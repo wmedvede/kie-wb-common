@@ -126,4 +126,24 @@ public class DataModelCommandBuilder {
                 propertyType, isMultiple, notifier );
     }
 
+    public DataObjectSuperClassChangeCommand buildDataObjectSuperClassChangeCommand( final DataModelerContext context,
+            final String source,
+            final DataObject dataObject,
+            final String newSuperClass ) {
+        return new DataObjectSuperClassChangeCommand( context, source, dataObject, newSuperClass, notifier );
+    }
+
+    public DataObjectPackageChangeCommand buildDataObjectPackageChangeCommand( final DataModelerContext context,
+            final String source,
+            final DataObject dataObject,
+            final String newPackage ) {
+        return new DataObjectPackageChangeCommand( context, source, dataObject, newPackage, notifier );
+    }
+
+    public DataObjectNameChangeCommand buildDataObjectNameChangeCommand( final DataModelerContext context,
+            final String source,
+            final DataObject dataObject,
+            final String newName ) {
+        return new DataObjectNameChangeCommand( context, source, dataObject, newName, notifier );
+    }
 }
