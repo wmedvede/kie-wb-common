@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.util.CommandDrivenAccordionGroup;
 import org.kie.workbench.common.services.datamodeller.core.Annotation;
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
+import org.kie.workbench.common.services.datamodeller.driver.model.AnnotationSource;
 import org.uberfire.mvp.Command;
 
 public class AdvancedAnnotationListEditorViewImpl
@@ -70,10 +71,11 @@ public class AdvancedAnnotationListEditorViewImpl
     }
 
     @Override
-    public void loadAnnotations( List<Annotation> annotations ) {
+    public void loadAnnotations( List<Annotation> annotations, Map<String, AnnotationSource> annotationSources ) {
         if ( annotations != null ) {
             for ( Annotation annotation : annotations ) {
-                createAnnotationAccordionGroup( annotation );
+                createAnnotationAccordionGroup( annotation, annotationSources != null ?
+                        annotationSources.get( annotation.getClassName() ) : null );
             }
         }
     }
@@ -87,7 +89,7 @@ public class AdvancedAnnotationListEditorViewImpl
         }
     }
 
-    private void createAnnotationAccordionGroup( final Annotation annotation ) {
+    private void createAnnotationAccordionGroup( final Annotation annotation, final AnnotationSource annotationSource ) {
 
         CommandDrivenAccordionGroup accordionGroup = new CommandDrivenAccordionGroup( "Delete", new Command() {
             @Override public void execute() {
@@ -102,12 +104,14 @@ public class AdvancedAnnotationListEditorViewImpl
         if ( annotation.getAnnotationDefinition() != null &&
                 annotation.getAnnotationDefinition().getValuePairs() != null ) {
             for ( AnnotationValuePairDefinition valuePairDefinition : annotation.getAnnotationDefinition().getValuePairs() ) {
-                accordionGroup.add( createValuePairItem( annotation, valuePairDefinition ) );
+                accordionGroup.add( createValuePairItem( annotation, valuePairDefinition, annotationSource ) );
             }
         }
     }
 
-    private Widget createValuePairItem( final Annotation annotation, final AnnotationValuePairDefinition valuePairDefinition ) {
+    private Widget createValuePairItem( final Annotation annotation,
+            final AnnotationValuePairDefinition valuePairDefinition,
+            final AnnotationSource annotationSource) {
         FlowPanel valuePairRow = new FlowPanel( );
         valuePairRow.addStyleName( "row-fluid");
         valuePairRow.addStyleName( "control-group" );
@@ -117,10 +121,10 @@ public class AdvancedAnnotationListEditorViewImpl
         TextBox content = new TextBox();
         content.addStyleName( "span8" );
         content.addStyleName( "controls" );
-        content.setText( getValuePairStringValue( annotation, valuePairDefinition ) );
+        String valuePairString = getValuePairStringValue( annotation, valuePairDefinition, annotationSource );
+        content.setText( valuePairString );
         content.setReadOnly( true );
-        content.setTitle( "This is the long content value for the value pair just in case it doesn't fit in the text field: "
-                + getValuePairStringValue( annotation, valuePairDefinition ) );
+        content.setTitle( valuePairString );
         valuePairRow.add( content );
 
         Button editButton = new Button( "edit", new ClickHandler() {
@@ -145,9 +149,22 @@ public class AdvancedAnnotationListEditorViewImpl
         return valuePairRow;
     }
 
-    private String getValuePairStringValue( Annotation annotation, AnnotationValuePairDefinition valuePairDefinition ) {
+    private String getValuePairStringValue( Annotation annotation,
+            AnnotationValuePairDefinition valuePairDefinition,
+            AnnotationSource annotationSource ) {
+
         Object value = annotation.getValue( valuePairDefinition.getName() );
-        String strValue = value != null ? value.toString() : "(value not set)";
+        String strValue;
+
+        if ( value == null ) {
+            strValue =  "(value not set)";
+        } else {
+            strValue = annotationSource != null ? annotationSource.getValuePairSource( valuePairDefinition.getName() ) : null;
+            if ( strValue == null ) {
+                strValue = "(source code not available)";
+            }
+        }
+
         return strValue;
     }
 

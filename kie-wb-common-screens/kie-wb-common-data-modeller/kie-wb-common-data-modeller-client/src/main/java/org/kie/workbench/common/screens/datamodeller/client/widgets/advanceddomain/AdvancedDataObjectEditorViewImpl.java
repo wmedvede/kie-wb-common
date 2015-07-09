@@ -53,7 +53,6 @@ public class AdvancedDataObjectEditorViewImpl
 
     @PostConstruct
     private void init() {
-        //annotationEditor.asWidget().setSize( "320px", "380px" );
         annotationEditorPanel.add( annotationEditor );
     }
 

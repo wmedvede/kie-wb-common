@@ -17,9 +17,11 @@
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.annotationlisteditor;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import org.kie.workbench.common.services.datamodeller.core.Annotation;
+import org.kie.workbench.common.services.datamodeller.driver.model.AnnotationSource;
 
 public interface AdvancedAnnotationListEditorView
     extends IsWidget {
@@ -32,7 +34,11 @@ public interface AdvancedAnnotationListEditorView
 
         void onEditValuePair( Annotation annotation, String valuePair );
 
+        void addEditValuePairHandler( EditValuePairHandler editValuePairHandler );
+
         void onClearValuePair( Annotation annotation, String valuePair );
+
+        void addClearValuePairHandler( ClearValuePairHandler clearValuePairHandler );
 
     }
 
@@ -42,9 +48,21 @@ public interface AdvancedAnnotationListEditorView
 
     }
 
+    interface EditValuePairHandler {
+
+        void onEditValuePair( Annotation annotation, String valuePair );
+
+    }
+
+    interface ClearValuePairHandler {
+
+        void onClearValuePair( Annotation annotation, String valuePair );
+
+    }
+
     void setPresenter( Presenter presenter );
 
-    void loadAnnotations( List<Annotation> annotations );
+    void loadAnnotations( List<Annotation> annotations, Map<String, AnnotationSource> annotationSources );
 
     void removeAnnotation( Annotation annotation );
 

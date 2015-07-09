@@ -81,6 +81,10 @@ public class DriverUtils {
         return new ClassTypeResolver( classImports, classLoader );
     }
 
+    public static ClassTypeResolver createClassTypeResolver( ClassLoader classLoader ) {
+        return new ClassTypeResolver( new HashSet<String>(  ), classLoader);
+    }
+
     public static Object[] isSimpleGeneric( Type type, ClassTypeResolver classTypeResolver ) throws ModelDriverException {
         Object[] result = new Object[ 3 ];
         result[ 0 ] = false;
@@ -353,7 +357,7 @@ public class DriverUtils {
         return modifiers;
     }
 
-    public static AnnotationDefinition buildAnnotationDefinition( Class cls) {
+    public static AnnotationDefinition buildAnnotationDefinition( Class cls ) {
 
         if ( !cls.isAnnotation() ) return null;
 

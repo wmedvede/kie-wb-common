@@ -16,13 +16,15 @@
 
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.annotationlisteditor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.services.datamodeller.core.Annotation;
+import org.kie.workbench.common.services.datamodeller.driver.model.AnnotationSource;
 
 public class AdvancedAnnotationListEditor
     implements IsWidget,
@@ -30,9 +32,11 @@ public class AdvancedAnnotationListEditor
 
     private AdvancedAnnotationListEditorView view;
 
-    private List<Annotation> annotations;
-
     private AdvancedAnnotationListEditorView.DeleteAnnotationHandler deleteAnnotationHandler;
+
+    private AdvancedAnnotationListEditorView.EditValuePairHandler editValuePairHandler;
+
+    private AdvancedAnnotationListEditorView.ClearValuePairHandler clearValuePairHandler;
 
     @Inject
     public AdvancedAnnotationListEditor( AdvancedAnnotationListEditorView view ) {
@@ -46,8 +50,11 @@ public class AdvancedAnnotationListEditor
     }
 
     public void loadAnnotations( List<Annotation> annotations ) {
-        this.annotations = annotations;
-        view.loadAnnotations( annotations );
+        view.loadAnnotations( annotations, new HashMap<String, AnnotationSource>(  ) );
+    }
+
+    public void loadAnnotations( List<Annotation> annotations, Map<String, AnnotationSource> annotationSources ) {
+        view.loadAnnotations( annotations, annotationSources );
     }
 
     @Override
@@ -59,17 +66,31 @@ public class AdvancedAnnotationListEditor
 
     @Override
     public void onEditValuePair( Annotation annotation, String valuePair ) {
-        Window.alert( "onEditValuePair, annotation: " + annotation + ", valuePair: " + valuePair );
+        if ( editValuePairHandler != null ) {
+            editValuePairHandler.onEditValuePair( annotation, valuePair );
+        }
     }
 
     @Override
     public void onClearValuePair( Annotation annotation, String valuePair ) {
-        Window.alert( "onClearValuePair, annotation: " + annotation + ", valuePair: " + valuePair );
+        if ( clearValuePairHandler != null ) {
+            clearValuePairHandler.onClearValuePair( annotation, valuePair );
+        }
     }
 
     @Override
     public void addDeleteAnnotationHandler( AdvancedAnnotationListEditorView.DeleteAnnotationHandler deleteAnnotationHandler ) {
         this.deleteAnnotationHandler = deleteAnnotationHandler;
+    }
+
+    @Override
+    public void addEditValuePairHandler( AdvancedAnnotationListEditorView.EditValuePairHandler editValuePairHandler ) {
+        this.editValuePairHandler = editValuePairHandler;
+    }
+
+    @Override
+    public void addClearValuePairHandler( AdvancedAnnotationListEditorView.ClearValuePairHandler clearValuePairHandler ) {
+        this.clearValuePairHandler = clearValuePairHandler;
     }
 
     public void clean() {
