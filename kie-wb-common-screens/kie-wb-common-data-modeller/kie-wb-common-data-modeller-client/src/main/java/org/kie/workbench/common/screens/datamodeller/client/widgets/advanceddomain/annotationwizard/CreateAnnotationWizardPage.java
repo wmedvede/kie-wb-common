@@ -16,11 +16,18 @@
 
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.annotationwizard;
 
+import java.util.List;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.common.client.api.Caller;
+import org.kie.workbench.common.screens.datamodeller.service.DataModelerService;
+import org.kie.workbench.common.services.datamodeller.core.AnnotationDefinition;
+import org.kie.workbench.common.services.datamodeller.core.ElementType;
+import org.kie.workbench.common.services.datamodeller.driver.model.DriverError;
+import org.kie.workbench.common.services.shared.project.KieProject;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
@@ -40,6 +47,15 @@ public abstract class CreateAnnotationWizardPage implements WizardPage {
 
     @Inject
     protected Event<WizardPageStatusChangeEvent> wizardPageStatusChangeEvent;
+
+    @Inject
+    protected Caller<DataModelerService> modelerService;
+
+    protected KieProject project;
+
+    protected AnnotationDefinition annotationDefinition;
+
+    protected ElementType target = ElementType.FIELD;
 
     public CreateAnnotationWizardPage() {
     }
@@ -89,6 +105,15 @@ public abstract class CreateAnnotationWizardPage implements WizardPage {
     public void fireStatusChangeEvent() {
         final WizardPageStatusChangeEvent event = new WizardPageStatusChangeEvent( this );
         wizardPageStatusChangeEvent.fire( event );
+    }
+
+    public String buildErrorList( List<DriverError> errors ) {
+        //TODO improve this error showing
+        String message = "";
+        for ( DriverError error : errors ) {
+            message += error.getMessage();
+        }
+        return message;
     }
 
 }

@@ -17,6 +17,7 @@
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.annotationwizard;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import org.kie.workbench.common.services.datamodeller.core.AnnotationDefinition;
 
 public interface SearchAnnotationPageView
     extends IsWidget {
@@ -32,9 +33,9 @@ public interface SearchAnnotationPageView
 
     interface SearchAnnotationHandler {
 
-        void onSearchClass( String className );
-
         void onSearchClassChanged();
+
+        void onAnnotationDefinitionChange( AnnotationDefinition annotationDefinition );
     }
 
     void setPresenter( Presenter presenter );

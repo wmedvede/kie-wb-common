@@ -724,12 +724,12 @@ public class JavaRoasterModelDriver implements ModelDriver {
             }
         } else if ( valuePairDefinition.isString() ) {
             if ( valuePairDefinition.isArray() ) {
-                String arrayValues[] = DriverUtils.encodeStringArrayValue( value );
-                if ( arrayValues != null ) {
-                    annotationSource.setStringArrayValue( valuePairDefinition.getName(), arrayValues );
-                }
+                encodedValue = DriverUtils.encodeStringArrayValue( value );
             } else {
-                annotationSource.setStringValue( valuePairDefinition.getName(), value.toString() );
+                encodedValue = DriverUtils.encodeStringValue( value );
+            }
+            if ( encodedValue != null ) {
+                annotationSource.setLiteralValue( valuePairDefinition.getName(), encodedValue );
             }
         } else if ( valuePairDefinition.isPrimitiveType() ) {
             //primitive types are wrapped by the java.lang.type.

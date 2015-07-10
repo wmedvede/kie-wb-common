@@ -25,6 +25,7 @@ public class SummaryPage extends CreateAnnotationWizardPage {
 
     public SummaryPage() {
         setTitle( "Summary" );
+        this.status = PageStatus.VALIDATED;
     }
 
     @Override

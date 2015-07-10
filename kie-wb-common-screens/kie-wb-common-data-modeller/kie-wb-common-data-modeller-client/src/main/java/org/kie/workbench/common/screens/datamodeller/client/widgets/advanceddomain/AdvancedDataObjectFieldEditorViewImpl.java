@@ -37,6 +37,7 @@ import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddoma
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.annotationwizard.CreateAnnotationWizard;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditor;
 import org.kie.workbench.common.services.datamodeller.core.Annotation;
+import org.kie.workbench.common.services.datamodeller.core.ElementType;
 import org.kie.workbench.common.services.datamodeller.driver.model.AnnotationSource;
 import org.kie.workbench.common.services.shared.project.KieProject;
 import org.uberfire.client.callbacks.Callback;
@@ -138,7 +139,7 @@ public class AdvancedDataObjectFieldEditorViewImpl
                 callback.callback( result );
             }
         } );
-        addAnnotationWizard.setCurrentProject( kieProject );
+        addAnnotationWizard.init( kieProject, ElementType.FIELD );
         addAnnotationWizard.start();
     }
 

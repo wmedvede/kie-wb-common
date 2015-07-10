@@ -25,22 +25,13 @@ import javax.inject.Inject;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
-import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditorView;
-import org.kie.workbench.common.screens.datamodeller.service.DataModelerService;
 import org.kie.workbench.common.services.datamodeller.core.Annotation;
 import org.kie.workbench.common.services.datamodeller.core.AnnotationDefinition;
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
 import org.kie.workbench.common.services.datamodeller.core.ElementType;
 import org.kie.workbench.common.services.datamodeller.core.impl.AnnotationImpl;
-import org.kie.workbench.common.services.datamodeller.driver.model.AnnotationDefinitionRequest;
-import org.kie.workbench.common.services.datamodeller.driver.model.AnnotationDefinitionResponse;
-import org.kie.workbench.common.services.datamodeller.driver.model.AnnotationParseRequest;
-import org.kie.workbench.common.services.datamodeller.driver.model.AnnotationParseResponse;
-import org.kie.workbench.common.services.datamodeller.driver.model.DriverError;
 import org.kie.workbench.common.services.shared.project.KieProject;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
@@ -53,13 +44,11 @@ public class CreateAnnotationWizard extends AbstractWizard {
 
     private Callback<Annotation> onCloseCallback;
 
-    private KieProject currentProject;
+    private KieProject project;
 
-    private AnnotationDefinition currentAnnotationDefinition = null;
+    private AnnotationDefinition annotationDefinition = null;
 
-    private Annotation currentAnnotation = null;
-
-    private  ElementType currentTarget = ElementType.FIELD;
+    private  ElementType target = ElementType.FIELD;
 
     @Inject
     private SearchAnnotationPage searchAnnotationPage;
@@ -70,11 +59,6 @@ public class CreateAnnotationWizard extends AbstractWizard {
     @Inject
     private SyncBeanManager iocManager;
 
-    @Inject
-    private Caller<DataModelerService> modelerService;
-
-    List<ValuePairEditorPage> currentEditorPages = new ArrayList<ValuePairEditorPage>(  );
-
     public CreateAnnotationWizard() {
     }
 
@@ -84,15 +68,21 @@ public class CreateAnnotationWizard extends AbstractWizard {
         pages.add( summaryPage );
         searchAnnotationPage.addSearchAnnotationHandler( new SearchAnnotationPageView.SearchAnnotationHandler() {
             @Override
-            public void onSearchClass( String className ) {
-                doOnSearchClass( className );
-            }
-
-            @Override
             public void onSearchClassChanged() {
                 doOnSearchClassChanged();
             }
+
+            @Override
+            public void onAnnotationDefinitionChange( AnnotationDefinition annotationDefinition ) {
+                updateValuePairPages( annotationDefinition );
+            }
         } );
+    }
+
+    public void init( KieProject project, ElementType target ) {
+        this.project = project;
+        this.target = target;
+        searchAnnotationPage.init( project, target );
     }
 
     @Override
@@ -112,12 +102,12 @@ public class CreateAnnotationWizard extends AbstractWizard {
 
     @Override
     public int getPreferredHeight() {
-        return 300;
+        return 350;
     }
 
     @Override
     public int getPreferredWidth() {
-        return 450;
+        return 500;
     }
 
     @Override
@@ -144,7 +134,6 @@ public class CreateAnnotationWizard extends AbstractWizard {
     @Override
     public void complete() {
         super.complete();
-        clearCurrentValuePairEditorPages();
         doComplete();
     }
 
@@ -152,62 +141,34 @@ public class CreateAnnotationWizard extends AbstractWizard {
     public void close() {
         super.close();
         clearCurrentValuePairEditorPages();
-        invokeOnCloseCallback();
-    }
-
-    public void setCurrentProject( KieProject currentProject ) {
-        this.currentProject = currentProject;
-    }
-
-    public void setCurrentTarget( ElementType currentTarget ) {
-        this.currentTarget = currentTarget;
+        invokeOnCloseCallback( null );
     }
 
     private void doComplete() {
-        invokeOnCloseCallback();
+        Annotation annotation = null;
+        if ( annotationDefinition != null ) {
+            annotation = new AnnotationImpl( annotationDefinition );
+            if ( !annotationDefinition.isMarker() ) {
+                for ( ValuePairEditorPage valuePairEditor : filterValuePairEditorPages() ) {
+                    if ( valuePairEditor.getCurrentValue() != null ) {
+                        annotation.setValue( valuePairEditor.getValuePairDefinition().getName(), valuePairEditor.getCurrentValue() );
+                    }
+                }
+            }
+        }
+        clearCurrentValuePairEditorPages();
+        invokeOnCloseCallback( annotation );
     }
 
     private void doOnSearchClassChanged() {
-        searchAnnotationPage.setHelpMessage( "Annotation definition is not loaded." );
-        currentAnnotationDefinition = null;
         clearCurrentValuePairEditorPages();
-    }
-
-    private void doOnSearchClass( String className ) {
-        AnnotationDefinitionRequest definitionRequest = new AnnotationDefinitionRequest( className );
-        modelerService.call( getOnSearchClassSuccessCallback( definitionRequest) ).resolveDefinitionRequest( definitionRequest, currentProject );
-    }
-
-    private RemoteCallback<AnnotationDefinitionResponse> getOnSearchClassSuccessCallback( final AnnotationDefinitionRequest definitionRequest ) {
-        return new RemoteCallback<AnnotationDefinitionResponse>() {
-            @Override
-            public void callback( AnnotationDefinitionResponse definitionResponse ) {
-                processAnnotationDefinitionRequest( definitionRequest, definitionResponse );
-            }
-        };
-    }
-
-    private void processAnnotationDefinitionRequest( AnnotationDefinitionRequest definitionRequest,
-            AnnotationDefinitionResponse definitionResponse ) {
-
-        this.currentAnnotationDefinition = definitionResponse.getAnnotationDefinition();
-        if ( definitionResponse.hasErrors() || definitionResponse.getAnnotationDefinition() == null ) {
-            //TODO improve this, use a details section to provide more info.
-            String message = "Class name " + definitionRequest.getClassName() + " was not found. \n It was not possible to load annotation definition ";
-            message += "\n" + buildErrorList( definitionResponse.getErrors() );
-            searchAnnotationPage.setHelpMessage( message );
-            updateValuePairPages( null );
-            this.currentAnnotation = null;
-        } else {
-            this.currentAnnotation = new AnnotationImpl( currentAnnotationDefinition );
-            updateValuePairPages( definitionResponse.getAnnotationDefinition() );
-        }
     }
 
     private void updateValuePairPages( AnnotationDefinition annotationDefinition ) {
-        pages.clear();
         clearCurrentValuePairEditorPages();
+        pages.clear();
         pages.add( searchAnnotationPage );
+        this.annotationDefinition = annotationDefinition;
 
         if ( annotationDefinition != null ) {
             for ( AnnotationValuePairDefinition valuePairDefinition : annotationDefinition.getValuePairs() ) {
@@ -217,102 +178,45 @@ public class CreateAnnotationWizard extends AbstractWizard {
 
         pages.add( summaryPage );
         super.start();
-
-        if ( annotationDefinition != null ) {
-            searchAnnotationPage.setStatus( CreateAnnotationWizardPage.PageStatus.VALIDATED );
-            summaryPage.setStatus( CreateAnnotationWizardPage.PageStatus.VALIDATED );
-        } else {
-            searchAnnotationPage.setStatus( CreateAnnotationWizardPage.PageStatus.NOT_VALIDATED );
-            summaryPage.setStatus( CreateAnnotationWizardPage.PageStatus.NOT_VALIDATED );
-        }
-
     }
 
     private ValuePairEditorPage createValuePairEditorPage( AnnotationValuePairDefinition valuePairDefinition ) {
-
         final ValuePairEditorPage valuePairEditorPage = iocManager.lookupBean( ValuePairEditorPage.class ).getInstance();
-        currentEditorPages.add( valuePairEditorPage );
-
-        valuePairEditorPage.setValuePairDefinition( valuePairDefinition );
-        String required = !valuePairDefinition.hasDefaultValue() ? "* " : "";
-        valuePairEditorPage.setTitle( "  -> " + required + valuePairDefinition.getName() );
-        valuePairEditorPage.setHelpMessage( "Enter the value for the annotation value pair and press the validate button" );
-        valuePairEditorPage.setName( valuePairDefinition.getName() );
-        valuePairEditorPage.addEditorHandler( new ValuePairEditorView.ValuePairEditorHandler() {
-            @Override
-            public void onValidate() {
-                onPageValidate( valuePairEditorPage );
-            }
-
-            @Override
-            public void onValueChanged( String currentValue ) {
-                onPageValueChanged( valuePairEditorPage );
-            }
-        } );
+        valuePairEditorPage.init( annotationDefinition, valuePairDefinition, target, project );
         return valuePairEditorPage;
     }
 
-    private void onPageValueChanged( ValuePairEditorPage valuePairEditorPage ) {
-        valuePairEditorPage.setHelpMessage( "Value is not validated" );
-        if ( currentAnnotation != null ) {
-            currentAnnotation.removeValue( valuePairEditorPage.getName() );
-        }
-    }
-
-    private void onPageValidate( ValuePairEditorPage valuePairEditorPage ) {
-
-        modelerService.call( getValuePairValidateSuccessCallback( valuePairEditorPage  ), new CreateAnnotationWizardErrorCallback() )
-                .resolveParseRequest( new AnnotationParseRequest( currentAnnotationDefinition.getClassName(), currentTarget,
-                        valuePairEditorPage.getName(), valuePairEditorPage.getValue() ), currentProject );
-
-    }
-
-    private RemoteCallback<AnnotationParseResponse> getValuePairValidateSuccessCallback(
-            final ValuePairEditorPage valuePairEditorPage ) {
-        return new RemoteCallback<AnnotationParseResponse>() {
-
-            @Override
-            public void callback( AnnotationParseResponse annotationParseResponse ) {
-                CreateAnnotationWizardPage.PageStatus status = CreateAnnotationWizardPage.PageStatus.NOT_VALIDATED;
-
-                if ( !annotationParseResponse.hasErrors() && annotationParseResponse.getAnnotation() != null ) {
-                    Object newValue = annotationParseResponse.getAnnotation().getValue( valuePairEditorPage.getName() );
-                    currentAnnotation.setValue( valuePairEditorPage.getName(), newValue );
-                    status = CreateAnnotationWizardPage.PageStatus.VALIDATED;
-                    valuePairEditorPage.setHelpMessage( "Value pair was validated!" );
-
-                } else {
-                    currentAnnotation.removeValue( valuePairEditorPage.getName() );
-                    status = CreateAnnotationWizardPage.PageStatus.NOT_VALIDATED;
-
-                    //TODO improve this error handling
-                    String errorMessage = "Value pair is not validated\n" +
-                            buildErrorList( annotationParseResponse.getErrors() );
-
-                    valuePairEditorPage.setHelpMessage( errorMessage );
-                }
-
-                valuePairEditorPage.setStatus( status );
-            }
-        };
-    }
-
     private void clearCurrentValuePairEditorPages() {
-        int pageCount = currentEditorPages.size();
+        List<ValuePairEditorPage> editorPages = filterValuePairEditorPages();
+        int valuePairEditors = editorPages.size();
 
-        for ( int i = 0; i < pageCount; i++ ) {
-            ValuePairEditorPage valuePairEditorPage = currentEditorPages.remove( 0 );
+        for ( WizardPage page : editorPages ) {
+            pages.remove( page );
+        }
+
+        for ( int i = 0; i < valuePairEditors; i++ ) {
+            ValuePairEditorPage valuePairEditorPage = editorPages.remove( 0 );
             iocManager.destroyBean( valuePairEditorPage );
         }
     }
 
-    private void invokeOnCloseCallback() {
+    private void invokeOnCloseCallback( Annotation annotation ) {
         if ( onCloseCallback != null ) {
-            onCloseCallback.callback( currentAnnotation );
+            onCloseCallback.callback( annotation );
         }
     }
 
-    class CreateAnnotationWizardErrorCallback implements ErrorCallback<Message> {
+    private List<ValuePairEditorPage> filterValuePairEditorPages() {
+        List<ValuePairEditorPage> result = new ArrayList<ValuePairEditorPage>( pages.size() );
+        for ( WizardPage page : pages ) {
+            if ( page instanceof ValuePairEditorPage ) {
+                result.add( ( ValuePairEditorPage ) page );
+            }
+        }
+        return result;
+    }
+
+    public static class CreateAnnotationWizardErrorCallback implements ErrorCallback<Message> {
 
         public CreateAnnotationWizardErrorCallback( ) {
         }
@@ -324,14 +228,4 @@ public class CreateAnnotationWizard extends AbstractWizard {
             return false;
         }
     }
-
-    private String buildErrorList( List<DriverError> errors ) {
-        //TODO improve this error showing
-        String message = "";
-        for ( DriverError error : errors ) {
-            message += error.getMessage();
-        }
-        return message;
-    }
-
 }
