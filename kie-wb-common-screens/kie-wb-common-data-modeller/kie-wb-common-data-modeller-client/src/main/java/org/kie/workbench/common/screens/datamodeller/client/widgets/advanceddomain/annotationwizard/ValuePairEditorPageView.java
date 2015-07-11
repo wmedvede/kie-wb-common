@@ -28,13 +28,9 @@ public interface ValuePairEditorPageView
 
     void setPresenter( Presenter presenter );
 
-    String getClassName();
-
     void setClassName( String className );
 
-    String getName();
-
-    void setName( String name );
+    void setNameLabel( String name );
 
     String getValue();
 

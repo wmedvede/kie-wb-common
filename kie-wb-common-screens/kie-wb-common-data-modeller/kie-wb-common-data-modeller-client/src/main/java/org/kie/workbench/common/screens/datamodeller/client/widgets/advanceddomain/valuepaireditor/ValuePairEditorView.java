@@ -39,7 +39,7 @@ public interface ValuePairEditorView
 
     void setPresenter( Presenter presenter );
 
-    void setName( String valuePairName );
+    void setNameLabel( String valuePairName );
 
     void setValue( String text );
 

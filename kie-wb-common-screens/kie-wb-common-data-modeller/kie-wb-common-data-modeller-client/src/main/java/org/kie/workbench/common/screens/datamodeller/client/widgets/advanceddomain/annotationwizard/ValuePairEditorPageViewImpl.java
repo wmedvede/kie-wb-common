@@ -73,23 +73,13 @@ public class ValuePairEditorPageViewImpl
     }
 
     @Override
-    public String getClassName() {
-        return valuePairEditor.getAnnotationClassName();
-    }
-
-    @Override
     public void setClassName( String className ) {
         valuePairEditor.setAnnotationClassName( className );
     }
 
     @Override
-    public String getName() {
-        return valuePairEditor.getName();
-    }
-
-    @Override
-    public void setName( String valuePairName ) {
-        valuePairEditor.setName( valuePairName );
+    public void setNameLabel( String valuePairName ) {
+        valuePairEditor.setNameLabel( valuePairName );
     }
 
     @Override

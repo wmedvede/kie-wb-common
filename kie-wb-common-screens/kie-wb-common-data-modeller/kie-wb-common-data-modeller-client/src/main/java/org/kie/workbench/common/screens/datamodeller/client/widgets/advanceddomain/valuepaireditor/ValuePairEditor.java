@@ -72,7 +72,10 @@ public class ValuePairEditor
 
     public void setName( String name ) {
         this.name = name;
-        view.setName( name );
+    }
+
+    public void setNameLabel( String nameLabel ) {
+        view.setNameLabel( nameLabel );
     }
 
     public String getValue() {

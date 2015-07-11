@@ -94,9 +94,8 @@ public class ValuePairEditorViewImpl
     }
 
     @Override
-    public void setName( String name ) {
-        //TODO set this label properly
-        valuePairValueLabel.setText( "Enter a value for -> \"" + name + "\"" );
+    public void setNameLabel( String nameLabel ) {
+        valuePairValueLabel.setText(  nameLabel );
     }
 
     @Override

@@ -61,22 +61,12 @@ public class ValuePairEditorPage
         setValuePairDefinition( valuePairDefinition );
         this.target = target;
         this.project = project;
-    }
 
-    public String getName() {
-        return view.getName();
-    }
-
-    public void setName( String name ) {
-        view.setName( name );
+        setStatus( isRequired() ? PageStatus.NOT_VALIDATED : PageStatus.VALIDATED );
     }
 
     public String getValue() {
         return view.getValue();
-    }
-
-    public void setValue( String value ) {
-        view.setValue( value );
     }
 
     public AnnotationValuePairDefinition getValuePairDefinition() {
@@ -85,23 +75,6 @@ public class ValuePairEditorPage
 
     public Object getCurrentValue() {
         return currentValue;
-    }
-
-    public void setValuePairDefinition( AnnotationValuePairDefinition valuePairDefinition ) {
-        this.valuePairDefinition = valuePairDefinition;
-
-        String required =  isRequired() ? "* " : "";
-        setTitle( "  -> " + required + valuePairDefinition.getName() );
-        setHelpMessage( "Enter the value for the annotation value pair and press the validate button" );
-        setName( valuePairDefinition.getName() );
-    }
-
-    public void clearHelpMessage() {
-        view.clearHelpMessage();
-    }
-
-    public void setHelpMessage( String helpMessage ) {
-        view.setHelpMessage( helpMessage );
     }
 
     public void addEditorHandler( ValuePairEditorView.ValuePairEditorHandler editorHandler ) {
@@ -127,6 +100,15 @@ public class ValuePairEditorPage
         }
     }
 
+    private void setValuePairDefinition( AnnotationValuePairDefinition valuePairDefinition ) {
+        this.valuePairDefinition = valuePairDefinition;
+
+        String required =  isRequired() ? "* " : "";
+        setTitle( "  -> " + required + valuePairDefinition.getName() );
+        setHelpMessage( "Enter the value for the annotation value pair and press the validate button" );
+        view.setNameLabel( required + valuePairDefinition.getName() + ":" );
+    }
+
     private void doOnValidate() {
 
         modelerService.call( getOnValidateValidateSuccessCallback(), new CreateAnnotationWizard.CreateAnnotationWizardErrorCallback() )
@@ -140,8 +122,7 @@ public class ValuePairEditorPage
 
             @Override
             public void callback( AnnotationParseResponse annotationParseResponse ) {
-                CreateAnnotationWizardPage.PageStatus status = CreateAnnotationWizardPage.PageStatus.NOT_VALIDATED;
-                PageStatus newStatus = PageStatus.NOT_VALIDATED;
+                PageStatus newStatus;
 
                 if ( !annotationParseResponse.hasErrors() && annotationParseResponse.getAnnotation() != null ) {
                     currentValue = annotationParseResponse.getAnnotation().getValue( valuePairDefinition.getName() );
@@ -168,7 +149,15 @@ public class ValuePairEditorPage
         currentValue = null;
     }
 
+    private void clearHelpMessage() {
+        view.clearHelpMessage();
+    }
+
+    private void setHelpMessage( String helpMessage ) {
+        view.setHelpMessage( helpMessage );
+    }
+
     private boolean isRequired() {
-        return valuePairDefinition != null && valuePairDefinition.getDefaultValue() != null;
+        return valuePairDefinition != null && valuePairDefinition.getDefaultValue() == null;
     }
 }

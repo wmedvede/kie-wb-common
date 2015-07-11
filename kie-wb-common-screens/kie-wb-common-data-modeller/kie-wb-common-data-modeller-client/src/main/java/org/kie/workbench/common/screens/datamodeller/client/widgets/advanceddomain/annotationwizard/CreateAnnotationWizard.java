@@ -42,6 +42,15 @@ public class CreateAnnotationWizard extends AbstractWizard {
 
     private List<WizardPage> pages = new ArrayList<WizardPage>();
 
+    @Inject
+    private SummaryPage summaryPage;
+
+    @Inject
+    private SearchAnnotationPage searchAnnotationPage;
+
+    @Inject
+    private SyncBeanManager iocManager;
+
     private Callback<Annotation> onCloseCallback;
 
     private KieProject project;
@@ -49,15 +58,6 @@ public class CreateAnnotationWizard extends AbstractWizard {
     private AnnotationDefinition annotationDefinition = null;
 
     private  ElementType target = ElementType.FIELD;
-
-    @Inject
-    private SearchAnnotationPage searchAnnotationPage;
-
-    @Inject
-    private SummaryPage summaryPage;
-
-    @Inject
-    private SyncBeanManager iocManager;
 
     public CreateAnnotationWizard() {
     }
@@ -162,6 +162,7 @@ public class CreateAnnotationWizard extends AbstractWizard {
 
     private void doOnSearchClassChanged() {
         clearCurrentValuePairEditorPages();
+        super.start();
     }
 
     private void updateValuePairPages( AnnotationDefinition annotationDefinition ) {
