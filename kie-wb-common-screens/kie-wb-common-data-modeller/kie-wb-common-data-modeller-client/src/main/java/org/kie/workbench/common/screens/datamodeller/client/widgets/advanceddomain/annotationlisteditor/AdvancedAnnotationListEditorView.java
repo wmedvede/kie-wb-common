@@ -22,23 +22,31 @@ import java.util.Map;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.kie.workbench.common.services.datamodeller.core.Annotation;
 import org.kie.workbench.common.services.datamodeller.driver.model.AnnotationSource;
+import org.kie.workbench.common.services.shared.project.KieProject;
+import org.kie.workbench.common.services.datamodeller.core.ElementType;
+import org.uberfire.client.callbacks.Callback;
+import org.uberfire.mvp.Command;
 
 public interface AdvancedAnnotationListEditorView
     extends IsWidget {
 
     interface Presenter {
 
+        void onAddAnnotation();
+
         void onDeleteAnnotation( Annotation annotation );
 
-        void addDeleteAnnotationHandler( DeleteAnnotationHandler deleteAnnotationHandler );
-
         void onEditValuePair( Annotation annotation, String valuePair );
-
-        void addEditValuePairHandler( EditValuePairHandler editValuePairHandler );
 
         void onClearValuePair( Annotation annotation, String valuePair );
 
         void addClearValuePairHandler( ClearValuePairHandler clearValuePairHandler );
+
+        void addDeleteAnnotationHandler( DeleteAnnotationHandler deleteAnnotationHandler );
+
+        void addValuePairChangeHandler( ValuePairChangeHandler valuePairChangeHandler );
+
+        void addAddAnnotationHandler( AddAnnotationHandler addAnnotationHandler );
 
     }
 
@@ -48,15 +56,20 @@ public interface AdvancedAnnotationListEditorView
 
     }
 
-    interface EditValuePairHandler {
-
-        void onEditValuePair( Annotation annotation, String valuePair );
-
-    }
-
     interface ClearValuePairHandler {
 
         void onClearValuePair( Annotation annotation, String valuePair );
+
+    }
+
+    interface ValuePairChangeHandler {
+
+        void onValuePairChange( String annotationClassName, String valuePairName, Object newValue );
+    }
+
+    interface AddAnnotationHandler {
+
+        void onAddAnnotation( Annotation annotation );
 
     }
 
@@ -66,6 +79,12 @@ public interface AdvancedAnnotationListEditorView
 
     void removeAnnotation( Annotation annotation );
 
-    void clean();
+    void showYesNoDialog( String message, Command yesCommand, Command noCommand, Command cancelCommand );
+
+    void invokeCreateAnnotationWizard( final Callback<Annotation> callback,
+            KieProject kieProject,
+            ElementType elementType );
+
+    void clear();
 
 }

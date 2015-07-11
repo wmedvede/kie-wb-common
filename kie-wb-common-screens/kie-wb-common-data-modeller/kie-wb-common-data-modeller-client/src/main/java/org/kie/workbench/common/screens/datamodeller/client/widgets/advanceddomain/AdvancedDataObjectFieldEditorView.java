@@ -17,14 +17,11 @@
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain;
 
 import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import org.kie.workbench.common.services.datamodeller.core.Annotation;
-import org.kie.workbench.common.services.datamodeller.driver.model.AnnotationSource;
+import org.kie.workbench.common.services.datamodeller.core.ElementType;
 import org.kie.workbench.common.services.shared.project.KieProject;
-import org.uberfire.client.callbacks.Callback;
-import org.uberfire.mvp.Command;
 
 public interface AdvancedDataObjectFieldEditorView
         extends IsWidget {
@@ -33,26 +30,22 @@ public interface AdvancedDataObjectFieldEditorView
 
         void onDeleteAnnotation( Annotation annotation );
 
-        void onEditValuePair( Annotation annotation, String valuePair );
+        void onValuePairChanged( String annotationClassName, String valuePair, Object newValue );
 
         void onClearValuePair( Annotation annotation, String valuePair );
 
-        void onAddAnnotation();
+        void onAddAnnotation( Annotation annotation );
 
     }
 
     void setPresenter( Presenter presenter );
 
-    void loadAnnotations( List<Annotation> annotations );
+    void init( KieProject project, ElementType elementType );
 
-    void loadAnnotations( List<Annotation> annotations, Map<String, AnnotationSource> annotationSources );
+    void loadAnnotations( List<Annotation> annotations );
 
     void removeAnnotation( Annotation annotation );
 
-    void clean();
-
-    void showYesNoDialog( String message, Command yesCommand, Command noCommand, Command cancelCommand );
-
-    void invokeCreateAnnotationWizard( final Callback<Annotation> callback, KieProject kieProject );
+    void clear();
 
 }

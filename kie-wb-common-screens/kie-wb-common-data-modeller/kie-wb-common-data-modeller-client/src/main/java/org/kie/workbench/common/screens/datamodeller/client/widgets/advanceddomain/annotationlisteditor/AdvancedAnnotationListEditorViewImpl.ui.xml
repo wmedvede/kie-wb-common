@@ -16,16 +16,17 @@
   -->
 
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-             xmlns:gwt="urn:import:com.google.gwt.user.client.ui"  >
+             xmlns:gwt="urn:import:com.google.gwt.user.client.ui"
+             xmlns:b="urn:import:com.github.gwtbootstrap.client.ui"
+             xmlns:base="urn:import:com.github.gwtbootstrap.client.ui.base">
 
-  <ui:with field="i18n" type="org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants"/>
 
+  <gwt:FlowPanel>
 
-  <gwt:HTMLPanel>
+    <b:Button ui:field="addAnnotationButton" text="Add annotation" />
+    <base:DivWidget ui:field="containerPanel" addStyleNames="row-fluid control-group"/>
 
-      <gwt:FlowPanel ui:field="containerPanel" addStyleNames="row-fluid control-group"/>
-
-  </gwt:HTMLPanel>
+  </gwt:FlowPanel>
 
 
 </ui:UiBinder>

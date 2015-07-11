@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -29,14 +31,22 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.annotationwizard.CreateAnnotationWizard;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.util.CommandDrivenAccordionGroup;
 import org.kie.workbench.common.services.datamodeller.core.Annotation;
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
+import org.kie.workbench.common.services.datamodeller.core.ElementType;
 import org.kie.workbench.common.services.datamodeller.driver.model.AnnotationSource;
+import org.kie.workbench.common.services.shared.project.KieProject;
+import org.uberfire.client.callbacks.Callback;
+import org.uberfire.ext.widgets.common.client.common.popups.YesNoCancelPopup;
+import org.uberfire.ext.widgets.common.client.resources.i18n.CommonConstants;
 import org.uberfire.mvp.Command;
 
 public class AdvancedAnnotationListEditorViewImpl
@@ -52,7 +62,10 @@ public class AdvancedAnnotationListEditorViewImpl
     private static AdvancedAnnotationListEditorViewImplUiBinder uiBinder = GWT.create( AdvancedAnnotationListEditorViewImplUiBinder.class );
 
     @UiField
-    FlowPanel containerPanel;
+    DivWidget containerPanel;
+
+    @UiField
+    Button addAnnotationButton;
 
     private DivWidget accordionsContainer = new DivWidget( );
 
@@ -60,9 +73,14 @@ public class AdvancedAnnotationListEditorViewImpl
 
     private Map<Annotation, CommandDrivenAccordionGroup> annotationAccordion = new HashMap<Annotation, CommandDrivenAccordionGroup>(  );
 
+    @Inject
+    private SyncBeanManager iocManager;
+
+
     public AdvancedAnnotationListEditorViewImpl() {
         initWidget( uiBinder.createAndBindUi( this ) );
         containerPanel.add( accordionsContainer );
+        addAnnotationButton.setType( ButtonType.LINK );
     }
 
     @Override
@@ -173,7 +191,37 @@ public class AdvancedAnnotationListEditorViewImpl
     }
 
     @Override
-    public void clean() {
+    public void showYesNoDialog( String message, Command yesCommand, Command noCommand, Command cancelCommand ) {
+
+        YesNoCancelPopup yesNoCancelPopup = YesNoCancelPopup.newYesNoCancelPopup(
+                CommonConstants.INSTANCE.Information(), message, yesCommand, noCommand, cancelCommand);
+
+        yesNoCancelPopup.setCloseVisible( false );
+        yesNoCancelPopup.show();
+    }
+
+    @Override
+    public void invokeCreateAnnotationWizard( final Callback<Annotation> callback,
+            KieProject kieProject, ElementType elementType ) {
+        final CreateAnnotationWizard addAnnotationWizard = iocManager.lookupBean( CreateAnnotationWizard.class ).getInstance();
+        //When the wizard is closed destroy it to avoid memory leak
+        addAnnotationWizard.onCloseCallback( new Callback<Annotation>() {
+            @Override public void callback( Annotation result ) {
+                iocManager.destroyBean( addAnnotationWizard );
+                callback.callback( result );
+            }
+        } );
+        addAnnotationWizard.init( kieProject, elementType );
+        addAnnotationWizard.start();
+    }
+
+    @Override
+    public void clear() {
         accordionsContainer.clear();
+    }
+
+    @UiHandler( "addAnnotationButton")
+    void onAddAnnotation( ClickEvent event ) {
+        presenter.onAddAnnotation();
     }
 }
