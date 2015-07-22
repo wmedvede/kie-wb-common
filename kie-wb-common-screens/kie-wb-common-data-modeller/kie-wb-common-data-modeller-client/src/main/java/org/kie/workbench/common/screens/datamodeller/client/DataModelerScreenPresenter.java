@@ -35,6 +35,7 @@ import org.guvnor.messageconsole.events.UnpublishMessagesEvent;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.security.shared.api.Role;
+import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWBContext;
 import org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants;
 import org.kie.workbench.common.screens.datamodeller.client.util.DataModelerUtils;
 import org.kie.workbench.common.screens.datamodeller.client.validation.JavaFileNameValidator;
@@ -70,6 +71,7 @@ import org.uberfire.client.annotations.WorkbenchMenu;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartTitleDecoration;
 import org.uberfire.client.annotations.WorkbenchPartView;
+import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.ext.editor.commons.client.file.CommandWithFileNameAndCommitMessage;
 import org.uberfire.ext.editor.commons.client.file.CopyPopup;
 import org.uberfire.ext.editor.commons.client.file.DeletePopup;
@@ -81,7 +83,11 @@ import org.uberfire.ext.widgets.common.client.common.Page;
 import org.uberfire.ext.widgets.common.client.common.popups.YesNoCancelPopup;
 import org.uberfire.ext.widgets.common.client.resources.i18n.CommonConstants;
 import org.uberfire.lifecycle.OnClose;
+import org.uberfire.lifecycle.OnFocus;
+import org.uberfire.lifecycle.OnLostFocus;
 import org.uberfire.lifecycle.OnMayClose;
+import org.uberfire.lifecycle.OnOpen;
+import org.uberfire.lifecycle.OnShutdown;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.ParameterizedCommand;
@@ -164,6 +170,17 @@ public class DataModelerScreenPresenter
 
     private String editorId;
 
+    @Inject
+    private PlaceManager placeManager;
+
+    /*
+    @Inject
+    DataModelerWorkbenchContext dataModelerWorkbenchContext;
+    */
+
+    @Inject
+    DataModelerWBContext dataModelerWBContext;
+
     @WorkbenchPartTitle
     public String getTitleText() {
         return super.getTitleText();
@@ -197,6 +214,8 @@ public class DataModelerScreenPresenter
     public void onStartup( final ObservablePath path,
                            final PlaceRequest place ) {
 
+        //Window.alert( "DataModeller.onStartup: " + editorId );
+
         setSourceEditionGrant();
         init( path, place, resourceType );
 
@@ -216,9 +235,39 @@ public class DataModelerScreenPresenter
         } );
     }
 
+    @OnOpen
+    public void onOpen() {
+       // Window.alert( "DataModeller.onOpen: "  + editorId  );
+    }
+
+    @OnFocus
+    public void onFocus() {
+        //Window.alert( "DataModeller.onFocus: "  + editorId  );
+        //Si el objecto YA esta cargado o el modelo inicializado aqui siempre lanzamos el evento de uqe
+        //se a actualizado el contexto
+        //El tema es que cuando vengo de un OnStartup , entonces el data object se puede estar aun cargando
+        //con lo cual al terminar el OnStartup, siempre que se haya podido cargar un objeto tengo q actualizar
+        /*
+        if ( !loading && context != null ) {
+            dataModelerWorkbenchContext.updateContext( context.getCurrentProject(), context.getDataObject() );
+        }
+        */
+
+    }
+
+    @OnLostFocus
+    public void onLostFocus() {
+        //Window.alert( "DataModeller.onLostFocus: "  + editorId );
+        //Si tengo un objecto cargado entonces SIEMPRE notifico que me voy
+        //dataModelerWorkbenchContext.clearContext();
+        dataModelerWBContext.clearContext();
+    }
+
+
     @OnMayClose
     public boolean onMayClose() {
 
+        //Window.alert( "DataModeller.onMayClose: " +  editorId  );
         if ( isDirty() ) {
             return view.confirmClose();
         }
@@ -227,12 +276,20 @@ public class DataModelerScreenPresenter
 
     @OnClose
     public void OnClose() {
+        //Window.alert( "DataModeller.OnClose: "  + editorId  );
 
         open = false;
         versionRecordManager.clear();
         cleanSystemMessages( getCurrentMessageType() );
         clearContext();
         super.OnClose();
+        //dataModelerWorkbenchContext.clearContext();
+        dataModelerWBContext.clearContext();
+    }
+
+    @OnShutdown
+    public void onShutDown() {
+        //Window.alert( "DataModeller.onShutDown: "  + editorId  );
     }
 
     private void onSafeDelete() {
@@ -739,21 +796,24 @@ public class DataModelerScreenPresenter
                 if ( content.getDataObject() != null ) {
                     selectEditorTab();
                     uiStarted = true;
+                    //dataModelerWorkbenchContext.updateContext( content.getCurrentProject(), content.getDataObject() );
                 } else {
+                    //dataModelerWorkbenchContext.updateContext( content.getCurrentProject(), null );
                     showParseErrorsDialog( Constants.INSTANCE.modelEditor_message_file_parsing_errors(),
-                                           false,
-                                           context.getEditorModelContent().getErrors(),
-                                           new Command() {
-                                               @Override
-                                               public void execute() {
-                                                   //we need to go directly to the sources tab
-                                                   uiStarted = true;
-                                                   //onSourceTabSelected();
-                                                   setSelectedTab( EDITABLE_SOURCE_TAB );
-                                               }
-                                           } );
+                            false,
+                            context.getEditorModelContent().getErrors(),
+                            new Command() {
+                                @Override
+                                public void execute() {
+                                    //we need to go directly to the sources tab
+                                    uiStarted = true;
+                                    //onSourceTabSelected();
+                                    setSelectedTab( EDITABLE_SOURCE_TAB );
+                                }
+                            } );
                 }
 
+                dataModelerWBContext.setActiveContext( context );
                 createOriginalHash( context.getDataObject() );
                 originalSourceHash = getSource().hashCode();
             }
@@ -1093,6 +1153,12 @@ public class DataModelerScreenPresenter
                 onValidate()
         )
         .addNewTopLevelMenu( versionRecordManager.buildMenu() );
+
+        menuBuilder.addCommand( "open screen", new Command() {
+            @Override public void execute() {
+                placeManager.goTo( "JPADomainScreen" );
+            }
+        } );
 
         for ( final String availableDomain : view.getAvailableDomains() ) {
             menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( availableDomain )

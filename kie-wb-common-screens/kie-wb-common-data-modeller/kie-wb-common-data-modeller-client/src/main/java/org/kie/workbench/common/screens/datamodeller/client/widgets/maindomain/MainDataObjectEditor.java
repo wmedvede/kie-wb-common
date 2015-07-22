@@ -18,6 +18,7 @@ package org.kie.workbench.common.screens.datamodeller.client.widgets.maindomain;
 
 import java.util.List;
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Command;
@@ -41,6 +42,7 @@ import org.uberfire.backend.vfs.Path;
 import org.uberfire.ext.editor.commons.client.validation.ValidatorCallback;
 import org.uberfire.ext.widgets.common.client.common.popups.errors.ErrorPopup;
 
+@Dependent
 public class MainDataObjectEditor
         extends ObjectEditor
         implements MainDataObjectEditorView.Presenter {
@@ -52,6 +54,9 @@ public class MainDataObjectEditor
 
     @Inject
     private ValidatorService validatorService;
+
+    public MainDataObjectEditor() {
+    }
 
     @Inject
     public MainDataObjectEditor( MainDataObjectEditorView view ) {

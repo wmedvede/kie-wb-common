@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 
 import com.google.gwt.core.client.GWT;
@@ -27,11 +28,11 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datamodeller.client.command.DataModelCommand;
-import org.kie.workbench.common.screens.datamodeller.model.jpadomain.JPADomainAnnotations;
 import org.kie.workbench.common.screens.datamodeller.client.model.DataModelerPropertyEditorFieldInfo;
 import org.kie.workbench.common.screens.datamodeller.client.util.AnnotationValueHandler;
 import org.kie.workbench.common.screens.datamodeller.client.util.DataModelerUtils;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.common.domain.ObjectEditor;
+import org.kie.workbench.common.screens.datamodeller.model.jpadomain.JPADomainAnnotations;
 import org.kie.workbench.common.services.datamodeller.core.Annotation;
 import org.kie.workbench.common.services.datamodeller.core.DataObject;
 import org.uberfire.ext.properties.editor.client.PropertyEditorWidget;
@@ -42,6 +43,7 @@ import org.uberfire.ext.properties.editor.model.PropertyEditorChangeEvent;
 import org.uberfire.ext.properties.editor.model.PropertyEditorEvent;
 import org.uberfire.ext.properties.editor.model.PropertyEditorFieldInfo;
 
+@Dependent
 public class JPADataObjectEditor extends ObjectEditor {
 
     interface JPADataObjectEditorUIBinder

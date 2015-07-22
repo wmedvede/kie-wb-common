@@ -88,7 +88,9 @@ public class DataModelerScreenViewImpl
         this.context = context;
         dataObjectBrowser.setContext(context);
         //modelPropertiesEditor.setContext(context);
-        domainEditorContainer.setContext( context );
+
+        //TODO commented for the separation of annotation domains into Docks
+        //domainEditorContainer.setContext( context );
     }
 
     @Override
