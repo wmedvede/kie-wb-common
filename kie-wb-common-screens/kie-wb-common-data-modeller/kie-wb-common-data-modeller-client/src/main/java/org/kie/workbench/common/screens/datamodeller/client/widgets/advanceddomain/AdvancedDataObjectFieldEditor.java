@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain;
 
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.kie.workbench.common.screens.datamodeller.client.DataModelerContext;
@@ -25,11 +26,15 @@ import org.kie.workbench.common.services.datamodeller.core.DataObject;
 import org.kie.workbench.common.services.datamodeller.core.ElementType;
 import org.kie.workbench.common.services.datamodeller.core.ObjectProperty;
 
+@Dependent
 public class AdvancedDataObjectFieldEditor
         extends FieldEditor
         implements AdvancedDataObjectFieldEditorView.Presenter {
 
     private AdvancedDataObjectFieldEditorView view;
+
+    public AdvancedDataObjectFieldEditor() {
+    }
 
     @Inject
     public AdvancedDataObjectFieldEditor( AdvancedDataObjectFieldEditorView view ) {
@@ -115,7 +120,9 @@ public class AdvancedDataObjectFieldEditor
     @Override
     public void setContext( DataModelerContext context ) {
         super.setContext( context );
-        view.init( context.getCurrentProject(), ElementType.FIELD );
+        //TODO, check this, because with current change to the screens approach the context can be
+        //null for some events
+        view.init( context != null ? context.getCurrentProject() : null, ElementType.FIELD );
     }
 
     private void refresh() {

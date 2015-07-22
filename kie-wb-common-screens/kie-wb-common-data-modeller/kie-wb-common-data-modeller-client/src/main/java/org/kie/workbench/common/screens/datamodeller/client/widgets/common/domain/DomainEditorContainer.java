@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.core.client.GWT;
@@ -34,6 +35,7 @@ import org.kie.workbench.common.screens.datamodeller.client.DataModelerContext;
 import org.kie.workbench.common.screens.datamodeller.client.handlers.DomainHandler;
 import org.kie.workbench.common.screens.datamodeller.client.handlers.DomainHandlerRegistry;
 
+@Dependent
 public class DomainEditorContainer extends Composite {
 
     interface DomainEditorContainerUIBinder
@@ -69,7 +71,7 @@ public class DomainEditorContainer extends Composite {
         mainPanel.add( deck );
         int index = 0;
         DomainEditor domainEditor;
-        for ( DomainHandler handler : domainHandlerRegistry.getDomainHandlers( ) ) {
+        for ( DomainHandler handler : domainHandlerRegistry.getDomainHandlers( "JPA" ) ) {
             //current implementation creates new instances for the domain editors since they are added to current
             //data modeler editor. When this code is moved to the tools windows approach likely we can simply have
             //application scoped instances for the domain editors.
