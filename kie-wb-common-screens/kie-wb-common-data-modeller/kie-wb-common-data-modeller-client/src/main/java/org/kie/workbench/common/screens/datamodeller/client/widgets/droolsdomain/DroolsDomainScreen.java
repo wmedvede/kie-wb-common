@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datamodeller.client.widgets.jpadomain;
+package org.kie.workbench.common.screens.datamodeller.client.widgets.droolsdomain;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -29,43 +29,42 @@ import org.uberfire.lifecycle.OnOpen;
 import org.uberfire.lifecycle.OnStartup;
 
 @ApplicationScoped
-@WorkbenchScreen ( identifier = "JPADomainScreen")
-public class JPADomainScreen {
+@WorkbenchScreen ( identifier = "DroolsDomainScreen")
+public class DroolsDomainScreen {
 
+    private DroolsDomainScreenView view;
 
-    JPADomainScreenView view;
-
-    public JPADomainScreen() {
+    public DroolsDomainScreen() {
     }
 
     @Inject
-    public JPADomainScreen( JPADomainScreenView view ) {
+    public DroolsDomainScreen( DroolsDomainScreenView view ) {
         this.view = view;
     }
 
     @OnStartup
     public void onStartup() {
-        //Window.alert("JPADomainScreen.onStartup");
+        //Window.alert("DroolsDomainScreen.onStartup");
     }
 
     @OnOpen
     public void onOpen() {
-        //Window.alert("JPADomainScreen.onOpen");
+        //Window.alert("DroolsDomainScreen.onOpen");
     }
 
     @OnFocus
     public void onFocus() {
-        /*Window.alert("JPADomainScreen.onFocus");*/
+        /*Window.alert("DroolsDomainScreen.onFocus");*/
     }
 
     @OnClose
     public void onClose() {
-        //Window.alert("JPADomainScreen.onClose");
+        //Window.alert("DroolsDomainScreen.onClose");
     }
 
     @WorkbenchPartTitle
     public String getTitle() {
-        return "JPADomainScreen";
+        return "DroolsDomainScreen";
     }
 
     @WorkbenchPartView

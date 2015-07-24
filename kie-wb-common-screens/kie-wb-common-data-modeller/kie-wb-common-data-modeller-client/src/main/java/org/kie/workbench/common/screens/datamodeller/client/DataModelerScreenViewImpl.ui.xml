@@ -21,6 +21,7 @@
 
   <ui:with field="i18n" type="org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants"/>
 
+  <!--
   <gwt:HTMLPanel>
 
     <style>
@@ -49,11 +50,6 @@
     <table class="BgTable">
       <tr>
 
-        <!--td class="TdLateralTable">
-            <div class="well well-small">
-            <gwt:SimplePanel ui:field="browserPanel"></gwt:SimplePanel>
-            </div>
-        </td-->
 
 
         <td class="TdCentralTable">
@@ -72,6 +68,16 @@
 
 
   </gwt:HTMLPanel>
+
+-->
+
+  <ui:with field="res" type="org.kie.workbench.common.screens.datamodeller.client.resources.DataModelerResources"/>
+
+  <gwt:FlowPanel addStyleNames="{res.CSS.columnsContainer}" ui:field="columnsContainer">
+    <gwt:FlowPanel addStyleNames="{res.CSS.columnBrowsers}" ui:field="fieldBrowserPanel"/>
+    <gwt:FlowPanel addStyleNames="{res.CSS.drlEditorContainer}" ui:field="fieldEditorPanel" />
+  </gwt:FlowPanel>
+
 
 </ui:UiBinder>
 

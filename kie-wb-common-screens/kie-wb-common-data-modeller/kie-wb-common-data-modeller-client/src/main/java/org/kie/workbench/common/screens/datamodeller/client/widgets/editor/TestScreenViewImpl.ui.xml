@@ -23,14 +23,14 @@
   <gwt:HTMLPanel>
 
     <style>
-      .jpa-domain {
-      min-height: 320px !Important;
-      width: 380px !Important;
-      }
+        .test-screen-domain {
+        min-height: 320px !Important;
+        width: 380px !Important;
+        }
 
     </style>
 
-    <base:DivWidget ui:field="containerPanel" addStyleNames="jpa-domain"></base:DivWidget>
+    <base:DivWidget ui:field="containerPanel" > </base:DivWidget>
 
   </gwt:HTMLPanel>
 

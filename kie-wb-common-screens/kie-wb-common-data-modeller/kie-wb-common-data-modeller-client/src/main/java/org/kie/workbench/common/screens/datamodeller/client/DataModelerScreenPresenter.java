@@ -94,7 +94,6 @@ import org.uberfire.mvp.ParameterizedCommand;
 import org.uberfire.mvp.PlaceRequest;
 import org.uberfire.rpc.SessionInfo;
 import org.uberfire.workbench.events.NotificationEvent;
-import org.uberfire.workbench.model.menu.MenuFactory;
 import org.uberfire.workbench.model.menu.Menus;
 
 @Dependent
@@ -112,12 +111,7 @@ public class DataModelerScreenPresenter
 
         void setEditorId( String editorId );
 
-        //TODO temporal method until we have facets.
-        void showDomain( String domainId );
-
         void refreshTypeLists( boolean keepCurrentSelection );
-
-        List<String> getAvailableDomains();
 
     }
 
@@ -260,7 +254,7 @@ public class DataModelerScreenPresenter
         //Window.alert( "DataModeller.onLostFocus: "  + editorId );
         //Si tengo un objecto cargado entonces SIEMPRE notifico que me voy
         //dataModelerWorkbenchContext.clearContext();
-        dataModelerWBContext.clearContext();
+        //dataModelerWBContext.clearContext();
     }
 
 
@@ -1156,26 +1150,11 @@ public class DataModelerScreenPresenter
 
         menuBuilder.addCommand( "open screen", new Command() {
             @Override public void execute() {
-                placeManager.goTo( "JPADomainScreen" );
+                placeManager.goTo( "DataModelerTestScreen" );
             }
         } );
 
-        for ( final String availableDomain : view.getAvailableDomains() ) {
-            menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( availableDomain )
-                            .respondsWith( new Command() {
-                                @Override public void execute() {
-                                    onShowDomain( availableDomain );
-                                }
-                            } )
-                            .endMenu()
-                            .build().getItems().get( 0 )
-            );
-        }
         menus = menuBuilder.build();
-    }
-
-    private void onShowDomain( String domain ) {
-        view.showDomain( domain);
     }
 
     private void initContext( final ObservablePath path ) {

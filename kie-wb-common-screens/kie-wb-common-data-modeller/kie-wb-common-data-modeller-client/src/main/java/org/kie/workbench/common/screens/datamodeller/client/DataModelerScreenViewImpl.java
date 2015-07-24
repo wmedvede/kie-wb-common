@@ -16,7 +16,6 @@
 
 package org.kie.workbench.common.screens.datamodeller.client;
 
-import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -25,10 +24,10 @@ import javax.inject.Inject;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
-import org.kie.workbench.common.screens.datamodeller.client.widgets.DataObjectBrowser;
-import org.kie.workbench.common.screens.datamodeller.client.widgets.common.domain.DomainEditorContainer;
+import org.kie.workbench.common.screens.datamodeller.client.widgets.editor.DataObjectFieldBrowser;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.maindomain.MainDomainEditor;
 import org.kie.workbench.common.screens.datamodeller.events.DataModelStatusChangeEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataModelerEvent;
@@ -41,7 +40,8 @@ import org.kie.workbench.common.widgets.metadata.client.KieEditorViewImpl;
 
 public class DataModelerScreenViewImpl
         extends KieEditorViewImpl
-        implements DataModelerScreenPresenter.DataModelerScreenView {
+        implements DataModelerScreenPresenter.DataModelerScreenView,
+        RequiresResize {
 
     interface DataModelerScreenViewBinder
             extends
@@ -51,20 +51,25 @@ public class DataModelerScreenViewImpl
 
     private static DataModelerScreenViewBinder uiBinder = GWT.create(DataModelerScreenViewBinder.class);
 
-    @UiField
-    SimplePanel dataObjectPanel = new SimplePanel();
+    //Scroll-bar Height + Container padding * 2
+    private static int SCROLL_BAR_SIZE = 32;
+    private static int CONTAINER_PADDING = 15;
+    private static int VERTICAL_MARGIN = SCROLL_BAR_SIZE + ( CONTAINER_PADDING * 2 );
 
     @UiField
-    SimplePanel domainContainerPanel = new SimplePanel();
+    FlowPanel columnsContainer;
+
+    @UiField
+    FlowPanel fieldBrowserPanel;
+
+    @UiField
+    FlowPanel fieldEditorPanel;
 
     @Inject
-    private MainDomainEditor modelPropertiesEditor;
+    private MainDomainEditor mainDomainEditor;
 
     @Inject
-    private DomainEditorContainer domainEditorContainer;
-
-    @Inject
-    private DataObjectBrowser dataObjectBrowser;
+    private DataObjectFieldBrowser fieldBrowser;
 
     @Inject
     private Event<DataModelerEvent> dataModelerEvent;
@@ -79,40 +84,27 @@ public class DataModelerScreenViewImpl
 
     @PostConstruct
     private void initUI() {
-        dataObjectPanel.add(dataObjectBrowser);
-        domainContainerPanel.add( domainEditorContainer );
+        fieldBrowserPanel.add( fieldBrowser );
+        fieldEditorPanel.add( mainDomainEditor );
     }
 
     @Override
     public void setContext(DataModelerContext context) {
         this.context = context;
-        dataObjectBrowser.setContext(context);
-        //modelPropertiesEditor.setContext(context);
-
-        //TODO commented for the separation of annotation domains into Docks
-        //domainEditorContainer.setContext( context );
+        fieldBrowser.setContext( context );
+        fieldBrowser.loadDataObject( context.getDataObject() );
+        mainDomainEditor.setContext( context );
     }
 
     @Override
     public void setEditorId( String editorId ) {
         this.editorId = editorId;
-        dataObjectBrowser.setEditorId( editorId );
-    }
-
-    @Override
-    public void showDomain( String domainId ) {
-        domainEditorContainer.showDomain( domainId );
     }
 
     @Override
     public void refreshTypeLists( boolean keepSelection ) {
-        dataObjectBrowser.refreshTypeList( keepSelection );
-        modelPropertiesEditor.refreshTypeList( keepSelection );
-    }
-
-    @Override
-    public List<String> getAvailableDomains() {
-        return domainEditorContainer.getInstantiatedDomains();
+        // probably fieldBrowser. dataObjectBrowser.refreshTypeList( keepSelection );
+        mainDomainEditor.refreshTypeList( keepSelection );
     }
 
     private void updateChangeStatus(DataModelerEvent event) {
@@ -137,11 +129,21 @@ public class DataModelerScreenViewImpl
     }
 
     private void onDataObjectFieldDeleted(@Observes DataObjectFieldDeletedEvent event) {
-        updateChangeStatus(event);
+        updateChangeStatus( event );
     }
 
     private DataModelerContext getContext() {
         return context;
     }
+
+
+    @Override
+    public void onResize() {
+        final int height = getParent().getOffsetHeight() - VERTICAL_MARGIN;
+        columnsContainer.setHeight( ( height > 0 ? height : 0 ) + "px" );
+        fieldEditorPanel.setHeight( ( ( height > 0 ? height : 0 ) + SCROLL_BAR_SIZE ) + "px" );
+        //drlEditor.onResize();
+    }
+
 
 }

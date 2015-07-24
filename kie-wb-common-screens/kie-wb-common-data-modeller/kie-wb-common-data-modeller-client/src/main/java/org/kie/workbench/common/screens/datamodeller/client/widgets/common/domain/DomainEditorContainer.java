@@ -71,7 +71,12 @@ public class DomainEditorContainer extends Composite {
         mainPanel.add( deck );
         int index = 0;
         DomainEditor domainEditor;
-        for ( DomainHandler handler : domainHandlerRegistry.getDomainHandlers( "JPA" ) ) {
+        //TODO Temporal with the moving to the docks only the main domain will be shown in the
+        //presener
+        List<String> domains = new ArrayList<String>(  );
+        domains.add( "MAIN" );
+
+        for ( DomainHandler handler : domainHandlerRegistry.getDomainHandlers( domains ) ) {
             //current implementation creates new instances for the domain editors since they are added to current
             //data modeler editor. When this code is moved to the tools windows approach likely we can simply have
             //application scoped instances for the domain editors.

@@ -14,58 +14,38 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datamodeller.client.widgets.jpadomain;
+package org.kie.workbench.common.screens.datamodeller.client.widgets.editor;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import org.kie.workbench.common.screens.datamodeller.events.DataObjectSelectedEvent;
+import org.uberfire.client.annotations.DefaultPosition;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
-import org.uberfire.lifecycle.OnClose;
-import org.uberfire.lifecycle.OnFocus;
-import org.uberfire.lifecycle.OnOpen;
-import org.uberfire.lifecycle.OnStartup;
+import org.uberfire.workbench.model.CompassPosition;
+import org.uberfire.workbench.model.Position;
 
 @ApplicationScoped
-@WorkbenchScreen ( identifier = "JPADomainScreen")
-public class JPADomainScreen {
+@WorkbenchScreen ( identifier = "DataModelerTestScreen")
+public class TestScreen {
 
+    private TestScreenView view;
 
-    JPADomainScreenView view;
-
-    public JPADomainScreen() {
+    public TestScreen() {
     }
 
     @Inject
-    public JPADomainScreen( JPADomainScreenView view ) {
+    public TestScreen( TestScreenView view ) {
         this.view = view;
-    }
-
-    @OnStartup
-    public void onStartup() {
-        //Window.alert("JPADomainScreen.onStartup");
-    }
-
-    @OnOpen
-    public void onOpen() {
-        //Window.alert("JPADomainScreen.onOpen");
-    }
-
-    @OnFocus
-    public void onFocus() {
-        /*Window.alert("JPADomainScreen.onFocus");*/
-    }
-
-    @OnClose
-    public void onClose() {
-        //Window.alert("JPADomainScreen.onClose");
     }
 
     @WorkbenchPartTitle
     public String getTitle() {
-        return "JPADomainScreen";
+        return "DataModelerTestScreen";
     }
 
     @WorkbenchPartView
@@ -73,4 +53,12 @@ public class JPADomainScreen {
         return view;
     }
 
+    @DefaultPosition
+    public Position getDefaultPosition() {
+        return CompassPosition.WEST;
+    }
+
+    protected void onDataObjectSelected( @Observes DataObjectSelectedEvent event ) {
+        view.loadDataObject( event.getCurrentDataObject() );
+    }
 }
