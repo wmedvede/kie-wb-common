@@ -83,7 +83,7 @@ public abstract class FieldEditor extends BaseEditor {
     protected void onDataObjectFieldDeleted( @Observes DataObjectFieldDeletedEvent event ) {
         // When all attributes from the current object have been deleted clean
         if ( event.isFromContext( context != null ? context.getContextId() : null ) ) {
-            if ( getDataObject().getProperties().size() == 0 ) {
+            if ( getDataObject() != null && getDataObject().getProperties().size() == 0 ) {
                 clean();
                 setReadonly( true );
             }

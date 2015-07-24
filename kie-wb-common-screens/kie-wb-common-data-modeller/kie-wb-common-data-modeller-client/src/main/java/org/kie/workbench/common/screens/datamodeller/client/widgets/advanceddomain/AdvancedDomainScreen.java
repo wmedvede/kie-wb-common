@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datamodeller.client.widgets.jpadomain;
+package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -29,28 +29,28 @@ import org.uberfire.lifecycle.OnOpen;
 import org.uberfire.lifecycle.OnStartup;
 
 @ApplicationScoped
-@WorkbenchScreen ( identifier = "JPADomainScreen")
-public class JPADomainScreen {
+@WorkbenchScreen ( identifier = "AdvancedDomainScreen")
+public class AdvancedDomainScreen {
 
 
-    JPADomainScreenView view;
+    AdvancedDomainScreenView view;
 
-    public JPADomainScreen() {
+    public AdvancedDomainScreen() {
     }
 
     @Inject
-    public JPADomainScreen( JPADomainScreenView view ) {
+    public AdvancedDomainScreen( AdvancedDomainScreenView view ) {
         this.view = view;
     }
 
     @OnStartup
     public void onStartup() {
-        //Window.alert("JPADomainScreen.onStartup");
+        //Window.alert("AdvancedDomainScreen.onStartup");
     }
 
     @OnOpen
     public void onOpen() {
-        //Window.alert("JPADomainScreen.onOpen");
+        //Window.alert("AdvancedDomainScreen.onOpen");
     }
 
     @OnFocus
@@ -60,12 +60,12 @@ public class JPADomainScreen {
 
     @OnClose
     public void onClose() {
-        //Window.alert("JPADomainScreen.onClose");
+        //Window.alert("AdvancedDomainScreen.onClose");
     }
 
     @WorkbenchPartTitle
     public String getTitle() {
-        return "JPADomainScreen";
+        return "AdvancedDomainScreen";
     }
 
     @WorkbenchPartView

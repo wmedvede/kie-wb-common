@@ -18,12 +18,15 @@ package org.kie.workbench.common.screens.datamodeller.client.widgets.common.doma
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datamodeller.client.DataModelerContext;
+import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWBContext;
+import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWBContextEvent;
 import org.kie.workbench.common.screens.datamodeller.client.handlers.DomainHandler;
 import org.kie.workbench.common.screens.datamodeller.events.DataModelerEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectDeletedEvent;
@@ -52,6 +55,9 @@ public abstract class BaseDomainEditor
     protected DataModelerContext context;
 
     protected DomainHandler handler;
+
+    @Inject
+    protected DataModelerWBContext dataModelerWBContext;
 
     public BaseDomainEditor() {
         initWidget( mainPanel );
@@ -124,6 +130,13 @@ public abstract class BaseDomainEditor
     }
 
     //event observers
+
+    //TODO ver si me combiene ademas acá hacer
+    //setContext() en el object editor y el field enditor y de esa forma ya no tengo que cambiarles nada
+    //o mas bien cada editor recibe el evento como lo tengo echo
+    protected void onContextChange( @Observes DataModelerWBContextEvent contextEvent ) {
+        this.context =  dataModelerWBContext.getActiveContext();
+    }
 
     protected void onDataObjectSelected( @Observes DataObjectSelectedEvent event ) {
         if ( event.isFromContext( getContextId() ) ) {
