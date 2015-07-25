@@ -19,6 +19,7 @@ package org.kie.workbench.common.screens.datamodeller.client.widgets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -26,6 +27,8 @@ import javax.inject.Inject;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CellTable;
 import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.ListBox;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.TooltipCellDecorator;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -51,8 +54,8 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -66,13 +69,14 @@ import org.kie.workbench.common.screens.datamodeller.client.command.DataModelCom
 import org.kie.workbench.common.screens.datamodeller.client.command.DataModelCommandBuilder;
 import org.kie.workbench.common.screens.datamodeller.client.handlers.DomainHandler;
 import org.kie.workbench.common.screens.datamodeller.client.handlers.DomainHandlerRegistry;
-import org.kie.workbench.common.screens.datamodeller.model.maindomain.MainDomainAnnotations;
 import org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants;
 import org.kie.workbench.common.screens.datamodeller.client.resources.images.ImagesResources;
 import org.kie.workbench.common.screens.datamodeller.client.util.AnnotationValueHandler;
 import org.kie.workbench.common.screens.datamodeller.client.util.DataModelerUtils;
 import org.kie.workbench.common.screens.datamodeller.client.util.ObjectPropertyComparator;
 import org.kie.workbench.common.screens.datamodeller.client.validation.ValidatorService;
+import org.kie.workbench.common.screens.datamodeller.client.widgets.editor.NewFieldPopup;
+import org.kie.workbench.common.screens.datamodeller.client.widgets.editor.NewFieldPopupView;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.refactoring.ShowUsagesPopup;
 import org.kie.workbench.common.screens.datamodeller.events.ChangeType;
 import org.kie.workbench.common.screens.datamodeller.events.DataModelerEvent;
@@ -82,6 +86,7 @@ import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldCreat
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldDeletedEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldSelectedEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectSelectedEvent;
+import org.kie.workbench.common.screens.datamodeller.model.maindomain.MainDomainAnnotations;
 import org.kie.workbench.common.screens.datamodeller.service.DataModelerService;
 import org.kie.workbench.common.services.datamodeller.core.DataModel;
 import org.kie.workbench.common.services.datamodeller.core.DataObject;
@@ -92,7 +97,6 @@ import org.uberfire.ext.editor.commons.client.validation.ValidatorCallback;
 import org.uberfire.ext.editor.commons.client.validation.ValidatorWithReasonCallback;
 import org.uberfire.ext.widgets.common.client.common.BusyPopup;
 import org.uberfire.ext.widgets.common.client.common.popups.YesNoCancelPopup;
-import org.uberfire.ext.widgets.common.client.common.popups.errors.ErrorPopup;
 import org.uberfire.ext.widgets.common.client.resources.i18n.CommonConstants;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.impl.PathPlaceRequest;
@@ -107,40 +111,32 @@ public class DataObjectBrowser extends Composite {
     private static DataObjectEditorUIBinder uiBinder = GWT.create( DataObjectEditorUIBinder.class );
 
     @UiField
-    VerticalPanel mainPanel;
+    Button objectButton;
 
     @UiField
-    Button objectButton;
+    Button newPropertyButton;
 
     @UiField(provided = true)
     CellTable<ObjectProperty> dataObjectPropertiesTable = new CellTable<ObjectProperty>( 1000, GWT.<CellTable.SelectableResources>create( CellTable.SelectableResources.class ) );
 
-    @UiField
-    Label newPropertyHeader;
+    Label newPropertyHeader = new Label(  );
 
-    @UiField
-    Label newPropertyIdLabel;
+    Label newPropertyIdLabel = new Label(  );
 
-    @UiField
-    com.github.gwtbootstrap.client.ui.TextBox newPropertyId;
+    com.github.gwtbootstrap.client.ui.TextBox newPropertyId = new TextBox();
 
-    @UiField
-    Label newPropertyLabelLabel;
+    Label newPropertyLabelLabel = new Label(  );
 
-    @UiField
-    com.github.gwtbootstrap.client.ui.TextBox newPropertyLabel;
+    com.github.gwtbootstrap.client.ui.TextBox newPropertyLabel = new TextBox();
 
-    @UiField
-    Label newPropertyTypeLabel;
+    Label newPropertyTypeLabel = new Label(  );
 
-    @UiField
-    com.github.gwtbootstrap.client.ui.ListBox newPropertyType;
+    com.github.gwtbootstrap.client.ui.ListBox newPropertyType = new ListBox(  );
 
-    @UiField
-    CheckBox isNewPropertyMultiple;
+    CheckBox isNewPropertyMultiple = new CheckBox(  );
 
-    @UiField
-    Button newPropertyButton;
+    @Inject
+    NewFieldPopup newFieldPopup;
 
     @Inject
     private DataModelCommandBuilder commandBuilder;
@@ -170,6 +166,8 @@ public class DataObjectBrowser extends Composite {
 
     private boolean skipNextFieldNotification = false;
 
+    private boolean showingObject = false;
+
     private String editorId;
 
     public DataObjectBrowser() {
@@ -189,12 +187,18 @@ public class DataObjectBrowser extends Composite {
         objectButton.addClickHandler( new ClickHandler() {
             @Override public void onClick( ClickEvent event ) {
                 //TODO review this
+                /*
                 if ( getDataObject().getProperties().size() > 0 ) {
                     skipNextFieldNotification = true;
                 }
+                */
+                showingObject = true;
                 notifyObjectSelected();
             }
         } );
+
+        newPropertyButton.setType( ButtonType.LINK );
+        newPropertyButton.setIcon( IconType.PLUS_SIGN );
 
         dataObjectPropertiesProvider.setList( new ArrayList<ObjectProperty>() );
 
@@ -393,12 +397,33 @@ public class DataObjectBrowser extends Composite {
 
             @Override
             public void onSelectionChange( SelectionChangeEvent event ) {
-                ObjectProperty selectedProperty = ( (SingleSelectionModel<ObjectProperty>) dataObjectPropertiesTable.getSelectionModel() ).getSelectedObject();
+                ObjectProperty selectedProperty = ( ( SingleSelectionModel<ObjectProperty> ) dataObjectPropertiesTable.getSelectionModel() ).getSelectedObject();
                 notifyFieldSelected( selectedProperty );
             }
         } );
 
         dataObjectPropertiesTable.setKeyboardSelectionPolicy( HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.BOUND_TO_SELECTION );
+
+
+
+        dataObjectPropertiesTable.addCellPreviewHandler( new CellPreviewEvent.Handler<ObjectProperty>() {
+
+            @Override
+            public void onCellPreview( CellPreviewEvent<ObjectProperty> event ) {
+                if ( showingObject && "click".equals( event.getNativeEvent().getType() ) ) {
+                    int selectedRow = dataObjectPropertiesTable.getKeyboardSelectedRow();
+                    ObjectProperty selectedProperty = ( ( SingleSelectionModel<ObjectProperty> ) dataObjectPropertiesTable.getSelectionModel() ).getSelectedObject();
+
+                    if ( selectedRow >= 0 && selectedProperty != null && selectedProperty.equals( dataObjectPropertiesProvider.getList().get( selectedRow ) ) ) {
+                        notifyFieldSelected( selectedProperty );
+                    }
+
+                    showingObject = false;
+                }
+            }
+
+        } );
+
 
         dataObjectPropertiesProvider.addDataDisplay( dataObjectPropertiesTable );
         dataObjectPropertiesProvider.refresh();
@@ -406,6 +431,39 @@ public class DataObjectBrowser extends Composite {
         newPropertyButton.setIcon( IconType.PLUS_SIGN );
 
         setReadonly( true );
+
+    }
+
+    @PostConstruct
+    private void init() {
+
+        newFieldPopup.addPopupHandler( new NewFieldPopupView.NewFieldPopupHandler() {
+            @Override
+            public void onCreate( String fieldName, String fieldLabel, String type, boolean multiple ) {
+                createNewProperty( dataObject,
+                        DataModelerUtils.unCapitalize( fieldName ),
+                        fieldLabel,
+                        type,
+                        multiple,
+                        true );
+            }
+
+            @Override
+            public void onCreateAndContinue( String fieldName, String fieldLabel, String type, boolean multiple ) {
+                createNewProperty( dataObject,
+                        DataModelerUtils.unCapitalize( fieldName ),
+                        fieldLabel,
+                        type,
+                        multiple,
+                        false );
+            }
+
+            @Override
+            public void onCancel() {
+                newFieldPopup.hide();
+            }
+        } );
+
     }
 
     public DataModelerContext getContext() {
@@ -444,12 +502,13 @@ public class DataObjectBrowser extends Composite {
                                     final String propertyName,
                                     final String propertyLabel,
                                     final String propertyType,
-                                    final Boolean isMultiple ) {
+                                    final Boolean isMultiple,
+                                    final boolean closePopup ) {
         if ( dataObject != null ) {
             validatorService.isValidIdentifier( propertyName, new ValidatorCallback() {
                 @Override
                 public void onFailure() {
-                    ErrorPopup.showMessage( Constants.INSTANCE.validation_error_invalid_object_attribute_identifier( propertyName ) );
+                    newFieldPopup.setErrorMessage( Constants.INSTANCE.validation_error_invalid_object_attribute_identifier( propertyName ) );
                 }
 
                 @Override
@@ -469,9 +528,9 @@ public class DataObjectBrowser extends Composite {
                         private void showFailure( String reason ) {
                             if ( ValidatorService.UN_MANAGED_PROPERTY_EXISTS.equals( reason ) ) {
                                 ObjectProperty unmanagedProperty = getDataObject().getUnManagedProperty( propertyName );
-                                ErrorPopup.showMessage( Constants.INSTANCE.validation_error_object_un_managed_attribute_already_exists( unmanagedProperty.getName(), unmanagedProperty.getClassName() ) );
+                                newFieldPopup.setErrorMessage( Constants.INSTANCE.validation_error_object_un_managed_attribute_already_exists( unmanagedProperty.getName(), unmanagedProperty.getClassName() ) );
                             } else {
-                                ErrorPopup.showMessage( Constants.INSTANCE.validation_error_object_attribute_already_exists( propertyName ) );
+                                newFieldPopup.setErrorMessage( Constants.INSTANCE.validation_error_object_attribute_already_exists( propertyName ) );
                             }
                         }
 
@@ -481,9 +540,14 @@ public class DataObjectBrowser extends Composite {
 
                                 boolean multiple = isMultiple && !getContext().getHelper().isPrimitiveType( propertyType ); //extra check
                                 addDataObjectProperty( getDataObject(), propertyName, propertyLabel, propertyType, multiple );
+                                if ( closePopup ) {
+                                    newFieldPopup.hide();
+                                } else {
+                                    newFieldPopup.resetInput();
+                                }
 
                             } else {
-                                ErrorPopup.showMessage( Constants.INSTANCE.validation_error_missing_object_attribute_type() );
+                                newFieldPopup.setErrorMessage( Constants.INSTANCE.validation_error_missing_object_attribute_type() );
                             }
                         }
                     } );
@@ -716,17 +780,30 @@ public class DataObjectBrowser extends Composite {
 
     @UiHandler("newPropertyButton")
     void newPropertyClick( ClickEvent event ) {
+        if ( getContext() != null ) {
+            newFieldPopup.init( getContext() );
+            newFieldPopup.show();
+        }
+
+
+
+
+
+
+
+        /*
         createNewProperty( dataObject,
                            DataModelerUtils.unCapitalize( newPropertyId.getText() ),
                            newPropertyLabel.getText(),
                            newPropertyType.getValue(),
                            isNewPropertyMultiple.getValue() );
+                           */
     }
 
     //Event Observers
 
     private void onDataObjectSelected( @Observes DataObjectSelectedEvent event ) {
-        if ( event.isFromContext( context != null ? context.getContextId() : null ) ) {
+        if ( event.isFromContext( context != null ? context.getContextId() : null ) && !DataModelerEvent.DATA_OBJECT_BROWSER.equals( event.getSource() ) ) {
             DataObject dataObject = event.getCurrentDataObject();
             resetInput();
             setDataObject( dataObject );
