@@ -27,7 +27,7 @@
     <style >
 
       .field-browser-container {
-        background-color: #E6F1F6;
+        background-color:  #f5f5f5;;
         padding-top: 10px;
         padding-bottom: 10px;
         padding-left: 10px;
@@ -57,16 +57,63 @@
         border-left: 0;
       }
 
+      .field-browser-scroll-list {
+        height: 460px;
+        width: 100%;
+        overflow-x:hidden;
+        overflow-y: auto;
+        relative;
+        zoom: 1;
+      }
+
+      .field-browser-navigator-itemsTable {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 5px;
+
+      }
+
+      .field-browser-navigator-leftTD {
+        border-left: 1px solid #e3e3e3;
+        border-top: 1px solid #e3e3e3;
+        border-bottom: 1px solid #e3e3e3;
+        border-right: 0px ;
+      }
+
+      .field-browser-navigator-internalTD {
+        border-top: 1px solid #e3e3e3;
+        border-bottom: 1px solid #e3e3e3;
+        border-left: 0px;
+      }
+
+      .field-browser-navigator-rightTD {
+        border-top: 1px solid #e3e3e3;
+        border-bottom: 1px solid #e3e3e3;
+        border-right: 1px solid #e3e3e3;
+      }
+
+
     </style>
 
 
-  <gwt:FlowPanel addStyleNames="field-browser-container">
+  <base:DivWidget addStyleNames="field-browser-container">
 
-    <b:Button ui:field="addFieldButton" text="add field" />
+    <gwt:HTMLPanel>
+      <div style="width: 280px;">
+        <div>Object name</div>
+        <div style="float:right;">
+          <b:Button ui:field="addFieldButton" text="add field" />
+        </div>
+      </div>
+    </gwt:HTMLPanel>
 
-    <base:DivWidget ui:field="containerPanel" />
+    <base:DivWidget styleName="field-browser-scroll-list">
+      <base:DivWidget ui:field="containerPanel" >
+        <gwt:FlexTable ui:field="items" addStyleNames="field-browser-navigator-itemsTable table table-striped table-hover "/>
+      </base:DivWidget>
+    </base:DivWidget>
 
-  </gwt:FlowPanel>
+  </base:DivWidget>
 
   </gwt:HTMLPanel>
 

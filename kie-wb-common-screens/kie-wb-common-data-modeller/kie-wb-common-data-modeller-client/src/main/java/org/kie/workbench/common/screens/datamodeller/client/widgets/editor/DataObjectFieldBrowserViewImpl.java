@@ -54,7 +54,8 @@ public class DataObjectFieldBrowserViewImpl
     @UiField
     DivWidget containerPanel;
 
-    private FlexTable items = new FlexTable();
+    @UiField
+    FlexTable items;
 
     private List<FieldBrowserItem> browserItems = new ArrayList<FieldBrowserItem>(  );
 
@@ -72,8 +73,9 @@ public class DataObjectFieldBrowserViewImpl
                 presenter.onAddItem();
             }
         } );
-        containerPanel.add( items );
-        items.addStyleName( "field-browser-navigator" );
+        //containerPanel.add( items );
+        //items.addStyleName( "field-browser-navigator" );
+        //items.addStyleName( "table table-bordered table-striped table-hover" );
     }
 
     @Override
@@ -126,6 +128,12 @@ public class DataObjectFieldBrowserViewImpl
 
         item = new FieldBrowserItemImpl( itemId, typeLabel, nameAnchor, iconContainer, deleteCommand );
         browserItems.add( item );
+
+        items.getFlexCellFormatter().addStyleName( row, 0, "field-browser-navigator-leftTD" );
+        items.getFlexCellFormatter().addStyleName( row, 1, "field-browser-navigator-internalTD" );
+        items.getFlexCellFormatter().addStyleName( row, 2, "field-browser-navigator-rightTD" );
+
+
         return item;
     }
 

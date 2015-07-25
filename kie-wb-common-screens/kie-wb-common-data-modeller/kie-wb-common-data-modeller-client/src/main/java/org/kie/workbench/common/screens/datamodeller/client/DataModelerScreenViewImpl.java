@@ -26,7 +26,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.kie.workbench.common.screens.datamodeller.client.widgets.DataObjectBrowser;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.editor.DataObjectFieldBrowser;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.maindomain.MainDomainEditor;
 import org.kie.workbench.common.screens.datamodeller.events.DataModelStatusChangeEvent;
@@ -56,14 +58,23 @@ public class DataModelerScreenViewImpl
     private static int CONTAINER_PADDING = 15;
     private static int VERTICAL_MARGIN = SCROLL_BAR_SIZE + ( CONTAINER_PADDING * 2 );
 
-    @UiField
+    //@UiField
     FlowPanel columnsContainer;
 
-    @UiField
+    //@UiField
     FlowPanel fieldBrowserPanel;
 
-    @UiField
+    //@UiField
     FlowPanel fieldEditorPanel;
+
+    @UiField
+    SimplePanel dataObjectPanel = new SimplePanel();
+
+    @UiField
+    SimplePanel domainContainerPanel = new SimplePanel();
+
+    @Inject
+    DataObjectBrowser dataObjectBrowser;
 
     @Inject
     private MainDomainEditor mainDomainEditor;
@@ -84,15 +95,18 @@ public class DataModelerScreenViewImpl
 
     @PostConstruct
     private void initUI() {
-        fieldBrowserPanel.add( fieldBrowser );
-        fieldEditorPanel.add( mainDomainEditor );
+        //fieldBrowserPanel.add( fieldBrowser );
+        //fieldEditorPanel.add( mainDomainEditor );
+        dataObjectPanel.add( dataObjectBrowser );
+        domainContainerPanel.add( mainDomainEditor );
     }
 
     @Override
     public void setContext(DataModelerContext context) {
         this.context = context;
-        fieldBrowser.setContext( context );
-        fieldBrowser.loadDataObject( context.getDataObject() );
+        //fieldBrowser.setContext( context );
+        //fieldBrowser.loadDataObject( context.getDataObject() );
+        dataObjectBrowser.setContext( context );
         mainDomainEditor.setContext( context );
     }
 
@@ -139,10 +153,13 @@ public class DataModelerScreenViewImpl
 
     @Override
     public void onResize() {
+
+        /*
         final int height = getParent().getOffsetHeight() - VERTICAL_MARGIN;
         columnsContainer.setHeight( ( height > 0 ? height : 0 ) + "px" );
         fieldEditorPanel.setHeight( ( ( height > 0 ? height : 0 ) + SCROLL_BAR_SIZE ) + "px" );
         //drlEditor.onResize();
+        */
     }
 
 
