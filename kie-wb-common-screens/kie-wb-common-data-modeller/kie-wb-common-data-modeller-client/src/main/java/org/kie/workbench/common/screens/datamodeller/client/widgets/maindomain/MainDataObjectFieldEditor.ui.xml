@@ -27,19 +27,19 @@
     <gwt:HTMLPanel>
 
         <style>
-            .propertiesTable {
+            .main-data-object-field-editor {
             min-height: 320px !Important;
             min-width: 380px !Important;
             overflow: hidden;
             }
 
-            .propertiesTable textarea {
+            .main-data-object-field-editor textarea {
             width: 185px !Important;
             resize: none;
             }
 
-            .propertiesTable select,
-            .propertiesTable input {
+            .main-data-object-field-editor select,
+            .main-data-object-field-editor input {
             width: 185px !Important;
             }
 
@@ -49,7 +49,7 @@
 
         </style>
 
-        <div class="well well-small propertiesTable">
+        <div class="well well-small main-data-object-field-editor">
 
         <table class="row-fluid" style="padding: 4px;">
 

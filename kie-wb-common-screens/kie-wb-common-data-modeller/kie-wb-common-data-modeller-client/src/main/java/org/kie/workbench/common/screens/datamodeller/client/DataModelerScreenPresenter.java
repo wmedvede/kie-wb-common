@@ -109,8 +109,6 @@ public class DataModelerScreenPresenter
 
         void setContext( DataModelerContext context );
 
-        void setEditorId( String editorId );
-
         void refreshTypeLists( boolean keepCurrentSelection );
 
     }
@@ -167,11 +165,6 @@ public class DataModelerScreenPresenter
     @Inject
     private PlaceManager placeManager;
 
-    /*
-    @Inject
-    DataModelerWorkbenchContext dataModelerWorkbenchContext;
-    */
-
     @Inject
     DataModelerWBContext dataModelerWBContext;
 
@@ -201,7 +194,6 @@ public class DataModelerScreenPresenter
         view = baseView;
         this.sessionInfo = sessionInfo;
         editorId = sessionInfo.getId() + "-" + editorIds++;
-        view.setEditorId( editorId );
     }
 
     @OnStartup
@@ -277,7 +269,6 @@ public class DataModelerScreenPresenter
         cleanSystemMessages( getCurrentMessageType() );
         clearContext();
         super.OnClose();
-        //dataModelerWorkbenchContext.clearContext();
         dataModelerWBContext.clearContext();
     }
 

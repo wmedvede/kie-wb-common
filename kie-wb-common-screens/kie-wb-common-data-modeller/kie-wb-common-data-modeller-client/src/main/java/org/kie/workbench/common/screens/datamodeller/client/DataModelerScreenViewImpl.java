@@ -24,12 +24,9 @@ import javax.inject.Inject;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.DataObjectBrowser;
-import org.kie.workbench.common.screens.datamodeller.client.widgets.editor.DataObjectFieldBrowser;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.maindomain.MainDomainEditor;
 import org.kie.workbench.common.screens.datamodeller.events.DataModelStatusChangeEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataModelerEvent;
@@ -42,8 +39,7 @@ import org.kie.workbench.common.widgets.metadata.client.KieEditorViewImpl;
 
 public class DataModelerScreenViewImpl
         extends KieEditorViewImpl
-        implements DataModelerScreenPresenter.DataModelerScreenView,
-        RequiresResize {
+        implements DataModelerScreenPresenter.DataModelerScreenView {
 
     interface DataModelerScreenViewBinder
             extends
@@ -51,43 +47,24 @@ public class DataModelerScreenViewImpl
 
     }
 
-    private static DataModelerScreenViewBinder uiBinder = GWT.create(DataModelerScreenViewBinder.class);
-
-    //Scroll-bar Height + Container padding * 2
-    private static int SCROLL_BAR_SIZE = 32;
-    private static int CONTAINER_PADDING = 15;
-    private static int VERTICAL_MARGIN = SCROLL_BAR_SIZE + ( CONTAINER_PADDING * 2 );
-
-    //@UiField
-    FlowPanel columnsContainer;
-
-    //@UiField
-    FlowPanel fieldBrowserPanel;
-
-    //@UiField
-    FlowPanel fieldEditorPanel;
+    private static DataModelerScreenViewBinder uiBinder = GWT.create( DataModelerScreenViewBinder.class );
 
     @UiField
-    SimplePanel dataObjectPanel = new SimplePanel();
+    SimplePanel dataObjectPanel;
 
     @UiField
-    SimplePanel domainContainerPanel = new SimplePanel();
+    SimplePanel domainContainerPanel;
 
     @Inject
-    DataObjectBrowser dataObjectBrowser;
+    private DataObjectBrowser dataObjectBrowser;
 
     @Inject
     private MainDomainEditor mainDomainEditor;
 
     @Inject
-    private DataObjectFieldBrowser fieldBrowser;
-
-    @Inject
     private Event<DataModelerEvent> dataModelerEvent;
 
     private DataModelerContext context;
-
-    private String editorId;
 
     public DataModelerScreenViewImpl() {
         initWidget( uiBinder.createAndBindUi( this ) );
@@ -95,8 +72,6 @@ public class DataModelerScreenViewImpl
 
     @PostConstruct
     private void initUI() {
-        //fieldBrowserPanel.add( fieldBrowser );
-        //fieldEditorPanel.add( mainDomainEditor );
         dataObjectPanel.add( dataObjectBrowser );
         domainContainerPanel.add( mainDomainEditor );
     }
@@ -104,20 +79,12 @@ public class DataModelerScreenViewImpl
     @Override
     public void setContext(DataModelerContext context) {
         this.context = context;
-        //fieldBrowser.setContext( context );
-        //fieldBrowser.loadDataObject( context.getDataObject() );
         dataObjectBrowser.setContext( context );
         mainDomainEditor.setContext( context );
     }
 
     @Override
-    public void setEditorId( String editorId ) {
-        this.editorId = editorId;
-    }
-
-    @Override
     public void refreshTypeLists( boolean keepSelection ) {
-        // probably fieldBrowser. dataObjectBrowser.refreshTypeList( keepSelection );
         mainDomainEditor.refreshTypeList( keepSelection );
     }
 
@@ -145,22 +112,5 @@ public class DataModelerScreenViewImpl
     private void onDataObjectFieldDeleted(@Observes DataObjectFieldDeletedEvent event) {
         updateChangeStatus( event );
     }
-
-    private DataModelerContext getContext() {
-        return context;
-    }
-
-
-    @Override
-    public void onResize() {
-
-        /*
-        final int height = getParent().getOffsetHeight() - VERTICAL_MARGIN;
-        columnsContainer.setHeight( ( height > 0 ? height : 0 ) + "px" );
-        fieldEditorPanel.setHeight( ( ( height > 0 ? height : 0 ) + SCROLL_BAR_SIZE ) + "px" );
-        //drlEditor.onResize();
-        */
-    }
-
 
 }

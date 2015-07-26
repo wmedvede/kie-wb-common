@@ -26,9 +26,6 @@ import javax.inject.Inject;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CellTable;
-import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.ListBox;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.TooltipCellDecorator;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -37,8 +34,6 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
@@ -53,7 +48,6 @@ import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
@@ -119,22 +113,6 @@ public class DataObjectBrowser extends Composite {
     @UiField(provided = true)
     CellTable<ObjectProperty> dataObjectPropertiesTable = new CellTable<ObjectProperty>( 1000, GWT.<CellTable.SelectableResources>create( CellTable.SelectableResources.class ) );
 
-    Label newPropertyHeader = new Label(  );
-
-    Label newPropertyIdLabel = new Label(  );
-
-    com.github.gwtbootstrap.client.ui.TextBox newPropertyId = new TextBox();
-
-    Label newPropertyLabelLabel = new Label(  );
-
-    com.github.gwtbootstrap.client.ui.TextBox newPropertyLabel = new TextBox();
-
-    Label newPropertyTypeLabel = new Label(  );
-
-    com.github.gwtbootstrap.client.ui.ListBox newPropertyType = new ListBox(  );
-
-    CheckBox isNewPropertyMultiple = new CheckBox(  );
-
     @Inject
     NewFieldPopup newFieldPopup;
 
@@ -168,37 +146,16 @@ public class DataObjectBrowser extends Composite {
 
     private boolean showingObject = false;
 
-    private String editorId;
-
     public DataObjectBrowser() {
         initWidget( uiBinder.createAndBindUi( this ) );
-
-        newPropertyId.getElement().getStyle().setWidth( 180, Style.Unit.PX );
-        newPropertyLabel.getElement().getStyle().setWidth( 160, Style.Unit.PX );
-        newPropertyType.getElement().getStyle().setWidth( 200, Style.Unit.PX );
-        newPropertyType.addChangeHandler( new ChangeHandler() {
-            @Override
-            public void onChange( ChangeEvent event ) {
-                selectedTypeChanged();
-            }
-        } );
 
         objectButton.setType( ButtonType.LINK );
         objectButton.addClickHandler( new ClickHandler() {
             @Override public void onClick( ClickEvent event ) {
-                //TODO review this
-                /*
-                if ( getDataObject().getProperties().size() > 0 ) {
-                    skipNextFieldNotification = true;
-                }
-                */
                 showingObject = true;
                 notifyObjectSelected();
             }
         } );
-
-        newPropertyButton.setType( ButtonType.LINK );
-        newPropertyButton.setIcon( IconType.PLUS_SIGN );
 
         dataObjectPropertiesProvider.setList( new ArrayList<ObjectProperty>() );
 
@@ -316,7 +273,6 @@ public class DataObjectBrowser extends Composite {
         } );
 
         dataObjectPropertiesTable.addColumn( typeImageColumn );
-        //dataObjectPropertiesTable.setColumnWidth( typeImageColumn, 32, Style.Unit.PX );
 
         //Init property type column
         final TextColumn<ObjectProperty> propertyTypeColumn = new TextColumn<ObjectProperty>() {
@@ -381,13 +337,11 @@ public class DataObjectBrowser extends Composite {
         } );
 
         dataObjectPropertiesTable.addColumn( deletePropertyColumnImg );
-        //dataObjectPropertiesTable.setColumnWidth( deletePropertyColumnImg, 32, Style.Unit.PX );
 
         ColumnSortEvent.ListHandler<ObjectProperty> propertyTypeColHandler = new ColumnSortEvent.ListHandler<ObjectProperty>( dataObjectPropertiesProvider.getList() );
         propertyTypeColHandler.setComparator( propertyTypeColumn, new ObjectPropertyComparator( "className" ) );
         dataObjectPropertiesTable.addColumnSortHandler( propertyTypeColHandler );
 
-        //dataObjectPropertiesTable.getColumnSortList().push(propertyTypeColumn);
         dataObjectPropertiesTable.getColumnSortList().push( propertyNameColumn );
 
         //Init the selection model
@@ -472,30 +426,6 @@ public class DataObjectBrowser extends Composite {
 
     public void setContext( DataModelerContext context ) {
         this.context = context;
-    }
-
-    public void setEditorId( String editorId ) {
-        this.editorId = editorId;
-    }
-
-    public String getEditorId() {
-        return editorId;
-    }
-
-    private void initTypeList() {
-        if ( getDataModel() != null ) {
-            DataModelerUtils.initTypeList( newPropertyType, getContext().getHelper().getOrderedBaseTypes().values(), getDataModel().getDataObjects(), getDataModel().getExternalClasses(), true );
-        } else {
-            DataModelerUtils.initList( newPropertyType, true );
-        }
-    }
-
-    public void refreshTypeList( boolean keepSelection ) {
-        String selectedValue = newPropertyType.getValue();
-        initTypeList();
-        if ( keepSelection && selectedValue != null ) {
-            newPropertyType.setSelectedValue( selectedValue );
-        }
     }
 
     private void createNewProperty( final DataObject dataObject,
@@ -624,7 +554,6 @@ public class DataObjectBrowser extends Composite {
         dataObjectPropertiesTable.setKeyboardSelectedRow( dataObjectPropertiesProvider.getList().size() - 1 );
 
         executePostCommandProcessing( command );
-        resetInput();
     }
 
     private void checkAndDeleteDataObjectProperty( final ObjectProperty objectProperty,
@@ -712,18 +641,6 @@ public class DataObjectBrowser extends Composite {
         return displayName;
     }
 
-    private void selectedTypeChanged() {
-        String selectedType = newPropertyType.getValue();
-        if ( getContext() != null && getContext().getHelper() != null ) {
-            if ( getContext().getHelper().isPrimitiveType( selectedType ) ) {
-                isNewPropertyMultiple.setEnabled( false );
-                isNewPropertyMultiple.setValue( false );
-            } else {
-                isNewPropertyMultiple.setEnabled( true );
-            }
-        }
-    }
-
     private DataModel getDataModel() {
         return getContext() != null ? getContext().getDataModel() : null;
     }
@@ -745,19 +662,7 @@ public class DataObjectBrowser extends Composite {
     }
 
     private void enableNewPropertyAction( boolean enable ) {
-        newPropertyId.setEnabled( enable );
-        newPropertyLabel.setEnabled( enable );
-        newPropertyType.setEnabled( enable );
         newPropertyButton.setEnabled( enable );
-    }
-
-    private void resetInput() {
-        newPropertyId.setText( null );
-        newPropertyLabel.setText( null );
-        initTypeList();
-        newPropertyType.setSelectedValue( DataModelerUtils.NOT_SELECTED );
-        isNewPropertyMultiple.setValue( false );
-        isNewPropertyMultiple.setEnabled( true );
     }
 
     private void setReadonly( boolean readonly ) {
@@ -784,20 +689,6 @@ public class DataObjectBrowser extends Composite {
             newFieldPopup.init( getContext() );
             newFieldPopup.show();
         }
-
-
-
-
-
-
-
-        /*
-        createNewProperty( dataObject,
-                           DataModelerUtils.unCapitalize( newPropertyId.getText() ),
-                           newPropertyLabel.getText(),
-                           newPropertyType.getValue(),
-                           isNewPropertyMultiple.getValue() );
-                           */
     }
 
     //Event Observers
@@ -805,7 +696,6 @@ public class DataObjectBrowser extends Composite {
     private void onDataObjectSelected( @Observes DataObjectSelectedEvent event ) {
         if ( event.isFromContext( context != null ? context.getContextId() : null ) && !DataModelerEvent.DATA_OBJECT_BROWSER.equals( event.getSource() ) ) {
             DataObject dataObject = event.getCurrentDataObject();
-            resetInput();
             setDataObject( dataObject );
             if ( dataObject == null ) {
                 setReadonly( true );
@@ -829,8 +719,6 @@ public class DataObjectBrowser extends Composite {
                     dataObjectPropertiesProvider.refresh();
                     dataObjectPropertiesTable.redraw();
                 }
-
-                initTypeList();
             }
         }
     }

@@ -26,7 +26,6 @@
   <inherits name="org.guvnor.messageconsole.GuvnorMessageConsoleAPI" />
   <inherits name="org.kie.workbench.common.services.datamodeller.DataModellerCore" />
 
-  <source path="context" />
   <source path="model"/>
   <source path="service"/>
   <source path="events" />
