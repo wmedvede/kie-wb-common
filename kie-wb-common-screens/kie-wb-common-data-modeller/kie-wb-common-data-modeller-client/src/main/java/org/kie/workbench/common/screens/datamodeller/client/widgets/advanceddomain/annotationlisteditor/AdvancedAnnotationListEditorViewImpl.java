@@ -26,6 +26,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -81,6 +82,7 @@ public class AdvancedAnnotationListEditorViewImpl
         initWidget( uiBinder.createAndBindUi( this ) );
         containerPanel.add( accordionsContainer );
         addAnnotationButton.setType( ButtonType.LINK );
+        addAnnotationButton.setIcon( IconType.PLUS_SIGN );
     }
 
     @Override
@@ -109,7 +111,7 @@ public class AdvancedAnnotationListEditorViewImpl
 
     private void createAnnotationAccordionGroup( final Annotation annotation, final AnnotationSource annotationSource ) {
 
-        CommandDrivenAccordionGroup accordionGroup = new CommandDrivenAccordionGroup( "Delete", new Command() {
+        CommandDrivenAccordionGroup accordionGroup = new CommandDrivenAccordionGroup( "delete", new Command() {
             @Override public void execute() {
                 presenter.onDeleteAnnotation( annotation );
             }

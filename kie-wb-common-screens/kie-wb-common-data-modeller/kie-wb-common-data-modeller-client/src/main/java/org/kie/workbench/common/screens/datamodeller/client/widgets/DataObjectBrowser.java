@@ -145,6 +145,7 @@ public class DataObjectBrowser extends Composite {
     private boolean skipNextFieldNotification = false;
 
     private boolean showingObject = false;
+    private int lastSelectedRow = -1;
 
     public DataObjectBrowser() {
         initWidget( uiBinder.createAndBindUi( this ) );
@@ -152,7 +153,12 @@ public class DataObjectBrowser extends Composite {
         objectButton.setType( ButtonType.LINK );
         objectButton.addClickHandler( new ClickHandler() {
             @Override public void onClick( ClickEvent event ) {
+                lastSelectedRow = dataObjectPropertiesTable.getKeyboardSelectedRow();
                 showingObject = true;
+                ObjectProperty currentSelection = (( SingleSelectionModel<ObjectProperty> ) dataObjectPropertiesTable.getSelectionModel()).getSelectedObject();
+                if ( currentSelection != null ) {
+                    dataObjectPropertiesTable.getSelectionModel().setSelected( currentSelection, false );
+                }
                 notifyObjectSelected();
             }
         } );
@@ -366,16 +372,13 @@ public class DataObjectBrowser extends Composite {
             public void onCellPreview( CellPreviewEvent<ObjectProperty> event ) {
                 if ( showingObject && "click".equals( event.getNativeEvent().getType() ) ) {
                     int selectedRow = dataObjectPropertiesTable.getKeyboardSelectedRow();
-                    ObjectProperty selectedProperty = ( ( SingleSelectionModel<ObjectProperty> ) dataObjectPropertiesTable.getSelectionModel() ).getSelectedObject();
-
-                    if ( selectedRow >= 0 && selectedProperty != null && selectedProperty.equals( dataObjectPropertiesProvider.getList().get( selectedRow ) ) ) {
-                        notifyFieldSelected( selectedProperty );
+                    if ( lastSelectedRow >= 0 && lastSelectedRow == selectedRow) {
+                        ObjectProperty selectedProperty = dataObjectPropertiesProvider.getList().get( selectedRow );
+                        ( ( SingleSelectionModel<ObjectProperty> ) dataObjectPropertiesTable.getSelectionModel() ).setSelected( selectedProperty, true );
                     }
-
                     showingObject = false;
                 }
             }
-
         } );
 
 
@@ -488,7 +491,7 @@ public class DataObjectBrowser extends Composite {
 
     private void setDataObject( DataObject dataObject ) {
         this.dataObject = dataObject;
-        objectButton.setText( DataModelerUtils.getDataObjectFullLabel( getDataObject() ) );
+        refreshTitle( dataObject );
 
         //We create a new selection model due to a bug found in GWT when we change e.g. from one data object with 9 rows
         // to one with 3 rows and the table was sorted.
@@ -641,6 +644,11 @@ public class DataObjectBrowser extends Composite {
         return displayName;
     }
 
+    private void refreshTitle( DataObject dataObject ) {
+        objectButton.setText( DataModelerUtils.getDataObjectFullLabel( dataObject, false ) );
+        objectButton.setTitle( dataObject.getClassName() );
+    }
+
     private DataModel getDataModel() {
         return getContext() != null ? getContext().getDataModel() : null;
     }
@@ -708,11 +716,12 @@ public class DataObjectBrowser extends Composite {
     private void onDataObjectChange( @Observes DataObjectChangeEvent event ) {
         if ( event.isFromContext( context != null ? context.getContextId() : null ) ) {
             if ( event.getChangeType() == ChangeType.CLASS_NAME_CHANGE ||
-                    event.getChangeType() == ChangeType.PACKAGE_NAME_CHANGE
+                    event.getChangeType() == ChangeType.PACKAGE_NAME_CHANGE ||
+                    event.getChangeType() == ChangeType.OBJECT_NAME_CHANGE  ||
+                    MainDomainAnnotations.LABEL_ANNOTATION.equals( event.getAnnotationClassName( ) )
                     ) {
-                //TODO add filtering for the Label annotation. if the label is set/added/removed
-                //the table should be redrawed
-                //use the annotationClassName
+
+                refreshTitle( dataObject );
 
                 // For self references: in case name or package changes redraw properties table
                 if ( dataObject.getClassName().equals( event.getCurrentDataObject().getClassName() ) ) {
@@ -747,7 +756,7 @@ public class DataObjectBrowser extends Composite {
 
     // Event notifications
     private void notifyFieldSelected( ObjectProperty selectedProperty ) {
-        if ( !skipNextFieldNotification ) {
+        if ( !skipNextFieldNotification && selectedProperty != null ) {
             dataModelerEvent.fire( new DataObjectFieldSelectedEvent( getContext().getContextId(), DataModelerEvent.DATA_OBJECT_BROWSER, getDataObject(), selectedProperty ) );
         }
         skipNextFieldNotification = false;

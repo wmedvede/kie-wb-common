@@ -71,7 +71,10 @@
         </td>
         <td class="TdLateralTable">
           <div class="data-modeler-main-container">
-              <gwt:SimplePanel ui:field="domainContainerPanel"></gwt:SimplePanel>
+            <div style="padding-top: 5px; padding-bottom: 10px; font-size: 20px;">
+              <gwt:Label ui:field="domainContainerTitle" />
+            </div>
+            <gwt:SimplePanel ui:field="domainContainerPanel"></gwt:SimplePanel>
           </div>
         </td>
       </tr>

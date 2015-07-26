@@ -98,11 +98,19 @@
                 <td style="white-space: nowrap; vertical-align: top;">
                     <gwt:Label ui:field="typeLabel" text="{i18n.objectFieldEditor_typeLabel}"/>
                 </td>
-                <td style="padding-left: 4px;">
-                    <b:ListBox ui:field="typeSelector" styleName="span10"></b:ListBox>
-                </td>
-                <td style="padding-left: 4px;">
-                  <table><tr><td><div class="typeCheckbox"><b:CheckBox ui:field="isTypeMultiple" /></div></td><td><b:Tooltip text="{i18n.objectBrowser_typeLabelMultipleTooltip}"><gwt:Label text="{i18n.objectBrowser_typeLabelMultiple}"/></b:Tooltip></td></tr></table>
+                <td style="padding-left: 4px;" colspan="2">
+                    <table>
+                        <tr>
+                            <td>
+                                <b:ListBox ui:field="typeSelector" styleName="span10"></b:ListBox>
+                            </td>
+
+                            <td style="padding-left: 4px;">
+                                <table><tr><td><div class="typeCheckbox"><b:CheckBox ui:field="isTypeMultiple" /></div></td><td><b:Tooltip text="{i18n.objectBrowser_typeLabelMultipleTooltip}"><gwt:Label text="{i18n.objectBrowser_typeLabelMultiple}"/></b:Tooltip></td></tr></table>
+                            </td>
+                        </tr>
+                    </table>
+
                 </td>
             </tr>
         </table>

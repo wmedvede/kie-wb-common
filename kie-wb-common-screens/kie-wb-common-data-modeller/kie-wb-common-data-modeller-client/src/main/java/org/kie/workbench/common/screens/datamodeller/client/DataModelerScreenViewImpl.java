@@ -24,8 +24,10 @@ import javax.inject.Inject;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.kie.workbench.common.screens.datamodeller.client.util.DataModelerUtils;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.DataObjectBrowser;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.maindomain.MainDomainEditor;
 import org.kie.workbench.common.screens.datamodeller.events.DataModelStatusChangeEvent;
@@ -34,6 +36,10 @@ import org.kie.workbench.common.screens.datamodeller.events.DataObjectChangeEven
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldChangeEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldCreatedEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldDeletedEvent;
+import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldSelectedEvent;
+import org.kie.workbench.common.screens.datamodeller.events.DataObjectSelectedEvent;
+import org.kie.workbench.common.services.datamodeller.core.DataObject;
+import org.kie.workbench.common.services.datamodeller.core.ObjectProperty;
 import org.kie.workbench.common.widgets.metadata.client.KieEditorViewImpl;
 
 
@@ -54,6 +60,9 @@ public class DataModelerScreenViewImpl
 
     @UiField
     SimplePanel domainContainerPanel;
+
+    @UiField
+    Label domainContainerTitle;
 
     @Inject
     private DataObjectBrowser dataObjectBrowser;
@@ -95,10 +104,28 @@ public class DataModelerScreenViewImpl
         }
     }
 
+    private void refreshTitle( DataObject dataObject) {
+        String label = DataModelerUtils.getDataObjectFullLabel( dataObject, false );
+        String title = "'" + label + "'" + " - general properties";
+        String tooltip= dataObject.getClassName();
+        domainContainerTitle.setText( title );
+        domainContainerTitle.setTitle( tooltip );
+    }
+
+    private void refreshTitle( DataObject dataObject, ObjectProperty objectProperty ) {
+        String title = "'" + objectProperty.getName() + "'" + " - general properties";
+        String tooltip = dataObject.getClassName() + "." + objectProperty.getName();
+        domainContainerTitle.setText( title );
+        domainContainerTitle.setTitle( tooltip );
+    }
+
     // event observers
 
     private void onDataObjectChange(@Observes DataObjectChangeEvent event) {
         updateChangeStatus( event );
+        if ( event.isFromContext( context != null ? context.getContextId() : null ) ) {
+            refreshTitle( event.getCurrentDataObject() );
+        }
     }
 
     private void onDataObjectFieldCreated(@Observes DataObjectFieldCreatedEvent event) {
@@ -107,10 +134,25 @@ public class DataModelerScreenViewImpl
 
     private void onDataObjectFieldChange(@Observes DataObjectFieldChangeEvent event) {
         updateChangeStatus(event);
+        if ( event.isFromContext( context != null ? context.getContextId() : null  ) ) {
+            refreshTitle( event.getCurrentDataObject(), event.getCurrentField() );
+        }
     }
 
     private void onDataObjectFieldDeleted(@Observes DataObjectFieldDeletedEvent event) {
         updateChangeStatus( event );
+    }
+
+    private void onDataObjectSelected(@Observes DataObjectSelectedEvent event) {
+        if ( event.isFromContext( context != null ? context.getContextId() : null ) ) {
+            refreshTitle( event.getCurrentDataObject() );
+        }
+    }
+
+    private void onDataObject(@Observes DataObjectFieldSelectedEvent event ) {
+        if ( event.isFromContext( context != null ? context.getContextId() : null )) {
+            refreshTitle( event.getCurrentDataObject(), event.getCurrentField() );
+        }
     }
 
 }
