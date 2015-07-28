@@ -20,11 +20,8 @@ import javax.enterprise.event.Observes;
 
 import org.kie.workbench.common.screens.datamodeller.client.DataModelerContext;
 import org.kie.workbench.common.screens.datamodeller.events.ChangeType;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectChangeEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldChangeEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldDeletedEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldSelectedEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectSelectedEvent;
 import org.kie.workbench.common.services.datamodeller.core.DataObject;
 import org.kie.workbench.common.services.datamodeller.core.ObjectProperty;
 
@@ -48,17 +45,19 @@ public abstract class FieldEditor extends BaseEditor {
     protected abstract void loadDataObjectField( DataObject dataObject,
             ObjectProperty objectField );
 
-
     @Override
-    public void contextChange( DataModelerContext context ) {
-        setContext( context );
+    public void onContextChange( DataModelerContext context ) {
+        super.onContextChange( context );
         if ( context == null ) {
             loadDataObjectField( null, null );
+        } else {
+            loadDataObjectField( context.getDataObject(), context.getObjectProperty() );
         }
     }
 
     // Event observers
 
+    /*
     protected void onDataObjectSelected( @Observes DataObjectSelectedEvent event ) {
         if ( event.isFromContext( context != null ? context.getContextId() : null ) ) {
             clean();
@@ -72,6 +71,7 @@ public abstract class FieldEditor extends BaseEditor {
             loadDataObjectField( event.getCurrentDataObject(), event.getCurrentField() );
         }
     }
+    */
 
     protected void onDataObjectFieldChange( @Observes DataObjectFieldChangeEvent event ) {
         if ( event.isFromContext( context != null ? context.getContextId() : null ) &&

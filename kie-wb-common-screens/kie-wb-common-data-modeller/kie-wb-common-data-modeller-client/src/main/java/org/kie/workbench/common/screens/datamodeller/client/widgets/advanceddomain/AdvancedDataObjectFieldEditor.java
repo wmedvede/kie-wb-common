@@ -56,7 +56,8 @@ public class AdvancedDataObjectFieldEditor
     @Override
     protected void loadDataObjectField( DataObject dataObject, ObjectProperty objectField ) {
         clean();
-        setReadonly( true );
+        setReadonly( context != null ? context.isReadonly() : true );
+        view.setReadonly( isReadonly() );
         this.dataObject = dataObject;
         this.objectField = objectField;
         if ( dataObject != null && objectField != null ) {
@@ -118,11 +119,10 @@ public class AdvancedDataObjectFieldEditor
     }
 
     @Override
-    public void setContext( DataModelerContext context ) {
-        super.setContext( context );
-        //TODO, check this, because with current change to the screens approach the context can be
-        //null for some events
+    public void onContextChange( DataModelerContext context ) {
         view.init( context != null ? context.getCurrentProject() : null, ElementType.FIELD );
+        view.setReadonly( context != null && context.isReadonly() );
+        super.onContextChange( context );
     }
 
     private void refresh() {

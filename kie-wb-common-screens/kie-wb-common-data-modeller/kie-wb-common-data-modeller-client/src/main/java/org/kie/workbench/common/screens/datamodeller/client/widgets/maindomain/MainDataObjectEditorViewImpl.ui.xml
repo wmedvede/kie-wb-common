@@ -23,8 +23,6 @@
 
     <ui:with field="i18n" type="org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants"/>
 
-    <!--gwt:HTMLPanel styleName="well container row-fluid " height="310px" -->
-
     <gwt:HTMLPanel>
 
         <style>

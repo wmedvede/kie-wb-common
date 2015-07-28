@@ -27,6 +27,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datamodeller.client.DataModelerContext;
 import org.kie.workbench.common.screens.datamodeller.client.command.DataModelCommand;
 import org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants;
+import org.kie.workbench.common.screens.datamodeller.client.util.AnnotationValueHandler;
 import org.kie.workbench.common.screens.datamodeller.client.util.DataModelerUtils;
 import org.kie.workbench.common.screens.datamodeller.client.validation.ValidatorService;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.common.domain.ObjectEditor;
@@ -81,9 +82,10 @@ public class MainDataObjectEditor
         return MainDomainEditor.MAIN_DOMAIN;
     }
 
-    public void setContext( DataModelerContext context ) {
-        super.setContext( context );
+    public void onContextChange( DataModelerContext context ) {
+        this.context = context;
         view.initPackageSelector( context );
+        super.onContextChange( context );
     }
 
     private DataModel getDataModel() {
@@ -291,12 +293,12 @@ public class MainDataObjectEditor
 
             Annotation annotation = dataObject.getAnnotation( MainDomainAnnotations.LABEL_ANNOTATION );
             if ( annotation != null ) {
-                view.setLabel( annotation.getValue( MainDomainAnnotations.VALUE_PARAM ).toString() );
+                view.setLabel( AnnotationValueHandler.getStringValue( annotation, MainDomainAnnotations.VALUE_PARAM ) );
             }
 
             annotation = dataObject.getAnnotation( MainDomainAnnotations.DESCRIPTION_ANNOTATION );
             if ( annotation != null ) {
-                view.setDescription( annotation.getValue( MainDomainAnnotations.VALUE_PARAM ).toString() );
+                view.setDescription( AnnotationValueHandler.getStringValue( annotation, MainDomainAnnotations.VALUE_PARAM ) );
             }
 
             view.setPackageName( dataObject.getPackageName() );

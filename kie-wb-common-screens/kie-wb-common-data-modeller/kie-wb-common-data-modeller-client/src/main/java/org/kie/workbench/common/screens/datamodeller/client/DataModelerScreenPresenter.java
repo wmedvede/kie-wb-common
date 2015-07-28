@@ -35,7 +35,7 @@ import org.guvnor.messageconsole.events.UnpublishMessagesEvent;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.security.shared.api.Role;
-import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWBContext;
+import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWorkbenchContext;
 import org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants;
 import org.kie.workbench.common.screens.datamodeller.client.util.DataModelerUtils;
 import org.kie.workbench.common.screens.datamodeller.client.validation.JavaFileNameValidator;
@@ -46,7 +46,6 @@ import org.kie.workbench.common.screens.datamodeller.events.DataModelStatusChang
 import org.kie.workbench.common.screens.datamodeller.events.DataModelerEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectCreatedEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectDeletedEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectSelectedEvent;
 import org.kie.workbench.common.screens.datamodeller.model.DataModelerError;
 import org.kie.workbench.common.screens.datamodeller.model.EditorModelContent;
 import org.kie.workbench.common.screens.datamodeller.model.GenerationResult;
@@ -84,10 +83,7 @@ import org.uberfire.ext.widgets.common.client.common.popups.YesNoCancelPopup;
 import org.uberfire.ext.widgets.common.client.resources.i18n.CommonConstants;
 import org.uberfire.lifecycle.OnClose;
 import org.uberfire.lifecycle.OnFocus;
-import org.uberfire.lifecycle.OnLostFocus;
 import org.uberfire.lifecycle.OnMayClose;
-import org.uberfire.lifecycle.OnOpen;
-import org.uberfire.lifecycle.OnShutdown;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.ParameterizedCommand;
@@ -144,9 +140,9 @@ public class DataModelerScreenPresenter
 
     private DataModelerContext context;
 
-    private boolean open = false;
-
     private boolean uiStarted = false;
+
+    private boolean loading = false;
 
     private SessionInfo sessionInfo;
 
@@ -166,7 +162,7 @@ public class DataModelerScreenPresenter
     private PlaceManager placeManager;
 
     @Inject
-    DataModelerWBContext dataModelerWBContext;
+    DataModelerWorkbenchContext dataModelerWBContext;
 
     @WorkbenchPartTitle
     public String getTitleText() {
@@ -200,13 +196,11 @@ public class DataModelerScreenPresenter
     public void onStartup( final ObservablePath path,
                            final PlaceRequest place ) {
 
-        //Window.alert( "DataModeller.onStartup: " + editorId );
-
+        loading = true;
         setSourceEditionGrant();
         init( path, place, resourceType );
 
         initContext( path );
-        open = true;
 
         currentMessageType = "DataModeler" + path.toURI();
         cleanSystemMessages( getCurrentMessageType() );
@@ -221,39 +215,15 @@ public class DataModelerScreenPresenter
         } );
     }
 
-    @OnOpen
-    public void onOpen() {
-       // Window.alert( "DataModeller.onOpen: "  + editorId  );
-    }
-
     @OnFocus
     public void onFocus() {
-        //Window.alert( "DataModeller.onFocus: "  + editorId  );
-        //Si el objecto YA esta cargado o el modelo inicializado aqui siempre lanzamos el evento de uqe
-        //se a actualizado el contexto
-        //El tema es que cuando vengo de un OnStartup , entonces el data object se puede estar aun cargando
-        //con lo cual al terminar el OnStartup, siempre que se haya podido cargar un objeto tengo q actualizar
-        /*
         if ( !loading && context != null ) {
-            dataModelerWorkbenchContext.updateContext( context.getCurrentProject(), context.getDataObject() );
+            dataModelerWBContext.setActiveContext( context );
         }
-        */
-
     }
-
-    @OnLostFocus
-    public void onLostFocus() {
-        //Window.alert( "DataModeller.onLostFocus: "  + editorId );
-        //Si tengo un objecto cargado entonces SIEMPRE notifico que me voy
-        //dataModelerWorkbenchContext.clearContext();
-        //dataModelerWBContext.clearContext();
-    }
-
 
     @OnMayClose
     public boolean onMayClose() {
-
-        //Window.alert( "DataModeller.onMayClose: " +  editorId  );
         if ( isDirty() ) {
             return view.confirmClose();
         }
@@ -262,9 +232,6 @@ public class DataModelerScreenPresenter
 
     @OnClose
     public void OnClose() {
-        //Window.alert( "DataModeller.OnClose: "  + editorId  );
-
-        open = false;
         versionRecordManager.clear();
         cleanSystemMessages( getCurrentMessageType() );
         clearContext();
@@ -272,16 +239,11 @@ public class DataModelerScreenPresenter
         dataModelerWBContext.clearContext();
     }
 
-    @OnShutdown
-    public void onShutDown() {
-        //Window.alert( "DataModeller.onShutDown: "  + editorId  );
-    }
-
     private void onSafeDelete() {
 
         if ( context.getEditorModelContent().getOriginalClassName() != null ) {
             //if we are about to delete a .java file that could be parsed without errors, and we can calculate the
-            //className we can check for class usages prior to deletion.
+            //className then we can check for class usages prior to deletion.
 
             final String className = context.getEditorModelContent().getOriginalClassName();
             modelerService.call( new RemoteCallback<List<Path>>() {
@@ -347,9 +309,9 @@ public class DataModelerScreenPresenter
                                                        view.showBusyIndicator( org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants.INSTANCE.Copying() );
                                                        modelerService.call( getCopySuccessCallback(),
                                                                             new DataModelerErrorCallback( Constants.INSTANCE.modelEditor_copying_error() ) ).copy( versionRecordManager.getCurrentPath(),
-                                                                                                                                                                   details.getNewFileName(),
-                                                                                                                                                                   details.getCommitMessage(),
-                                                                                                                                                                   true );
+                                                               details.getNewFileName(),
+                                                               details.getCommitMessage(),
+                                                               true );
                                                    }
                                                } );
         popup.show();
@@ -409,26 +371,26 @@ public class DataModelerScreenPresenter
     protected void rename() {
         if ( isDirty() ) {
             YesNoCancelPopup yesNoCancelPopup = YesNoCancelPopup.newYesNoCancelPopup( CommonConstants.INSTANCE.Information(),
-                                                                                      Constants.INSTANCE.modelEditor_confirm_save_before_rename(),
-                                                                                      new Command() {
-                                                                                          @Override
-                                                                                          public void execute() {
-                                                                                              rename( true );
-                                                                                          }
-                                                                                      },
-                                                                                      new Command() {
-                                                                                          @Override
-                                                                                          public void execute() {
-                                                                                              rename( false );
-                                                                                          }
-                                                                                      },
-                                                                                      new Command() {
-                                                                                          @Override
-                                                                                          public void execute() {
-                                                                                              //do nothing.
-                                                                                          }
-                                                                                      }
-                                                                                    );
+                    Constants.INSTANCE.modelEditor_confirm_save_before_rename(),
+                    new Command() {
+                        @Override
+                        public void execute() {
+                            rename( true );
+                        }
+                    },
+                    new Command() {
+                        @Override
+                        public void execute() {
+                            rename( false );
+                        }
+                    },
+                    new Command() {
+                        @Override
+                        public void execute() {
+                            //do nothing.
+                        }
+                    }
+            );
             yesNoCancelPopup.setCloseVisible( false );
             yesNoCancelPopup.show();
         } else {
@@ -781,9 +743,9 @@ public class DataModelerScreenPresenter
                 if ( content.getDataObject() != null ) {
                     selectEditorTab();
                     uiStarted = true;
-                    //dataModelerWorkbenchContext.updateContext( content.getCurrentProject(), content.getDataObject() );
+                    context.setEditionMode( DataModelerContext.EditionMode.GRAPHICAL_MODE );
                 } else {
-                    //dataModelerWorkbenchContext.updateContext( content.getCurrentProject(), null );
+                    context.setEditionMode( DataModelerContext.EditionMode.SOURCE_MODE );
                     showParseErrorsDialog( Constants.INSTANCE.modelEditor_message_file_parsing_errors(),
                             false,
                             context.getEditorModelContent().getErrors(),
@@ -792,7 +754,6 @@ public class DataModelerScreenPresenter
                                 public void execute() {
                                     //we need to go directly to the sources tab
                                     uiStarted = true;
-                                    //onSourceTabSelected();
                                     setSelectedTab( EDITABLE_SOURCE_TAB );
                                 }
                             } );
@@ -801,6 +762,7 @@ public class DataModelerScreenPresenter
                 dataModelerWBContext.setActiveContext( context );
                 createOriginalHash( context.getDataObject() );
                 originalSourceHash = getSource().hashCode();
+                loading = false;
             }
         };
     }
@@ -870,10 +832,6 @@ public class DataModelerScreenPresenter
         javaSourceEditor.setContent( source );
     }
 
-    private boolean isSourceTabSelected() {
-        return getSelectedTabIndex() == EDITABLE_SOURCE_TAB;
-    }
-
     private void setSourceEditionGrant() {
         Set<String> grantedRoles = kieACL.getGrantedRoles( DataModelerFeatures.EDIT_SOURCES );
         sourceEditionEnabled = false;
@@ -886,24 +844,25 @@ public class DataModelerScreenPresenter
                 }
             }
         }
+        //TODO remove this setting to edition true
+        sourceEditionEnabled = true;
     }
 
     private void setModel( EditorModelContent model ) {
-
         view.setContext( context );
         setSource( model.getSource() );
 
         if ( model.getDataObject() != null ) {
             context.setParseStatus( DataModelerContext.ParseStatus.PARSED );
-            dataModelerEvent.fire( new DataObjectSelectedEvent( context.getContextId(), DataModelerEvent.DATA_MODEL_BROWSER, model.getDataObject() ) );
         } else {
             context.setParseStatus( DataModelerContext.ParseStatus.PARSE_ERRORS );
-            dataModelerEvent.fire( new DataObjectSelectedEvent( context.getContextId(), DataModelerEvent.DATA_MODEL_BROWSER, null ) );
         }
     }
 
+    @Override
     public void onSourceTabSelected() {
 
+        context.setEditionMode( DataModelerContext.EditionMode.SOURCE_MODE );
         if ( context.isParsed() && context.isEditorChanged() ) {
 
             //If there are changes in the ui the source must be regenerated on server side.
@@ -915,6 +874,7 @@ public class DataModelerScreenPresenter
                     setSource( result.getSource() );
                     updateSource( result.getSource() );
                     context.setEditionStatus( DataModelerContext.EditionStatus.NO_CHANGES );
+                    dataModelerWBContext.setActiveContext( context );
                 }
             }, new DataModelerErrorCallback( Constants.INSTANCE.modelEditor_loading_error() ) ).updateSource( getSource(), versionRecordManager.getCurrentPath(), context.getDataObject() );
         } else {
@@ -922,7 +882,14 @@ public class DataModelerScreenPresenter
                 context.setEditionStatus( DataModelerContext.EditionStatus.NO_CHANGES );
             }
             updateSource( javaSourceEditor.getContent() );
+            dataModelerWBContext.setActiveContext( context );
         }
+    }
+
+    @Override
+    public void onOverviewSelected() {
+        context.setEditionMode( DataModelerContext.EditionMode.SOURCE_MODE );
+        dataModelerWBContext.setActiveContext( context );
     }
 
     @Override
@@ -942,7 +909,6 @@ public class DataModelerScreenPresenter
             context.getDataModel().removeDataObject( dataObject.getClassName() );
             context.getDataModel().getDataObjects().add( dataObject );
         }
-        dataModelerEvent.fire( new DataObjectSelectedEvent( context.getContextId(), DataModelerEvent.DATA_MODEL_BROWSER, dataObject ) );
     }
 
     @Override
@@ -966,6 +932,7 @@ public class DataModelerScreenPresenter
                 @Override
                 public void callback( GenerationResult result ) {
                     view.hideBusyIndicator();
+
                     if ( result.hasErrors() ) {
 
                         showParseErrorsDialog( Constants.INSTANCE.modelEditor_message_file_parsing_errors(),
@@ -979,6 +946,8 @@ public class DataModelerScreenPresenter
                                                        context.setParseStatus( DataModelerContext.ParseStatus.PARSE_ERRORS );
                                                        updateEditorView( null );
                                                        context.setDataObject( null );
+                                                       context.setEditionMode( DataModelerContext.EditionMode.SOURCE_MODE );
+                                                       dataModelerWBContext.setActiveContext( context );
                                                    }
                                                } );
 
@@ -988,7 +957,11 @@ public class DataModelerScreenPresenter
                         updateEditorView( result.getDataObject() );
                         context.setEditionStatus( DataModelerContext.EditionStatus.NO_CHANGES );
                         context.setDataObject( result.getDataObject() );
+                        context.setObjectProperty( null );
+                        context.setEditionMode( DataModelerContext.EditionMode.GRAPHICAL_MODE );
+                        view.setContext( context );
                         cleanSystemMessages( getCurrentMessageType() );
+                        dataModelerWBContext.setActiveContext( context );
                     }
                 }
             }, new DataModelerErrorCallback( Constants.INSTANCE.modelEditor_loading_error() ) ).updateDataObject( context.getDataObject(), getSource(), versionRecordManager.getCurrentPath() );
@@ -1001,14 +974,19 @@ public class DataModelerScreenPresenter
             if ( context.isParseErrors() ) {
                 //there are parse errors, the editor tab couldn't be loaded.  (errors are already published)
                 showParseErrorsDialog( Constants.INSTANCE.modelEditor_message_file_parsing_errors(),
-                                       false,
-                                       null,
-                                       new Command() {
-                                           @Override
-                                           public void execute() {
-                                               setSelectedTab( EDITABLE_SOURCE_TAB );
-                                           }
-                                       } );
+                        false,
+                        null,
+                        new Command() {
+                            @Override
+                            public void execute() {
+                                context.setEditionMode( DataModelerContext.EditionMode.SOURCE_MODE );
+                                dataModelerWBContext.setActiveContext( context );
+                                setSelectedTab( EDITABLE_SOURCE_TAB );
+                            }
+                        } );
+            } else {
+                context.setEditionMode( DataModelerContext.EditionMode.GRAPHICAL_MODE );
+                dataModelerWBContext.setActiveContext( context );
             }
         }
     }
@@ -1038,10 +1016,6 @@ public class DataModelerScreenPresenter
                                                                                 );
         yesNoCancelPopup.setCloseVisible( false );
         yesNoCancelPopup.show();
-    }
-
-    private boolean isOpen() {
-        return open;
     }
 
     private void onDataObjectDeleted( @Observes DataObjectDeletedEvent event ) {
@@ -1138,13 +1112,6 @@ public class DataModelerScreenPresenter
                 onValidate()
         )
         .addNewTopLevelMenu( versionRecordManager.buildMenu() );
-
-        menuBuilder.addCommand( "open screen", new Command() {
-            @Override public void execute() {
-                placeManager.goTo( "DataModelerTestScreen" );
-            }
-        } );
-
         menus = menuBuilder.build();
     }
 

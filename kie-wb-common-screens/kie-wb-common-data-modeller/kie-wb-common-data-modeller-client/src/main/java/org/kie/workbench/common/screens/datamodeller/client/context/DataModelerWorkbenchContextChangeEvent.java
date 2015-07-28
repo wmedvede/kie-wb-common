@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datamodeller.client.widgets.editor;
+package org.kie.workbench.common.screens.datamodeller.client.context;
 
-import com.google.gwt.user.client.ui.IsWidget;
-import org.kie.workbench.common.services.datamodeller.core.DataObject;
+public class DataModelerWorkbenchContextChangeEvent {
 
-public interface TestScreenView
-        extends IsWidget {
-
-    interface Presenter {
-
+    public DataModelerWorkbenchContextChangeEvent() {
     }
-
-    void loadDataObject( DataObject dataObject );
 
 }

@@ -74,6 +74,8 @@ public class AdvancedAnnotationListEditorViewImpl
 
     private Map<Annotation, CommandDrivenAccordionGroup> annotationAccordion = new HashMap<Annotation, CommandDrivenAccordionGroup>(  );
 
+    private boolean readonly = false;
+
     @Inject
     private SyncBeanManager iocManager;
 
@@ -116,6 +118,7 @@ public class AdvancedAnnotationListEditorViewImpl
                 presenter.onDeleteAnnotation( annotation );
             }
         } );
+        accordionGroup.setCommandEnabled( !readonly );
         annotationAccordion.put( annotation, accordionGroup );
 
         accordionGroup.setHeading( accordionHeading( annotation ));
@@ -154,16 +157,18 @@ public class AdvancedAnnotationListEditorViewImpl
             }
         } );
         editButton.setType( ButtonType.LINK );
+        editButton.setEnabled( !readonly );
         valuePairRow.add( editButton );
 
-        Button cleanButton = new Button( "clean", new ClickHandler() {
+        Button clearButton = new Button( "clear", new ClickHandler() {
             @Override
             public void onClick( ClickEvent event ) {
                 presenter.onClearValuePair( annotation, valuePairDefinition.getName() );
             }
         } );
-        cleanButton.setType( ButtonType.LINK );
-        valuePairRow.add( cleanButton );
+        clearButton.setType( ButtonType.LINK );
+        clearButton.setEnabled( !readonly );
+        valuePairRow.add( clearButton );
 
 
         return valuePairRow;
@@ -215,6 +220,12 @@ public class AdvancedAnnotationListEditorViewImpl
         } );
         addAnnotationWizard.init( kieProject, elementType );
         addAnnotationWizard.start();
+    }
+
+    @Override
+    public void setReadonly( boolean readonly ) {
+        this.readonly = readonly;
+        addAnnotationButton.setEnabled( !readonly );
     }
 
     @Override

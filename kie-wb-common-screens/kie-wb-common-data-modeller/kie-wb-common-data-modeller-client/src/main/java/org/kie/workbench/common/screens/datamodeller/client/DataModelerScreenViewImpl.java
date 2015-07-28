@@ -27,6 +27,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWorkbenchContext;
+import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWorkbenchContextChangeEvent;
 import org.kie.workbench.common.screens.datamodeller.client.util.DataModelerUtils;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.DataObjectBrowser;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.maindomain.MainDomainEditor;
@@ -36,8 +38,6 @@ import org.kie.workbench.common.screens.datamodeller.events.DataObjectChangeEven
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldChangeEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldCreatedEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldDeletedEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldSelectedEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectSelectedEvent;
 import org.kie.workbench.common.services.datamodeller.core.DataObject;
 import org.kie.workbench.common.services.datamodeller.core.ObjectProperty;
 import org.kie.workbench.common.widgets.metadata.client.KieEditorViewImpl;
@@ -75,6 +75,9 @@ public class DataModelerScreenViewImpl
 
     private DataModelerContext context;
 
+    @Inject
+    private DataModelerWorkbenchContext dataModelerWBContext;
+
     public DataModelerScreenViewImpl() {
         initWidget( uiBinder.createAndBindUi( this ) );
     }
@@ -89,7 +92,6 @@ public class DataModelerScreenViewImpl
     public void setContext(DataModelerContext context) {
         this.context = context;
         dataObjectBrowser.setContext( context );
-        mainDomainEditor.setContext( context );
     }
 
     @Override
@@ -100,59 +102,65 @@ public class DataModelerScreenViewImpl
     private void updateChangeStatus(DataModelerEvent event) {
         if ( event.isFromContext( context != null ? context.getContextId() : null )) {
             context.setEditionStatus( DataModelerContext.EditionStatus.EDITOR_CHANGED );
-            dataModelerEvent.fire(new DataModelStatusChangeEvent( context.getContextId(), null, false, true));
+            dataModelerEvent.fire( new DataModelStatusChangeEvent( context.getContextId(), null, false, true ) );
         }
     }
 
     private void refreshTitle( DataObject dataObject) {
-        String label = DataModelerUtils.getDataObjectFullLabel( dataObject, false );
-        String title = "'" + label + "'" + " - general properties";
-        String tooltip= dataObject.getClassName();
-        domainContainerTitle.setText( title );
-        domainContainerTitle.setTitle( tooltip );
+        if ( dataObject != null ) {
+            String label = DataModelerUtils.getDataObjectFullLabel( dataObject, false );
+            String title = "'" + label + "'" + " - general properties";
+            String tooltip = dataObject.getClassName();
+            domainContainerTitle.setText( title );
+            domainContainerTitle.setTitle( tooltip );
+        }
     }
 
     private void refreshTitle( DataObject dataObject, ObjectProperty objectProperty ) {
-        String title = "'" + objectProperty.getName() + "'" + " - general properties";
-        String tooltip = dataObject.getClassName() + "." + objectProperty.getName();
-        domainContainerTitle.setText( title );
-        domainContainerTitle.setTitle( tooltip );
+        if ( dataObject != null && objectProperty != null ) {
+            String title = "'" + objectProperty.getName() + "'" + " - general properties";
+            String tooltip = dataObject.getClassName() + "." + objectProperty.getName();
+            domainContainerTitle.setText( title );
+            domainContainerTitle.setTitle( tooltip );
+        }
     }
 
     // event observers
 
-    private void onDataObjectChange(@Observes DataObjectChangeEvent event) {
+    private void onContextChange( @Observes DataModelerWorkbenchContextChangeEvent contextEvent ) {
+
+        DataModelerContext activeContext = dataModelerWBContext.getActiveContext();
+        if ( context != null && context.getContextId().equals( activeContext != null ? activeContext.getContextId() : null ) ) {
+
+            if ( activeContext.getDataObject() != null && activeContext.getObjectProperty() != null ) {
+                refreshTitle( activeContext.getDataObject(), activeContext.getObjectProperty() );
+            } else if ( activeContext.getDataObject() != null ) {
+                refreshTitle( activeContext.getDataObject() );
+            }
+        }
+    }
+
+
+    private void onDataObjectChange( @Observes DataObjectChangeEvent event ) {
         updateChangeStatus( event );
         if ( event.isFromContext( context != null ? context.getContextId() : null ) ) {
             refreshTitle( event.getCurrentDataObject() );
         }
     }
 
-    private void onDataObjectFieldCreated(@Observes DataObjectFieldCreatedEvent event) {
+    private void onDataObjectFieldCreated( @Observes DataObjectFieldCreatedEvent event ) {
         updateChangeStatus(event);
     }
 
-    private void onDataObjectFieldChange(@Observes DataObjectFieldChangeEvent event) {
+    private void onDataObjectFieldChange( @Observes DataObjectFieldChangeEvent event ) {
         updateChangeStatus(event);
         if ( event.isFromContext( context != null ? context.getContextId() : null  ) ) {
             refreshTitle( event.getCurrentDataObject(), event.getCurrentField() );
         }
     }
 
-    private void onDataObjectFieldDeleted(@Observes DataObjectFieldDeletedEvent event) {
+    private void onDataObjectFieldDeleted( @Observes DataObjectFieldDeletedEvent event ) {
         updateChangeStatus( event );
-    }
-
-    private void onDataObjectSelected(@Observes DataObjectSelectedEvent event) {
-        if ( event.isFromContext( context != null ? context.getContextId() : null ) ) {
-            refreshTitle( event.getCurrentDataObject() );
-        }
-    }
-
-    private void onDataObject(@Observes DataObjectFieldSelectedEvent event ) {
-        if ( event.isFromContext( context != null ? context.getContextId() : null )) {
-            refreshTitle( event.getCurrentDataObject(), event.getCurrentField() );
-        }
     }
 
 }

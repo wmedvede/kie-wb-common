@@ -54,7 +54,8 @@ public class AdvancedDataObjectEditor
 
     protected void loadDataObject( DataObject dataObject ) {
         clean();
-        setReadonly( true );
+        setReadonly( context != null && context.isReadonly() );
+        view.setReadonly( isReadonly() );
         this.dataObject = dataObject;
         if ( dataObject != null ) {
             view.loadAnnotations( dataObject.getAnnotations() );
@@ -111,12 +112,10 @@ public class AdvancedDataObjectEditor
     }
 
     @Override
-    public void setContext( DataModelerContext context ) {
-        super.setContext( context );
-        //TODO, check this, because with current change to the screens approach the context can be
-        //null for some events.
-        //If the context is null we should likely just clean the editor and in readonly mode
+    public void onContextChange( DataModelerContext context ) {
         view.init( context != null ? context.getCurrentProject() : null, ElementType.TYPE );
+        view.setReadonly( context != null && context.isReadonly() );
+        super.onContextChange( context );
     }
 
     private void refresh() {

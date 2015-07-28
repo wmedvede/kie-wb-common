@@ -42,6 +42,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datamodeller.client.DataModelerContext;
 import org.kie.workbench.common.screens.datamodeller.client.command.DataModelCommand;
 import org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants;
+import org.kie.workbench.common.screens.datamodeller.client.util.AnnotationValueHandler;
 import org.kie.workbench.common.screens.datamodeller.client.util.DataModelerUtils;
 import org.kie.workbench.common.screens.datamodeller.client.validation.ValidatorService;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.common.domain.FieldEditor;
@@ -124,10 +125,11 @@ public class MainDataObjectFieldEditor extends FieldEditor {
         setReadonly( true );
     }
 
-    public void setContext( DataModelerContext context ) {
+    public void onContextChange( DataModelerContext context ) {
         this.context = context;
         initTypeList();
         isTypeMultiple.setEnabled( false );
+        super.onContextChange( context );
     }
 
     @Override
@@ -181,12 +183,12 @@ public class MainDataObjectFieldEditor extends FieldEditor {
 
             Annotation annotation = objectField.getAnnotation( MainDomainAnnotations.LABEL_ANNOTATION );
             if ( annotation != null ) {
-                label.setText( ( String ) annotation.getValue( MainDomainAnnotations.VALUE_PARAM ) );
+                label.setText( AnnotationValueHandler.getStringValue( annotation, MainDomainAnnotations.VALUE_PARAM ) );
             }
 
             annotation = objectField.getAnnotation( MainDomainAnnotations.DESCRIPTION_ANNOTATION );
             if ( annotation != null ) {
-                description.setText( ( String ) annotation.getValue( MainDomainAnnotations.VALUE_PARAM ) );
+                description.setText( AnnotationValueHandler.getStringValue( annotation, MainDomainAnnotations.VALUE_PARAM ) );
             }
 
             setReadonly( getContext() == null || getContext().isReadonly() );
@@ -194,8 +196,6 @@ public class MainDataObjectFieldEditor extends FieldEditor {
             initTypeList();
         }
     }
-
-    // TODO listen to DataObjectFieldDeletedEvent?
 
     // Event handlers
     @UiHandler("name")

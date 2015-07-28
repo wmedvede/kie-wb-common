@@ -20,20 +20,18 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import com.github.gwtbootstrap.client.ui.HelpInline;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datamodeller.client.DataModelerContext;
-import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWBContext;
-import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWBContextEvent;
+import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWorkbenchContext;
+import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWorkbenchContextChangeEvent;
 import org.kie.workbench.common.screens.datamodeller.client.handlers.DomainHandler;
 import org.kie.workbench.common.screens.datamodeller.events.DataModelerEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectDeletedEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldCreatedEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldDeletedEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldSelectedEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectSelectedEvent;
 import org.kie.workbench.common.services.datamodeller.core.DataModel;
 
 public abstract class BaseDomainEditor
@@ -44,6 +42,8 @@ public abstract class BaseDomainEditor
 
     protected static int FIELD_EDITOR = 1;
 
+    protected static int INFO_EDITOR = 2;
+
     protected SimplePanel mainPanel = new SimplePanel(  );
 
     protected DeckPanel editorsDeck = new DeckPanel();
@@ -52,12 +52,16 @@ public abstract class BaseDomainEditor
 
     protected FieldEditor fieldEditor;
 
+    protected DivWidget infoEditor = new DivWidget(  );
+
+    protected HelpInline infoEditorContent = new HelpInline();
+
     protected DataModelerContext context;
 
     protected DomainHandler handler;
 
     @Inject
-    protected DataModelerWBContext dataModelerWBContext;
+    protected DataModelerWorkbenchContext dataModelerWBContext;
 
     public BaseDomainEditor() {
         initWidget( mainPanel );
@@ -71,20 +75,17 @@ public abstract class BaseDomainEditor
 
     @PostConstruct
     private void init() {
+        infoEditor.add( infoEditorContent );
+
         editorsDeck.add( objectEditor );
         editorsDeck.add( fieldEditor );
+        editorsDeck.add( infoEditor );
         mainPanel.add( editorsDeck );
-        editorsDeck.showWidget( OBJECT_EDITOR );
+        showInfoEditor();
     }
 
     public DataModelerContext getContext() {
         return context;
-    }
-
-    public void setContext( DataModelerContext context ) {
-        this.context = context;
-        objectEditor.setContext( context );
-        fieldEditor.setContext( context );
     }
 
     protected String getContextId() {
@@ -101,6 +102,10 @@ public abstract class BaseDomainEditor
 
     public void showFieldEditor() {
         editorsDeck.showWidget( FIELD_EDITOR );
+    }
+
+    public void showInfoEditor() {
+        editorsDeck.showWidget( INFO_EDITOR );
     }
 
     @Override
@@ -131,41 +136,31 @@ public abstract class BaseDomainEditor
 
     //event observers
 
-    //TODO ver si me combiene ademas acá hacer
-    //setContext() en el object editor y el field enditor y de esa forma ya no tengo que cambiarles nada
-    //o mas bien cada editor recibe el evento como lo tengo echo
-    protected void onContextChange( @Observes DataModelerWBContextEvent contextEvent ) {
+    protected void onContextChange( @Observes DataModelerWorkbenchContextChangeEvent contextEvent ) {
         this.context =  dataModelerWBContext.getActiveContext();
-    }
 
-    protected void onDataObjectSelected( @Observes DataObjectSelectedEvent event ) {
-        if ( event.isFromContext( getContextId() ) ) {
-            showObjectEditor();
+        if ( context == null ) {
+            infoEditorContent.setText( "No data object has been opened." );
+            showInfoEditor();
+        } else if ( context.getEditionMode() == DataModelerContext.EditionMode.SOURCE_MODE ) {
+            infoEditorContent.setText( "Data object is being edited at this moment." );
+            showInfoEditor();
+        } else if ( context.getEditionMode() == DataModelerContext.EditionMode.GRAPHICAL_MODE ) {
+            if ( context.getDataObject() != null && context.getObjectProperty() != null ) {
+                showFieldEditor();
+            } else {
+                showObjectEditor();
+            }
         }
+        objectEditor.onContextChange( context );
+        fieldEditor.onContextChange( context );
+
     }
 
     protected void onDataObjectDeleted( @Observes DataObjectDeletedEvent event ) {
         if ( event.isFromContext( getContextId() ) ) {
-            //TODO check if we wants to do something special here
-            showObjectEditor();
+            showInfoEditor();
         }
     }
 
-    protected void onDataObjectFieldCreated( @Observes DataObjectFieldCreatedEvent event ) {
-        if ( event.isFromContext( getContextId() ) ) {
-            showFieldEditor( event );
-        }
-    }
-
-    protected void onDataObjectFieldDeleted( @Observes DataObjectFieldDeletedEvent event ) {
-        if ( event.isFromContext( getContextId() ) ) {
-            showFieldEditor( event );
-        }
-    }
-
-    protected void onDataObjectFieldSelected( @Observes DataObjectFieldSelectedEvent event ) {
-        if ( event.isFromContext( getContextId() ) ) {
-            showFieldEditor( event );
-        }
-    }
 }

@@ -48,7 +48,7 @@ public class DroolsDomainScreenViewImpl
     @Inject
     public DroolsDomainScreenViewImpl( DroolsDomainEditor domainEditor ) {
         initWidget( uiBinder.createAndBindUi( this ) );
-        //TODO review this, if use the normal injection I get an error because of the property editor.
+        //just a comment, if we use field injection for domainEditor we get an error because of the uberfire property editor.
         this.domainEditor = domainEditor;
     }
 

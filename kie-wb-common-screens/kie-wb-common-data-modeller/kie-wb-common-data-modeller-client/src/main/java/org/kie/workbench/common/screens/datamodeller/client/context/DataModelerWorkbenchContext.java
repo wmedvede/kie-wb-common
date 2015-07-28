@@ -23,19 +23,19 @@ import javax.inject.Inject;
 import org.kie.workbench.common.screens.datamodeller.client.DataModelerContext;
 
 @ApplicationScoped
-public class DataModelerWBContext {
+public class DataModelerWorkbenchContext {
 
     @Inject
-    private Event<DataModelerWBContextEvent> dataModelerWBContextEvent;
+    private Event<DataModelerWorkbenchContextChangeEvent> dataModelerWBContextEvent;
 
     private DataModelerContext activeContext;
 
-    public DataModelerWBContext() {
+    public DataModelerWorkbenchContext() {
     }
 
     public void setActiveContext( DataModelerContext activeContext ) {
         this.activeContext = activeContext;
-        dataModelerWBContextEvent.fire( new DataModelerWBContextEvent() );
+        dataModelerWBContextEvent.fire( new DataModelerWorkbenchContextChangeEvent() );
     }
 
     public DataModelerContext getActiveContext() {
@@ -44,6 +44,6 @@ public class DataModelerWBContext {
 
     public void clearContext() {
         this.activeContext = null;
-        dataModelerWBContextEvent.fire( new DataModelerWBContextEvent()  );
+        dataModelerWBContextEvent.fire( new DataModelerWorkbenchContextChangeEvent()  );
     }
 }

@@ -61,6 +61,7 @@ import org.kie.workbench.common.screens.datamodeller.client.DataModelerErrorCall
 import org.kie.workbench.common.screens.datamodeller.client.command.AddPropertyCommand;
 import org.kie.workbench.common.screens.datamodeller.client.command.DataModelCommand;
 import org.kie.workbench.common.screens.datamodeller.client.command.DataModelCommandBuilder;
+import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWorkbenchContextChangeEvent;
 import org.kie.workbench.common.screens.datamodeller.client.handlers.DomainHandler;
 import org.kie.workbench.common.screens.datamodeller.client.handlers.DomainHandlerRegistry;
 import org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants;
@@ -76,10 +77,7 @@ import org.kie.workbench.common.screens.datamodeller.events.ChangeType;
 import org.kie.workbench.common.screens.datamodeller.events.DataModelerEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectChangeEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldChangeEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldCreatedEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldDeletedEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectFieldSelectedEvent;
-import org.kie.workbench.common.screens.datamodeller.events.DataObjectSelectedEvent;
 import org.kie.workbench.common.screens.datamodeller.model.maindomain.MainDomainAnnotations;
 import org.kie.workbench.common.screens.datamodeller.service.DataModelerService;
 import org.kie.workbench.common.services.datamodeller.core.DataModel;
@@ -136,6 +134,9 @@ public class DataObjectBrowser extends Composite {
 
     @Inject
     Event<DataModelerEvent> dataModelerEvent;
+
+    @Inject
+    Event<DataModelerWorkbenchContextChangeEvent> dataModelerWBContextEvent;
 
     @Inject
     private PlaceManager placeManager;
@@ -429,6 +430,12 @@ public class DataObjectBrowser extends Composite {
 
     public void setContext( DataModelerContext context ) {
         this.context = context;
+        if ( context != null ) {
+            setDataObject( context.getDataObject() );
+            setReadonly( context.isReadonly() );
+        } else {
+            setReadonly( true );
+        }
     }
 
     private void createNewProperty( final DataObject dataObject,
@@ -491,7 +498,7 @@ public class DataObjectBrowser extends Composite {
 
     private void setDataObject( DataObject dataObject ) {
         this.dataObject = dataObject;
-        refreshTitle( dataObject );
+        refreshObjectSelector( dataObject );
 
         //We create a new selection model due to a bug found in GWT when we change e.g. from one data object with 9 rows
         // to one with 3 rows and the table was sorted.
@@ -575,6 +582,10 @@ public class DataObjectBrowser extends Composite {
 
             getContext().getHelper().dataObjectUnReferenced( objectProperty.getClassName(), dataObject.getClassName() );
             notifyFieldDeleted( objectProperty );
+            if ( dataObjectPropertiesProvider.getList().size() == 0 ) {
+                context.setObjectProperty( null );
+                dataModelerWBContextEvent.fire( new DataModelerWorkbenchContextChangeEvent() );
+            }
         }
     }
 
@@ -644,9 +655,11 @@ public class DataObjectBrowser extends Composite {
         return displayName;
     }
 
-    private void refreshTitle( DataObject dataObject ) {
-        objectButton.setText( DataModelerUtils.getDataObjectFullLabel( dataObject, false ) );
-        objectButton.setTitle( dataObject.getClassName() );
+    private void refreshObjectSelector( DataObject dataObject ) {
+        if ( dataObject != null ) {
+            objectButton.setText( DataModelerUtils.getDataObjectFullLabel( dataObject, false ) );
+            objectButton.setTitle( dataObject.getClassName() );
+        }
     }
 
     private DataModel getDataModel() {
@@ -701,18 +714,6 @@ public class DataObjectBrowser extends Composite {
 
     //Event Observers
 
-    private void onDataObjectSelected( @Observes DataObjectSelectedEvent event ) {
-        if ( event.isFromContext( context != null ? context.getContextId() : null ) && !DataModelerEvent.DATA_OBJECT_BROWSER.equals( event.getSource() ) ) {
-            DataObject dataObject = event.getCurrentDataObject();
-            setDataObject( dataObject );
-            if ( dataObject == null ) {
-                setReadonly( true );
-            } else {
-                setReadonly( getContext() == null || getContext().isReadonly() );
-            }
-        }
-    }
-
     private void onDataObjectChange( @Observes DataObjectChangeEvent event ) {
         if ( event.isFromContext( context != null ? context.getContextId() : null ) ) {
             if ( event.getChangeType() == ChangeType.CLASS_NAME_CHANGE ||
@@ -721,7 +722,7 @@ public class DataObjectBrowser extends Composite {
                     MainDomainAnnotations.LABEL_ANNOTATION.equals( event.getAnnotationClassName( ) )
                     ) {
 
-                refreshTitle( dataObject );
+                refreshObjectSelector( dataObject );
 
                 // For self references: in case name or package changes redraw properties table
                 if ( dataObject.getClassName().equals( event.getCurrentDataObject().getClassName() ) ) {
@@ -740,7 +741,7 @@ public class DataObjectBrowser extends Composite {
                     event.getChangeType() == ChangeType.FIELD_ANNOTATION_VALUE_CHANGE ||
                     event.getChangeType() == ChangeType.FIELD_ANNOTATION_ADD_CHANGE ||
                     event.getChangeType() == ChangeType.FIELD_ANNOTATION_REMOVE_CHANGE ) {
-                //TODO add fitering for the Label annotation class name.
+                //TODO add filtering for the Label annotation class name.
 
                 //use the annotationClassName
                 List<ObjectProperty> props = dataObjectPropertiesProvider.getList();
@@ -757,7 +758,8 @@ public class DataObjectBrowser extends Composite {
     // Event notifications
     private void notifyFieldSelected( ObjectProperty selectedProperty ) {
         if ( !skipNextFieldNotification && selectedProperty != null ) {
-            dataModelerEvent.fire( new DataObjectFieldSelectedEvent( getContext().getContextId(), DataModelerEvent.DATA_OBJECT_BROWSER, getDataObject(), selectedProperty ) );
+            context.setObjectProperty( selectedProperty );
+            dataModelerWBContextEvent.fire( new DataModelerWorkbenchContextChangeEvent() );
         }
         skipNextFieldNotification = false;
     }
@@ -766,12 +768,9 @@ public class DataObjectBrowser extends Composite {
         dataModelerEvent.fire( new DataObjectFieldDeletedEvent( getContext().getContextId(), DataModelerEvent.DATA_OBJECT_BROWSER, getDataObject(), deletedProperty ) );
     }
 
-    private void notifyFieldCreated( ObjectProperty createdProperty ) {
-        dataModelerEvent.fire( new DataObjectFieldCreatedEvent( getContext().getContextId(), DataModelerEvent.DATA_OBJECT_BROWSER, getDataObject(), createdProperty ) );
-    }
-
     private void notifyObjectSelected() {
-        dataModelerEvent.fire( new DataObjectSelectedEvent( getContext().getContextId(), DataModelerEvent.DATA_OBJECT_BROWSER, getDataObject() ) );
+        context.setObjectProperty( null );
+        dataModelerWBContextEvent.fire( new DataModelerWorkbenchContextChangeEvent() );
     }
 
     private void openDataObject( final DataObject dataObject ) {

@@ -18,15 +18,12 @@ package org.kie.workbench.common.screens.datamodeller.client.widgets.common.doma
 
 import java.util.List;
 import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Composite;
 import org.kie.workbench.common.screens.datamodeller.client.DataModelerContext;
 import org.kie.workbench.common.screens.datamodeller.client.command.DataModelCommand;
 import org.kie.workbench.common.screens.datamodeller.client.command.DataModelCommandBuilder;
-import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWBContext;
-import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWBContextEvent;
 import org.kie.workbench.common.screens.datamodeller.client.handlers.DomainHandler;
 import org.kie.workbench.common.screens.datamodeller.client.handlers.DomainHandlerRegistry;
 import org.kie.workbench.common.screens.datamodeller.events.DataModelerEvent;
@@ -47,9 +44,6 @@ public abstract class BaseEditor extends Composite {
     @Inject
     protected DataModelCommandBuilder commandBuilder;
 
-    @Inject
-    protected DataModelerWBContext dataModelerWBContext;
-
     protected BaseEditor() {
     }
 
@@ -57,7 +51,7 @@ public abstract class BaseEditor extends Composite {
         return context;
     }
 
-    public void setContext( DataModelerContext context ) {
+    public void onContextChange( DataModelerContext context ) {
         this.context = context;
     }
 
@@ -75,11 +69,6 @@ public abstract class BaseEditor extends Composite {
 
     public abstract String getDomainName();
 
-    //TODO make this method abstract
-    public void contextChange( DataModelerContext context ) {
-
-    }
-
     protected void executePostCommandProcessing( DataModelCommand command ) {
         List<DomainHandler> handlers = handlerRegistry.getDomainHandlers( getDomainName() );
         for ( DomainHandler handler : handlers ) {
@@ -94,7 +83,4 @@ public abstract class BaseEditor extends Composite {
         getContext().getHelper().dataModelChanged( ( DataModelerValueChangeEvent)event );
     }
 
-    protected void onContextChange( @Observes DataModelerWBContextEvent contextEvent ) {
-        contextChange( dataModelerWBContext.getActiveContext() );
-    }
 }

@@ -23,10 +23,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
-import org.uberfire.lifecycle.OnClose;
-import org.uberfire.lifecycle.OnFocus;
-import org.uberfire.lifecycle.OnOpen;
-import org.uberfire.lifecycle.OnStartup;
 
 @ApplicationScoped
 @WorkbenchScreen ( identifier = "DroolsDomainScreen")
@@ -42,29 +38,9 @@ public class DroolsDomainScreen {
         this.view = view;
     }
 
-    @OnStartup
-    public void onStartup() {
-        //Window.alert("DroolsDomainScreen.onStartup");
-    }
-
-    @OnOpen
-    public void onOpen() {
-        //Window.alert("DroolsDomainScreen.onOpen");
-    }
-
-    @OnFocus
-    public void onFocus() {
-        /*Window.alert("DroolsDomainScreen.onFocus");*/
-    }
-
-    @OnClose
-    public void onClose() {
-        //Window.alert("DroolsDomainScreen.onClose");
-    }
-
     @WorkbenchPartTitle
     public String getTitle() {
-        return "DroolsDomainScreen";
+        return "Drools & jBPM";
     }
 
     @WorkbenchPartView

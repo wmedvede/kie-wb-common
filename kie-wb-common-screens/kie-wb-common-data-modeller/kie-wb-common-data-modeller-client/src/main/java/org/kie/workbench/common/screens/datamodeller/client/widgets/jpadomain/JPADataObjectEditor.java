@@ -212,7 +212,7 @@ public class JPADataObjectEditor extends ObjectEditor {
     }
 
     private String getCurrentEditorEventId() {
-        //TODO, temporal mecanism to avoid two property editors opened in different workbench JPA editors receiving crossed events
+        //Mechanism to avoid two uberfire property editors opened in different workbench JPA editors receiving crossed events
         return JPA_DATA_OBJECT_EDITOR_EVENT + "-" + this.hashCode();
     }
 

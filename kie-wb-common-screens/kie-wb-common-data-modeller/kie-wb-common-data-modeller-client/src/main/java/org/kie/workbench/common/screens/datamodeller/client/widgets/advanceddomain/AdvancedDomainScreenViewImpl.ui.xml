@@ -20,18 +20,6 @@
              xmlns:gwt="urn:import:com.google.gwt.user.client.ui"
         >
 
-  <gwt:HTMLPanel>
-
-    <style>
-      .advanced-domain {
-      min-height: 320px !Important;
-      width: 380px !Important;
-      }
-
-    </style>
-
     <base:DivWidget ui:field="containerPanel" addStyleNames="advanced-domain" ></base:DivWidget>
-
-  </gwt:HTMLPanel>
 
 </ui:UiBinder>
