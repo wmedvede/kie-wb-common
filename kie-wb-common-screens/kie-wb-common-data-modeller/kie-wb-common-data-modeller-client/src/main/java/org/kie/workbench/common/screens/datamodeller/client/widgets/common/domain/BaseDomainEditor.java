@@ -30,7 +30,6 @@ import org.kie.workbench.common.screens.datamodeller.client.DataModelerContext;
 import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWorkbenchContext;
 import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWorkbenchContextChangeEvent;
 import org.kie.workbench.common.screens.datamodeller.client.handlers.DomainHandler;
-import org.kie.workbench.common.screens.datamodeller.events.DataModelerEvent;
 import org.kie.workbench.common.screens.datamodeller.events.DataObjectDeletedEvent;
 import org.kie.workbench.common.services.datamodeller.core.DataModel;
 
@@ -44,7 +43,7 @@ public abstract class BaseDomainEditor
 
     protected static int INFO_EDITOR = 2;
 
-    protected SimplePanel mainPanel = new SimplePanel(  );
+    protected SimplePanel mainPanel = new SimplePanel();
 
     protected DeckPanel editorsDeck = new DeckPanel();
 
@@ -52,9 +51,7 @@ public abstract class BaseDomainEditor
 
     protected FieldEditor fieldEditor;
 
-    protected DivWidget infoEditor = new DivWidget(  );
-
-    protected HelpInline infoEditorContent = new HelpInline();
+    protected InfoEditor infoEditor = new InfoEditor();
 
     protected DataModelerContext context;
 
@@ -75,12 +72,11 @@ public abstract class BaseDomainEditor
 
     @PostConstruct
     private void init() {
-        infoEditor.add( infoEditorContent );
-
         editorsDeck.add( objectEditor );
         editorsDeck.add( fieldEditor );
         editorsDeck.add( infoEditor );
         mainPanel.add( editorsDeck );
+        infoEditor.setInfo( "No data object has been opened."  );
         showInfoEditor();
     }
 
@@ -122,28 +118,16 @@ public abstract class BaseDomainEditor
         this.handler = handler;
     }
 
-    protected void showFieldEditor( DataModelerEvent event ) {
-        if ( getDataModel() != null &&
-                getDataModel().getDataObjects().size() > 0 &&
-                event.getCurrentDataObject() != null &&
-                event.getCurrentDataObject().getProperties() != null &&
-                event.getCurrentDataObject().getProperties().size() > 0 ) {
-                showFieldEditor();
-        } else {
-            showObjectEditor();
-        }
-    }
-
     //event observers
 
     protected void onContextChange( @Observes DataModelerWorkbenchContextChangeEvent contextEvent ) {
         this.context =  dataModelerWBContext.getActiveContext();
 
         if ( context == null ) {
-            infoEditorContent.setText( "No data object has been opened." );
+            infoEditor.setInfo( "No data object has been opened." );
             showInfoEditor();
         } else if ( context.getEditionMode() == DataModelerContext.EditionMode.SOURCE_MODE ) {
-            infoEditorContent.setText( "Data object is being edited at this moment." );
+            infoEditor.setInfo( "Data object is being edited at this moment." );
             showInfoEditor();
         } else if ( context.getEditionMode() == DataModelerContext.EditionMode.GRAPHICAL_MODE ) {
             if ( context.getDataObject() != null && context.getObjectProperty() != null ) {
