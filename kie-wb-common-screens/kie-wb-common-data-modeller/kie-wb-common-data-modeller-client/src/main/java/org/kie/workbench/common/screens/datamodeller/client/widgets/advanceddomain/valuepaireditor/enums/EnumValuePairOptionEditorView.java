@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2015 JBoss Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,26 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor;
+package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.enums;
 
-public interface ValuePairEditorHandler {
+import org.uberfire.client.mvp.UberView;
 
-    void onValidate( );
+public interface EnumValuePairOptionEditorView
+    extends UberView<EnumValuePairOptionEditorView.Presenter> {
 
-    void onValueChange( );
+    interface Presenter
+        extends EnumValuePairOptionEditorHandler {
+    }
+
+    interface EnumValuePairOptionEditorHandler {
+
+        void onValueChange( );
+    }
+
+    void setOptionLabel( String optionLabel );
+
+    void setValue( boolean value );
+
+    boolean getValue();
 
 }

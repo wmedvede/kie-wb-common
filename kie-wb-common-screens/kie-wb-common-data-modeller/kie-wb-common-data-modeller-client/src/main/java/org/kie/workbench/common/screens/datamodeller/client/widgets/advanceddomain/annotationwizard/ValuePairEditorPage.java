@@ -97,7 +97,7 @@ public class ValuePairEditorPage
     }
 
     @Override
-    public void onValueChanged() {
+    public void onValueChange() {
         PageStatus nextStatus = PageStatus.NOT_VALIDATED;
         currentValue = view.getValuePairEditor().getValue();
 

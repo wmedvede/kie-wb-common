@@ -53,13 +53,13 @@ public class StringValuePairEditorViewImpl
         textBox.addKeyUpHandler( new KeyUpHandler() {
             @Override
             public void onKeyUp( KeyUpEvent event ) {
-                presenter.onValueChanged();
+                presenter.onValueChange();
             }
         } );
     }
 
     @Override
-    public void setPresenter( Presenter presenter ) {
+    public void init( Presenter presenter ) {
         this.presenter = presenter;
     }
 
@@ -94,7 +94,7 @@ public class StringValuePairEditorViewImpl
     }
 
     @UiHandler( "textBox" )
-    void onValueChanged( ChangeEvent event ) {
-        presenter.onValueChanged();
+    void onValueChange( ChangeEvent event ) {
+        presenter.onValueChange();
     }
 }

@@ -80,7 +80,7 @@ public class MultipleValuePairEditorViewImpl
     }
 
     @Override
-    public void setPresenter( Presenter presenter ) {
+    public void init( Presenter presenter ) {
         this.presenter = presenter;
     }
 
@@ -134,8 +134,8 @@ public class MultipleValuePairEditorViewImpl
             }
 
             @Override
-            public void onValueChanged() {
-                presenter.onValueChanged( itemId );
+            public void onValueChange() {
+                presenter.onValueChange( itemId );
             }
         } );
         itemContainer.add( valuePairEditor );
@@ -158,7 +158,7 @@ public class MultipleValuePairEditorViewImpl
     }
 
     @Override
-    public void removeItem( Integer itemId ) {
+    public void removeItemEditor( Integer itemId ) {
         Widget widget = indexToEditorWidget.get( itemId );
         if ( widget != null ) {
             itemsPanel.remove( widget );

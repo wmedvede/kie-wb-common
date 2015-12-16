@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2015 JBoss Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.string;
+package org.kie.workbench.common.services.datamodeller.annotations;
 
-import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditorView;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.RetentionPolicy;
 
-public interface StringValuePairEditorView
-        extends ValuePairEditorView<StringValuePairEditorView.Presenter> {
+/**
+ * This annotation is intended for UI testing purposes.
+ */
 
-    interface Presenter {
+@java.lang.annotation.Retention( RetentionPolicy.RUNTIME )
+@java.lang.annotation.Target({ ElementType.TYPE, ElementType.FIELD })
+public @interface BooleanParamsAnnotation {
 
-        void onValueChange();
-    }
+    boolean booleanParam1() default false;
 
-    void setValue ( String value );
+    boolean booleanParam2();
 
-    String getValue( );
+    boolean[] booleanArrayParam1() default {};
 
-    void clear();
+    boolean[] booleanArrayParam2();
 
 }

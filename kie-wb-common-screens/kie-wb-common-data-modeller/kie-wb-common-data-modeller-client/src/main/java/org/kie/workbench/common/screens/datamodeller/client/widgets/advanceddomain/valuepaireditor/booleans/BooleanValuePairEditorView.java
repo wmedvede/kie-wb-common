@@ -16,22 +16,23 @@
 
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.booleans;
 
+import java.util.List;
+
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditorView;
+import org.uberfire.commons.data.Pair;
 
 public interface BooleanValuePairEditorView
-        extends ValuePairEditorView {
-
-    String NOT_SELECTED = "_NOT_SELECTED_";
+        extends ValuePairEditorView<BooleanValuePairEditorView.Presenter> {
 
     interface Presenter {
 
-        void onValueChanged();
+        void onValueChange();
     }
-
-    void setPresenter( Presenter presenter );
 
     void setSelectedValue( String value );
 
     String getSelectedValue();
+
+    void initOptions( List<Pair<String, String>> options );
 
 }

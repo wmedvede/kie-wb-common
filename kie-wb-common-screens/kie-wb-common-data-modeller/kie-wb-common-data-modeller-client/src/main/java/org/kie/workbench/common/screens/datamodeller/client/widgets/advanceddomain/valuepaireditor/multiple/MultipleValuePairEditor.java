@@ -21,7 +21,6 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditor;
@@ -30,8 +29,7 @@ import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddoma
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
 
 public abstract class MultipleValuePairEditor
-        implements IsWidget,
-        MultipleValuePairEditorView.Presenter,
+        implements MultipleValuePairEditorView.Presenter,
         ValuePairEditor<List<?>> {
 
     private MultipleValuePairEditorView view;
@@ -46,7 +44,7 @@ public abstract class MultipleValuePairEditor
 
     public MultipleValuePairEditor() {
         view = GWT.create( MultipleValuePairEditorViewImpl.class );
-        view.setPresenter( this );
+        view.init( this );
     }
 
     @Override
@@ -123,7 +121,6 @@ public abstract class MultipleValuePairEditor
 
     @Override
     public void showValuePairName( boolean show ) {
-        //TODO implement if needed
         //this editor doesn't need to hide the label
     }
 
@@ -134,7 +131,7 @@ public abstract class MultipleValuePairEditor
 
     @Override
     public void onRemoveItem( Integer itemId ) {
-        view.removeItem( itemId );
+        view.removeItemEditor( itemId );
         valid = calculateStatus();
         notifyChange();
     }
@@ -156,7 +153,7 @@ public abstract class MultipleValuePairEditor
     }
 
     @Override
-    public void onValueChanged( Integer itemId ) {
+    public void onValueChange( Integer itemId ) {
         valid = calculateStatus();
         notifyChange();
     }
@@ -186,7 +183,7 @@ public abstract class MultipleValuePairEditor
 
     private void notifyChange( ) {
         if ( editorHandler != null ) {
-            editorHandler.onValueChanged();
+            editorHandler.onValueChange();
         }
     }
 }

@@ -55,15 +55,13 @@ public class EnumValuePairEditorViewImpl
     }
 
     @Override
-    public void setPresenter( Presenter presenter ) {
+    public void init( Presenter presenter ) {
         this.presenter = presenter;
     }
 
     @Override
-    public void initItems( List<Pair<String, String>> options ) {
-        for ( Pair<String, String> option : options ) {
-            listBox.add( UIUtil.newOption( option.getK1(), option.getK2() ) );
-        }
+    public void initOptions( List<Pair<String, String>> options ) {
+        UIUtil.initList( listBox, options, true );
     }
 
     @Override
@@ -92,7 +90,7 @@ public class EnumValuePairEditorViewImpl
     }
 
     @UiHandler("listBox")
-    void onValueChanged( ChangeEvent event ) {
-        presenter.onValueChanged();
+    void onValueChange( ChangeEvent event ) {
+        presenter.onValueChange();
     }
 }

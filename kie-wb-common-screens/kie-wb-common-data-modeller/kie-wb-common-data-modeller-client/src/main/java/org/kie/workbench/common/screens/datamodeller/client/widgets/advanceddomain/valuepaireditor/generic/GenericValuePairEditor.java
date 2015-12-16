@@ -18,7 +18,6 @@ package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddom
 
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditor;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditorHandler;
@@ -26,8 +25,7 @@ import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddoma
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
 
 public class GenericValuePairEditor
-    implements IsWidget,
-        GenericValuePairEditorView.Presenter,
+    implements GenericValuePairEditorView.Presenter,
         ValuePairEditor<String> {
 
     private GenericValuePairEditorView view;
@@ -43,7 +41,7 @@ public class GenericValuePairEditor
     @Inject
     public GenericValuePairEditor( GenericValuePairEditorView view ) {
         this.view = view;
-        view.setPresenter( this );
+        view.init( this );
     }
 
     @Override
@@ -63,9 +61,9 @@ public class GenericValuePairEditor
     }
 
     @Override
-    public void onValueChanged() {
+    public void onValueChange() {
         if ( editorHandler != null ) {
-            editorHandler.onValueChanged();
+            editorHandler.onValueChange();
         }
     }
 
@@ -118,7 +116,7 @@ public class GenericValuePairEditor
 
     @Override
     public void showValuePairName( boolean show ) {
-        //TODO complete this
+        view.showValuePairName( show );
     }
 
     public void refresh() {

@@ -16,7 +16,6 @@
 
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.booleans;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -49,27 +48,14 @@ public class BooleanValuePairEditorViewImpl
     @UiField
     Select listBox;
 
-    String currentValuePairLabel = null;
-
-    boolean showRequiredIndicator = true;
-
-    private static List<Pair<String, String>> items = new ArrayList<Pair<String, String>>();
-
-    static {
-        items.add( new Pair<String, String>( "", BooleanValuePairEditorView.NOT_SELECTED ) );
-        items.add( new Pair<String, String>( "true", "true" ) );
-        items.add( new Pair<String, String>( "false", "false" ) );
-    }
-
     private Presenter presenter;
 
     public BooleanValuePairEditorViewImpl() {
         initWidget( uiBinder.createAndBindUi( this ) );
-        initItems( items );
     }
 
     @Override
-    public void setPresenter( Presenter presenter ) {
+    public void init( Presenter presenter ) {
         this.presenter = presenter;
     }
 
@@ -85,36 +71,25 @@ public class BooleanValuePairEditorViewImpl
 
     public void setValuePairLabel( String valuePairLabel ) {
         this.valuePairLabel.setText( valuePairLabel );
-        currentValuePairLabel = valuePairLabel;
     }
 
     @Override
     public void showValuePairName( boolean show ) {
-        if ( !show ) {
-            currentValuePairLabel = valuePairLabel.getText();
-            showRequiredIndicator = valuePairLabel.getShowRequiredIndicator();
-            valuePairLabel.setText( null );
-            valuePairLabel.setShowRequiredIndicator( false );
-        } else {
-            valuePairLabel.setText( currentValuePairLabel );
-            valuePairLabel.setShowRequiredIndicator( showRequiredIndicator );
-        }
+        this.valuePairLabel.setVisible( show );
     }
 
     @Override
     public void showValuePairRequiredIndicator( boolean required ) {
         this.valuePairLabel.setShowRequiredIndicator( required );
-        showRequiredIndicator = required;
     }
 
-    private void initItems( List<Pair<String, String>> options ) {
-        for ( Pair<String, String> option : options ) {
-            listBox.add( UIUtil.newOption( option.getK1(), option.getK2() ) );
-        }
+    @Override
+    public void initOptions( List<Pair<String, String>> options ) {
+        UIUtil.initList( listBox, options, true );
     }
 
     @UiHandler( "listBox" )
-    void onValueChanged( ChangeEvent event ) {
-        presenter.onValueChanged();
+    void onValueChange( ChangeEvent event ) {
+        presenter.onValueChange();
     }
 }

@@ -17,7 +17,6 @@
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.numeric;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditor;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditorHandler;
@@ -26,8 +25,7 @@ import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddoma
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
 
 public class NumericValuePairEditor
-        implements IsWidget,
-        NumericValuePairEditorView.Presenter,
+        implements NumericValuePairEditorView.Presenter,
         ValuePairEditor<Object> {
 
     private NumericValuePairEditorView view;
@@ -44,7 +42,7 @@ public class NumericValuePairEditor
 
     public NumericValuePairEditor() {
         view = GWT.create( NumericValuePairEditorViewImpl.class );
-        view.setPresenter( this );
+        view.init( this );
     }
 
     @Override
@@ -76,7 +74,7 @@ public class NumericValuePairEditor
     }
 
     @Override
-    public void onValueChanged() {
+    public void onValueChange() {
         String value = view.getValue();
         if ( "".equals( view.getValue() ) || view.getValue() == null ) {
             currentValue = null;
@@ -100,7 +98,7 @@ public class NumericValuePairEditor
             }
         }
         if ( editorHandler != null ) {
-            editorHandler.onValueChanged();
+            editorHandler.onValueChange();
         }
     }
 

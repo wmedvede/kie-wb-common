@@ -116,8 +116,8 @@ public class ValuePairEditorPopupViewImpl
             }
 
             @Override
-            public void onValueChanged() {
-                presenter.onValueChanged();
+            public void onValueChange() {
+                presenter.onValueChange();
             }
         } );
     }

@@ -26,7 +26,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -48,7 +47,7 @@ public class GenericValuePairEditorViewImpl
     private Presenter presenter;
 
     @UiField
-    HelpBlock valuePairValueInline;
+    HelpBlock valuePairHelpBlock;
 
     @UiField
     FlowPanel editorContainer;
@@ -75,13 +74,13 @@ public class GenericValuePairEditorViewImpl
         javaSourceEditor.addChangeHandler( new EditJavaSourceWidget.TextChangeHandler() {
             @Override
             public void onTextChange() {
-                presenter.onValueChanged();
+                presenter.onValueChange();
             }
         } );
     }
 
     @Override
-    public void setPresenter( Presenter presenter ) {
+    public void init( Presenter presenter ) {
         this.presenter = presenter;
     }
 
@@ -112,12 +111,12 @@ public class GenericValuePairEditorViewImpl
 
     @Override
     public void setErrorMessage( String errorMessage ) {
-        valuePairValueInline.setText( errorMessage );
+        valuePairHelpBlock.setText( errorMessage );
     }
 
     @Override
     public void clearErrorMessage() {
-        valuePairValueInline.setText( null );
+        valuePairHelpBlock.setText( null );
     }
 
     @Override
@@ -134,11 +133,6 @@ public class GenericValuePairEditorViewImpl
     @Override
     public void refresh() {
         javaSourceEditor.refresh();
-    }
-
-    @Override
-    public void addEditor( IsWidget editor ) {
-        editorContainer.add( editor );
     }
 
     @UiHandler("validateButton")

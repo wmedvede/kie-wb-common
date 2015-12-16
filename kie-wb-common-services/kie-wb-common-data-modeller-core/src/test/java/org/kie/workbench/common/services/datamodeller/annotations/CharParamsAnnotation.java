@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2015 JBoss Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor;
+package org.kie.workbench.common.services.datamodeller.annotations;
 
-public interface ValuePairEditorHandler {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.RetentionPolicy;
 
-    void onValidate( );
+/**
+ * This annotation is intended for UI testing purposes.
+ */
 
-    void onValueChange( );
+@java.lang.annotation.Retention( RetentionPolicy.RUNTIME )
+@java.lang.annotation.Target({ ElementType.TYPE, ElementType.FIELD })
+public @interface CharParamsAnnotation {
+
+    char charParam1() default 0;
+
+    char charParam2();
+
+    char[] charArrayParam1() default {};
+
+    char[] charArrayParam2();
 
 }

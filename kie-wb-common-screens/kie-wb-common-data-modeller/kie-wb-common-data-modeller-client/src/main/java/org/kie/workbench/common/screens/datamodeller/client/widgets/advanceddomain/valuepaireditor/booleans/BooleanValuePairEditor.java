@@ -16,17 +16,20 @@
 
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.booleans;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import org.kie.workbench.common.screens.datamodeller.client.util.UIUtil;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditor;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditorHandler;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.util.ValuePairEditorUtil;
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
+import org.uberfire.commons.data.Pair;
 
 public class BooleanValuePairEditor
-        implements IsWidget,
-        BooleanValuePairEditorView.Presenter,
+        implements BooleanValuePairEditorView.Presenter,
         ValuePairEditor<Boolean> {
 
     private BooleanValuePairEditorView view;
@@ -37,9 +40,17 @@ public class BooleanValuePairEditor
 
     private ValuePairEditorHandler editorHandler;
 
+    private static List<Pair<String, String>> options = new ArrayList<Pair<String, String>>();
+
+    static {
+        options.add( new Pair<String, String>( "true", "true" ) );
+        options.add( new Pair<String, String>( "false", "false" ) );
+    }
+
     public BooleanValuePairEditor() {
         view = GWT.create( BooleanValuePairEditorViewImpl.class );
-        view.setPresenter( this );
+        view.init( this );
+        view.initOptions( options );
     }
 
     @Override
@@ -56,7 +67,7 @@ public class BooleanValuePairEditor
 
     @Override
     public void setValue( Boolean value ) {
-        view.setSelectedValue( value != null ? value.toString() : BooleanValuePairEditorView.NOT_SELECTED );
+        view.setSelectedValue( value != null ? value.toString() : UIUtil.NOT_SELECTED );
         this.currentValue = value;
     }
 
@@ -72,7 +83,7 @@ public class BooleanValuePairEditor
 
     @Override
     public void clear() {
-        view.setSelectedValue( BooleanValuePairEditorView.NOT_SELECTED  );
+        view.setSelectedValue( UIUtil.NOT_SELECTED );
     }
 
     @Override
@@ -87,12 +98,12 @@ public class BooleanValuePairEditor
 
     @Override
     public void setErrorMessage( String errorMessage ) {
-        //TODO implement if needed
+        //implement if needed
     }
 
     @Override
     public void clearErrorMessage() {
-        //TODO implement if needed
+        //implement if needed
     }
 
     @Override
@@ -111,11 +122,11 @@ public class BooleanValuePairEditor
     }
 
     @Override
-    public void onValueChanged() {
+    public void onValueChange() {
         String value = view.getSelectedValue();
-        currentValue = !BooleanValuePairEditorView.NOT_SELECTED.equals( value ) ? Boolean.valueOf( value ) : null;
+        currentValue = !UIUtil.NOT_SELECTED.equals( value ) ? Boolean.valueOf( value ) : null;
         if ( editorHandler != null ) {
-            editorHandler.onValueChanged();
+            editorHandler.onValueChange();
         }
     }
 }

@@ -17,7 +17,6 @@
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.string;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditor;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditorHandler;
@@ -25,8 +24,7 @@ import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddoma
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
 
 public class StringValuePairEditor
-        implements IsWidget,
-        StringValuePairEditorView.Presenter,
+        implements StringValuePairEditorView.Presenter,
         ValuePairEditor<String> {
 
     private StringValuePairEditorView view;
@@ -39,7 +37,7 @@ public class StringValuePairEditor
 
     public StringValuePairEditor() {
         view = GWT.create( StringValuePairEditorViewImpl.class );
-        view.setPresenter( this );
+        view.init( this );
     }
 
     @Override
@@ -87,12 +85,12 @@ public class StringValuePairEditor
 
     @Override
     public void setErrorMessage( String errorMessage ) {
-        //TODO implement if needed
+        //implement if needed
     }
 
     @Override
     public void clearErrorMessage() {
-        //TODO implement if needed
+        //implement if needed
     }
 
     @Override
@@ -111,10 +109,10 @@ public class StringValuePairEditor
     }
 
     @Override
-    public void onValueChanged() {
+    public void onValueChange() {
         currentValue = "".equals( view.getValue() ) ? null : view.getValue();
         if ( editorHandler != null ) {
-            editorHandler.onValueChanged();
+            editorHandler.onValueChange();
         }
     }
 }

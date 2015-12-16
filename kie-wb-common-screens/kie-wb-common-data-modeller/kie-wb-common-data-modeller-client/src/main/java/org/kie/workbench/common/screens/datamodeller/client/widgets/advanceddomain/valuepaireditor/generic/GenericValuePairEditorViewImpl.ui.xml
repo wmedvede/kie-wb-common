@@ -26,7 +26,7 @@
         <b:Column size="MD_8">
             <g:FlowPanel ui:field="editorContainer"/>
             <b:Button ui:field="validateButton" text="{i18n.advanced_domain_generic_value_pair_editor_action}"/>
-            <b:HelpBlock ui:field="valuePairValueInline"/>
+            <b:HelpBlock ui:field="valuePairHelpBlock"/>
         </b:Column>
     </b:FormGroup>
 
