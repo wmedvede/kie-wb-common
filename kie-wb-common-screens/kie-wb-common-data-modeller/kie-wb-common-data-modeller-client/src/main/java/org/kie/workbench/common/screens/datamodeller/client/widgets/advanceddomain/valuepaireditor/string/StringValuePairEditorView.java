@@ -16,10 +16,12 @@
 
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.string;
 
+import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.HasErrorMessage;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditorView;
 
 public interface StringValuePairEditorView
-        extends ValuePairEditorView<StringValuePairEditorView.Presenter> {
+        extends ValuePairEditorView<StringValuePairEditorView.Presenter>,
+        HasErrorMessage {
 
     interface Presenter {
 

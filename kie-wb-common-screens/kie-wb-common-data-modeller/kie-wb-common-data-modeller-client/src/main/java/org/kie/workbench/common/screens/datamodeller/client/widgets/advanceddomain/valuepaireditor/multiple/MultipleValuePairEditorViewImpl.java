@@ -28,14 +28,14 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.Column;
 import org.gwtbootstrap3.client.ui.FormLabel;
+import org.gwtbootstrap3.client.ui.HelpBlock;
+import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.client.ui.constants.ButtonType;
+import org.gwtbootstrap3.client.ui.constants.ColumnSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditor;
@@ -58,10 +58,13 @@ public class MultipleValuePairEditorViewImpl
     FormLabel valuePairLabel;
 
     @UiField
-    VerticalPanel itemsPanel;
+    Column itemsPanel;
 
     @UiField
-    FlowPanel addItemPanel;
+    HelpBlock helpBlock;
+
+    @UiField
+    Column addItemPanel;
 
     private Map<Integer, ValuePairEditor<?>> indexToEditor = new TreeMap<Integer, ValuePairEditor<?>>();
 
@@ -107,10 +110,12 @@ public class MultipleValuePairEditorViewImpl
 
     @Override
     public void setErrorMessage( String errorMessage ) {
+        helpBlock.setText( errorMessage );
     }
 
     @Override
     public void clearErrorMessage() {
+        helpBlock.setText( null );
     }
 
     @Override
@@ -123,9 +128,10 @@ public class MultipleValuePairEditorViewImpl
     @Override
     public Integer addItemEditor( ValuePairEditor<?> valuePairEditor ) {
 
-        HorizontalPanel itemContainer = new HorizontalPanel();
-        final Integer itemId = nextItemId();
+        Row itemEditorRow = new Row();
+        Column itemEditorColumn = new Column( ColumnSize.MD_10 );
 
+        final Integer itemId = nextItemId();
         valuePairEditor.showValuePairName( false );
         valuePairEditor.addEditorHandler( new ValuePairEditorHandler() {
             @Override
@@ -138,7 +144,11 @@ public class MultipleValuePairEditorViewImpl
                 presenter.onValueChange( itemId );
             }
         } );
-        itemContainer.add( valuePairEditor );
+
+        itemEditorColumn.add( valuePairEditor );
+        itemEditorRow.add( itemEditorColumn );
+
+        Column deleteButtonColumn = new Column( ColumnSize.MD_2 );
 
         Button deleteButton = new Button( Constants.INSTANCE.advanced_domain_multiple_value_pair_editor_action_delete() );
         deleteButton.setType( ButtonType.LINK );
@@ -148,12 +158,15 @@ public class MultipleValuePairEditorViewImpl
                 presenter.onRemoveItem( itemId );
             }
         } );
-        itemContainer.add( deleteButton );
 
-        itemsPanel.add( itemContainer );
+        deleteButtonColumn.add( deleteButton );
+        itemEditorRow.add( deleteButtonColumn );
+
+
+        itemsPanel.add( itemEditorRow );
 
         indexToEditor.put( itemId, valuePairEditor );
-        indexToEditorWidget.put( itemId, itemContainer );
+        indexToEditorWidget.put( itemId, itemEditorRow );
         return itemId;
     }
 
@@ -187,12 +200,19 @@ public class MultipleValuePairEditorViewImpl
 
     private void initAddItemPanel() {
 
-        HorizontalPanel addItemContainer = new HorizontalPanel();
-        addItemContainer.setVerticalAlignment( HasVerticalAlignment.ALIGN_BOTTOM );
+        Row addItemRow = new Row();
+        addItemPanel.add( addItemRow );
+
+        Column addItemEditorColumn = new Column( ColumnSize.MD_10 );
+
+        //addItemContainer.setVerticalAlignment( HasVerticalAlignment.ALIGN_BOTTOM );
         addItemEditor = presenter.createValuePairEditor( valuePairDefinition );
         addItemEditor.showValuePairName( false );
 
-        addItemContainer.add( addItemEditor );
+        addItemEditorColumn.add( addItemEditor );
+        addItemRow.add( addItemEditorColumn );
+
+        Column addItemButtonColumn = new Column( ColumnSize.MD_2 );
 
         Button addItemButton = new Button( Constants.INSTANCE.advanced_domain_multiple_value_pair_editor_action_add() );
         addItemButton.setType( ButtonType.PRIMARY );
@@ -203,9 +223,11 @@ public class MultipleValuePairEditorViewImpl
                 presenter.onAddItem();
             }
         } );
-        addItemContainer.add( addItemButton );
 
-        addItemPanel.add( addItemContainer );
+        addItemButtonColumn.add( addItemButton );
+        addItemRow.add( addItemButtonColumn );
+
+        addItemPanel.add( addItemRow );
     }
 
     private Integer nextItemId() {

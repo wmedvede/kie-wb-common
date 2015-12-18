@@ -147,6 +147,7 @@ public abstract class MultipleValuePairEditor
             view.addItemEditor( valuePairEditor );
             setEditorValue( valuePairEditor, addItemEditor.getValue() );
             addItemEditor.clear();
+            //addItemEditor.setValue(  );
             addItemEditor.clearErrorMessage();
             notifyChange();
         }
@@ -163,15 +164,12 @@ public abstract class MultipleValuePairEditor
     public abstract void setEditorValue( ValuePairEditor<?> valuePairEditor, Object value );
 
     private boolean calculateStatus() {
-        boolean newStatus = true;
-
         for ( ValuePairEditor<?> itemEditor : view.getItemEditors() ) {
-            newStatus = newStatus && itemEditor.isValid();
-            if ( !newStatus ) {
-                break;
+            if ( !itemEditor.isValid() || itemEditor.getValue() == null ) {
+                return false;
             }
         }
-        return newStatus;
+        return true;
     }
 
     private void addSafeValue( Object value ) {

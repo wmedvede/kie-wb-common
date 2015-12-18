@@ -26,6 +26,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import org.gwtbootstrap3.client.ui.FormLabel;
+import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.TextBox;
 
 public class StringValuePairEditorViewImpl
@@ -45,6 +46,9 @@ public class StringValuePairEditorViewImpl
 
     @UiField
     TextBox textBox;
+
+    @UiField
+    HelpBlock helpBlock;
 
     private Presenter presenter;
 
@@ -91,6 +95,17 @@ public class StringValuePairEditorViewImpl
     @Override
     public void clear() {
         textBox.setText( null );
+        clearErrorMessage();
+    }
+
+    @Override
+    public void setErrorMessage( String errorMessage ) {
+        helpBlock.setText( errorMessage );
+    }
+
+    @Override
+    public void clearErrorMessage() {
+        helpBlock.setText( null );
     }
 
     @UiHandler( "textBox" )

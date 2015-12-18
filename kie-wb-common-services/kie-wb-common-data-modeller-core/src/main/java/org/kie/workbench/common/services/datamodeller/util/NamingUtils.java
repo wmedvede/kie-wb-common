@@ -177,13 +177,25 @@ public class NamingUtils {
             return parseDoubleValue( value );
         }
         if ( CHAR.equals( type ) ) {
-            return value.trim().length() > 0 ? value.trim().charAt( 0 ) : null;
+            return parseCharValue( value );
         }
         if ( BOOLEAN.equals( type ) ) {
             return Boolean.valueOf( value );
         }
 
         return null;
+    }
+
+    public static Character parseCharValue( String value ) {
+        if ( value == null ) {
+            return null;
+        }
+        value = value.trim();
+        if ( value.length() == 0 ) {
+            return '\u0000';
+        } else {
+            return value.charAt( 0 );
+        }
     }
 
     public static Long parseLongValue( final String value ) {

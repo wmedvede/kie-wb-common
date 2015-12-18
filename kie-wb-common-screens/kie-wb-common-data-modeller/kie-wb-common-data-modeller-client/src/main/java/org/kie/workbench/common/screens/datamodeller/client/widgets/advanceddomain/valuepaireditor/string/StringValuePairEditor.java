@@ -85,12 +85,12 @@ public class StringValuePairEditor
 
     @Override
     public void setErrorMessage( String errorMessage ) {
-        //implement if needed
+        view.setErrorMessage( errorMessage );
     }
 
     @Override
     public void clearErrorMessage() {
-        //implement if needed
+        view.clearErrorMessage();
     }
 
     @Override

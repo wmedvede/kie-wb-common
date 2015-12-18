@@ -34,7 +34,7 @@ public class BooleanValuePairEditor
 
     private BooleanValuePairEditorView view;
 
-    private Boolean currentValue;
+    private Boolean currentValue = null;
 
     private AnnotationValuePairDefinition valuePairDefinition;
 
@@ -83,7 +83,8 @@ public class BooleanValuePairEditor
 
     @Override
     public void clear() {
-        view.setSelectedValue( UIUtil.NOT_SELECTED );
+        setValue( null );
+        view.clearErrorMessage();
     }
 
     @Override
@@ -98,12 +99,12 @@ public class BooleanValuePairEditor
 
     @Override
     public void setErrorMessage( String errorMessage ) {
-        //implement if needed
+        view.setErrorMessage( errorMessage );
     }
 
     @Override
     public void clearErrorMessage() {
-        //implement if needed
+        view.clearErrorMessage();
     }
 
     @Override

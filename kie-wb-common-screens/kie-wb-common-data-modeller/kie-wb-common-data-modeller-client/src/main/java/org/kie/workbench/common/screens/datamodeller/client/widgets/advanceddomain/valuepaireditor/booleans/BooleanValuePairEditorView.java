@@ -18,11 +18,13 @@ package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddom
 
 import java.util.List;
 
+import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.HasErrorMessage;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditorView;
 import org.uberfire.commons.data.Pair;
 
 public interface BooleanValuePairEditorView
-        extends ValuePairEditorView<BooleanValuePairEditorView.Presenter> {
+        extends ValuePairEditorView<BooleanValuePairEditorView.Presenter>,
+            HasErrorMessage {
 
     interface Presenter {
 

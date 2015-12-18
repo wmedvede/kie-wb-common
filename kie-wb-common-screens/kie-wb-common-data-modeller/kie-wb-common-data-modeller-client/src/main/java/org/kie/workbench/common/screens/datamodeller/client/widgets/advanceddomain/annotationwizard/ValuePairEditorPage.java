@@ -147,10 +147,12 @@ public class ValuePairEditorPage
 
         initValuePairEditor( valuePairDefinition );
 
-        if ( isRequired() ) {
-            setHelpMessage( Constants.INSTANCE.advanced_domain_wizard_value_pair_editor_page_message_enter_required_value_and_validate() );
-        } else {
-            setHelpMessage( Constants.INSTANCE.advanced_domain_wizard_value_pair_editor_page_message_enter_optional_value_and_validate() );
+        if ( view.getValuePairEditor() instanceof GenericValuePairEditor ) {
+            if ( isRequired() ) {
+                setHelpMessage( Constants.INSTANCE.advanced_domain_wizard_value_pair_editor_page_message_enter_required_value_and_validate() );
+            } else {
+                setHelpMessage( Constants.INSTANCE.advanced_domain_wizard_value_pair_editor_page_message_enter_optional_value_and_validate() );
+            }
         }
     }
 

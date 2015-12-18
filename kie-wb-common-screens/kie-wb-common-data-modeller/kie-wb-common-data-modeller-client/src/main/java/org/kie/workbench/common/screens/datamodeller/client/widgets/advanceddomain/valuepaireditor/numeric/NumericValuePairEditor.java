@@ -105,6 +105,7 @@ public class NumericValuePairEditor
     @Override
     public void clear() {
         view.clear();
+        setValue( null );
     }
 
     @Override

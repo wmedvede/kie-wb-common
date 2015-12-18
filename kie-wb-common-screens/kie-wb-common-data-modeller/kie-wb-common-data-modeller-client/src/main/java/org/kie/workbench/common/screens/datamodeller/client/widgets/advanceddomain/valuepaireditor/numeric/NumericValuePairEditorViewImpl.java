@@ -65,16 +65,6 @@ public class NumericValuePairEditorViewImpl
         this.presenter = presenter;
     }
 
-    /*
-    TODO, remove this.
-    SE precisan los dos???
-    @UiHandler( "textBox" )
-    void onValueChanged( ChangeEvent event ) {
-        presenter.onValueChange();
-    }
-
-    */
-
     @Override
     public void setValue( String value ) {
         textBox.setValue( value );

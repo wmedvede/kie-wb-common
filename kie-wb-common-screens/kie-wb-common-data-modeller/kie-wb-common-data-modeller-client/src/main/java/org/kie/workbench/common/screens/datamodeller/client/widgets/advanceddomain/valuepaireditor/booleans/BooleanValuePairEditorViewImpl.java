@@ -26,6 +26,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import org.gwtbootstrap3.client.ui.FormLabel;
+import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.extras.select.client.ui.Select;
 import org.kie.workbench.common.screens.datamodeller.client.util.UIUtil;
 import org.uberfire.commons.data.Pair;
@@ -47,6 +48,13 @@ public class BooleanValuePairEditorViewImpl
 
     @UiField
     Select listBox;
+
+    @UiField
+    HelpBlock helpBlock;
+
+    String currentValuePairLabel = null;
+
+    boolean showRequiredIndicator = true;
 
     private Presenter presenter;
 
@@ -71,21 +79,41 @@ public class BooleanValuePairEditorViewImpl
 
     public void setValuePairLabel( String valuePairLabel ) {
         this.valuePairLabel.setText( valuePairLabel );
+        currentValuePairLabel = valuePairLabel;
     }
 
     @Override
     public void showValuePairName( boolean show ) {
-        this.valuePairLabel.setVisible( show );
+        if ( !show ) {
+            currentValuePairLabel = valuePairLabel.getText();
+            showRequiredIndicator = valuePairLabel.getShowRequiredIndicator();
+            valuePairLabel.setText( null );
+            valuePairLabel.setShowRequiredIndicator( false );
+        } else {
+            valuePairLabel.setText( currentValuePairLabel );
+            valuePairLabel.setShowRequiredIndicator( showRequiredIndicator );
+        }
     }
 
     @Override
     public void showValuePairRequiredIndicator( boolean required ) {
         this.valuePairLabel.setShowRequiredIndicator( required );
+        showRequiredIndicator = required;
     }
 
     @Override
     public void initOptions( List<Pair<String, String>> options ) {
         UIUtil.initList( listBox, options, true );
+    }
+
+    @Override
+    public void setErrorMessage( String errorMessage ) {
+        helpBlock.setText( errorMessage );
+    }
+
+    @Override
+    public void clearErrorMessage() {
+        helpBlock.setText( null );
     }
 
     @UiHandler( "listBox" )
