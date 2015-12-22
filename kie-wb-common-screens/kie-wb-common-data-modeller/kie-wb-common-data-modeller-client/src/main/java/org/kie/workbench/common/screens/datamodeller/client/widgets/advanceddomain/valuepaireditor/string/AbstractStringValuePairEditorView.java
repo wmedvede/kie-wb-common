@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2015 JBoss Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.enums;
-
-import java.util.List;
+package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.string;
 
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.HasErrorMessage;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditorView;
-import org.uberfire.commons.data.Pair;
 
-public interface EnumValuePairEditorView
-        extends ValuePairEditorView<EnumValuePairEditorView.Presenter>,
+public interface AbstractStringValuePairEditorView
+        extends ValuePairEditorView<AbstractStringValuePairEditorView.Presenter>,
         HasErrorMessage {
 
     interface Presenter {
 
         void onValueChange();
-
     }
 
-    void initOptions( List<Pair<String, String>> options );
+    void setValue( String value );
 
-    void setSelectedValue( String value );
+    String getValue();
 
-    String getSelectedValue( );
+    void clear();
 
 }

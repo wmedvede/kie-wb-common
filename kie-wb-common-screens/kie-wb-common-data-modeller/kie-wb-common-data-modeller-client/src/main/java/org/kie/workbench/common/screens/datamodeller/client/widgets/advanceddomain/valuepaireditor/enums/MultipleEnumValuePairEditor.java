@@ -95,12 +95,12 @@ public class MultipleEnumValuePairEditor
 
     @Override
     public void setErrorMessage( String errorMessage ) {
-        //implement this if needed
+        view.setErrorMessage( errorMessage );
     }
 
     @Override
     public void clearErrorMessage() {
-        //implement this if needed
+        view.clearErrorMessage();
     }
 
     @Override

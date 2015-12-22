@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2015 JBoss Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,29 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.enums;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.string;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
-import org.kie.workbench.common.screens.datamodeller.client.util.UIUtil;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditor;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditorHandler;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.util.ValuePairEditorUtil;
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
-import org.uberfire.commons.data.Pair;
 
-public class EnumValuePairEditor
-        implements EnumValuePairEditorView.Presenter,
+public abstract class AbstractStringValuePairEditor
+        implements AbstractStringValuePairEditorView.Presenter,
         ValuePairEditor<String> {
 
-    private EnumValuePairEditorView view;
+    protected AbstractStringValuePairEditorView view;
 
-    private String currentValue;
+    protected String currentValue;
 
-    private AnnotationValuePairDefinition valuePairDefinition;
+    protected AnnotationValuePairDefinition valuePairDefinition;
 
-    private ValuePairEditorHandler editorHandler;
+    protected ValuePairEditorHandler editorHandler;
 
-    public EnumValuePairEditor() {
-        view = GWT.create( EnumValuePairEditorViewImpl.class );
+    public AbstractStringValuePairEditor() {
+        view = GWT.create( AbstractStringValuePairEditorViewImpl.class );
         view.init( this );
     }
 
@@ -53,37 +48,24 @@ public class EnumValuePairEditor
     @Override
     public void init( AnnotationValuePairDefinition valuePairDefinition ) {
         this.valuePairDefinition = valuePairDefinition;
-        view.initOptions( createOptionsList( valuePairDefinition.enumValues() ) );
         view.setValuePairLabel( ValuePairEditorUtil.buildValuePairLabel( valuePairDefinition ) );
         view.showValuePairRequiredIndicator( !valuePairDefinition.hasDefaultValue() );
     }
 
-    private List<Pair<String, String>> createOptionsList( String[] enumValues ) {
-        List<Pair<String, String>> items = new ArrayList<Pair<String, String>>(  );
-        for ( int i = 0; i < enumValues.length; i++ ) {
-            items.add( new Pair( enumValues[i], enumValues[i] ) );
-        }
-        return items;
-    }
-
     @Override
     public void setValue( String value ) {
-        view.setSelectedValue( value != null ? value : UIUtil.NOT_SELECTED );
+        view.setValue( value );
         this.currentValue = value;
     }
 
+    @Override
     public String getValue( ) {
         return currentValue;
     }
 
     @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
     public void clear() {
-        view.setSelectedValue( UIUtil.NOT_SELECTED  );
+        view.clear();
     }
 
     @Override
@@ -113,7 +95,7 @@ public class EnumValuePairEditor
 
     @Override
     public void showValuePairName( boolean show ) {
-        //this editor doesn't need to hide the label
+        view.showValuePairName( show );
     }
 
     @Override
@@ -121,12 +103,4 @@ public class EnumValuePairEditor
         //This editor doesn't need the refresh method.
     }
 
-    @Override
-    public void onValueChange() {
-        String value = view.getSelectedValue();
-        currentValue = !UIUtil.NOT_SELECTED.equals( value ) ? value : null;
-        if ( editorHandler != null ) {
-            editorHandler.onValueChange();
-        }
-    }
 }

@@ -35,7 +35,7 @@ import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddoma
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.generic.GenericValuePairEditor;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.multiple.MultipleValuePairEditor;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.numeric.NumericValuePairEditor;
-import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.string.StringValuePairEditor;
+import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.string.AbstractStringValuePairEditor;
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
 import org.uberfire.ext.widgets.common.client.common.popups.BaseModal;
 import org.uberfire.ext.widgets.common.client.common.popups.footers.ModalFooterOKCancelButtons;
@@ -151,8 +151,8 @@ public class ValuePairEditorPopupViewImpl
             ( (MultipleValuePairEditor) valuePairEditor ).setValue( currentList );
         } else if ( valuePairEditor instanceof BooleanValuePairEditor ) {
             ( (BooleanValuePairEditor) valuePairEditor ).setValue( value != null ? Boolean.TRUE.equals( value ) : null );
-        } else if ( valuePairEditor instanceof StringValuePairEditor ) {
-            ( (StringValuePairEditor) valuePairEditor ).setValue( value != null ? value.toString() : null );
+        } else if ( valuePairEditor instanceof AbstractStringValuePairEditor ) {
+            ( (AbstractStringValuePairEditor) valuePairEditor ).setValue( value != null ? value.toString() : null );
         } else if ( valuePairEditor instanceof EnumValuePairEditor ) {
             ( (EnumValuePairEditor) valuePairEditor ).setValue( value != null ? value.toString() : null );
         } else if ( valuePairEditor instanceof MultipleEnumValuePairEditor ) {

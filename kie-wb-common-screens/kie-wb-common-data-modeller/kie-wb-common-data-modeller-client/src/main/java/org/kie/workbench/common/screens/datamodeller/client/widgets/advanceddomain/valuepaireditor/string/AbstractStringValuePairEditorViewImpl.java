@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2015 JBoss Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,42 +14,52 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.enums;
+package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.string;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
+import org.gwtbootstrap3.client.ui.TextBox;
 
-public class MultipleEnumValuePairEditorViewImpl
+public class AbstractStringValuePairEditorViewImpl
         extends Composite
-        implements MultipleEnumValuePairEditorView {
+        implements AbstractStringValuePairEditorView {
 
-    interface MultipleEnumValuePairEditorViewImplUiBinder
+    interface AbstractStringValuePairEditorViewImplUiBinder
             extends
-            UiBinder<Widget, MultipleEnumValuePairEditorViewImpl> {
+            UiBinder<Widget, AbstractStringValuePairEditorViewImpl> {
 
     }
 
-    private static MultipleEnumValuePairEditorViewImplUiBinder uiBinder = GWT.create( MultipleEnumValuePairEditorViewImplUiBinder.class );
+    private static AbstractStringValuePairEditorViewImplUiBinder uiBinder = GWT.create( AbstractStringValuePairEditorViewImplUiBinder.class );
 
     @UiField
     FormLabel valuePairLabel;
 
     @UiField
-    FlowPanel controlsContainer;
+    TextBox textBox;
 
     @UiField
     HelpBlock helpBlock;
 
     private Presenter presenter;
 
-    public MultipleEnumValuePairEditorViewImpl() {
+    public AbstractStringValuePairEditorViewImpl() {
         initWidget( uiBinder.createAndBindUi( this ) );
+        textBox.addKeyUpHandler( new KeyUpHandler() {
+            @Override
+            public void onKeyUp( KeyUpEvent event ) {
+                presenter.onValueChange();
+            }
+        } );
     }
 
     @Override
@@ -58,28 +68,34 @@ public class MultipleEnumValuePairEditorViewImpl
     }
 
     @Override
-    public void addOptionEditor( EnumValuePairOptionEditor optionEditor ) {
-        controlsContainer.add( optionEditor );
+    public void setValue( String value ) {
+        textBox.setText( value );
     }
 
     @Override
-    public void clear() {
-        controlsContainer.clear();
+    public String getValue() {
+        return textBox.getText();
     }
 
     @Override
-    public void setValuePairLabel( String label ) {
-        valuePairLabel.setText( label );
+    public void setValuePairLabel( String valuePairLabel ) {
+        this.valuePairLabel.setText( valuePairLabel );
     }
 
     @Override
     public void showValuePairName( boolean show ) {
-        valuePairLabel.setVisible( show );
+        this.valuePairLabel.setVisible( show );
     }
 
     @Override
     public void showValuePairRequiredIndicator( boolean required ) {
-        valuePairLabel.setShowRequiredIndicator( required );
+        this.valuePairLabel.setShowRequiredIndicator( required );
+    }
+
+    @Override
+    public void clear() {
+        textBox.setText( null );
+        clearErrorMessage();
     }
 
     @Override
@@ -90,5 +106,10 @@ public class MultipleEnumValuePairEditorViewImpl
     @Override
     public void clearErrorMessage() {
         helpBlock.setText( null );
+    }
+
+    @UiHandler( "textBox" )
+    void onValueChange( ChangeEvent event ) {
+        presenter.onValueChange();
     }
 }

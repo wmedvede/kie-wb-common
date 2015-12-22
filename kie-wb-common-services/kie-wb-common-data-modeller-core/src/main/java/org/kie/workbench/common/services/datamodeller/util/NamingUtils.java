@@ -186,16 +186,8 @@ public class NamingUtils {
         return null;
     }
 
-    public static Character parseCharValue( String value ) {
-        if ( value == null ) {
-            return null;
-        }
-        value = value.trim();
-        if ( value.length() == 0 ) {
-            return '\u0000';
-        } else {
-            return value.charAt( 0 );
-        }
+    public static String parseCharValue( String value ) {
+        return value;
     }
 
     public static Long parseLongValue( final String value ) {
