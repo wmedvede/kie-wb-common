@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.generic;
 
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -24,6 +25,7 @@ import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddoma
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.util.ValuePairEditorUtil;
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
 
+@Dependent
 public class GenericValuePairEditor
     implements GenericValuePairEditorView.Presenter,
         ValuePairEditor<String> {

@@ -17,6 +17,7 @@
 package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.generic;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.core.client.GWT;
@@ -32,17 +33,18 @@ import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.kie.workbench.common.screens.javaeditor.client.widget.EditJavaSourceWidget;
 
+@Dependent
 public class GenericValuePairEditorViewImpl
         extends Composite
         implements GenericValuePairEditorView {
 
-    interface ComplexValuePairEditorViewImplUiBinder
+    interface GenericValuePairEditorViewImplUiBinder
             extends
             UiBinder<Widget, GenericValuePairEditorViewImpl> {
 
     }
 
-    private static ComplexValuePairEditorViewImplUiBinder uiBinder = GWT.create( ComplexValuePairEditorViewImplUiBinder.class );
+    private static GenericValuePairEditorViewImplUiBinder uiBinder = GWT.create( GenericValuePairEditorViewImplUiBinder.class );
 
     private Presenter presenter;
 
@@ -58,18 +60,19 @@ public class GenericValuePairEditorViewImpl
     @UiField
     Button validateButton;
 
-    @Inject
     private EditJavaSourceWidget javaSourceEditor;
 
-    public GenericValuePairEditorViewImpl() {
+    @Inject
+    public GenericValuePairEditorViewImpl( EditJavaSourceWidget javaSourceEditor ) {
         initWidget( uiBinder.createAndBindUi( this ) );
+        this.javaSourceEditor = javaSourceEditor;
     }
 
     @PostConstruct
-    private void init() {
+    protected void init() {
         editorContainer.add( javaSourceEditor );
         javaSourceEditor.setReadonly( false );
-        javaSourceEditor.setWidth( "500px" );
+        javaSourceEditor.setWidth( "400px" );
         javaSourceEditor.setHeight( "100px" );
         javaSourceEditor.addChangeHandler( new EditJavaSourceWidget.TextChangeHandler() {
             @Override

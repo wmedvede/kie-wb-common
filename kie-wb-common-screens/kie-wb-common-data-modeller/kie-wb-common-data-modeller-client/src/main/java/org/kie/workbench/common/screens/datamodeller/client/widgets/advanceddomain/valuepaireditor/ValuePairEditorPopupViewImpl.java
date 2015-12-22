@@ -27,7 +27,6 @@ import org.gwtbootstrap3.client.ui.Container;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.client.ui.constants.ColumnSize;
-import org.gwtbootstrap3.client.ui.constants.FormType;
 import org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.booleans.BooleanValuePairEditor;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.enums.EnumValuePairEditor;
@@ -61,7 +60,6 @@ public class ValuePairEditorPopupViewImpl
 
     @Inject
     public ValuePairEditorPopupViewImpl() {
-        form.setType( FormType.HORIZONTAL );
         container.setFluid( true );
         container.add( row );
         row.add( column );
