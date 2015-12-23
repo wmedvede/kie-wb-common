@@ -19,11 +19,17 @@ package org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddom
 import com.google.gwt.core.client.GWT;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditor;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.multiple.MultipleValuePairEditor;
+import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.multiple.MultipleValuePairEditorView;
 import org.kie.workbench.common.services.datamodeller.core.AnnotationValuePairDefinition;
 
 public class MultipleCharacterValuePairEditor extends MultipleValuePairEditor {
 
     public MultipleCharacterValuePairEditor() {
+        super();
+    }
+
+    public MultipleCharacterValuePairEditor( MultipleValuePairEditorView view ) {
+        super( view );
     }
 
     @Override

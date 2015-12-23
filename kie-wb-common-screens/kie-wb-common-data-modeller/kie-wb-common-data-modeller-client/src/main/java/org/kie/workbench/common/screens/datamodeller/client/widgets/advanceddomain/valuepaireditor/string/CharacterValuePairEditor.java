@@ -28,6 +28,10 @@ public class CharacterValuePairEditor
         super();
     }
 
+    public CharacterValuePairEditor( AbstractStringValuePairEditorView view ) {
+        super( view );
+    }
+
     @Override
     public void onValueChange() {
         String originalCurrentValue = view.getValue();

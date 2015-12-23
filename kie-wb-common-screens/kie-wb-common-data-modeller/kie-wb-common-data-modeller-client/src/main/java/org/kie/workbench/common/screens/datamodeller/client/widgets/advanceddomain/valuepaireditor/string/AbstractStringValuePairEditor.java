@@ -36,7 +36,11 @@ public abstract class AbstractStringValuePairEditor
     protected ValuePairEditorHandler editorHandler;
 
     public AbstractStringValuePairEditor() {
-        view = GWT.create( AbstractStringValuePairEditorViewImpl.class );
+        this( ( AbstractStringValuePairEditorView ) GWT.create( AbstractStringValuePairEditorViewImpl.class ) );
+    }
+
+    public AbstractStringValuePairEditor( AbstractStringValuePairEditorView view ) {
+        this.view = view;
         view.init( this );
     }
 

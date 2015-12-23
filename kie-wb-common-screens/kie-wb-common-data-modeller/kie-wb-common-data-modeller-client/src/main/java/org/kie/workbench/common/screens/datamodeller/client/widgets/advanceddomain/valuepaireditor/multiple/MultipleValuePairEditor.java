@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datamodeller.client.resources.i18n.Constants;
 import org.kie.workbench.common.screens.datamodeller.client.widgets.advanceddomain.valuepaireditor.ValuePairEditor;
@@ -43,7 +42,11 @@ public abstract class MultipleValuePairEditor
     boolean valid = true;
 
     public MultipleValuePairEditor() {
-        view = GWT.create( MultipleValuePairEditorViewImpl.class );
+        this( ( MultipleValuePairEditorView ) GWT.create( MultipleValuePairEditorViewImpl.class ) );
+    }
+
+    public MultipleValuePairEditor( MultipleValuePairEditorView view ) {
+        this.view = view;
         view.init( this );
     }
 
@@ -140,14 +143,13 @@ public abstract class MultipleValuePairEditor
     public void onAddItem( ) {
         ValuePairEditor<?> addItemEditor = view.getAddItemEditor();
         if ( !addItemEditor.isValid() || addItemEditor.getValue() == null ) {
-            Window.alert( Constants.INSTANCE.advanced_domain_multiple_value_pair_editor_message_null_or_invalid() );
+            view.showAlert( Constants.INSTANCE.advanced_domain_multiple_value_pair_editor_message_null_or_invalid() );
         } else {
 
             ValuePairEditor<?>  valuePairEditor = createValuePairEditor( valuePairDefinition );
             view.addItemEditor( valuePairEditor );
             setEditorValue( valuePairEditor, addItemEditor.getValue() );
             addItemEditor.clear();
-            //addItemEditor.setValue(  );
             addItemEditor.clearErrorMessage();
             notifyChange();
         }

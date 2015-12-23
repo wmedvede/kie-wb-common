@@ -53,6 +53,8 @@ public interface MultipleValuePairEditorView
 
     Integer addItemEditor( ValuePairEditor<?> valuePairEditor );
 
+    void showAlert( String message );
+
     void clear();
 
 }

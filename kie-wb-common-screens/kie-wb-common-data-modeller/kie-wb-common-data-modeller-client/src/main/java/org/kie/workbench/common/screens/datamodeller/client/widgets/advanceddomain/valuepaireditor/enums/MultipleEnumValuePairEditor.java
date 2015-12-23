@@ -46,7 +46,11 @@ public class MultipleEnumValuePairEditor
     private List<String> currentValues = null;
 
     public MultipleEnumValuePairEditor() {
-        view = GWT.create( MultipleEnumValuePairEditorViewImpl.class );
+        this( ( MultipleEnumValuePairEditorView ) GWT.create( MultipleEnumValuePairEditorViewImpl.class ) );
+    }
+
+    public MultipleEnumValuePairEditor( MultipleEnumValuePairEditorView view ) {
+        this.view = view;
         view.init( this );
     }
 
@@ -130,7 +134,7 @@ public class MultipleEnumValuePairEditor
         view.clear();
         if ( options != null ) {
             for ( final Pair<String, String> option : options ) {
-                final EnumValuePairOptionEditor optionEditor = new EnumValuePairOptionEditor( option.getK2() );
+                final EnumValuePairOptionEditor optionEditor = createOptionEditor( option.getK2() );
                 valueToEditor.put( option.getK2(), optionEditor );
                 optionEditor.addEnumValuePairOptionEditorHandler( new EnumValuePairOptionEditorView.EnumValuePairOptionEditorHandler() {
                     @Override
@@ -144,7 +148,7 @@ public class MultipleEnumValuePairEditor
                 view.addOptionEditor( optionEditor );
             }
         }
-        final EnumValuePairOptionEditor emptyArrayEditor = new EnumValuePairOptionEditor("{}");
+        final EnumValuePairOptionEditor emptyArrayEditor = createOptionEditor( "{}" );
         view.addOptionEditor( emptyArrayEditor );
         valueToEditor.put( EMPTY_ARRAY, emptyArrayEditor );
         emptyArrayEditor.addEnumValuePairOptionEditorHandler( new EnumValuePairOptionEditorView.EnumValuePairOptionEditorHandler() {
@@ -156,6 +160,11 @@ public class MultipleEnumValuePairEditor
                 }
             }
         } );
+    }
+
+    //protected for testing purposes
+    protected EnumValuePairOptionEditor createOptionEditor( String option ) {
+        return new EnumValuePairOptionEditor( option );
     }
 
     private void doOnValueChange( String valueName, boolean isChecked ) {

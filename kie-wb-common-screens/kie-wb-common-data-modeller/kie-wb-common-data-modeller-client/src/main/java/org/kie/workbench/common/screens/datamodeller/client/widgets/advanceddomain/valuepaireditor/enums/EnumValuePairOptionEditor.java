@@ -28,7 +28,11 @@ public class EnumValuePairOptionEditor
     private EnumValuePairOptionEditorView.EnumValuePairOptionEditorHandler handler;
 
     public EnumValuePairOptionEditor() {
-        view = new EnumValuePairOptionEditorViewImpl();
+        this( new EnumValuePairOptionEditorViewImpl() );
+    }
+
+    public EnumValuePairOptionEditor( EnumValuePairOptionEditorView view ) {
+        this.view = view;
         view.init( this );
     }
 

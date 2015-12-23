@@ -33,6 +33,6 @@ public @interface DoubleParamsAnnotation {
 
     double[] doubleArrayParam1() default {};
 
-    double[] intArrayParam2();
+    double[] doubleArrayParam2();
 
 }

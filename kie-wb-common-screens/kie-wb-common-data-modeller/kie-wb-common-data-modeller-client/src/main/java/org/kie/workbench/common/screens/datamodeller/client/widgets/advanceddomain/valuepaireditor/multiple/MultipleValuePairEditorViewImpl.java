@@ -27,6 +27,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import org.gwtbootstrap3.client.ui.Button;
@@ -196,6 +197,11 @@ public class MultipleValuePairEditorViewImpl
 
     public ValuePairEditor<?> getAddItemEditor() {
         return addItemEditor;
+    }
+
+    @Override
+    public void showAlert( String message ) {
+        Window.alert( message );
     }
 
     private void initAddItemPanel() {

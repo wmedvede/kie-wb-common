@@ -41,7 +41,11 @@ public class EnumValuePairEditor
     private ValuePairEditorHandler editorHandler;
 
     public EnumValuePairEditor() {
-        view = GWT.create( EnumValuePairEditorViewImpl.class );
+        this( ( EnumValuePairEditorView ) GWT.create( EnumValuePairEditorViewImpl.class ) );
+    }
+
+    public EnumValuePairEditor( EnumValuePairEditorView view ) {
+        this.view = view;
         view.init( this );
     }
 
