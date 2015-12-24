@@ -23,6 +23,10 @@ public class StringValuePairEditor
         super();
     }
 
+    public StringValuePairEditor( AbstractStringValuePairEditorView view ) {
+        super( view );
+    }
+
     @Override
     public void onValueChange() {
         currentValue = "".equals( view.getValue() ) ? null : view.getValue();

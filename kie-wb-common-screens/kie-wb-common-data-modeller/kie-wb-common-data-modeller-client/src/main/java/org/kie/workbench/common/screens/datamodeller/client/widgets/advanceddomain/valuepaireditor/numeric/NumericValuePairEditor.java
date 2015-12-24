@@ -41,7 +41,11 @@ public class NumericValuePairEditor
     boolean valid = true;
 
     public NumericValuePairEditor() {
-        view = GWT.create( NumericValuePairEditorViewImpl.class );
+        this( ( NumericValuePairEditorView ) GWT.create( NumericValuePairEditorViewImpl.class ) );
+    }
+
+    public NumericValuePairEditor( NumericValuePairEditorView view ) {
+        this.view = view;
         view.init( this );
     }
 
@@ -56,6 +60,10 @@ public class NumericValuePairEditor
         numberType = ValuePairEditorUtil.getNumberType( valuePairDefinition );
         view.setValuePairLabel( ValuePairEditorUtil.buildValuePairLabel( valuePairDefinition ) );
         view.showValuePairRequiredIndicator( !valuePairDefinition.hasDefaultValue() );
+    }
+
+    public NumberType getNumberType() {
+        return numberType;
     }
 
     public Object getValue( ) {

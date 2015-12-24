@@ -48,7 +48,11 @@ public class BooleanValuePairEditor
     }
 
     public BooleanValuePairEditor() {
-        view = GWT.create( BooleanValuePairEditorViewImpl.class );
+        this ( ( BooleanValuePairEditorViewImpl ) GWT.create( BooleanValuePairEditorViewImpl.class ) );
+    }
+
+    public BooleanValuePairEditor( BooleanValuePairEditorView view ) {
+        this.view = view;
         view.init( this );
         view.initOptions( options );
     }
