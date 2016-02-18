@@ -261,6 +261,7 @@ public class DataObjectBrowser
         dataProvider.getList().addAll( sortBuffer );
         dataProvider.flush();
         dataProvider.refresh();
+        view.redrawRow( -1 );
     }
 
     private void addNewProperty( DataObject dataObject,

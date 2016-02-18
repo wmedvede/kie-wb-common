@@ -27,6 +27,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.gwtbootstrap3.client.ui.Container;
 import org.gwtbootstrap3.client.ui.Legend;
 import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWorkbenchContext;
 import org.kie.workbench.common.screens.datamodeller.client.context.DataModelerWorkbenchContextChangeEvent;
@@ -56,6 +57,9 @@ public class DataModelerScreenViewImpl
     }
 
     private static DataModelerScreenViewBinder uiBinder = GWT.create( DataModelerScreenViewBinder.class );
+
+    @UiField
+    Container mainPanel;
 
     @UiField
     FlowPanel dataObjectPanel;
