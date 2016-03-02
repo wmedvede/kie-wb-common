@@ -20,52 +20,34 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.ui.Composite;
-import org.gwtbootstrap3.client.ui.LinkedGroup;
+import com.google.gwt.user.client.ui.Label;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.uberfire.ext.editor.commons.client.BaseEditorViewImpl;
 
 @Dependent
 @Templated
-public class DataSourceDefExplorerViewImpl
-        extends Composite
-        implements DataSourceDefExplorerView {
+public class DataSourceDefEditorViewImpl
+        extends BaseEditorViewImpl
+        implements  DataSourceDefEditorView {
 
     @Inject
     @DataField
-    private com.google.gwt.user.client.ui.Label emptyLabel;
-
-    @Inject
-    @DataField
-    private LinkedGroup itemsGroup;
+    Label label;
 
     private Presenter presenter;
 
-    public DataSourceDefExplorerViewImpl() {
+    public DataSourceDefEditorViewImpl() {
     }
 
     @PostConstruct
     private void init() {
-        //set i18n or whatever any other ui initialization here.
+        //UI initializations
+        label.setText( "DataSourceEditorView !" );
     }
 
     @Override
     public void init( Presenter presenter ) {
         this.presenter = presenter;
-    }
-
-    @Override
-    public void addItem( DataSourceDefItem item ) {
-        itemsGroup.add( item );
-    }
-
-    @Override
-    public void removeItem( DataSourceDefItem item ) {
-        itemsGroup.remove( item );
-    }
-
-    @Override
-    public void clear() {
-        itemsGroup.clear();
     }
 }

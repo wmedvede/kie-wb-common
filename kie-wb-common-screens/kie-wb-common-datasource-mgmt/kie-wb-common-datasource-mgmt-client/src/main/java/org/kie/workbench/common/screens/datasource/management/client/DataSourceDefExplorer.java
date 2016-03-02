@@ -18,12 +18,14 @@ package org.kie.workbench.common.screens.datasource.management.client;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 
@@ -37,16 +39,20 @@ public class DataSourceDefExplorer
 
     Caller<DataSourceManagementService> dataSourceService;
 
+    Instance<DataSourceDefItem> itemInstance;
+
     @Inject
     public DataSourceDefExplorer( DataSourceDefExplorerView view,
-            Caller<DataSourceManagementService> dataSourceService ) {
+            Caller<DataSourceManagementService> dataSourceService,
+            Instance<DataSourceDefItem> itemInstance ) {
         this.view = view;
         this.dataSourceService = dataSourceService;
+        this.itemInstance = itemInstance;
         view.init( this );
     }
 
     @PostConstruct
-    public void init() {
+    private void init() {
         loadItems();
     }
 
@@ -69,7 +75,7 @@ public class DataSourceDefExplorer
     private void loadDataSources( List<DataSourceDef> dataSourceDefs ) {
         DataSourceDefItem item;
         for ( DataSourceDef dataSourceDef : dataSourceDefs ) {
-            item = new DataSourceDefItem();
+            item = createItem();
             item.setName( dataSourceDef.getName() );
             view.addItem( item );
         }
@@ -77,13 +83,15 @@ public class DataSourceDefExplorer
 
     private void loadItems() {
         DataSourceDefItem item;
-
         for ( int i = 0; i < 10; i ++ ) {
-            item = new DataSourceDefItem();
+            item = createItem();
             item.setName( "Datasource def: " + i );
             view.addItem( item );
         }
-
     }
 
+    protected DataSourceDefItem createItem() {
+        //return itemInstance.get();
+        return IOC.getBeanManager().lookupBean( DataSourceDefItem.class ).newInstance();
+    }
 }

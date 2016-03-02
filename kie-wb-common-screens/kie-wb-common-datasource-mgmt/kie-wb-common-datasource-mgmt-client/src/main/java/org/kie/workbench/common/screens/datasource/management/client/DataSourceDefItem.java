@@ -16,11 +16,15 @@
 
 package org.kie.workbench.common.screens.datasource.management.client;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
+@Dependent
 public class DataSourceDefItem
         implements IsWidget,
         DataSourceDefItemView.Presenter {
@@ -28,8 +32,10 @@ public class DataSourceDefItem
 
     private DataSourceDefItemView view;
 
-    public DataSourceDefItem( ) {
-        view = GWT.create( DataSourceDefItemViewImpl.class );
+    @Inject
+    public DataSourceDefItem( DataSourceDefItemView view ) {
+        GWT.log( "Creando DataSourceDefItem");
+        this.view = view;
         view.init( this );
     }
 
