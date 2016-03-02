@@ -16,38 +16,50 @@
 
 package org.kie.workbench.common.screens.datasource.management.client;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
 import org.gwtbootstrap3.client.ui.LinkedGroupItem;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+@Dependent
+@Templated
 public class DataSourceDefItemViewImpl
         extends Composite
         implements DataSourceDefItemView {
 
-    interface Binder extends UiBinder<Widget, DataSourceDefItemViewImpl> {
-
-    }
-
-    private static Binder uiBinder = GWT.create( Binder.class );
+    @Inject
+    @DataField( "item" )
+    LinkedGroupItem item;
 
     Presenter presenter;
 
-    @UiField
-    LinkedGroupItem item;
-
     public DataSourceDefItemViewImpl() {
-        initWidget( uiBinder.createAndBindUi( this ) );
+        GWT.log( "creando DataSourceDefItemViewImpl" );
+    }
+
+    @PostConstruct
+    private void init() {
+        GWT.log( "init() DataSourceDefItemViewImpl" );
+
+
+        //TODO: ask Chistian why this alternative doesn't work.
         item.addClickHandler( new ClickHandler() {
             @Override
             public void onClick( ClickEvent clickEvent ) {
+                //GWT.log( "estoy en el click" );
+                Window.alert( "ahora si?" );
                 presenter.onClick();
             }
         } );
+        GWT.log( "end of init() in DataSourceDefItemViewImpl" );
     }
 
     @Override
@@ -65,5 +77,11 @@ public class DataSourceDefItemViewImpl
         this.presenter = presenter;
     }
 
+    //@EventHandler( "item" )
+    //@SinkNative( Event.ONCLICK )
+    public void onItemClick( ClickEvent event ) {
+        GWT.log( "item clicked" );
+        presenter.onClick();
+    }
 
 }

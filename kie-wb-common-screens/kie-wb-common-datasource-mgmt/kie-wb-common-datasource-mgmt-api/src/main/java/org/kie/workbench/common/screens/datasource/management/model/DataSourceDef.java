@@ -16,6 +16,9 @@
 
 package org.kie.workbench.common.screens.datasource.management.model;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
+
+@Portable
 public class DataSourceDef {
 
     String name;
@@ -39,6 +42,9 @@ public class DataSourceDef {
     boolean useJTA;
 
     boolean useCCM;
+
+    public DataSourceDef() {
+    }
 
     public String getName() {
         return name;
