@@ -31,7 +31,7 @@ import org.kie.workbench.integration.DataSourceManager;
 public class DataSourceManagementServiceImpl
         implements DataSourceManagementService {
 
-    DataSourceManager dataSourceManager;
+    DataSourceManager dataSourceManager = new DataSourceManager();
 
     @Override
     public List<DataSourceDef> getDataSources() {

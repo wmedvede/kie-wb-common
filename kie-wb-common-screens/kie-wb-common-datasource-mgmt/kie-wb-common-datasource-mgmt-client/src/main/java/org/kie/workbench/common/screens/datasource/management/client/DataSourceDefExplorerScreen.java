@@ -24,7 +24,9 @@ import org.uberfire.client.annotations.WorkbenchMenu;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
+import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.Command;
+import org.uberfire.mvp.PlaceRequest;
 import org.uberfire.workbench.model.menu.MenuFactory;
 import org.uberfire.workbench.model.menu.Menus;
 
@@ -34,11 +36,19 @@ public class DataSourceDefExplorerScreen {
 
     private DataSourceDefExplorer explorer;
 
+    private PlaceRequest placeRequest;
+
     private Menus menu;
 
     @Inject
     public DataSourceDefExplorerScreen( DataSourceDefExplorer explorer ) {
         this.explorer = explorer;
+    }
+
+    @OnStartup
+    public void onStartup( PlaceRequest placeRequest ) {
+        this.placeRequest = placeRequest;
+        this.menu = makeMenuBar();
     }
 
     @WorkbenchPartTitle
@@ -71,5 +81,4 @@ public class DataSourceDefExplorerScreen {
             }
         };
     }
-
 }
