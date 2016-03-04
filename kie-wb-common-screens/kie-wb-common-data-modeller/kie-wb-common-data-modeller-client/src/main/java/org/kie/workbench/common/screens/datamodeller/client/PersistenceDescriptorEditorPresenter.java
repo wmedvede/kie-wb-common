@@ -22,6 +22,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datamodeller.client.pdescriptor.ClassRow;
@@ -37,6 +38,7 @@ import org.kie.workbench.common.screens.datamodeller.model.persistence.Transacti
 import org.kie.workbench.common.screens.datamodeller.service.DataModelerService;
 import org.kie.workbench.common.screens.datamodeller.service.PersistenceDescriptorEditorService;
 import org.kie.workbench.common.screens.datamodeller.service.PersistenceDescriptorService;
+import org.kie.workbench.common.widgets.client.popups.validation.ValidationPopup;
 import org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants;
 import org.kie.workbench.common.widgets.metadata.client.KieEditor;
 import org.uberfire.backend.vfs.ObservablePath;
@@ -47,13 +49,16 @@ import org.uberfire.client.annotations.WorkbenchPartTitleDecoration;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.views.pfly.multipage.PageImpl;
 import org.uberfire.ext.editor.commons.client.file.SaveOperationService;
+import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 import org.uberfire.ext.widgets.common.client.callbacks.HasBusyIndicatorDefaultErrorCallback;
 import org.uberfire.lifecycle.OnClose;
 import org.uberfire.lifecycle.OnFocus;
 import org.uberfire.lifecycle.OnMayClose;
 import org.uberfire.lifecycle.OnStartup;
+import org.uberfire.mvp.Command;
 import org.uberfire.mvp.ParameterizedCommand;
 import org.uberfire.mvp.PlaceRequest;
+import org.uberfire.workbench.events.NotificationEvent;
 import org.uberfire.workbench.model.menu.Menus;
 
 @Dependent
@@ -320,6 +325,32 @@ public class PersistenceDescriptorEditorPresenter
         view.showBusyIndicator( Constants.INSTANCE.persistence_descriptor_editor_loading_classes_message() );
         dataModelerService.call( getLoadClassSuccessCallback( className ),
                 new HasBusyIndicatorDefaultErrorCallback( view ) ).isPersistableClass( className, versionRecordManager.getCurrentPath() );
+    }
+
+    @Override
+    protected Command onValidate() {
+        return new Command() {
+            @Override
+            public void execute() {
+                onValidateDescriptor();
+            }
+        };
+    }
+
+    protected void onValidateDescriptor() {
+        descriptorService.call( new RemoteCallback<List<ValidationMessage>>() {
+
+            @Override
+            public void callback( final List<ValidationMessage> results ) {
+                if ( results == null || results.isEmpty() ) {
+                    notification.fire( new NotificationEvent(
+                            org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants.INSTANCE.ItemValidatedSuccessfully(),
+                            NotificationEvent.NotificationType.SUCCESS ) );
+                } else {
+                    ValidationPopup.showMessages( results );
+                }
+            }
+        }, new DefaultErrorCallback() ).validate( versionRecordManager.getCurrentPath(), content.getDescriptorModel() );
     }
 
     protected void updateContent() {
