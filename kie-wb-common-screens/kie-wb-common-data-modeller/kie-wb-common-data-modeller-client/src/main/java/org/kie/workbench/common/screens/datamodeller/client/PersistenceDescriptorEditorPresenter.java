@@ -338,6 +338,7 @@ public class PersistenceDescriptorEditorPresenter
     }
 
     protected void onValidateDescriptor() {
+        updateContent();
         descriptorService.call( new RemoteCallback<List<ValidationMessage>>() {
 
             @Override

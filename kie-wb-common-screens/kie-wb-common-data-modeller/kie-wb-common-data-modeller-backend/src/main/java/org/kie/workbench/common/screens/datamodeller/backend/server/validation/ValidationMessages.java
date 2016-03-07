@@ -59,6 +59,18 @@ public class ValidationMessages {
 
     public static final String PERSISTENCE_UNIT_JTA_DATASOURCE_EMPTY = "JTA transaction type must have a non empty Data Source configured";
 
+    public static final long PERSISTENCE_UNIT_NON_JTA_DATASOURCE_EMPTY_ID = ID_SEQUENCE++;
+
+    public static final String PERSISTENCE_UNIT_NON_JTA_DATASOURCE_EMPTY = "Resource transaction type must have a non empty Data Source configured";
+
+    public static final long PROPERTY_NAME_EMPTY_ID = ID_SEQUENCE++;
+
+    public static final String PROPERTY_NAME_EMPTY = "Property name should have a non empty String value";
+
+    public static final long PROPERTY_VALUE_EMPTY_ID = ID_SEQUENCE++;
+
+    public static final String PROPERTY_VALUE_EMPTY = "Property {0} has an empty value assigned";
+
     public static ValidationMessage newValidationMessage( long id, Level level, String text ) {
         ValidationMessage validationMessage = new ValidationMessage();
         validationMessage.setId( id );

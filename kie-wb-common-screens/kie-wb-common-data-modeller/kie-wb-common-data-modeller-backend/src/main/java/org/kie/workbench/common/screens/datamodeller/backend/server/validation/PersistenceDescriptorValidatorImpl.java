@@ -25,6 +25,7 @@ import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.kie.workbench.common.screens.datamodeller.backend.server.DataModelerServiceHelper;
 import org.kie.workbench.common.screens.datamodeller.model.persistence.PersistenceDescriptorModel;
 import org.kie.workbench.common.screens.datamodeller.model.persistence.PersistenceUnitModel;
+import org.kie.workbench.common.screens.datamodeller.model.persistence.Property;
 import org.kie.workbench.common.screens.datamodeller.model.persistence.TransactionType;
 import org.kie.workbench.common.screens.datamodeller.validation.PersistenceDescriptorValidator;
 import org.kie.workbench.common.services.shared.project.KieProject;
@@ -41,6 +42,8 @@ public class PersistenceDescriptorValidatorImpl
 
     private PersistableClassValidator classValidator = new PersistableClassValidator();
 
+    private PropertyValidator propertyValidator = new PropertyValidator();
+
     public PersistenceDescriptorValidatorImpl() {
     }
 
@@ -55,6 +58,7 @@ public class PersistenceDescriptorValidatorImpl
     public List<ValidationMessage> validate( Path path, PersistenceDescriptorModel model ) {
 
         List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
+        List<ValidationMessage> subMessages;
         ValidationMessage message;
         PersistenceUnitModel unitModel;
 
@@ -89,20 +93,31 @@ public class PersistenceDescriptorValidatorImpl
                     ValidationMessages.PERSISTENCE_UNIT_TRANSACTION_TYPE_EMPTY ) );
         } else if ( unitModel.getTransactionType() == TransactionType.JTA &&
                 ( unitModel.getJtaDataSource() == null || "".equals( unitModel.getJtaDataSource().trim() ) ) ) {
-
+            messages.add( ValidationMessages.newErrorMessage( ValidationMessages.PERSISTENCE_UNIT_JTA_DATASOURCE_EMPTY_ID,
+                    ValidationMessages.PERSISTENCE_UNIT_JTA_DATASOURCE_EMPTY ) );
+        } else if ( unitModel.getTransactionType() == TransactionType.RESOURCE_LOCAL &&
+                ( unitModel.getNonJtaDataSource() == null || "".equals( unitModel.getNonJtaDataSource().trim() ) ) ) {
+            messages.add( ValidationMessages.newErrorMessage( ValidationMessages.PERSISTENCE_UNIT_NON_JTA_DATASOURCE_EMPTY_ID,
+                    ValidationMessages.PERSISTENCE_UNIT_NON_JTA_DATASOURCE_EMPTY ) );
         }
 
         if ( unitModel.getClasses() != null && unitModel.getClasses().size() > 0 ) {
             ClassLoader projectClassLoader = serviceHelper.getProjectClassLoader( project );
             for ( String clazz : unitModel.getClasses() ) {
-                if ( ( message = classValidator.validate( clazz, projectClassLoader ) ) != null  ) {
+                if ( ( message = classValidator.validate( clazz, projectClassLoader ) ) != null ) {
                     messages.add( message );
                 }
             }
         }
 
+        if ( unitModel.getProperties() != null ) {
+            for ( Property property : unitModel.getProperties() ) {
+                subMessages = propertyValidator.validate( property.getName(), property.getValue() );
+                if ( subMessages.size() > 0 ) {
+                    messages.addAll( subMessages );
+                }
+            }
+        }
         return messages;
     }
-
-
 }
