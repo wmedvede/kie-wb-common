@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.service;
+package org.kie.workbench.common.screens.datasource.management.backend;
 
 import java.util.List;
 
-import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 
-@Remote
-public interface DataSourceManagementService {
+public interface DataSourceDeploymentService {
 
-    List<DataSourceDef> getDataSources();
+    void deploy( final DataSourceDef dataSourceDef ) throws Exception;
 
-    List<DataSourceDeploymentInfo> getSystemDataSources();
+    void undeploy( final String uuid ) throws Exception;
 
-    DataSourceDeploymentInfo getDeploymentInfo( String uuid );
+    DataSourceDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception;
 
-    void deploy( DataSourceDef dataSourceDef );
-
-    void undeploy( String uuid );
+    List<DataSourceDeploymentInfo> getAllDeploymentInfo() throws Exception;
 
 }

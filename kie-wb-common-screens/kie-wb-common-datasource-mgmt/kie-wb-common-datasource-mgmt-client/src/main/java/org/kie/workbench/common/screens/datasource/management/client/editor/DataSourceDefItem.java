@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client;
+package org.kie.workbench.common.screens.datasource.management.client.editor;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
@@ -34,7 +33,6 @@ public class DataSourceDefItem
 
     @Inject
     public DataSourceDefItem( DataSourceDefItemView view ) {
-        GWT.log( "Creando DataSourceDefItem");
         this.view = view;
         view.init( this );
     }

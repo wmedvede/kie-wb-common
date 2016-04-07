@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.type;
+package org.kie.workbench.common.screens.datasource.management.client.type;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IsWidget;
+import org.kie.workbench.common.screens.datasource.management.type.DataSourceDefTypeDefinition;
 import org.uberfire.client.resources.UberfireResources;
 import org.uberfire.client.workbench.type.ClientResourceType;
 

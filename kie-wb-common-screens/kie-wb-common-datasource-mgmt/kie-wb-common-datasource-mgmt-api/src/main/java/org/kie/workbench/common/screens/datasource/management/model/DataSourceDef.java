@@ -21,6 +21,8 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 @Portable
 public class DataSourceDef {
 
+    String uuid;
+
     String name;
 
     String jndi;
@@ -44,6 +46,14 @@ public class DataSourceDef {
     boolean useCCM;
 
     public DataSourceDef() {
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid( String uuid ) {
+        this.uuid = uuid;
     }
 
     public String getName() {
@@ -129,7 +139,8 @@ public class DataSourceDef {
     @Override
     public String toString() {
         return "DataSourceDef{" +
-                "name='" + name + '\'' +
+                "uuid='" + uuid + '\'' +
+                ", name='" + name + '\'' +
                 ", jndi='" + jndi + '\'' +
                 ", connectionURL='" + connectionURL + '\'' +
                 ", driverClass='" + driverClass + '\'' +
@@ -137,8 +148,74 @@ public class DataSourceDef {
                 ", driverName='" + driverName + '\'' +
                 ", user='" + user + '\'' +
                 ", password='" + password + '\'' +
+                ", poolName='" + poolName + '\'' +
                 ", useJTA=" + useJTA +
                 ", useCCM=" + useCCM +
                 '}';
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) {
+            return true;
+        }
+        if ( o == null || getClass() != o.getClass() ) {
+            return false;
+        }
+
+        DataSourceDef that = ( DataSourceDef ) o;
+
+        if ( useJTA != that.useJTA ) {
+            return false;
+        }
+        if ( useCCM != that.useCCM ) {
+            return false;
+        }
+        if ( uuid != null ? !uuid.equals( that.uuid ) : that.uuid != null ) {
+            return false;
+        }
+        if ( name != null ? !name.equals( that.name ) : that.name != null ) {
+            return false;
+        }
+        if ( jndi != null ? !jndi.equals( that.jndi ) : that.jndi != null ) {
+            return false;
+        }
+        if ( connectionURL != null ? !connectionURL.equals( that.connectionURL ) : that.connectionURL != null ) {
+            return false;
+        }
+        if ( driverClass != null ? !driverClass.equals( that.driverClass ) : that.driverClass != null ) {
+            return false;
+        }
+        if ( dataSourceClass != null ? !dataSourceClass.equals( that.dataSourceClass ) : that.dataSourceClass != null ) {
+            return false;
+        }
+        if ( driverName != null ? !driverName.equals( that.driverName ) : that.driverName != null ) {
+            return false;
+        }
+        if ( user != null ? !user.equals( that.user ) : that.user != null ) {
+            return false;
+        }
+        if ( password != null ? !password.equals( that.password ) : that.password != null ) {
+            return false;
+        }
+        return !( poolName != null ? !poolName.equals( that.poolName ) : that.poolName != null );
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = uuid != null ? uuid.hashCode() : 0;
+        result = 31 * result + ( name != null ? name.hashCode() : 0 );
+        result = 31 * result + ( jndi != null ? jndi.hashCode() : 0 );
+        result = 31 * result + ( connectionURL != null ? connectionURL.hashCode() : 0 );
+        result = 31 * result + ( driverClass != null ? driverClass.hashCode() : 0 );
+        result = 31 * result + ( dataSourceClass != null ? dataSourceClass.hashCode() : 0 );
+        result = 31 * result + ( driverName != null ? driverName.hashCode() : 0 );
+        result = 31 * result + ( user != null ? user.hashCode() : 0 );
+        result = 31 * result + ( password != null ? password.hashCode() : 0 );
+        result = 31 * result + ( poolName != null ? poolName.hashCode() : 0 );
+        result = 31 * result + ( useJTA ? 1 : 0 );
+        result = 31 * result + ( useCCM ? 1 : 0 );
+        return result;
     }
 }
