@@ -25,11 +25,20 @@
   <inherits name="com.google.gwt.http.HTTP"/>
   <inherits name="com.google.gwt.user.User"/>
 
-  <inherits name='org.uberfire.ext.editor.commons.UberfireCommonsEditorClient'/>
-  <inherits name="org.kie.workbench.common.widgets.metadata.KieWorkbenchMetadataWidget"/>
+  <inherits name="org.jboss.errai.ui.UI"/>
+  <inherits name="org.jboss.errai.common.ErraiCommon"/>
 
-  <inherits name="org.kie.workbench.common.screens.datasource.KieWorkbenchDatasourceAPI" />
+  <inherits name="org.uberfire.UberfireAPI"/>
+  <inherits name="org.uberfire.UberfireClientAPI"/>
+  <inherits name="org.uberfire.commons.UberfireCommons"/>
 
-  <source path="management/client"/>
+  <inherits name="org.uberfire.ext.editor.commons.UberfireCommonsEditorClient" />
+
+  <inherits name="org.kie.workbench.common.widgets.metadata.KieWorkbenchMetadataWidget" />
+  <inherits name="org.kie.workbench.common.widgets.KieWorkbenchWidgetsCommon" />
+
+  <inherits name="org.kie.workbench.common.screens.datasource.KieWorkbenchDataSourceAPI" />
+
+  <source path="management"/>
 
 </module>

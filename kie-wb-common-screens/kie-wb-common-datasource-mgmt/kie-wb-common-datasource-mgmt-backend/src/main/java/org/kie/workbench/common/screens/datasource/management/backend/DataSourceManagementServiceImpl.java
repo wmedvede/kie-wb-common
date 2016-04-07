@@ -19,30 +19,36 @@ package org.kie.workbench.common.screens.datasource.management.backend;
 import java.util.ArrayList;
 import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
+import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.screens.datasource.management.backend.jboss.JBossDataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
-
-import org.kie.workbench.integration.DataSourceManager;
+import org.kie.workbench.common.screens.datasource.management.backend.jboss.JBossDataSourceService;
 
 @Service
 @ApplicationScoped
 public class DataSourceManagementServiceImpl
         implements DataSourceManagementService {
 
-    DataSourceManager dataSourceManager = new DataSourceManager();
+    JBossDataSourceService dataSourceManager = new JBossDataSourceService();
+
+    @Inject
+    DataSourceDeploymentService deploymentService;
 
     @Override
     public List<DataSourceDef> getDataSources() {
 
-        List<org.kie.workbench.integration.DataSourceDef> serverSources = null;
+        List<JBossDataSourceDef> serverSources = null;
         List<DataSourceDef> dataSourceDefs = new ArrayList<DataSourceDef>( );
         DataSourceDef dataSourceDef;
 
         try {
             serverSources =  dataSourceManager.getDataSources();
-            for ( org.kie.workbench.integration.DataSourceDef ds : serverSources ) {
+            for ( JBossDataSourceDef ds : serverSources ) {
                 dataSourceDef = new DataSourceDef();
                 dataSourceDef.setName( ds.getName() );
                 dataSourceDef.setJndi( ds.getJndi() );
@@ -60,6 +66,56 @@ public class DataSourceManagementServiceImpl
             return dataSourceDefs;
         } catch ( Exception e ) {
             throw new RuntimeException( e.getMessage() );
+        }
+    }
+
+    @Override
+    public List<DataSourceDeploymentInfo> getSystemDataSources() {
+
+        List<JBossDataSourceDef> serverSources = null;
+        List<DataSourceDeploymentInfo> result = new ArrayList<DataSourceDeploymentInfo>( );
+        DataSourceDeploymentInfo deploymentInfo;
+
+        try {
+            serverSources =  dataSourceManager.getDataSources();
+            for ( JBossDataSourceDef ds : serverSources ) {
+                deploymentInfo = new DataSourceDeploymentInfo();
+                deploymentInfo.setUuid( ds.getName() );
+                deploymentInfo.setJndi( ds.getJndi() );
+                deploymentInfo.setManaged( true );
+                result.add( deploymentInfo );
+            }
+
+            return result;
+        } catch ( Exception e ) {
+            throw new RuntimeException( e.getMessage() );
+        }
+    }
+
+    @Override
+    public DataSourceDeploymentInfo getDeploymentInfo( String uuid ) {
+        try {
+            return deploymentService.getDeploymentInfo( uuid );
+        } catch ( Exception e ) {
+            throw ExceptionUtilities.handleException( e );
+        }
+    }
+
+    @Override
+    public void deploy( DataSourceDef dataSourceDef ) {
+        try {
+            deploymentService.deploy( dataSourceDef );
+        } catch ( Exception e ) {
+            throw ExceptionUtilities.handleException( e );
+        }
+    }
+
+    @Override
+    public void undeploy( String uuid ) {
+        try {
+            deploymentService.undeploy( uuid );
+        } catch ( Exception e ) {
+            throw ExceptionUtilities.handleException( e );
         }
     }
 }

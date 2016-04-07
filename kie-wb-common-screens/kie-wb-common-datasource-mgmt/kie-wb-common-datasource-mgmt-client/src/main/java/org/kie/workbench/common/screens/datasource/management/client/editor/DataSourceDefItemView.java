@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client;
+package org.kie.workbench.common.screens.datasource.management.client.editor;
 
 import org.uberfire.client.mvp.UberView;
-import org.uberfire.ext.editor.commons.client.BaseEditorView;
 
-public interface DataSourceDefEditorView
-        extends BaseEditorView,
-        UberView<DataSourceDefEditorView.Presenter> {
+public interface DataSourceDefItemView
+        extends UberView<DataSourceDefItemView.Presenter> {
 
     interface Presenter {
 
+        void onClick();
+
     }
+
+    void setName( String name );
+
+    String getName();
 
 }
