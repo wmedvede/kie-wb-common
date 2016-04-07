@@ -16,23 +16,22 @@
 
 package org.kie.workbench.common.screens.datasource.management.service;
 
-import java.util.List;
-
 import org.jboss.errai.bus.server.annotations.Remote;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
+import org.uberfire.backend.vfs.Path;
+import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 
 @Remote
-public interface DataSourceManagementService {
+public interface DataSourceDefEditorService
+        extends SupportsDelete {
 
-    List<DataSourceDef> getDataSources();
+    DataSourceDefEditorContent loadContent( final Path path );
 
-    List<DataSourceDeploymentInfo> getSystemDataSources();
+    Path save( final Path path, final DataSourceDefEditorContent editorContent, final String comment );
 
-    DataSourceDeploymentInfo getDeploymentInfo( String uuid );
+    Path create( final Path context, final String fileName );
 
-    void deploy( DataSourceDef dataSourceDef );
-
-    void undeploy( String uuid );
+    //TODO experimental
+    String test( final String jndi );
 
 }
