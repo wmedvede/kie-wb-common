@@ -14,58 +14,63 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client;
+package org.kie.workbench.common.screens.datasource.management.client.editor;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Composite;
-import org.gwtbootstrap3.client.ui.LinkedGroup;
+import org.gwtbootstrap3.client.ui.LinkedGroupItem;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 @Dependent
 @Templated
-public class DataSourceDefExplorerViewImpl
+public class DataSourceDefItemViewImpl
         extends Composite
-        implements DataSourceDefExplorerView {
+        implements DataSourceDefItemView {
 
     @Inject
-    @DataField
-    private com.google.gwt.user.client.ui.Label emptyLabel;
+    @DataField( "item" )
+    LinkedGroupItem item;
 
-    @Inject
-    @DataField
-    private LinkedGroup itemsGroup;
+    Presenter presenter;
 
-    private Presenter presenter;
-
-    public DataSourceDefExplorerViewImpl() {
+    public DataSourceDefItemViewImpl() {
     }
 
     @PostConstruct
     private void init() {
-        //set i18n or whatever any other ui initialization here.
+
+//        item.addClickHandler( new ClickHandler() {
+//            @Override
+//            public void onClick( ClickEvent clickEvent ) {
+//                presenter.onClick();
+//            }
+//        } );
     }
 
     @Override
-    public void init( Presenter presenter ) {
+    public void setName( String name ) {
+        item.setText( name );
+    }
+
+    @Override
+    public String getName() {
+        return item.getText();
+    }
+
+    @Override
+    public void init( DataSourceDefItemView.Presenter presenter ) {
         this.presenter = presenter;
     }
 
-    @Override
-    public void addItem( DataSourceDefItem item ) {
-        itemsGroup.add( item );
+    @EventHandler( "item" )
+    public void onItemClick( ClickEvent event ) {
+        presenter.onClick();
     }
 
-    @Override
-    public void removeItem( DataSourceDefItem item ) {
-        itemsGroup.remove( item );
-    }
-
-    @Override
-    public void clear() {
-        itemsGroup.clear();
-    }
 }

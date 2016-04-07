@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.service;
+package org.kie.workbench.common.screens.datasource.management.util;
 
-import java.util.List;
-
-import org.jboss.errai.bus.server.annotations.Remote;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 
-@Remote
-public interface DataSourceManagementService {
+public class DataSourceDefSerializer {
 
-    List<DataSourceDef> getDataSources();
+    public static DataSourceDef deserialize( String dataSourceDefString ) {
+        Gson gson = new GsonBuilder().create();
+        return gson.fromJson( dataSourceDefString, DataSourceDef.class );
+    }
 
-    List<DataSourceDeploymentInfo> getSystemDataSources();
-
-    DataSourceDeploymentInfo getDeploymentInfo( String uuid );
-
-    void deploy( DataSourceDef dataSourceDef );
-
-    void undeploy( String uuid );
-
+    public static String serialize( DataSourceDef dataSourceDef ) {
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .create();
+        return gson.toJson( dataSourceDef );
+    }
 }

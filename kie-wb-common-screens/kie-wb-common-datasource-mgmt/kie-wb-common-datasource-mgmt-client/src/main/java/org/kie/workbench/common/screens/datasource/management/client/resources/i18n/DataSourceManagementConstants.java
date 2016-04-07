@@ -13,21 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.workbench.common.screens.datasource.management.client;
 
-import org.uberfire.client.mvp.UberView;
+package org.kie.workbench.common.screens.datasource.management.client.resources.i18n;
 
-public interface DataSourceDefExplorerView
-        extends UberView<DataSourceDefExplorerView.Presenter> {
+import org.jboss.errai.ui.shared.api.annotations.TranslationKey;
 
-    interface Presenter {
+public interface DataSourceManagementConstants {
 
-    }
-
-    void addItem( DataSourceDefItem item );
-
-    void removeItem( DataSourceDefItem item );
-
-    void clear();
+    @TranslationKey( defaultValue = "" )
+    String  DataSourceDefEditorViewImpl_name = "DataSourceDefEditorViewImpl.name";
 
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client;
+package org.kie.workbench.common.screens.datasource.management.client.editor;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -71,6 +71,9 @@ public class DataSourceDefExplorerScreen {
                 .newTopLevelMenu( "Load data sources" )
                 .respondsWith( getLoadCommand() )
                 .endMenu()
+                .newTopLevelMenu( "New" )
+                .respondsWith( getNewCommand() )
+                .endMenu()
                 .build();
     }
 
@@ -80,5 +83,17 @@ public class DataSourceDefExplorerScreen {
                 explorer.loadDataSources();
             }
         };
+    }
+
+    private Command getNewCommand() {
+        return new Command() {
+            @Override public void execute() {
+                onNewDataSource();
+            }
+        };
+    }
+
+    public void onNewDataSource() {
+
     }
 }
