@@ -45,7 +45,7 @@ public class DataSourceDefEditorServiceImpl
 
     @Inject
     @Named("ioStrategy")
-    IOService ioService;
+    private IOService ioService;
 
     @Inject
     private CommentedOptionFactory optionsFactory;
