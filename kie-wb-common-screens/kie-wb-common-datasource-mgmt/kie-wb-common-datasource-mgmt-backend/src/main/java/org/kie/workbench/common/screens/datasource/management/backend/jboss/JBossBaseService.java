@@ -18,6 +18,7 @@ package org.kie.workbench.common.screens.datasource.management.backend.jboss;
 
 import java.io.Closeable;
 import java.net.InetAddress;
+import java.util.Date;
 
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
@@ -27,7 +28,8 @@ import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 public class JBossBaseService {
 
     public ModelControllerClient createControllerClient() throws Exception {
-        return ModelControllerClient.Factory.create( InetAddress.getByName( "127.0.0.1" ), 9999 );
+        ModelControllerClient result = ModelControllerClient.Factory.create( InetAddress.getByName( "127.0.0.1" ), 9999 );
+        return result;
     }
 
     public void checkResponse( ModelNode response ) throws Exception {
@@ -49,9 +51,12 @@ public class JBossBaseService {
     public void safeClose( final Closeable closeable ) {
         if ( closeable != null ) {
             try {
+                System.out.println(" Antes close: " + new Date() );
                 closeable.close();
+                System.out.println( " Despues close" );
             } catch ( Exception e ) {
-
+                System.out.println(" error when closing connection: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }

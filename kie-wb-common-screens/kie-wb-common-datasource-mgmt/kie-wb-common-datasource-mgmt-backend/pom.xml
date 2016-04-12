@@ -95,12 +95,13 @@
     <dependency>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-dmr</artifactId>
-      <!--<scope>provided</scope>-->
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.wildfly</groupId>
       <artifactId>wildfly-controller-client</artifactId>
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>
