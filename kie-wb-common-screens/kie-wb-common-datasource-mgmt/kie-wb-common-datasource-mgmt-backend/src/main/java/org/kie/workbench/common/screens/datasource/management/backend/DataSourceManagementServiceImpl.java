@@ -26,6 +26,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.backend.jboss.JBossDataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.backend.jboss.JBossDataSourceService;
 
@@ -47,7 +48,7 @@ public class DataSourceManagementServiceImpl
         DataSourceDef dataSourceDef;
 
         try {
-            serverSources =  dataSourceManager.getDataSources();
+            serverSources = dataSourceManager.getDataSources();
             for ( JBossDataSourceDef ds : serverSources ) {
                 dataSourceDef = new DataSourceDef();
                 dataSourceDef.setName( ds.getName() );
@@ -95,7 +96,17 @@ public class DataSourceManagementServiceImpl
     @Override
     public DataSourceDeploymentInfo getDeploymentInfo( String uuid ) {
         try {
+            //TODO provide formal implementation.
             return deploymentService.getDeploymentInfo( uuid );
+        } catch ( Exception e ) {
+            throw ExceptionUtilities.handleException( e );
+        }
+    }
+
+    @Override
+    public DriverDeploymentInfo getDriverDeploymentInfo( String uuid ) {
+        try {
+            return new DriverDeploymentInfo();
         } catch ( Exception e ) {
             throw ExceptionUtilities.handleException( e );
         }
