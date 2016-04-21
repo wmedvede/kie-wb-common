@@ -30,6 +30,7 @@ import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.uberfire.backend.vfs.Path;
 import org.uberfire.ext.editor.commons.client.BaseEditorViewImpl;
 import org.uberfire.ext.widgets.core.client.editors.defaulteditor.DefaultEditorFileUpload;
 
@@ -103,6 +104,11 @@ public class DriverDefEditorViewImpl
     @Override
     public String getDriverClass() {
         return driverClassTextBox.getText();
+    }
+
+    @Override
+    public void setPath( Path path ) {
+        fileUpload.setPath( path );
     }
 
     @Override
