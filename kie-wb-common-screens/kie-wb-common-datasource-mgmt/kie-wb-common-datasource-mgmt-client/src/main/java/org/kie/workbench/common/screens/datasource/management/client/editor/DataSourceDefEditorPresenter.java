@@ -16,7 +16,10 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor;
 
+import java.util.List;
+
 import org.uberfire.client.mvp.UberView;
+import org.uberfire.commons.data.Pair;
 import org.uberfire.ext.editor.commons.client.BaseEditorView;
 
 public interface DataSourceDefEditorPresenter {
@@ -26,31 +29,37 @@ public interface DataSourceDefEditorPresenter {
                 UberView<DataSourceDefEditorPresenter>,
                 BaseEditorView {
 
-        void setName( String text );
+        void setName( final String text );
 
         String getName();
 
-        void setJndi( String jndi );
+        void setJndi( final String jndi );
 
         String getJndi();
 
         String getConnectionURL();
 
-        void setConnectionURL( String connectionURL );
+        void setConnectionURL( final String connectionURL );
 
         String getUser();
 
-        void setUser( String user );
+        void setUser( final String user );
 
         String getPassword();
 
-        void setPassword( String password );
+        void setPassword( final String password );
 
-        void enableDeployButton( boolean enabled );
+        void enableDeployButton( final boolean enabled );
 
-        void enableUnDeployButton( boolean enabled );
+        void enableUnDeployButton( final boolean enabled );
 
-        void enableTestButton( boolean enabled );
+        void enableTestButton( final boolean enabled );
+
+        void loadDriverOptions( final List<Pair<String,String>> driverOptions, final boolean addEmptyOption );
+
+        String getDriver();
+
+        void setDriver( String driver );
     }
 
     void onDeployDataSource();

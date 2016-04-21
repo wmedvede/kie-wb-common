@@ -22,47 +22,41 @@ import javax.inject.Inject;
 
 import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceService;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
+import org.kie.workbench.common.screens.datasource.management.backend.integration.DriverService;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 
 @Service
 @ApplicationScoped
-public class DataSourceManagementServiceImpl
-        implements DataSourceManagementService {
+public class DriverManagementServiceImpl
+    implements DriverManagementService {
 
     @Inject
-    DataSourceService dataSourceService;
+    DriverService driverService;
 
     @Override
-    public List<DataSourceDef> getDataSources() {
-
+    public List<DriverDef> getDrivers() {
         try {
-            return dataSourceService.getDataSources();
-        } catch ( Exception e ) {
-            throw new RuntimeException( e.getMessage() );
-        }
-    }
-
-    @Override
-    public List<DataSourceDef> getSystemDataSources() {
-        return getDataSources();
-    }
-
-    @Override
-    public DataSourceDeploymentInfo getDeploymentInfo( String uuid ) {
-        try {
-            return dataSourceService.getDeploymentInfo( uuid );
+            return driverService.getDrivers();
         } catch ( Exception e ) {
             throw ExceptionUtilities.handleException( e );
         }
     }
 
     @Override
-    public void deploy( DataSourceDef dataSourceDef ) {
+    public DriverDeploymentInfo getDriverDeploymentInfo( String uuid ) {
         try {
-            dataSourceService.deploy( dataSourceDef );
+            return driverService.getDeploymentInfo( uuid );
+        } catch ( Exception e ) {
+            throw ExceptionUtilities.handleException( e );
+        }
+    }
+
+    @Override
+    public void deploy( DriverDef driverDef ) {
+        try {
+            driverService.deploy( driverDef );
         } catch ( Exception e ) {
             throw ExceptionUtilities.handleException( e );
         }
@@ -71,7 +65,7 @@ public class DataSourceManagementServiceImpl
     @Override
     public void undeploy( String uuid ) {
         try {
-            dataSourceService.undeploy( uuid );
+            driverService.undeploy( uuid );
         } catch ( Exception e ) {
             throw ExceptionUtilities.handleException( e );
         }

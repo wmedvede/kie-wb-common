@@ -16,20 +16,25 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor;
 
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.TextBox;
+import org.gwtbootstrap3.extras.select.client.ui.Option;
+import org.gwtbootstrap3.extras.select.client.ui.Select;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.uberfire.commons.data.Pair;
 import org.uberfire.ext.editor.commons.client.BaseEditorViewImpl;
 
 @Dependent
@@ -68,6 +73,13 @@ public class DataSourceDefEditorViewImpl
     @DataField ( value = "password" )
     TextBox passwordTextBox = GWT.create( TextBox.class );
 
+    @DataField ( value = "driver-form-group" )
+    Element driverFormGroup = DOM.createDiv();
+
+    @Inject
+    @DataField ( value = "driver-selector" )
+    Select driverSelector;
+
     @Inject
     @DataField("deploy-btn")
     Button deployButton;
@@ -99,12 +111,12 @@ public class DataSourceDefEditorViewImpl
     }
 
     @Override
-    public void init( DataSourceDefEditorPresenter presenter ) {
+    public void init( final DataSourceDefEditorPresenter presenter ) {
         this.presenter = presenter;
     }
 
     @Override
-    public void setName( String name ) {
+    public void setName( final String name ) {
         this.nameTextBox.setText( name );
     }
 
@@ -114,7 +126,7 @@ public class DataSourceDefEditorViewImpl
     }
 
     @Override
-    public void setJndi( String jndi ) {
+    public void setJndi( final String jndi ) {
         this.jndiTextBox.setText( jndi );
     }
 
@@ -129,7 +141,7 @@ public class DataSourceDefEditorViewImpl
     }
 
     @Override
-    public void setConnectionURL( String connectionURL ) {
+    public void setConnectionURL( final String connectionURL ) {
         this.connectionURLTextBox.setText( connectionURL );
     }
 
@@ -139,7 +151,7 @@ public class DataSourceDefEditorViewImpl
     }
 
     @Override
-    public void setUser( String user ) {
+    public void setUser( final String user ) {
         this.userTextBox.setText( user );
     }
 
@@ -149,23 +161,46 @@ public class DataSourceDefEditorViewImpl
     }
 
     @Override
-    public void setPassword( String password ) {
+    public void setPassword( final String password ) {
         this.passwordTextBox.setText( password );
     }
 
     @Override
-    public void enableDeployButton( boolean enabled ) {
+    public void enableDeployButton( final boolean enabled ) {
         deployButton.setEnabled( enabled );
     }
 
     @Override
-    public void enableUnDeployButton( boolean enabled ) {
+    public void enableUnDeployButton( final boolean enabled ) {
         undeployButton.setEnabled( enabled );
     }
 
     @Override
-    public void enableTestButton( boolean enabled ) {
+    public void enableTestButton( final boolean enabled ) {
         testButton.setEnabled( enabled );
+    }
+
+    @Override
+    public void loadDriverOptions( final List<Pair<String, String>> driverOptions, final boolean addEmptyOption ) {
+        driverSelector.clear();
+        if ( addEmptyOption ) {
+            driverSelector.add( newOption( "", "" ) );
+        }
+        for ( Pair<String, String> optionPair: driverOptions ) {
+            driverSelector.add( newOption( optionPair.getK1(), optionPair.getK2() ));
+        }
+        refreshDriverSelector();
+    }
+
+    @Override
+    public String getDriver() {
+        return driverSelector.getValue();
+    }
+
+    @Override
+    public void setDriver( final String driver ) {
+        driverSelector.setValue( driver );
+        refreshDriverSelector();
     }
 
     @EventHandler("deploy-btn")
@@ -181,5 +216,21 @@ public class DataSourceDefEditorViewImpl
     @EventHandler("test-btn")
     public void onTest( final ClickEvent event ) {
         presenter.onUnTestDataSource();
+    }
+
+    private Option newOption( final String text, final String value ) {
+        final Option option = new Option();
+        option.setValue( value );
+        option.setText( text );
+        return option;
+    }
+
+    private void refreshDriverSelector() {
+        Scheduler.get().scheduleDeferred( new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                driverSelector.refresh();
+            }
+        } );
     }
 }

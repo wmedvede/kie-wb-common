@@ -55,7 +55,9 @@ public class DriverDefEditorServiceImpl
         DriverDefEditorContent editorContent = new DriverDefEditorContent();
         String content = ioService.readAllString( Paths.convert( path ) );
         DriverDef driverDef = DriverDefSerializer.deserialize( content );
+        driverDef.setDriverLib( claculateJarPath( path ) );
         editorContent.setDriverDef( driverDef );
+
         return editorContent;
     }
 
@@ -98,5 +100,11 @@ public class DriverDefEditorServiceImpl
     public void delete( final Path path, final String comment ) {
         checkNotNull( "path", path );
         ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
+    }
+
+    private Path claculateJarPath( Path currentFile ) {
+        String jarFileName = currentFile.getFileName() + ".jar";
+        org.uberfire.java.nio.file.Path nioJarPath = Paths.convert( currentFile ).resolveSibling( jarFileName );
+        return Paths.convert( nioJarPath );
     }
 }

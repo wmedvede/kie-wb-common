@@ -19,19 +19,17 @@ package org.kie.workbench.common.screens.datasource.management.service;
 import java.util.List;
 
 import org.jboss.errai.bus.server.annotations.Remote;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 
 @Remote
-public interface DataSourceManagementService {
+public interface DriverManagementService {
 
-    List<DataSourceDef> getDataSources();
+    List<DriverDef> getDrivers();
 
-    List<DataSourceDef> getSystemDataSources();
+    DriverDeploymentInfo getDriverDeploymentInfo( String uuid );
 
-    DataSourceDeploymentInfo getDeploymentInfo( String uuid );
-
-    void deploy( DataSourceDef dataSourceDef );
+    void deploy( DriverDef driverDef );
 
     void undeploy( String uuid );
 
