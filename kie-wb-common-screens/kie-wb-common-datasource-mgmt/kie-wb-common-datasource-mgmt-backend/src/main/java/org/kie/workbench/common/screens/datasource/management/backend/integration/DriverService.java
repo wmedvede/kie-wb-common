@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend;
+package org.kie.workbench.common.screens.datasource.management.backend.integration;
 
 import java.util.List;
 
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 
-public interface DataSourceDeploymentService {
+public interface DriverService {
 
-    void deploy( final DataSourceDef dataSourceDef ) throws Exception;
+    void deploy( DriverDef driverDef ) throws Exception;
 
-    void undeploy( final String uuid ) throws Exception;
+    void undeploy( String uuid ) throws Exception;
 
-    DataSourceDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception;
+    DriverDeploymentInfo getDeploymentInfo( String uuid ) throws Exception;
 
-    List<DataSourceDeploymentInfo> getAllDeploymentInfo() throws Exception;
+    List<DriverDeploymentInfo> getAllDeploymentInfo() throws Exception;
 
+    List<DriverDef> getDrivers() throws Exception;
 }

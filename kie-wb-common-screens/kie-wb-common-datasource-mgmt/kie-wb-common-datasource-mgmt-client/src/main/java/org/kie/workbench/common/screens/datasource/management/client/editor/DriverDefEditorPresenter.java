@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor;
 
+import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.mvp.UberView;
 import org.uberfire.ext.editor.commons.client.BaseEditorView;
 
@@ -32,6 +33,8 @@ public interface DriverDefEditorPresenter {
         void setDriverClass( String driverClass );
 
         String getDriverClass();
+
+        void setPath( Path path );
 
         void enableDeployButton( boolean enable );
 

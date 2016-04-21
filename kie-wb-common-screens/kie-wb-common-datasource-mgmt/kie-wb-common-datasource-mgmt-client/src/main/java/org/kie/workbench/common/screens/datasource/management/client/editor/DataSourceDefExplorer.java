@@ -28,6 +28,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
+import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 
 @Dependent
 public class DataSourceDefExplorer
@@ -68,7 +69,7 @@ public class DataSourceDefExplorer
             public void callback( List<DataSourceDef> dataSourceDefs ) {
                 loadDataSources( dataSourceDefs );
             }
-        }).getDataSources();
+        }, new DefaultErrorCallback() ).getDataSources();
 
     }
 

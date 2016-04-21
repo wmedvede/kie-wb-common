@@ -26,8 +26,8 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.type.DriverDefType;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
+import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.annotations.WorkbenchEditor;
 import org.uberfire.client.annotations.WorkbenchMenu;
@@ -37,6 +37,7 @@ import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.ext.editor.commons.client.BaseEditor;
 import org.uberfire.ext.editor.commons.client.file.SaveOperationService;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
+import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 import org.uberfire.ext.widgets.common.client.callbacks.HasBusyIndicatorDefaultErrorCallback;
 import org.uberfire.lifecycle.OnMayClose;
 import org.uberfire.lifecycle.OnStartup;
@@ -60,7 +61,7 @@ public class DriverDefEditor
 
     private Caller<DriverDefEditorService> editorService;
 
-    private Caller<DataSourceManagementService> dataSourceService;
+    private Caller<DriverManagementService> driverService;
 
     private DriverDefEditorContent editorContent;
 
@@ -68,12 +69,12 @@ public class DriverDefEditor
     public DriverDefEditor( final DriverDefEditorPresenter.DriverDefEditorView view,
             final DriverDefType type,
             final Caller<DriverDefEditorService> editorService,
-            final Caller<DataSourceManagementService> dataSourceService ) {
+            final Caller<DriverManagementService> driverService ) {
         super( view );
         this.view = view;
         this.type = type;
         this.editorService = editorService;
-        this.dataSourceService = dataSourceService;
+        this.driverService = driverService;
         view.init( this );
     }
 
@@ -189,6 +190,7 @@ public class DriverDefEditor
 
         view.setName( editorContent.getDriverDef().getName() );
         view.setDriverClass( editorContent.getDriverDef().getDriverClass() );
+        view.setPath( editorContent.getDriverDef().getDriverLib() );
     }
 
     protected void updateContent() {
@@ -197,7 +199,7 @@ public class DriverDefEditor
     }
 
     protected void refreshDeploymentInfo() {
-        dataSourceService.call( getRefreshDeploymentInfoSuccessCallback() ).getDriverDeploymentInfo( editorContent.getDriverDef().getUuid() );
+        driverService.call( getRefreshDeploymentInfoSuccessCallback() ).getDriverDeploymentInfo( editorContent.getDriverDef().getUuid() );
     }
 
     private RemoteCallback<DriverDeploymentInfo> getRefreshDeploymentInfoSuccessCallback() {
@@ -205,8 +207,6 @@ public class DriverDefEditor
         return new RemoteCallback<DriverDeploymentInfo>() {
             @Override
             public void callback( DriverDeploymentInfo deploymentInfo ) {
-                //TODO provide implementation
-                /*
                 if ( deploymentInfo != null ) {
                     view.enableDeployButton( false );
                     view.enableUnDeployButton( true );
@@ -214,66 +214,36 @@ public class DriverDefEditor
                     view.enableDeployButton( true );
                     view.enableUnDeployButton( false );
                 }
-                */
             }
         };
     }
 
     @Override
     public void onDeployDriver() {
-        Window.alert( "on deploy driver" );
+        //TODO verify all required parameters are set.
+        //TODO add and verify server response.
+
+        driverService.call(
+                new RemoteCallback<Void>() {
+                    @Override
+                    public void callback( Void aVoid ) {
+                        Window.alert( "driver successfully deployed" );
+                        view.enableUnDeployButton( true );
+                        view.enableDeployButton( false );
+                    }
+                }, new DefaultErrorCallback() ).deploy( getContent().getDriverDef() );
     }
 
     @Override
     public void onUnDeployDriver() {
-        Window.alert( "on undeploy driver" );
-    }
-
-    /*
-    @Override
-
-    public void onDeployDataSource() {
-        //TODO verify all required parameters are set.
-        //TODO add and verify server response.
-        dataSourceService.call(
+        driverService.call(
                 new RemoteCallback<Void>() {
                     @Override
                     public void callback( Void aVoid ) {
-                        Window.alert( "datasource successfully deployed" );
-                        view.enableUnDeployButton( true );
-                        view.enableDeployButton( false );
-                        view.enableTestButton( true );
-                    }
-                }, new DefaultErrorCallback() ).deploy( getContent().getDataSourceDef() );
-    }
-    */
-
-    /*
-    @Override
-    public void onUnDeployDataSource() {
-        //TODO add and verify server response, etc.
-        dataSourceService.call(
-                new RemoteCallback<Void>() {
-                    @Override
-                    public void callback( Void aVoid ) {
-                        Window.alert( "datasource successfully un deployed" );
+                        Window.alert( "driver successfully un deployed" );
                         view.enableUnDeployButton( false );
                         view.enableDeployButton( true );
-                        view.enableTestButton( false );
                     }
-                }, new DefaultErrorCallback() ).undeploy( getContent().getDataSourceDef().getUuid() );
-
+                }, new DefaultErrorCallback() ).undeploy( getContent().getDriverDef().getUuid() );
     }
-
-    @Override
-    public void onUnTestDataSource() {
-        editorService.call(
-                new RemoteCallback<String>() {
-                    @Override
-                    public void callback( String result ) {
-                        Window.alert( result );
-                    }
-                }, new DefaultErrorCallback() ).test( getContent().getDataSourceDef().getJndi() );
-    }
-    */
 }
