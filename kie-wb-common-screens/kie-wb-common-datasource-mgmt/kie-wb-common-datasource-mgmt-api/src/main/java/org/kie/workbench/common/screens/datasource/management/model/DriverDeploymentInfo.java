@@ -23,6 +23,10 @@ public class DriverDeploymentInfo {
 
     String uuid;
 
+    boolean managed;
+
+    String driverClass;
+
     public DriverDeploymentInfo() {
     }
 
@@ -32,5 +36,21 @@ public class DriverDeploymentInfo {
 
     public void setUuid( String uuid ) {
         this.uuid = uuid;
+    }
+
+    public boolean isManaged() {
+        return managed;
+    }
+
+    public void setManaged( boolean managed ) {
+        this.managed = managed;
+    }
+
+    public String getDriverClass() {
+        return driverClass;
+    }
+
+    public void setDriverClass( String driverClass ) {
+        this.driverClass = driverClass;
     }
 }

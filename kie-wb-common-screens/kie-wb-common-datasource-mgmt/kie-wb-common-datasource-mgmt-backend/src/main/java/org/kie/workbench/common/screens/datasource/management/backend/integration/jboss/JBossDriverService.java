@@ -14,19 +14,93 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.jboss;
+package org.kie.workbench.common.screens.datasource.management.backend.integration.jboss;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
+import org.kie.workbench.common.screens.datasource.management.backend.integration.DriverService;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
+import org.uberfire.backend.server.util.Paths;
+import org.uberfire.io.IOService;
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
-public class JBossDriverService extends JBossBaseService {
+@ApplicationScoped
+public class JBossDriverService
+        extends JBossBaseService
+        implements DriverService {
 
-    public List<JBossDriverDef> getDrivers() throws Exception {
+    @Inject
+    @Named("ioStrategy")
+    private IOService ioService;
+
+    private JBossDeploymentService deploymentService = new JBossDeploymentService();
+
+    @Override
+    public DriverDeploymentInfo getDeploymentInfo( String uuid ) throws Exception {
+        for ( DriverDeploymentInfo deploymentInfo : getAllDeploymentInfo() ) {
+            if ( uuid.equals( deploymentInfo.getUuid() ) ) {
+                return deploymentInfo;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void deploy( DriverDef driverDef ) throws Exception {
+
+        byte[] libContent = ioService.readAllBytes( Paths.convert( driverDef.getDriverLib() ) );
+        deploymentService.deployContent( driverDef.getUuid(), driverDef.getUuid(), libContent, true );
+
+    }
+
+    @Override
+    public void undeploy( String uuid ) throws Exception {
+        deploymentService.removeDeployment( uuid );
+    }
+
+    public List<DriverDef> getDrivers() throws Exception {
+
+        List<DriverDef> driverDefs = new ArrayList<>(  );
+        DriverDef driverDef;
+
+        for ( JBossDriverDef internalDef : getInternalDrivers() ) {
+            driverDef = new DriverDef();
+            driverDef.setUuid( internalDef.getDeploymentName() );
+            driverDef.setName( internalDef.getDriverName() );
+            driverDef.setDriverClass( internalDef.getDriverClass() );
+            driverDefs.add( driverDef );
+        }
+
+        return driverDefs;
+    }
+
+    @Override
+    public List<DriverDeploymentInfo> getAllDeploymentInfo() throws Exception {
+
+        List<DriverDeploymentInfo> deploymentInfos = new ArrayList<>(  );
+        DriverDeploymentInfo deploymentInfo;
+
+        for ( JBossDriverDef internalDef : getInternalDrivers() ) {
+            deploymentInfo = new DriverDeploymentInfo();
+            deploymentInfo.setUuid( internalDef.getDeploymentName() );
+            deploymentInfo.setDriverClass( internalDef.getDriverClass() );
+            deploymentInfo.setManaged( true );
+
+            deploymentInfos.add( deploymentInfo );
+        }
+
+        return deploymentInfos;
+    }
+
+    private List<JBossDriverDef> getInternalDrivers() throws Exception {
 
         ModelNode operation = new ModelNode();
         operation.get( OP ).set( "installed-drivers-list" );

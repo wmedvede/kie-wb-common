@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.jboss;
+package org.kie.workbench.common.screens.datasource.management.backend.integration.jboss;
 
 import java.util.ArrayList;
 import java.util.List;

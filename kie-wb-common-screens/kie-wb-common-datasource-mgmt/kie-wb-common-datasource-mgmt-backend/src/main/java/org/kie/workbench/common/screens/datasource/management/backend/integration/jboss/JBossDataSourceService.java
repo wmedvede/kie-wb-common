@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.jboss;
+package org.kie.workbench.common.screens.datasource.management.backend.integration.jboss;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,15 +24,92 @@ import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.OperationBuilder;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
+import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceService;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
-public class JBossDataSourceService extends JBossBaseService {
+public class JBossDataSourceService
+        extends JBossBaseService
+        implements DataSourceService {
 
     public JBossDataSourceService() {
     }
 
-    public List<JBossDataSourceDef> getDataSources() throws Exception {
+    @Override
+    public List<DataSourceDef> getDataSources() throws Exception {
+
+        List<JBossDataSourceDef> dataSources;
+        List<DataSourceDef> dataSourceDefs = new ArrayList<>( );
+        DataSourceDef dataSourceDef;
+
+        dataSources = getInternalDataSources();
+        for ( JBossDataSourceDef internalDef : dataSources ) {
+            dataSourceDef = new DataSourceDef();
+            dataSourceDef.setName( internalDef.getName() );
+            dataSourceDef.setJndi( internalDef.getJndi() );
+            dataSourceDef.setConnectionURL( internalDef.getConnectionURL() );
+            dataSourceDef.setDriverName( internalDef.getDriverName() );
+            dataSourceDef.setDriverClass( internalDef.getDriverClass() );
+            dataSourceDef.setDataSourceClass( internalDef.getDataSourceClass() );
+            dataSourceDef.setUser( internalDef.getUser() );
+            dataSourceDef.setPassword( internalDef.getPassword() );
+            dataSourceDef.setUseJTA( internalDef.isUseJTA() );
+            dataSourceDef.setUseCCM( internalDef.isUseCCM() );
+            dataSourceDefs.add( dataSourceDef );
+        }
+
+        return dataSourceDefs;
+    }
+
+    @Override
+    public void deploy( DataSourceDef dataSourceDef ) throws Exception {
+        createDatasource( dataSourceDef.getUuid(),
+                dataSourceDef.getJndi(),
+                dataSourceDef.getConnectionURL(),
+                dataSourceDef.getDriverClass(),
+                dataSourceDef.getDataSourceClass(),
+                dataSourceDef.getDriverName(),
+                dataSourceDef.getUser(),
+                dataSourceDef.getPassword(),
+                null,
+                dataSourceDef.isUseJTA(),
+                dataSourceDef.isUseCCM() );
+    }
+
+    @Override
+    public void undeploy( String uuid ) throws Exception {
+        deleteDatasource( uuid );
+    }
+
+    @Override
+    public DataSourceDeploymentInfo getDeploymentInfo( String uuid ) throws Exception {
+        for ( DataSourceDeploymentInfo deploymentInfo : getAllDeploymentInfo() ) {
+            if ( uuid.equals( deploymentInfo.getUuid() ) ) {
+                return deploymentInfo;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<DataSourceDeploymentInfo> getAllDeploymentInfo() throws Exception {
+        List<JBossDataSourceDef> dataSources = getInternalDataSources();
+        List<DataSourceDeploymentInfo> result = new ArrayList<DataSourceDeploymentInfo>( );
+        DataSourceDeploymentInfo deploymentInfo;
+
+        for ( JBossDataSourceDef internalDef : dataSources ) {
+            deploymentInfo = new DataSourceDeploymentInfo();
+            deploymentInfo.setUuid( internalDef.getName() );
+            deploymentInfo.setJndi( internalDef.getJndi() );
+            deploymentInfo.setManaged( true );
+            result.add( deploymentInfo );
+        }
+        return result;
+    }
+
+    private List<JBossDataSourceDef> getInternalDataSources() throws Exception {
 
         List<JBossDataSourceDef> dataSources = new ArrayList<JBossDataSourceDef>( );
         JBossDataSourceDef dataSource;
@@ -95,7 +172,7 @@ public class JBossDataSourceService extends JBossBaseService {
      * @param poolName Seems like EAP 6.4.6 uses the name as the pool name.
      * @throws Exception
      */
-    public void createDatasource( String name,
+    private void createDatasource( String name,
             String jndi,
             String connectionURL,
             String driverClass,
@@ -156,9 +233,7 @@ public class JBossDataSourceService extends JBossBaseService {
         checkResponse( response );
     }
 
-
-
-    public void updateDatasource( String name, Map<String, Object> changeSet ) throws Exception {
+    private void updateDatasource( String name, Map<String, Object> changeSet ) throws Exception {
 
         //note: in order to update a datasource it should first be disabled.
 
@@ -204,7 +279,7 @@ public class JBossDataSourceService extends JBossBaseService {
         checkResponse( response );
     }
 
-    public void enableDatasource( String name, boolean enable ) throws Exception {
+    private void enableDatasource( String name, boolean enable ) throws Exception {
 
         final String opName = enable ? "enable" : "disable";
 
@@ -224,7 +299,7 @@ public class JBossDataSourceService extends JBossBaseService {
 
     }
 
-    public void deleteDatasource( String name ) throws Exception {
+    private void deleteDatasource( String name ) throws Exception {
 
         ModelNode operation = new ModelNode( );
         operation.get( OP ).set( "remove" );

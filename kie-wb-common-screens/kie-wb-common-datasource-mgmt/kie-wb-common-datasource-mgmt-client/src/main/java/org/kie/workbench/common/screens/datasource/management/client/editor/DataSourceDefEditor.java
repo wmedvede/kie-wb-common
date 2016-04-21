@@ -16,6 +16,10 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -26,14 +30,17 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.type.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
+import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.annotations.WorkbenchEditor;
 import org.uberfire.client.annotations.WorkbenchMenu;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartTitleDecoration;
 import org.uberfire.client.annotations.WorkbenchPartView;
+import org.uberfire.commons.data.Pair;
 import org.uberfire.ext.editor.commons.client.BaseEditor;
 import org.uberfire.ext.editor.commons.client.file.SaveOperationService;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
@@ -64,18 +71,24 @@ public class DataSourceDefEditor
 
     private Caller<DataSourceManagementService> dataSourceService;
 
+    private Caller<DriverManagementService> driverService;
+
     private DataSourceDefEditorContent editorContent;
+
+    private Map<String, DriverDef> driverDefMap = new HashMap<>(  );
 
     @Inject
     public DataSourceDefEditor( final DataSourceDefEditorView view,
             final DataSourceDefType type,
             final Caller<DataSourceDefEditorService> editorService,
-            final Caller<DataSourceManagementService> dataSourceService ) {
+            final Caller<DataSourceManagementService> dataSourceService,
+            final Caller<DriverManagementService> driverService ) {
         super( view );
         this.view = view;
         this.type = type;
         this.editorService = editorService;
         this.dataSourceService = dataSourceService;
+        this.driverService = driverService;
         view.init( this );
     }
 
@@ -126,6 +139,11 @@ public class DataSourceDefEditor
 
     }
 
+    protected void loadDrivers() {
+        driverService.call( getLoadDriversSuccessCallback(),
+                new DefaultErrorCallback() ).getDrivers();
+    }
+
     @Override
     protected Command onValidate() {
         return new Command() {
@@ -171,6 +189,31 @@ public class DataSourceDefEditor
         };
     }
 
+    private RemoteCallback<List<DriverDef>> getLoadDriversSuccessCallback() {
+        return new RemoteCallback<List<DriverDef>>() {
+            @Override
+            public void callback( List<DriverDef> driverDefs ) {
+                onDriversLoaded( driverDefs );
+            }
+        };
+    }
+
+    private void onDriversLoaded( List<DriverDef> driverDefs ) {
+        List<Pair<String, String>> driverOptions = buildDriverOptions( driverDefs );
+        view.loadDriverOptions( driverOptions, true );
+        view.setDriver( editorContent.getDataSourceDef().getDriverName()  );
+    }
+
+    private List<Pair<String, String>> buildDriverOptions( List<DriverDef> driverDefs ) {
+        List<Pair<String, String>> options = new ArrayList<>(  );
+        driverDefMap.clear();
+        for ( DriverDef driverDef : driverDefs ) {
+            options.add( new Pair<String, String>( driverDef.getName(), driverDef.getUuid() ) );
+            driverDefMap.put( driverDef.getUuid(), driverDef );
+        }
+        return options;
+    }
+
     protected void onContentLoaded( DataSourceDefEditorContent editorContent ) {
         //Path is set to null when the Editor is closed (which can happen before async calls complete).
         if ( versionRecordManager.getCurrentPath() == null ) {
@@ -179,6 +222,7 @@ public class DataSourceDefEditor
         setContent( editorContent );
         setOriginalHash( editorContent.hashCode() );
         refreshDeploymentInfo();
+        loadDrivers();
     }
 
     protected DataSourceDefEditorContent getContent() {
@@ -202,10 +246,14 @@ public class DataSourceDefEditor
         editorContent.getDataSourceDef().setUser( view.getUser() );
         editorContent.getDataSourceDef().setPassword( view.getPassword() );
 
-        //TODO remove this temporal setting
-        editorContent.getDataSourceDef().setDriverName( "h2" );
-        editorContent.getDataSourceDef().setDriverClass( "org.h2.Driver" );
-        //editorContent.getDataSourceDef().setDataSourceClass( "org.h2.jdbcx.JdbcDataSource" );
+        DriverDef driverDef = driverDefMap.get( view.getDriver() );
+        if ( driverDef != null ) {
+            editorContent.getDataSourceDef().setDriverName( driverDef.getUuid() );
+            editorContent.getDataSourceDef().setDriverClass( driverDef.getDriverClass() );
+        } else {
+            editorContent.getDataSourceDef().setDriverName( null );
+            editorContent.getDataSourceDef().setDriverClass( null );
+        }
     }
 
     protected void refreshDeploymentInfo() {

@@ -59,7 +59,6 @@ public class DataSourceDefHandler extends DefaultNewResourceHandler {
     }
 
     @Override
-
     public void create( final Package pkg,
                         final String baseFileName,
                         final NewResourcePresenter presenter ) {
