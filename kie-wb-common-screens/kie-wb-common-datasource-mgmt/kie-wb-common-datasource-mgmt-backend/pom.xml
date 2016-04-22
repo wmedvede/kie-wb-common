@@ -31,6 +31,12 @@
   <description>Kie Workbench - Common - Data Source Mgmt Backend</description>
 
   <dependencies>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-bus</artifactId>
@@ -55,11 +61,6 @@
       <groupId>org.uberfire</groupId>
       <artifactId>uberfire-commons</artifactId>
     </dependency>
-
-    <!--dependency>
-      <groupId>org.uberfire</groupId>
-      <artifactId>uberfire-commons-editor-api</artifactId>
-    </dependency-->
 
     <dependency>
       <groupId>org.uberfire</groupId>

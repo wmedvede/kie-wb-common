@@ -29,7 +29,7 @@ public interface DataSourceDefEditorService
 
     Path save( final Path path, final DataSourceDefEditorContent editorContent, final String comment );
 
-    Path create( final Path context, final String fileName );
+    Path create( final Path context, final String dataSourceName, final String fileName );
 
     //TODO experimental
     String test( final String jndi );

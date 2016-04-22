@@ -44,7 +44,7 @@ public class JBossDriverService
     private JBossDeploymentService deploymentService = new JBossDeploymentService();
 
     @Override
-    public DriverDeploymentInfo getDeploymentInfo( String uuid ) throws Exception {
+    public DriverDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception {
         for ( DriverDeploymentInfo deploymentInfo : getAllDeploymentInfo() ) {
             if ( uuid.equals( deploymentInfo.getUuid() ) ) {
                 return deploymentInfo;
@@ -54,7 +54,7 @@ public class JBossDriverService
     }
 
     @Override
-    public void deploy( DriverDef driverDef ) throws Exception {
+    public void deploy( final DriverDef driverDef ) throws Exception {
 
         byte[] libContent = ioService.readAllBytes( Paths.convert( driverDef.getDriverLib() ) );
         deploymentService.deployContent( driverDef.getUuid(), driverDef.getUuid(), libContent, true );
@@ -62,7 +62,7 @@ public class JBossDriverService
     }
 
     @Override
-    public void undeploy( String uuid ) throws Exception {
+    public void undeploy( final String uuid ) throws Exception {
         deploymentService.removeDeployment( uuid );
     }
 
@@ -73,8 +73,8 @@ public class JBossDriverService
 
         for ( JBossDriverDef internalDef : getInternalDrivers() ) {
             driverDef = new DriverDef();
-            driverDef.setUuid( internalDef.getDeploymentName() );
-            driverDef.setName( internalDef.getDriverName() );
+            driverDef.setUuid( Util.normalizeDriverName( internalDef.getDriverName() ) );
+            driverDef.setName( internalDef.getDeploymentName() );
             driverDef.setDriverClass( internalDef.getDriverClass() );
             driverDefs.add( driverDef );
         }
@@ -90,7 +90,8 @@ public class JBossDriverService
 
         for ( JBossDriverDef internalDef : getInternalDrivers() ) {
             deploymentInfo = new DriverDeploymentInfo();
-            deploymentInfo.setUuid( internalDef.getDeploymentName() );
+            deploymentInfo.setUuid( Util.normalizeDriverName( internalDef.getDriverName() ) );
+            deploymentInfo.setInternalUuid( internalDef.getDriverName() );
             deploymentInfo.setDriverClass( internalDef.getDriverClass() );
             deploymentInfo.setManaged( true );
 
@@ -113,6 +114,7 @@ public class JBossDriverService
             client = createControllerClient();
             ModelNode response = client.execute( operation );
             JBossDriverDef driver;
+            String driverName;
 
             if ( !isFailure( response ) ) {
 
@@ -123,8 +125,9 @@ public class JBossDriverService
                     for ( ModelNode node : nodes ) {
 
                         driver = new JBossDriverDef();
+                        driverName = node.get( "driver-name" ).asString();
+                        driver.setDriverName( driverName );
 
-                        driver.setDriverName( node.get( "driver-name" ).asString() );
                         if ( node.hasDefined( "deployment-name" ) ) {
                             driver.setDeploymentName( node.get( "deployment-name" ).asString() );
                         }

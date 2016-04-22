@@ -16,58 +16,96 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend.integration.jboss;
 
+/**
+ * This class defines the information that us used by the Wildfly/EAP server to define a data base driver.
+ * A database driver my be defined by:
+ *
+ * 1) just deploying a jar file with the packaged driver. e.g. "h2-1.4.190.jar", "postgresql-9.4.1207.jre7.jar".
+ *    In this case all driver's parameters will be automatically established by the server.
+ *
+ * 2) by defining the driver in the <datasources></datasources> section of the server configuration file.
+ *  e.g.
+ *  <datasources>
+ *      <drivers>
+ *          <driver name="h2" module="com.h2database.h2">
+ *               <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+ *         </driver>
+ *      </drivers>
+ *  </datasources>
+ *  when the driver is defined in this way it should point a server module that contains the .classes.
+ *
+ */
 public class JBossDriverDef {
 
     /**
-     *  "driver-name"
+     * "driver-name": Defines the JDBC driver name. This name will later be used by a given data source as a symbolic
+     *  link for referencing the driver.
+     *  In case the driver is deployed as jar, the name is the name of deployment unit. (typically the file name)
+     *  In cases where the driver is defined in the <datasources> section, then an arbitrary name may have been used.
      */
     String driverName;
 
     /**
-     *  "deployment-name"
+     *  "deployment-name": The name of the deployment unit from which the driver was loaded.
+     *  If the driver was deployed as a jar, then deployment-name == driver-name.
+     *  In cases where the driver is defined in de <datasources> section then deployment-name == undefined.
      */
     String deploymentName;
 
     /**
      * "driver-module-name"
      * In cases the driver was installed as an EAP module and not just copying it into the deployments directory.
+     * (typically defined in the <datasources> section)
      */
     String driverModuleName;
 
     /**
      * "module-slot"
      * In cases the driver was installed as an EAP module and a module slot is used.
+     * (typically defined in the <datasources> section)
      *
      */
     String moduleSlot;
 
     /**
-     * "major-version"
+     * "major-version": The driver's major version number.
+     * Typically automatically established by the server both when the driver is deployed as a jar, or defined in
+     * the <datasources> section.
      */
     int mayorVersion;
 
     /**
-     * "minor-version"
+     * "minor-version": The driver's minor version number.
+     * Typically automatically established by the server both when the driver is deployed as a jar, or defined in
+     * the <datasources> section.
      */
     int minorVersion;
 
     /**
-     * "driver-class"
+     * "driver-class": The fully qualified class name of the java.sql.Driver implementation. (automatically established
+     * by the server both when the driver is deployed as a jar or defined in the <datasources> section)
      */
     String driverClass;
 
     /**
-     * "driver-datasource-class-name"
+     * "driver-datasource-class-name": The fully qualified class name of the javax.sql.DataSource implementation.
+     * (not listed/established when the driver is deployed as a jar. In this case just has undefined value.)
+     * And can be manually set when the driver is defined in the <datasources> section.)
      */
     String dataSourceClass;
 
     /**
-     * "driver-xa-datasource-class-name"
+     * "driver-xa-datasource-class-name": The fully qualified class name of the javax.sql.XADataSource implementation
+     * when an XA Datasource is defined.
+     * (not listed when the driver is deployed as a jar. In this case just has undefined value.) And can be manually set
+     * when teh driver is defined in the <datasources> section
      */
     String xaDataSourceClass;
 
     /**
-     * "jdbc-compliant"
+     * "jdbc-compliant": Whether or not the driver is JDBC compliant.
+     * This value is automatically established by the server both when it's deployed as a jar or defined in the
+     * <datasources> section.
      */
     boolean jdbcCompliant;
 

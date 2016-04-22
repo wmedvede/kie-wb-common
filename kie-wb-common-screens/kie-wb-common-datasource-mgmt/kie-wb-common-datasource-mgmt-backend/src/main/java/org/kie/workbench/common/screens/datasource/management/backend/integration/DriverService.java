@@ -23,11 +23,11 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDeploy
 
 public interface DriverService {
 
-    void deploy( DriverDef driverDef ) throws Exception;
+    void deploy( final DriverDef driverDef ) throws Exception;
 
-    void undeploy( String uuid ) throws Exception;
+    void undeploy( final String uuid ) throws Exception;
 
-    DriverDeploymentInfo getDeploymentInfo( String uuid ) throws Exception;
+    DriverDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception;
 
     List<DriverDeploymentInfo> getAllDeploymentInfo() throws Exception;
 

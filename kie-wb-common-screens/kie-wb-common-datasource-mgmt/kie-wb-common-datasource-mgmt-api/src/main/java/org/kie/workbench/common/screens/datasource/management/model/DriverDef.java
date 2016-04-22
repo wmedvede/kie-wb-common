@@ -64,4 +64,51 @@ public class DriverDef {
     public void setDriverLib( Path driverLib ) {
         this.driverLib = driverLib;
     }
+
+    @Override
+    public String toString() {
+        return "DriverDef{" +
+                "uuid='" + uuid + '\'' +
+                ", name='" + name + '\'' +
+                ", driverClass='" + driverClass + '\'' +
+                ", driverLib=" + driverLib +
+                '}';
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) {
+            return true;
+        }
+        if ( o == null || getClass() != o.getClass() ) {
+            return false;
+        }
+
+        DriverDef driverDef = ( DriverDef ) o;
+
+        if ( uuid != null ? !uuid.equals( driverDef.uuid ) : driverDef.uuid != null ) {
+            return false;
+        }
+        if ( name != null ? !name.equals( driverDef.name ) : driverDef.name != null ) {
+            return false;
+        }
+        if ( driverClass != null ? !driverClass.equals( driverDef.driverClass ) : driverDef.driverClass != null ) {
+            return false;
+        }
+        return !( driverLib != null ? !driverLib.equals( driverDef.driverLib ) : driverDef.driverLib != null );
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = uuid != null ? uuid.hashCode() : 0;
+        result = ~~result;
+        result = 31 * result + ( name != null ? name.hashCode() : 0 );
+        result = ~~result;
+        result = 31 * result + ( driverClass != null ? driverClass.hashCode() : 0 );
+        result = ~~result;
+        result = 31 * result + ( driverLib != null ? driverLib.hashCode() : 0 );
+        result = ~~result;
+        return result;
+    }
 }

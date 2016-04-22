@@ -23,8 +23,29 @@ import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
+/**
+ * This Class enables the deployment of contents into a Wildfy/EAP server.
+ */
 public class JBossDeploymentService extends JBossBaseService {
 
+    /**
+     *
+     * @param deploymentName Unique identifier of the deployment. Must be unique across all deployments.
+     *
+     * @param runtimeName Name by which the deployment should be known within a server's runtime. This would be
+     * equivalent to the file name of a deployment file, and would form the basis for such things as default
+     * Java Enterprise Edition application and module names.
+     * This would typically be the same as 'name', but in some cases users may wish to have two deployments with
+     * the same 'runtime-name' (e.g. two versions of "foo.war") both available in the deployment content repository,
+     * in which case the deployments would need to have distinct 'name' values but would have the same 'runtime-name'.
+     *
+     * @param content Content that comprise the deployment.
+     *
+     * @param enabled Boolean indicating whether the deployment content is currently deployed in the runtime
+     * (or should be deployed in the runtime the next time the server starts.)
+     *
+     * @throws Exception
+     */
     public void deployContent( String deploymentName, String runtimeName, byte[] content, boolean enabled ) throws Exception {
 
         ModelControllerClient client = null;
@@ -55,6 +76,14 @@ public class JBossDeploymentService extends JBossBaseService {
         }
     }
 
+    /**
+     *
+     * @param deploymentName Unique identifier of the deployment to be enabled/disabled.
+     *
+     * @param enabled true if the deployment should be enabled, false if it should be disabled.
+     *
+     * @throws Exception
+     */
     public void enableDeployment( String deploymentName, boolean enabled ) throws Exception {
 
         ModelControllerClient client = null;
@@ -78,6 +107,12 @@ public class JBossDeploymentService extends JBossBaseService {
         }
     }
 
+    /**
+     *
+     * @param deploymentName Unique identifier of the deployment to be removed.
+     *
+     * @throws Exception
+     */
     public void removeDeployment( String deploymentName ) throws Exception {
         ModelControllerClient client = null;
         ModelNode response = null;

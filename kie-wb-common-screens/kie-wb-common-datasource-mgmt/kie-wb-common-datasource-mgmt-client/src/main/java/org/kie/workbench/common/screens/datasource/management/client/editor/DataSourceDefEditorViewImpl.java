@@ -21,9 +21,9 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import org.gwtbootstrap3.client.ui.Button;
@@ -43,53 +43,58 @@ public class DataSourceDefEditorViewImpl
         extends BaseEditorViewImpl
         implements DataSourceDefEditorPresenter.DataSourceDefEditorView {
 
-    @DataField ( value = "name-form-group" )
+    @DataField ( "name-form-group" )
     Element nameFormGroup =  DOM.createDiv();
 
-    @DataField ( value = "name" )
-    TextBox nameTextBox = GWT.create( TextBox.class );
+    @Inject
+    @DataField ( "name" )
+    TextBox nameTextBox;
 
-    @DataField ( value = "jndi-form-group" )
+    @DataField ( "jndi-form-group" )
     Element jndiFormGroup =  DOM.createDiv();
 
-    @DataField ( value = "jndi" )
-    TextBox jndiTextBox = GWT.create( TextBox.class );
+    @Inject
+    @DataField ( "jndi" )
+    TextBox jndiTextBox;
 
-    @DataField ( value = "connection-url-form-group" )
+    @DataField ( "connection-url-form-group" )
     Element connectionURLFormGroup =  DOM.createDiv();
 
-    @DataField ( value = "connection-url" )
-    TextBox connectionURLTextBox = GWT.create( TextBox.class );
+    @Inject
+    @DataField ( "connection-url" )
+    TextBox connectionURLTextBox;
 
-    @DataField ( value = "user-form-group" )
+    @DataField ( "user-form-group" )
     Element userFormGroup =  DOM.createDiv();
 
-    @DataField ( value = "user" )
-    TextBox userTextBox = GWT.create( TextBox.class );
+    @Inject
+    @DataField ( "user" )
+    TextBox userTextBox;
 
-    @DataField ( value = "password-form-group" )
+    @DataField ( "password-form-group" )
     Element passwordFormGroup =  DOM.createDiv();
 
-    @DataField ( value = "password" )
-    TextBox passwordTextBox = GWT.create( TextBox.class );
+    @Inject
+    @DataField ( "password" )
+    TextBox passwordTextBox;
 
-    @DataField ( value = "driver-form-group" )
+    @DataField ( "driver-form-group" )
     Element driverFormGroup = DOM.createDiv();
 
     @Inject
-    @DataField ( value = "driver-selector" )
+    @DataField ( "driver-selector" )
     Select driverSelector;
 
     @Inject
-    @DataField("deploy-btn")
+    @DataField( "deploy-btn" )
     Button deployButton;
 
     @Inject
-    @DataField("undeploy-btn")
+    @DataField( "undeploy-btn" )
     Button undeployButton;
 
     @Inject
-    @DataField("test-btn")
+    @DataField( "test-btn" )
     Button testButton;
 
     private DataSourceDefEditorPresenter presenter;
@@ -104,7 +109,6 @@ public class DataSourceDefEditorViewImpl
 
     @PostConstruct
     private void init() {
-        //UI initializations
         enableDeployButton( false );
         enableUnDeployButton( false );
         enableTestButton( false );
@@ -166,6 +170,17 @@ public class DataSourceDefEditorViewImpl
     }
 
     @Override
+    public String getDriver() {
+        return driverSelector.getValue();
+    }
+
+    @Override
+    public void setDriver( final String driver ) {
+        driverSelector.setValue( driver );
+        refreshDriverSelector();
+    }
+
+    @Override
     public void enableDeployButton( final boolean enabled ) {
         deployButton.setEnabled( enabled );
     }
@@ -192,28 +207,47 @@ public class DataSourceDefEditorViewImpl
         refreshDriverSelector();
     }
 
-    @Override
-    public String getDriver() {
-        return driverSelector.getValue();
+    @EventHandler( "name" )
+    public void onNameChange( final ChangeEvent event ) {
+        presenter.onNameChange();
     }
 
-    @Override
-    public void setDriver( final String driver ) {
-        driverSelector.setValue( driver );
-        refreshDriverSelector();
+    @EventHandler( "jndi" )
+    public void onJndiChange( final ChangeEvent event ) {
+        presenter.onJndiChange();
     }
 
-    @EventHandler("deploy-btn")
+    @EventHandler( "connection-url")
+    public void onConnectionURLChange( final ChangeEvent event ) {
+        presenter.onConnectionURLChange();
+    }
+
+    @EventHandler( "user" )
+    public void onUserChange( final ChangeEvent event ) {
+        presenter.onUserChange();
+    }
+
+    @EventHandler( "password" )
+    public void onPasswordChange( final ChangeEvent event ) {
+        presenter.onPasswordChange();
+    }
+
+    @EventHandler( "driver-selector" )
+    public void onDriverChange( final ChangeEvent event ) {
+        presenter.onDriverChange();
+    }
+
+    @EventHandler( "deploy-btn" )
     public void onDeploy( final ClickEvent event ) {
         presenter.onDeployDataSource();
     }
 
-    @EventHandler("undeploy-btn")
+    @EventHandler( "undeploy-btn" )
     public void onUnDeploy( final ClickEvent event ) {
         presenter.onUnDeployDataSource();
     }
 
-    @EventHandler("test-btn")
+    @EventHandler( "test-btn" )
     public void onTest( final ClickEvent event ) {
         presenter.onUnTestDataSource();
     }

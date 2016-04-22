@@ -23,6 +23,8 @@ public class DriverDeploymentInfo {
 
     String uuid;
 
+    String internalUuid;
+
     boolean managed;
 
     String driverClass;
@@ -36,6 +38,14 @@ public class DriverDeploymentInfo {
 
     public void setUuid( String uuid ) {
         this.uuid = uuid;
+    }
+
+    public String getInternalUuid() {
+        return internalUuid;
+    }
+
+    public void setInternalUuid( String internalUuid ) {
+        this.internalUuid = internalUuid;
     }
 
     public boolean isManaged() {
