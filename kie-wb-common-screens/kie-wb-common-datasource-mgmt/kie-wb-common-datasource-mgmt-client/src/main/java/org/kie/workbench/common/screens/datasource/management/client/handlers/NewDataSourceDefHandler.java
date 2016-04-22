@@ -16,11 +16,13 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.handlers;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import org.guvnor.common.services.project.model.Package;
 import org.jboss.errai.common.client.api.Caller;
-import org.kie.workbench.common.screens.datasource.management.client.type.DriverDefType;
+import org.kie.workbench.common.screens.datasource.management.client.type.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.kie.workbench.common.widgets.client.handlers.DefaultNewResourceHandler;
 import org.kie.workbench.common.widgets.client.handlers.NewResourcePresenter;
@@ -29,20 +31,21 @@ import org.uberfire.ext.widgets.common.client.callbacks.HasBusyIndicatorDefaultE
 import org.uberfire.ext.widgets.common.client.common.BusyIndicatorView;
 import org.uberfire.workbench.type.ResourceTypeDefinition;
 
-public class DriverDefHandler extends DefaultNewResourceHandler {
+@ApplicationScoped
+public class NewDataSourceDefHandler extends DefaultNewResourceHandler {
 
     @Inject
     private Caller<DataSourceDefEditorService> editorService;
 
     @Inject
-    private DriverDefType resourceType;
+    private DataSourceDefType resourceType;
 
     @Inject
     private BusyIndicatorView busyIndicatorView;
 
     @Override
     public String getDescription() {
-        return "New Driver";
+        return "New DataSource";
     }
 
     @Override
@@ -56,13 +59,14 @@ public class DriverDefHandler extends DefaultNewResourceHandler {
     }
 
     @Override
-    public void create( final org.guvnor.common.services.project.model.Package pkg,
-            final String baseFileName,
-            final NewResourcePresenter presenter ) {
+    public void create( final Package pkg,
+                        final String baseFileName,
+                        final NewResourcePresenter presenter ) {
 
         busyIndicatorView.showBusyIndicator( CommonConstants.INSTANCE.Saving() );
         editorService.call( getSuccessCallback( presenter ),
                 new HasBusyIndicatorDefaultErrorCallback( busyIndicatorView ) ).create( pkg.getPackageMainResourcesPath(),
+                baseFileName,
                 buildFileName( baseFileName,
                         resourceType ) );
 

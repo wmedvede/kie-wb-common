@@ -22,12 +22,12 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 
 public class DataSourceDefSerializer {
 
-    public static DataSourceDef deserialize( String dataSourceDefString ) {
+    public static DataSourceDef deserialize( final String dataSourceDefString ) {
         Gson gson = new GsonBuilder().create();
         return gson.fromJson( dataSourceDefString, DataSourceDef.class );
     }
 
-    public static String serialize( DataSourceDef dataSourceDef ) {
+    public static String serialize( final DataSourceDef dataSourceDef ) {
         Gson gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .create();

@@ -19,15 +19,18 @@ package org.kie.workbench.common.screens.datasource.management.util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
+import org.uberfire.backend.vfs.Path;
 
 public class DriverDefSerializer {
 
-    public static DriverDef deserialize( String driverDefString ) {
-        Gson gson = new GsonBuilder().create();
+    public static DriverDef deserialize( final String driverDefString ) {
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter( Path.class, new PathDeserializer() )
+                .create();
         return gson.fromJson( driverDefString, DriverDef.class );
     }
 
-    public static String serialize( DriverDef driverDef ) {
+    public static String serialize( final DriverDef driverDef ) {
         Gson gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .create();

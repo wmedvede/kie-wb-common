@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.OperationBuilder;
 import org.jboss.dmr.ModelNode;
@@ -27,12 +30,18 @@ import org.jboss.dmr.Property;
 import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceService;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
+@ApplicationScoped
 public class JBossDataSourceService
         extends JBossBaseService
         implements DataSourceService {
+
+
+    @Inject
+    JBossDriverService driverService;
 
     public JBossDataSourceService() {
     }
@@ -50,7 +59,7 @@ public class JBossDataSourceService
             dataSourceDef.setName( internalDef.getName() );
             dataSourceDef.setJndi( internalDef.getJndi() );
             dataSourceDef.setConnectionURL( internalDef.getConnectionURL() );
-            dataSourceDef.setDriverName( internalDef.getDriverName() );
+            dataSourceDef.setDriverUuid( Util.normalizeDriverName( internalDef.getDriverName() ) );
             dataSourceDef.setDriverClass( internalDef.getDriverClass() );
             dataSourceDef.setDataSourceClass( internalDef.getDataSourceClass() );
             dataSourceDef.setUser( internalDef.getUser() );
@@ -64,13 +73,17 @@ public class JBossDataSourceService
     }
 
     @Override
-    public void deploy( DataSourceDef dataSourceDef ) throws Exception {
+    public void deploy( final DataSourceDef dataSourceDef ) throws Exception {
+        DriverDeploymentInfo driverDeploymentInfo = driverService.getDeploymentInfo( dataSourceDef.getDriverUuid() );
+        if ( getAllDeploymentInfo() == null ) {
+            throw new Exception( "Required driver: " + dataSourceDef.getDriverUuid() + " has not been deployed." );
+        }
         createDatasource( dataSourceDef.getUuid(),
                 dataSourceDef.getJndi(),
                 dataSourceDef.getConnectionURL(),
                 dataSourceDef.getDriverClass(),
                 dataSourceDef.getDataSourceClass(),
-                dataSourceDef.getDriverName(),
+                driverDeploymentInfo.getInternalUuid(),
                 dataSourceDef.getUser(),
                 dataSourceDef.getPassword(),
                 null,
@@ -79,12 +92,12 @@ public class JBossDataSourceService
     }
 
     @Override
-    public void undeploy( String uuid ) throws Exception {
+    public void undeploy( final String uuid ) throws Exception {
         deleteDatasource( uuid );
     }
 
     @Override
-    public DataSourceDeploymentInfo getDeploymentInfo( String uuid ) throws Exception {
+    public DataSourceDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception {
         for ( DataSourceDeploymentInfo deploymentInfo : getAllDeploymentInfo() ) {
             if ( uuid.equals( deploymentInfo.getUuid() ) ) {
                 return deploymentInfo;
