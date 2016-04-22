@@ -26,23 +26,26 @@ public interface DriverDefEditorPresenter {
             extends UberView<DriverDefEditorPresenter>,
             BaseEditorView {
 
-        void setName( String text );
+        void setName( final String text );
 
         String getName();
 
-        void setDriverClass( String driverClass );
+        void setDriverClass( final String driverClass );
 
         String getDriverClass();
 
         void setPath( Path path );
 
-        void enableDeployButton( boolean enable );
+        void enableDeployButton( final boolean enable );
 
-        void enableUnDeployButton( boolean enable );
+        void enableUnDeployButton( final boolean enable );
     }
+
+    void onNameChange();
+
+    void onDriverClassChange();
 
     void onDeployDriver();
 
     void onUnDeployDriver();
-
 }

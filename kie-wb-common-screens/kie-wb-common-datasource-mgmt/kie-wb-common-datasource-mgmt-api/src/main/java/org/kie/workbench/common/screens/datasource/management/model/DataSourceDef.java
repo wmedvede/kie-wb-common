@@ -33,13 +33,11 @@ public class DataSourceDef {
 
     String dataSourceClass;
 
-    String driverName;
+    String driverUuid;
 
     String user;
 
     String password;
-
-    String poolName;
 
     boolean useJTA;
 
@@ -96,12 +94,12 @@ public class DataSourceDef {
         this.dataSourceClass = dataSourceClass;
     }
 
-    public String getDriverName() {
-        return driverName;
+    public String getDriverUuid() {
+        return driverUuid;
     }
 
-    public void setDriverName( String driverName ) {
-        this.driverName = driverName;
+    public void setDriverUuid( String driverUuid ) {
+        this.driverUuid = driverUuid;
     }
 
     public String getUser() {
@@ -145,10 +143,9 @@ public class DataSourceDef {
                 ", connectionURL='" + connectionURL + '\'' +
                 ", driverClass='" + driverClass + '\'' +
                 ", dataSourceClass='" + dataSourceClass + '\'' +
-                ", driverName='" + driverName + '\'' +
+                ", driverUuid='" + driverUuid + '\'' +
                 ", user='" + user + '\'' +
                 ", password='" + password + '\'' +
-                ", poolName='" + poolName + '\'' +
                 ", useJTA=" + useJTA +
                 ", useCCM=" + useCCM +
                 '}';
@@ -189,33 +186,40 @@ public class DataSourceDef {
         if ( dataSourceClass != null ? !dataSourceClass.equals( that.dataSourceClass ) : that.dataSourceClass != null ) {
             return false;
         }
-        if ( driverName != null ? !driverName.equals( that.driverName ) : that.driverName != null ) {
+        if ( driverUuid != null ? !driverUuid.equals( that.driverUuid ) : that.driverUuid != null ) {
             return false;
         }
         if ( user != null ? !user.equals( that.user ) : that.user != null ) {
             return false;
         }
-        if ( password != null ? !password.equals( that.password ) : that.password != null ) {
-            return false;
-        }
-        return !( poolName != null ? !poolName.equals( that.poolName ) : that.poolName != null );
+        return !( password != null ? !password.equals( that.password ) : that.password != null );
 
     }
 
     @Override
     public int hashCode() {
         int result = uuid != null ? uuid.hashCode() : 0;
+        result = ~~result;
         result = 31 * result + ( name != null ? name.hashCode() : 0 );
+        result = ~~result;
         result = 31 * result + ( jndi != null ? jndi.hashCode() : 0 );
+        result = ~~result;
         result = 31 * result + ( connectionURL != null ? connectionURL.hashCode() : 0 );
+        result = ~~result;
         result = 31 * result + ( driverClass != null ? driverClass.hashCode() : 0 );
+        result = ~~result;
         result = 31 * result + ( dataSourceClass != null ? dataSourceClass.hashCode() : 0 );
-        result = 31 * result + ( driverName != null ? driverName.hashCode() : 0 );
+        result = ~~result;
+        result = 31 * result + ( driverUuid != null ? driverUuid.hashCode() : 0 );
+        result = ~~result;
         result = 31 * result + ( user != null ? user.hashCode() : 0 );
+        result = ~~result;
         result = 31 * result + ( password != null ? password.hashCode() : 0 );
-        result = 31 * result + ( poolName != null ? poolName.hashCode() : 0 );
+        result = ~~result;
         result = 31 * result + ( useJTA ? 1 : 0 );
+        result = ~~result;
         result = 31 * result + ( useCCM ? 1 : 0 );
+        result = ~~result;
         return result;
     }
 }

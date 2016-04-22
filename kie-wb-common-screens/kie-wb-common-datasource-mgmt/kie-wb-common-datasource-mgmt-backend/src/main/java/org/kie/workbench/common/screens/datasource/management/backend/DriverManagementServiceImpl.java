@@ -26,11 +26,15 @@ import org.kie.workbench.common.screens.datasource.management.backend.integratio
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @ApplicationScoped
 public class DriverManagementServiceImpl
     implements DriverManagementService {
+
+    private static final Logger logger = LoggerFactory.getLogger( DriverManagementServiceImpl.class );
 
     @Inject
     DriverService driverService;
@@ -40,33 +44,37 @@ public class DriverManagementServiceImpl
         try {
             return driverService.getDrivers();
         } catch ( Exception e ) {
+            logger.error( "getDrivers failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }
 
     @Override
-    public DriverDeploymentInfo getDriverDeploymentInfo( String uuid ) {
+    public DriverDeploymentInfo getDriverDeploymentInfo( final String uuid ) {
         try {
             return driverService.getDeploymentInfo( uuid );
         } catch ( Exception e ) {
+            logger.error( "getDriverDeploymentInfo for driver: " + uuid + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }
 
     @Override
-    public void deploy( DriverDef driverDef ) {
+    public void deploy( final DriverDef driverDef ) {
         try {
             driverService.deploy( driverDef );
         } catch ( Exception e ) {
+            logger.error( "deployment of driver: " + driverDef + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }
 
     @Override
-    public void undeploy( String uuid ) {
+    public void undeploy( final String uuid ) {
         try {
             driverService.undeploy( uuid );
         } catch ( Exception e ) {
+            logger.error( "undeployment of driver: " + uuid + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }

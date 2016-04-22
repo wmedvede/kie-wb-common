@@ -78,14 +78,16 @@ public class DataSourceDefEditorServiceImpl
 
     @Override
     public Path create( final Path context,
+            final String dataSourceName,
             final String fileName ) {
 
         checkNotNull( "context", context );
+        checkNotNull( "dataSourceName", dataSourceName );
         checkNotNull( "fileName", fileName );
 
         DataSourceDef dataSourceDef = new DataSourceDef();
         dataSourceDef.setUuid( UUID.randomUUID().toString() );
-        dataSourceDef.setName( fileName );
+        dataSourceDef.setName( dataSourceName );
         String content = DataSourceDefSerializer.serialize( dataSourceDef );
 
         final org.uberfire.java.nio.file.Path nioPath = Paths.convert( context ).resolve( fileName );
@@ -103,8 +105,7 @@ public class DataSourceDefEditorServiceImpl
     }
 
     @Override
-    public String test( String jndi ) {
-        //TODO experimental method
+    public String test( final String jndi ) {
         StringBuilder stringBuilder = new StringBuilder();
         try {
 
@@ -152,7 +153,7 @@ public class DataSourceDefEditorServiceImpl
     }
 
     @Override
-    public void delete( Path path, String comment ) {
+    public void delete( final Path path, final String comment ) {
         checkNotNull( "path", path );
         ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
     }

@@ -20,8 +20,8 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import org.gwtbootstrap3.client.ui.Button;
@@ -40,17 +40,19 @@ public class DriverDefEditorViewImpl
         extends BaseEditorViewImpl
         implements DriverDefEditorPresenter.DriverDefEditorView {
 
-    @DataField ( value = "name-form-group" )
+    @DataField ( "name-form-group" )
     Element nameFormGroup =  DOM.createDiv();
 
-    @DataField ( value = "name" )
-    TextBox nameTextBox = GWT.create( TextBox.class );
+    @Inject
+    @DataField ( "name" )
+    TextBox nameTextBox;
 
-    @DataField ( value = "driver-class-form-group" )
+    @DataField ( "driver-class-form-group" )
     Element driverClassFormGroup =  DOM.createDiv();
 
-    @DataField ( value = "driver-class" )
-    TextBox driverClassTextBox = GWT.create( TextBox.class );
+    @Inject
+    @DataField ( "driver-class" )
+    TextBox driverClassTextBox;
 
     @Inject
     @DataField( "deploy-btn" )
@@ -76,18 +78,17 @@ public class DriverDefEditorViewImpl
 
     @PostConstruct
     private void init() {
-        //UI initializations
         enableDeployButton( false );
         enableUnDeployButton( false );
     }
 
     @Override
-    public void init( DriverDefEditorPresenter presenter ) {
+    public void init( final DriverDefEditorPresenter presenter ) {
         this.presenter = presenter;
     }
 
     @Override
-    public void setName( String name ) {
+    public void setName( final String name ) {
         this.nameTextBox.setText( name );
     }
 
@@ -97,7 +98,7 @@ public class DriverDefEditorViewImpl
     }
 
     @Override
-    public void setDriverClass( String driverClass ) {
+    public void setDriverClass( final String driverClass ) {
         this.driverClassTextBox.setText( driverClass );
     }
 
@@ -107,26 +108,36 @@ public class DriverDefEditorViewImpl
     }
 
     @Override
-    public void setPath( Path path ) {
+    public void setPath( final Path path ) {
         fileUpload.setPath( path );
     }
 
     @Override
-    public void enableDeployButton( boolean enabled ) {
+    public void enableDeployButton( final boolean enabled ) {
         deployButton.setEnabled( enabled );
     }
 
     @Override
-    public void enableUnDeployButton( boolean enabled ) {
+    public void enableUnDeployButton( final boolean enabled ) {
         undeployButton.setEnabled( enabled );
     }
 
-    @EventHandler("deploy-btn")
+    @EventHandler( "name" )
+    public void onNameChange( final ChangeEvent event ) {
+        presenter.onNameChange();
+    }
+
+    @EventHandler( "driver-class" )
+    public void onDriverClassChange( final ChangeEvent event ) {
+        presenter.onDriverClassChange();
+    }
+
+    @EventHandler( "deploy-btn" )
     public void onDeploy( final ClickEvent event ) {
         presenter.onDeployDriver();
     }
 
-    @EventHandler("undeploy-btn")
+    @EventHandler( "undeploy-btn" )
     public void onUnDeploy( final ClickEvent event ) {
         presenter.onUnDeployDriver();
     }

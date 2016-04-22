@@ -55,7 +55,7 @@ public class DriverDefEditorServiceImpl
         DriverDefEditorContent editorContent = new DriverDefEditorContent();
         String content = ioService.readAllString( Paths.convert( path ) );
         DriverDef driverDef = DriverDefSerializer.deserialize( content );
-        driverDef.setDriverLib( claculateJarPath( path ) );
+        driverDef.setDriverLib( calculateJarPath( path ) );
         editorContent.setDriverDef( driverDef );
 
         return editorContent;
@@ -73,13 +73,14 @@ public class DriverDefEditorServiceImpl
     }
 
     @Override
-    public Path create( final Path context, final String fileName ) {
+    public Path create( final Path context, final String driverName, final String fileName ) {
         checkNotNull( "context", context );
+        checkNotNull( "driverName", driverName );
         checkNotNull( "fileName", fileName );
 
         DriverDef driverDef = new DriverDef();
         driverDef.setUuid( UUID.randomUUID().toString() );
-        driverDef.setName( fileName );
+        driverDef.setName( driverName );
         String content = DriverDefSerializer.serialize( driverDef );
 
         final org.uberfire.java.nio.file.Path nioPath = Paths.convert( context ).resolve( fileName );
@@ -100,9 +101,13 @@ public class DriverDefEditorServiceImpl
     public void delete( final Path path, final String comment ) {
         checkNotNull( "path", path );
         ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
+        final org.uberfire.java.nio.file.Path nioJarPath = Paths.convert( calculateJarPath( path ) );
+        if ( ioService.exists( nioJarPath ) ) {
+            ioService.delete( nioJarPath, optionsFactory.makeCommentedOption( comment ) );
+        }
     }
 
-    private Path claculateJarPath( Path currentFile ) {
+    private Path calculateJarPath( final Path currentFile ) {
         String jarFileName = currentFile.getFileName() + ".jar";
         org.uberfire.java.nio.file.Path nioJarPath = Paths.convert( currentFile ).resolveSibling( jarFileName );
         return Paths.convert( nioJarPath );

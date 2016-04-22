@@ -26,11 +26,15 @@ import org.kie.workbench.common.screens.datasource.management.backend.integratio
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @ApplicationScoped
 public class DataSourceManagementServiceImpl
         implements DataSourceManagementService {
+
+    private static final Logger logger = LoggerFactory.getLogger( DataSourceManagementServiceImpl.class );
 
     @Inject
     DataSourceService dataSourceService;
@@ -41,6 +45,7 @@ public class DataSourceManagementServiceImpl
         try {
             return dataSourceService.getDataSources();
         } catch ( Exception e ) {
+            logger.error( "getDataSources failed: " + e.getMessage(), e );
             throw new RuntimeException( e.getMessage() );
         }
     }
@@ -51,28 +56,31 @@ public class DataSourceManagementServiceImpl
     }
 
     @Override
-    public DataSourceDeploymentInfo getDeploymentInfo( String uuid ) {
+    public DataSourceDeploymentInfo getDeploymentInfo( final String uuid ) {
         try {
             return dataSourceService.getDeploymentInfo( uuid );
         } catch ( Exception e ) {
+            logger.error( "getDeploymentInfo for dataSource: " + uuid + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }
 
     @Override
-    public void deploy( DataSourceDef dataSourceDef ) {
+    public void deploy( final DataSourceDef dataSourceDef ) {
         try {
             dataSourceService.deploy( dataSourceDef );
         } catch ( Exception e ) {
+            logger.error( "deployment of dataSourceDef: " + dataSourceDef + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }
 
     @Override
-    public void undeploy( String uuid ) {
+    public void undeploy( final String uuid ) {
         try {
             dataSourceService.undeploy( uuid );
         } catch ( Exception e ) {
+            logger.error( "undeployment of dataSource: " + uuid + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }

@@ -160,7 +160,9 @@ public class DataSourceDefEditor
                 new ParameterizedCommand<String>() {
                     @Override
                     public void execute( final String commitMessage ) {
-                        editorService.call( getSaveSuccessCallback( getContent().hashCode() ) ).save( versionRecordManager.getCurrentPath(),
+                        editorService.call( getSaveSuccessCallback( getContent().hashCode() ),
+                                new HasBusyIndicatorDefaultErrorCallback( view )
+                        ).save( versionRecordManager.getCurrentPath(),
                                 getContent(),
                                 commitMessage );
                     }
@@ -198,23 +200,23 @@ public class DataSourceDefEditor
         };
     }
 
-    private void onDriversLoaded( List<DriverDef> driverDefs ) {
+    private void onDriversLoaded( final List<DriverDef> driverDefs ) {
         List<Pair<String, String>> driverOptions = buildDriverOptions( driverDefs );
         view.loadDriverOptions( driverOptions, true );
-        view.setDriver( editorContent.getDataSourceDef().getDriverName()  );
+        view.setDriver( getContent().getDataSourceDef().getDriverUuid()  );
     }
 
-    private List<Pair<String, String>> buildDriverOptions( List<DriverDef> driverDefs ) {
+    private List<Pair<String, String>> buildDriverOptions( final List<DriverDef> driverDefs ) {
         List<Pair<String, String>> options = new ArrayList<>(  );
         driverDefMap.clear();
         for ( DriverDef driverDef : driverDefs ) {
-            options.add( new Pair<String, String>( driverDef.getName(), driverDef.getUuid() ) );
+            options.add( new Pair<String, String>( driverDef.getDriverClass(), driverDef.getUuid() ) );
             driverDefMap.put( driverDef.getUuid(), driverDef );
         }
         return options;
     }
 
-    protected void onContentLoaded( DataSourceDefEditorContent editorContent ) {
+    protected void onContentLoaded( final DataSourceDefEditorContent editorContent ) {
         //Path is set to null when the Editor is closed (which can happen before async calls complete).
         if ( versionRecordManager.getCurrentPath() == null ) {
             return;
@@ -226,11 +228,10 @@ public class DataSourceDefEditor
     }
 
     protected DataSourceDefEditorContent getContent() {
-        updateContent();
         return editorContent;
     }
 
-    protected void setContent( DataSourceDefEditorContent editorContent ) {
+    protected void setContent( final DataSourceDefEditorContent editorContent ) {
         this.editorContent = editorContent;
         view.setName( editorContent.getDataSourceDef().getName() );
         view.setJndi( editorContent.getDataSourceDef().getJndi() );
@@ -239,25 +240,9 @@ public class DataSourceDefEditor
         view.setPassword( editorContent.getDataSourceDef().getPassword() );
     }
 
-    protected void updateContent() {
-        editorContent.getDataSourceDef().setName( view.getName() );
-        editorContent.getDataSourceDef().setJndi( view.getJndi() );
-        editorContent.getDataSourceDef().setConnectionURL( view.getConnectionURL() );
-        editorContent.getDataSourceDef().setUser( view.getUser() );
-        editorContent.getDataSourceDef().setPassword( view.getPassword() );
-
-        DriverDef driverDef = driverDefMap.get( view.getDriver() );
-        if ( driverDef != null ) {
-            editorContent.getDataSourceDef().setDriverName( driverDef.getUuid() );
-            editorContent.getDataSourceDef().setDriverClass( driverDef.getDriverClass() );
-        } else {
-            editorContent.getDataSourceDef().setDriverName( null );
-            editorContent.getDataSourceDef().setDriverClass( null );
-        }
-    }
-
     protected void refreshDeploymentInfo() {
-        dataSourceService.call( getRefreshDeploymentInfoSuccessCallback() ).getDeploymentInfo( editorContent.getDataSourceDef().getUuid() );
+        dataSourceService.call( getRefreshDeploymentInfoSuccessCallback(),
+                new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDataSourceDef().getUuid() );
     }
 
     private RemoteCallback<DataSourceDeploymentInfo> getRefreshDeploymentInfoSuccessCallback() {
@@ -275,6 +260,43 @@ public class DataSourceDefEditor
                 }
             }
         };
+    }
+
+    @Override
+    public void onNameChange() {
+        getContent().getDataSourceDef().setName( view.getName() );
+    }
+
+    @Override
+    public void onJndiChange() {
+        getContent().getDataSourceDef().setJndi( view.getJndi() );
+    }
+
+    @Override
+    public void onConnectionURLChange() {
+        getContent().getDataSourceDef().setConnectionURL( view.getConnectionURL() );
+    }
+
+    @Override
+    public void onUserChange() {
+        getContent().getDataSourceDef().setUser( view.getUser() );
+    }
+
+    @Override
+    public void onPasswordChange() {
+        getContent().getDataSourceDef().setPassword( view.getPassword() );
+    }
+
+    @Override
+    public void onDriverChange() {
+        DriverDef driverDef = driverDefMap.get( view.getDriver() );
+        if ( driverDef != null ) {
+            getContent().getDataSourceDef().setDriverUuid( driverDef.getUuid() );
+            getContent().getDataSourceDef().setDriverClass( driverDef.getDriverClass() );
+        } else {
+            getContent().getDataSourceDef().setDriverUuid( null );
+            getContent().getDataSourceDef().setDriverClass( null );
+        }
     }
 
     @Override
