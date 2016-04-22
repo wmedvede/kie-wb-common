@@ -16,28 +16,58 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend.integration.jboss;
 
+/**
+ * This class defines the information that us used by the Wildfly/EAP server to define a data source.
+ */
 public class JBossDataSourceDef {
 
     String name;
 
+    /**
+     * "jndi-name":  (required) Specifies the JNDI name for the datasource.
+     */
     String jndi;
 
+    /**
+     * "connection-url": (required) The JDBC driver connection URL.
+     */
     String connectionURL;
 
+    /**
+     * "driver-class" The fully qualified name of the JDBC driver class. (seems to be mandatory en EAP 6.4.6)
+     */
     String driverClass;
 
+    /**
+     * "datasource-class": The fully qualified name of the JDBC datasource class.
+     */
     String dataSourceClass;
 
+    /**
+     * "driver-name" :Defines the JDBC driver the datasource should use.
+     * It is a symbolic name matching the the name of installed driver. In case the driver is deployed as jar, the
+     * name is the name of deployment unit. (see JBossDriverDef).
+     */
     String driverName;
 
+    /**
+     * "user-name": Specify the user name used when creating a new connection.
+     */
     String user;
 
+    /**
+     * "password": Specifies the password used when creating a new connection.
+     */
     String password;
 
-    String poolName;
-
+    /**
+     * "jta": Enable JTA integration
+     */
     boolean useJTA;
 
+    /**
+     * "use-ccm": Enable the use of a cached connection manager
+     */
     boolean useCCM;
 
     public String getName() {

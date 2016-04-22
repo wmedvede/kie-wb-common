@@ -29,10 +29,10 @@ public interface DataSourceManagementService {
 
     List<DataSourceDef> getSystemDataSources();
 
-    DataSourceDeploymentInfo getDeploymentInfo( String uuid );
+    DataSourceDeploymentInfo getDeploymentInfo( final String uuid );
 
-    void deploy( DataSourceDef dataSourceDef );
+    void deploy( final DataSourceDef dataSourceDef );
 
-    void undeploy( String uuid );
+    void undeploy( final String uuid );
 
 }

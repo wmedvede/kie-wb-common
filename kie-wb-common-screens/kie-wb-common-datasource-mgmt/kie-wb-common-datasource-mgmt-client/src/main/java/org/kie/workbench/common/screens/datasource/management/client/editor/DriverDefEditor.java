@@ -141,7 +141,8 @@ public class DriverDefEditor
                 new ParameterizedCommand<String>() {
                     @Override
                     public void execute( final String commitMessage ) {
-                        editorService.call( getSaveSuccessCallback( getContent().hashCode() ) ).save( versionRecordManager.getCurrentPath(),
+                        editorService.call( getSaveSuccessCallback( getContent().hashCode() ),
+                                new HasBusyIndicatorDefaultErrorCallback( view ) ).save( versionRecordManager.getCurrentPath(),
                                 getContent(),
                                 commitMessage );
                     }
@@ -170,7 +171,7 @@ public class DriverDefEditor
         };
     }
 
-    protected void onContentLoaded( DriverDefEditorContent editorContent ) {
+    protected void onContentLoaded( final DriverDefEditorContent editorContent ) {
         //Path is set to null when the Editor is closed (which can happen before async calls complete).
         if ( versionRecordManager.getCurrentPath() == null ) {
             return;
@@ -181,11 +182,10 @@ public class DriverDefEditor
     }
 
     protected DriverDefEditorContent getContent() {
-        updateContent();
         return editorContent;
     }
 
-    protected void setContent( DriverDefEditorContent editorContent ) {
+    protected void setContent( final DriverDefEditorContent editorContent ) {
         this.editorContent = editorContent;
 
         view.setName( editorContent.getDriverDef().getName() );
@@ -193,13 +193,9 @@ public class DriverDefEditor
         view.setPath( editorContent.getDriverDef().getDriverLib() );
     }
 
-    protected void updateContent() {
-        editorContent.getDriverDef().setName( view.getName() );
-        editorContent.getDriverDef().setDriverClass( view.getDriverClass() );
-    }
-
     protected void refreshDeploymentInfo() {
-        driverService.call( getRefreshDeploymentInfoSuccessCallback() ).getDriverDeploymentInfo( editorContent.getDriverDef().getUuid() );
+        driverService.call( getRefreshDeploymentInfoSuccessCallback(),
+                new DefaultErrorCallback() ).getDriverDeploymentInfo( getContent().getDriverDef().getUuid() );
     }
 
     private RemoteCallback<DriverDeploymentInfo> getRefreshDeploymentInfoSuccessCallback() {
@@ -216,6 +212,16 @@ public class DriverDefEditor
                 }
             }
         };
+    }
+
+    @Override
+    public void onNameChange() {
+        getContent().getDriverDef().setName( view.getName() );
+    }
+
+    @Override
+    public void onDriverClassChange() {
+        getContent().getDriverDef().setDriverClass( view.getDriverClass() );
     }
 
     @Override

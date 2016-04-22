@@ -27,10 +27,10 @@ public interface DriverManagementService {
 
     List<DriverDef> getDrivers();
 
-    DriverDeploymentInfo getDriverDeploymentInfo( String uuid );
+    DriverDeploymentInfo getDriverDeploymentInfo( final String uuid );
 
-    void deploy( DriverDef driverDef );
+    void deploy( final DriverDef driverDef );
 
-    void undeploy( String uuid );
+    void undeploy( final String uuid );
 
 }

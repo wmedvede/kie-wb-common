@@ -24,21 +24,26 @@ import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.OperationBuilder;
 import org.jboss.as.controller.client.helpers.ClientConstants;
 import org.jboss.dmr.ModelNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
-public class JBossBaseService {
+public abstract class JBossBaseService {
+
+    private static final Logger logger = LoggerFactory.getLogger( JBossBaseService.class );
 
     public ModelControllerClient createControllerClient( ) throws Exception {
         return createControllerClient( true );
     }
 
     public ModelControllerClient createControllerClient( boolean checkConnection ) throws Exception {
-        ModelControllerClient client = ModelControllerClient.Factory.create( InetAddress.getByName( "127.0.0.1" ), 9999 );
 
+        ModelControllerClient client = ModelControllerClient.Factory.create( InetAddress.getByName( "127.0.0.1" ), 9999 );
         if ( checkConnection ) {
             try {
-                //dummy operation to check if the connection was properly established.
+                //dummy operation to check if the connection was properly established, since the create operation
+                //don't warranty the connection has been established.
                 ModelNode op = new ModelNode();
                 op.get( ClientConstants.OP ).set("read-resource");
 
@@ -46,19 +51,26 @@ public class JBossBaseService {
                 String releaseVersion = returnVal.get("result").get("release-version").asString();
                 String releaseCodeName = returnVal.get("result").get("release-codename").asString();
             } catch ( Exception e ) {
+                logger.error( "It was not possible to open connection to Wildfly/EAP server.", e );
                 throw new Exception( "It was not possible to open connection to server. " + e.getMessage() );
             }
         }
         return client;
     }
 
+    /**
+     * Checks the outcome returned by server when an operation was executed.
+     *
+     * @param response ModelNode returned by server as response.
+     *
+     * @throws Exception
+     */
     public void checkResponse( ModelNode response ) throws Exception {
 
-        //TODO improve all this error checking and handling.
         if ( "failed".equals( response.get( OUTCOME ) ) ) {
-            throw new Exception( getErrorDescription( response ) );
+            throw new Exception( "operation execution failed. :" + getErrorDescription( response ) );
         } else if ( "canceled".equals( response.get( OUTCOME ) ) ) {
-            //to nothing
+            throw new Exception( "operation excecution was canceled by server: " + getErrorDescription( response ) );
         } else if ( SUCCESS.equals( response.get( OUTCOME ) ) ) {
             //great!!!
         }
@@ -93,9 +105,5 @@ public class JBossBaseService {
         } else {
             return response.asString();
         }
-    }
-
-    public void log( String message ) {
-        System.out.println( message );
     }
 }

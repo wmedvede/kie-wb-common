@@ -49,18 +49,30 @@ public interface DataSourceDefEditorPresenter {
 
         void setPassword( final String password );
 
+        String getDriver();
+
+        void setDriver( final String driver );
+
+        void loadDriverOptions( final List<Pair<String,String>> driverOptions, final boolean addEmptyOption );
+
         void enableDeployButton( final boolean enabled );
 
         void enableUnDeployButton( final boolean enabled );
 
         void enableTestButton( final boolean enabled );
-
-        void loadDriverOptions( final List<Pair<String,String>> driverOptions, final boolean addEmptyOption );
-
-        String getDriver();
-
-        void setDriver( String driver );
     }
+
+    void onNameChange();
+
+    void onJndiChange();
+
+    void onConnectionURLChange();
+
+    void onUserChange();
+
+    void onPasswordChange();
+
+    void onDriverChange();
 
     void onDeployDataSource();
 
