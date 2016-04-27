@@ -19,51 +19,59 @@ package org.kie.workbench.common.screens.datasource.management.client.editor;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Widget;
-
 @Dependent
-public class DataSourceDefItem
-        implements IsWidget,
-        DataSourceDefItemView.Presenter {
+public class NewDataSourcePopup
+        implements NewDataSourcePopupPresenter {
 
+    private NewDataSourcePopupView view;
 
-    private DataSourceDefItemView view;
+    private NewDataSourcePopupHandler handler;
 
-    private DataSourceDefItemView.ItemHandler itemHandler;
-
-    private static int itemIds = 0;
-
-    private String itemId = "item_"+ itemIds++;
+    public NewDataSourcePopup() {
+    }
 
     @Inject
-    public DataSourceDefItem( DataSourceDefItemView view ) {
+    public NewDataSourcePopup( NewDataSourcePopupView view ) {
         this.view = view;
         view.init( this );
     }
 
+    @Override
+    public String getName() {
+        return view.getName();
+    }
+
+    @Override
     public void setName( String name ) {
         view.setName( name );
     }
 
     @Override
-    public Widget asWidget() {
-        return view.asWidget();
+    public void show() {
+        view.show();
     }
 
     @Override
-    public void onClick() {
-        if ( itemHandler != null ) {
-            itemHandler.onClick( getId() );
+    public void hide() {
+        view.hide();
+    }
+
+    @Override
+    public void onOk() {
+        if ( handler != null) {
+            handler.onOk();
         }
     }
 
     @Override
-    public void addItemHandler( DataSourceDefItemView.ItemHandler itemHandler ) {
-        this.itemHandler = itemHandler;
+    public void onCancel() {
+        if ( handler != null ) {
+            handler.onCancel();
+        }
     }
 
-    public String getId() {
-        return itemId;
+    @Override
+    public void addPopupHandler( NewDataSourcePopupHandler handler ) {
+        this.handler = handler;
     }
 }
