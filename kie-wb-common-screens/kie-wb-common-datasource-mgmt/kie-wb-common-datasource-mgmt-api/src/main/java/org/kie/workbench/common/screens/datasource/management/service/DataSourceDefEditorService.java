@@ -16,8 +16,11 @@
 
 package org.kie.workbench.common.screens.datasource.management.service;
 
+import java.util.List;
+
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 
@@ -33,5 +36,11 @@ public interface DataSourceDefEditorService
 
     //TODO experimental
     String test( final String jndi );
+
+    List<DataSourceDefInfo> getGlobalDataSources();
+
+    List<DataSourceDefInfo> getProjectDataSources( final Path path );
+
+    Path getGlobalDataSourcesContext();
 
 }
