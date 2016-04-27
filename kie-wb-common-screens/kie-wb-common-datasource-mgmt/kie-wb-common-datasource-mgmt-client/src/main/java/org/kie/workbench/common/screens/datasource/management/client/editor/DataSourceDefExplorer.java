@@ -15,7 +15,9 @@
  */
 package org.kie.workbench.common.screens.datasource.management.client.editor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
@@ -25,10 +27,11 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.ioc.client.container.IOC;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
+import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
+import org.uberfire.mvp.impl.PathPlaceRequest;
 
 @Dependent
 public class DataSourceDefExplorer
@@ -38,23 +41,33 @@ public class DataSourceDefExplorer
 
     DataSourceDefExplorerView view;
 
-    Caller<DataSourceManagementService> dataSourceService;
+    Caller<DataSourceDefEditorService> editorService;
 
     Instance<DataSourceDefItem> itemInstance;
 
+    Map<String, DataSourceDefInfo> itemsMap = new HashMap<>(  );
+
+    PlaceManager placeManager;
+
+    public DataSourceDefExplorer() {
+    }
+
     @Inject
     public DataSourceDefExplorer( DataSourceDefExplorerView view,
-            Caller<DataSourceManagementService> dataSourceService,
-            Instance<DataSourceDefItem> itemInstance ) {
+            Caller<DataSourceDefEditorService> editorService,
+            Instance<DataSourceDefItem> itemInstance,
+            PlaceManager placeManager ) {
         this.view = view;
-        this.dataSourceService = dataSourceService;
+        this.editorService = editorService;
         this.itemInstance = itemInstance;
+        this.placeManager = placeManager;
+
         view.init( this );
     }
 
     @PostConstruct
     private void init() {
-        loadItems();
+        loadDataSources();
     }
 
     @Override
@@ -64,35 +77,37 @@ public class DataSourceDefExplorer
 
     public void loadDataSources() {
         view.clear();
-        dataSourceService.call( new RemoteCallback<List<DataSourceDef>>() {
+        editorService.call( new RemoteCallback<List<DataSourceDefInfo>>() {
             @Override
-            public void callback( List<DataSourceDef> dataSourceDefs ) {
-                loadDataSources( dataSourceDefs );
+            public void callback( List<DataSourceDefInfo> dataSourceDefInfos ) {
+                loadDataSources( dataSourceDefInfos );
             }
-        }, new DefaultErrorCallback() ).getDataSources();
-
+        }, new DefaultErrorCallback() ).getGlobalDataSources();
     }
 
-    private void loadDataSources( List<DataSourceDef> dataSourceDefs ) {
+    private void loadDataSources( List<DataSourceDefInfo> dataSourceDefInfos ) {
         DataSourceDefItem item;
-        for ( DataSourceDef dataSourceDef : dataSourceDefs ) {
+        for ( DataSourceDefInfo dataSourceDefInfo : dataSourceDefInfos ) {
             item = createItem();
-            item.setName( dataSourceDef.getName() );
+            item.setName( dataSourceDefInfo.getName() );
+            item.addItemHandler( new DataSourceDefItemView.ItemHandler() {
+                @Override
+                public void onClick( String itemId ) {
+                    onItemClick( itemsMap.get( itemId ) );
+                }
+            } );
+            itemsMap.put( item.getId(), dataSourceDefInfo );
             view.addItem( item );
         }
     }
 
-    private void loadItems() {
-        DataSourceDefItem item;
-        for ( int i = 0; i < 10; i ++ ) {
-            item = createItem();
-            item.setName( "Datasource def: " + i );
-            view.addItem( item );
-        }
+    private void onItemClick( DataSourceDefInfo dataSourceDefInfo ) {
+        placeManager.goTo( new PathPlaceRequest( dataSourceDefInfo.getPath() ) );
     }
 
     protected DataSourceDefItem createItem() {
-        //return itemInstance.get();
-        return IOC.getBeanManager().lookupBean( DataSourceDefItem.class ).newInstance();
+        return itemInstance.get();
     }
+
+
 }
