@@ -16,25 +16,41 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend;
 
+import java.net.URI;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
+import org.guvnor.common.services.project.model.Package;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.util.DataSourceDefSerializer;
+import org.kie.workbench.common.services.datamodeller.util.FileUtils;
+import org.kie.workbench.common.services.shared.project.KieProject;
+import org.kie.workbench.common.services.shared.project.KieProjectService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.uberfire.backend.server.util.Paths;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.io.IOService;
 import org.uberfire.java.nio.base.options.CommentedOption;
 import org.uberfire.java.nio.file.FileAlreadyExistsException;
+import org.uberfire.java.nio.file.FileSystem;
+import org.uberfire.java.nio.file.FileSystemAlreadyExistsException;
 
 import static org.uberfire.commons.validation.PortablePreconditions.*;
 
@@ -43,12 +59,48 @@ import static org.uberfire.commons.validation.PortablePreconditions.*;
 public class DataSourceDefEditorServiceImpl
         implements DataSourceDefEditorService {
 
+    private static final Logger logger = LoggerFactory.getLogger( DataSourceDefEditorServiceImpl.class );
+
     @Inject
     @Named("ioStrategy")
     private IOService ioService;
 
     @Inject
     private CommentedOptionFactory optionsFactory;
+
+    @Inject
+    protected KieProjectService projectService;
+
+    /**
+     * Filesystem that will hold the platform data sources. Platform data sources has global scope instead of belong
+     * to a given project.
+     */
+    private FileSystem fileSystem;
+
+    /**
+     *  Root to the platform data sources repository.
+     */
+    private org.uberfire.java.nio.file.Path root;
+
+    @PostConstruct
+    public void init() {
+        String repositoryURI = null;
+        try {
+            repositoryURI = "default://" + getGlobalFileSystemName();
+            fileSystem = ioService.newFileSystem( URI.create( repositoryURI ),
+                    new HashMap<String, Object>() {{
+                        put( "init", Boolean.TRUE );
+                        put( "internal", Boolean.TRUE );
+                    }} );
+
+            logger.debug( "Data sources platform repository: " + repositoryURI + " was successfully created." );
+
+        } catch ( FileSystemAlreadyExistsException e ) {
+            logger.debug( "Data sources platform repository: " + repositoryURI + " already exits and will be used." );
+            fileSystem = ioService.getFileSystem( URI.create( repositoryURI ) );
+        }
+        this.root = fileSystem.getRootDirectories().iterator().next();
+    }
 
     @Override
     public DataSourceDefEditorContent loadContent( final Path path ) {
@@ -61,7 +113,6 @@ public class DataSourceDefEditorServiceImpl
         editorContent.setDataSourceDef( dataSourceDef );
         return editorContent;
     }
-
 
     @Override
     public Path save( final Path path,
@@ -156,5 +207,56 @@ public class DataSourceDefEditorServiceImpl
     public void delete( final Path path, final String comment ) {
         checkNotNull( "path", path );
         ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
+    }
+
+    public List<DataSourceDefInfo> getGlobalDataSources() {
+        return getDataSources( root );
+    }
+
+    public List<DataSourceDefInfo> getProjectDataSources( final Path path ) {
+        checkNotNull( "path", path );
+        KieProject project = projectService.resolveProject( path );
+        if ( project == null ) {
+            return new ArrayList<>( );
+        } else {
+            Package defaultPackage = projectService.resolveDefaultPackage( project );
+            return getDataSources( Paths.convert( defaultPackage.getPackageMainResourcesPath() ) );
+        }
+    }
+
+    @Override
+    public Path getGlobalDataSourcesContext() {
+        return Paths.convert( root );
+    }
+
+    private List<DataSourceDefInfo> getDataSources( final org.uberfire.java.nio.file.Path rootPath ) {
+
+        List<DataSourceDefInfo> result = new ArrayList<>( );
+        List<String> fileTypes = new ArrayList<>();
+        fileTypes.add( "datasource" );
+        Collection<FileUtils.ScanResult> dataSources;
+
+        try {
+            dataSources = FileUtils.getInstance().scan( ioService, rootPath , fileTypes, true );
+            Path dataSourceFile;
+            if ( dataSources != null ) {
+                for ( FileUtils.ScanResult scanResult : dataSources ) {
+                    dataSourceFile = Paths.convert( scanResult.getFile() );
+                    result.add( new DataSourceDefInfo( dataSourceFile.getFileName(), dataSourceFile ) );
+                }
+            }
+            return result;
+        } catch ( Exception e ) {
+            logger.error( "It was not possible read data sources info from: " + rootPath, e );
+            throw ExceptionUtilities.handleException( e );
+        }
+    }
+
+    private String getGlobalFileSystemName() {
+        String name = System.getProperty( "org.kie.workbench.datasource-filesystem" );
+        if ( name == null || "".equals( name ) ) {
+            name = "datasources";
+        }
+        return name;
     }
 }

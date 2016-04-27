@@ -169,6 +169,12 @@
       <scope>test</scope>
     </dependency>
 
+    <!--Temporal hasta que esté el PR de peter-->
+    <dependency>
+         <groupId>org.uberfire</groupId>
+          <artifactId>uberfire-widgets-table</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.uberfire</groupId>
       <artifactId>uberfire-testing-utils</artifactId>

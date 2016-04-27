@@ -18,24 +18,40 @@ package org.kie.workbench.common.screens.datasource.management.client.editor;
 
 import org.uberfire.client.mvp.UberView;
 
-public interface DataSourceDefItemView
-        extends UberView<DataSourceDefItemView.Presenter> {
+public interface NewDataSourcePopupPresenter {
 
-    interface Presenter {
+    interface NewDataSourcePopupView
+            extends
+            UberView<NewDataSourcePopupPresenter> {
 
-        void onClick();
+        void show();
 
-        void addItemHandler( ItemHandler itemHandler );
+        void hide();
 
+        String getName();
+
+        void setName( String name );
     }
 
-    interface ItemHandler {
-        void onClick( String itemId );
-    }
+    interface NewDataSourcePopupHandler {
 
-    void setName( String name );
+        void onOk();
+
+        void onCancel();
+    }
 
     String getName();
 
+    void setName( String name );
+
+    void show();
+
+    void hide();
+
+    void onOk();
+
+    void onCancel();
+
+    void addPopupHandler( NewDataSourcePopupHandler handler );
 
 }
