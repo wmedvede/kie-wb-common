@@ -71,7 +71,6 @@ public class DataSourceDefExplorerScreen {
 
     @PostConstruct
     private void init() {
-        /*
         newDataSourcePopup.addPopupHandler( new NewDataSourcePopupPresenter.NewDataSourcePopupHandler() {
             @Override
             public void onOk() {
@@ -83,19 +82,19 @@ public class DataSourceDefExplorerScreen {
                 newDataSourcePopup.hide();
             }
         } );
-        editorService.call( new RemoteCallback<Path>() {
-            @Override
-            public void callback( Path path ) {
-                globalDataSourcesContext = path;
-            }
-        }, new DefaultErrorCallback() ).getGlobalDataSourcesContext();
-        */
     }
 
     @OnStartup
     public void onStartup( PlaceRequest placeRequest ) {
         this.placeRequest = placeRequest;
         this.menu = makeMenuBar();
+
+        editorService.call( new RemoteCallback<Path>() {
+            @Override
+            public void callback( Path path ) {
+                globalDataSourcesContext = path;
+            }
+        }, new DefaultErrorCallback() ).getGlobalDataSourcesContext();
     }
 
     @WorkbenchPartTitle
@@ -143,6 +142,7 @@ public class DataSourceDefExplorerScreen {
     }
 
     public void onNewDataSource() {
+        newDataSourcePopup.clear();
         newDataSourcePopup.show();
     }
 
@@ -170,6 +170,7 @@ public class DataSourceDefExplorerScreen {
             public void callback( Path path ) {
                 BusyPopup.close();
                 placeManager.goTo( new PathPlaceRequest( path ) );
+                newDataSourcePopup.hide();
                 getLoadCommand().execute();
             }
         };
