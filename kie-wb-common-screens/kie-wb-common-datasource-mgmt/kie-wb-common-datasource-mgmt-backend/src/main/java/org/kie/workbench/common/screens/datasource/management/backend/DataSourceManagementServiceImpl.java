@@ -17,15 +17,17 @@
 package org.kie.workbench.common.screens.datasource.management.backend;
 
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
+import org.guvnor.common.services.shared.exceptions.GenericPortableException;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceService;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
+import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceServicesProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +39,27 @@ public class DataSourceManagementServiceImpl
     private static final Logger logger = LoggerFactory.getLogger( DataSourceManagementServiceImpl.class );
 
     @Inject
-    DataSourceService dataSourceService;
+    DataSourceServicesProvider servicesProvider;
+
+    @PostConstruct
+    public void init() {
+        if ( servicesProvider.getDataSourceService() == null ) {
+            logger.warn( "Data source services was not initialized in current server. " +
+            "Data sources features won't be available.");
+        }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return servicesProvider.getDataSourceService() != null;
+    }
 
     @Override
     public List<DataSourceDef> getDataSources() {
 
+        assertDataSourceSerives();
         try {
-            return dataSourceService.getDataSources();
+            return servicesProvider.getDataSourceService().getDataSources();
         } catch ( Exception e ) {
             logger.error( "getDataSources failed: " + e.getMessage(), e );
             throw new RuntimeException( e.getMessage() );
@@ -57,8 +73,10 @@ public class DataSourceManagementServiceImpl
 
     @Override
     public DataSourceDeploymentInfo getDeploymentInfo( final String uuid ) {
+
+        assertDataSourceSerives();
         try {
-            return dataSourceService.getDeploymentInfo( uuid );
+            return servicesProvider.getDataSourceService().getDeploymentInfo( uuid );
         } catch ( Exception e ) {
             logger.error( "getDeploymentInfo for dataSource: " + uuid + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
@@ -67,8 +85,10 @@ public class DataSourceManagementServiceImpl
 
     @Override
     public void deploy( final DataSourceDef dataSourceDef ) {
+
+        assertDataSourceSerives();
         try {
-            dataSourceService.deploy( dataSourceDef );
+            servicesProvider.getDataSourceService().deploy( dataSourceDef );
         } catch ( Exception e ) {
             logger.error( "deployment of dataSourceDef: " + dataSourceDef + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
@@ -77,11 +97,20 @@ public class DataSourceManagementServiceImpl
 
     @Override
     public void undeploy( final String uuid ) {
+
+        assertDataSourceSerives();
         try {
-            dataSourceService.undeploy( uuid );
+            servicesProvider.getDataSourceService().undeploy( uuid );
         } catch ( Exception e ) {
             logger.error( "undeployment of dataSource: " + uuid + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }
+
+    private void assertDataSourceSerives() {
+        if ( servicesProvider.getDataSourceService() == null ) {
+            throw new GenericPortableException( "Data source services are not provided for current server.");
+        }
+    }
+
 }

@@ -39,18 +39,15 @@ public class DataSourceDefExplorer
         DataSourceDefExplorerView.Presenter {
 
 
-    DataSourceDefExplorerView view;
+    private DataSourceDefExplorerView view;
 
-    Caller<DataSourceDefEditorService> editorService;
+    private Caller<DataSourceDefEditorService> editorService;
 
-    Instance<DataSourceDefItem> itemInstance;
+    private Instance<DataSourceDefItem> itemInstance;
 
-    Map<String, DataSourceDefInfo> itemsMap = new HashMap<>(  );
+    private Map<String, DataSourceDefInfo> itemsMap = new HashMap<>(  );
 
-    PlaceManager placeManager;
-
-    public DataSourceDefExplorer() {
-    }
+    private PlaceManager placeManager;
 
     @Inject
     public DataSourceDefExplorer( DataSourceDefExplorerView view,
@@ -105,9 +102,7 @@ public class DataSourceDefExplorer
         placeManager.goTo( new PathPlaceRequest( dataSourceDefInfo.getPath() ) );
     }
 
-    protected DataSourceDefItem createItem() {
+    private DataSourceDefItem createItem() {
         return itemInstance.get();
     }
-
-
 }

@@ -25,10 +25,10 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>kie-wb-common-datasource-mgmt-backend</artifactId>
+  <artifactId>kie-wb-common-datasource-mgmt-wildfly</artifactId>
 
-  <name>Kie Workbench - Common - Data Source Mgmt Backend</name>
-  <description>Kie Workbench - Common - Data Source Mgmt Backend</description>
+  <name>Kie Workbench - Common - Data Source Mgmt Wildfly</name>
+  <description>Kie Workbench - Common - Data Source Mgmt Wildfly</description>
 
   <dependencies>
 
@@ -38,28 +38,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-bus</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-security-server</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.uberfire</groupId>
       <artifactId>uberfire-api</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.uberfire</groupId>
-      <artifactId>uberfire-commons</artifactId>
     </dependency>
 
     <dependency>
@@ -83,23 +63,20 @@
     </dependency>
 
     <dependency>
-      <groupId>org.kie.workbench.services</groupId>
-      <artifactId>kie-wb-common-data-modeller-core</artifactId>
+      <groupId>org.kie.workbench.screens</groupId>
+      <artifactId>kie-wb-common-datasource-mgmt-backend</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>org.kie.workbench.services</groupId>
-      <artifactId>kie-wb-common-services-api</artifactId>
+      <groupId>org.jboss</groupId>
+      <artifactId>jboss-dmr</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.guvnor</groupId>
-      <artifactId>guvnor-project-api</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.guvnor</groupId>
-      <artifactId>guvnor-services-api</artifactId>
+      <groupId>org.wildfly</groupId>
+      <artifactId>wildfly-controller-client</artifactId>
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>

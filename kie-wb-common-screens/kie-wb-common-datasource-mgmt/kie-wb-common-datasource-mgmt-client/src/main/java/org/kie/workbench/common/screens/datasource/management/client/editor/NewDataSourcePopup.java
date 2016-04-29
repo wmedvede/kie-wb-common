@@ -27,9 +27,6 @@ public class NewDataSourcePopup
 
     private NewDataSourcePopupHandler handler;
 
-    public NewDataSourcePopup() {
-    }
-
     @Inject
     public NewDataSourcePopup( NewDataSourcePopupView view ) {
         this.view = view;
@@ -73,5 +70,9 @@ public class NewDataSourcePopup
     @Override
     public void addPopupHandler( NewDataSourcePopupHandler handler ) {
         this.handler = handler;
+    }
+
+    public void clear() {
+        view.setName( null );
     }
 }
