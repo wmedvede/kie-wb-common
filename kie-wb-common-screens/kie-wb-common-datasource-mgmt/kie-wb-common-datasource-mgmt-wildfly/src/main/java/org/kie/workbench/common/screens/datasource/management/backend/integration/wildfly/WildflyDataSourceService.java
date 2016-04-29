@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.integration.jboss;
+package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.OperationBuilder;
@@ -34,27 +34,28 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDeploy
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
-@ApplicationScoped
-public class JBossDataSourceService
-        extends JBossBaseService
+@Dependent
+@Named(value = "WildflyDataSourceService" )
+public class WildflyDataSourceService
+        extends WildflyBaseService
         implements DataSourceService {
 
 
     @Inject
-    JBossDriverService driverService;
+    WildflyDriverService driverService;
 
-    public JBossDataSourceService() {
+    public WildflyDataSourceService() {
     }
 
     @Override
     public List<DataSourceDef> getDataSources() throws Exception {
 
-        List<JBossDataSourceDef> dataSources;
+        List<WildflyDataSourceDef> dataSources;
         List<DataSourceDef> dataSourceDefs = new ArrayList<>( );
         DataSourceDef dataSourceDef;
 
         dataSources = getInternalDataSources();
-        for ( JBossDataSourceDef internalDef : dataSources ) {
+        for ( WildflyDataSourceDef internalDef : dataSources ) {
             dataSourceDef = new DataSourceDef();
             dataSourceDef.setName( internalDef.getName() );
             dataSourceDef.setJndi( internalDef.getJndi() );
@@ -108,11 +109,11 @@ public class JBossDataSourceService
 
     @Override
     public List<DataSourceDeploymentInfo> getAllDeploymentInfo() throws Exception {
-        List<JBossDataSourceDef> dataSources = getInternalDataSources();
+        List<WildflyDataSourceDef> dataSources = getInternalDataSources();
         List<DataSourceDeploymentInfo> result = new ArrayList<DataSourceDeploymentInfo>( );
         DataSourceDeploymentInfo deploymentInfo;
 
-        for ( JBossDataSourceDef internalDef : dataSources ) {
+        for ( WildflyDataSourceDef internalDef : dataSources ) {
             deploymentInfo = new DataSourceDeploymentInfo();
             deploymentInfo.setUuid( internalDef.getName() );
             deploymentInfo.setJndi( internalDef.getJndi() );
@@ -122,10 +123,10 @@ public class JBossDataSourceService
         return result;
     }
 
-    private List<JBossDataSourceDef> getInternalDataSources() throws Exception {
+    private List<WildflyDataSourceDef> getInternalDataSources() throws Exception {
 
-        List<JBossDataSourceDef> dataSources = new ArrayList<JBossDataSourceDef>( );
-        JBossDataSourceDef dataSource;
+        List<WildflyDataSourceDef> dataSources = new ArrayList<WildflyDataSourceDef>( );
+        WildflyDataSourceDef dataSource;
         ModelNode response = null;
         ModelControllerClient client = null;
 
@@ -147,18 +148,18 @@ public class JBossDataSourceService
                     for ( ModelNode resultNode : nodes ) {
                         property = resultNode.asProperty();
                         node = property.getValue();
-                        dataSource = new JBossDataSourceDef();
+                        dataSource = new WildflyDataSourceDef();
 
                         dataSource.setName( property.getName() );
-                        dataSource.setJndi( node.get( JBossDataSourceAttributes.JNDI_NAME ).asString() );
-                        dataSource.setConnectionURL( node.get( JBossDataSourceAttributes.CONNECTION_URL ).asString() );
-                        dataSource.setDriverName( node.get( JBossDataSourceAttributes.DRIVER_NAME ).asString() );
-                        dataSource.setDriverClass( node.get( JBossDataSourceAttributes.DRIVER_CLASS ).asString() );
-                        dataSource.setDataSourceClass( node.get( JBossDataSourceAttributes.DATASOURCE_CLASS ).asString() );
-                        dataSource.setUser( node.get( JBossDataSourceAttributes.USER_NAME ).asString() );
-                        dataSource.setPassword( node.get( JBossDataSourceAttributes.PASSWORD ).asString() );
-                        dataSource.setUseJTA( node.get( JBossDataSourceAttributes.JTA ).asBoolean() );
-                        dataSource.setUseCCM( node.get( JBossDataSourceAttributes.USE_CCM ).asBoolean() );
+                        dataSource.setJndi( node.get( WildflyDataSourceAttributes.JNDI_NAME ).asString() );
+                        dataSource.setConnectionURL( node.get( WildflyDataSourceAttributes.CONNECTION_URL ).asString() );
+                        dataSource.setDriverName( node.get( WildflyDataSourceAttributes.DRIVER_NAME ).asString() );
+                        dataSource.setDriverClass( node.get( WildflyDataSourceAttributes.DRIVER_CLASS ).asString() );
+                        dataSource.setDataSourceClass( node.get( WildflyDataSourceAttributes.DATASOURCE_CLASS ).asString() );
+                        dataSource.setUser( node.get( WildflyDataSourceAttributes.USER_NAME ).asString() );
+                        dataSource.setPassword( node.get( WildflyDataSourceAttributes.PASSWORD ).asString() );
+                        dataSource.setUseJTA( node.get( WildflyDataSourceAttributes.JTA ).asBoolean() );
+                        dataSource.setUseCCM( node.get( WildflyDataSourceAttributes.USE_CCM ).asBoolean() );
 
                         dataSources.add( dataSource );
                     }
@@ -207,31 +208,31 @@ public class JBossDataSourceService
             operation.get( OP_ADDR ).add( "data-source", name );
         }
         if ( jndi != null ) {
-            operation.get( JBossDataSourceAttributes.JNDI_NAME ).set( jndi );
+            operation.get( WildflyDataSourceAttributes.JNDI_NAME ).set( jndi );
         }
         if ( connectionURL != null ) {
-            operation.get( JBossDataSourceAttributes.CONNECTION_URL ).set( connectionURL );
+            operation.get( WildflyDataSourceAttributes.CONNECTION_URL ).set( connectionURL );
         }
         if ( driverName != null ) {
-            operation.get( JBossDataSourceAttributes.DRIVER_NAME ).set( driverName );
+            operation.get( WildflyDataSourceAttributes.DRIVER_NAME ).set( driverName );
         }
         if ( driverClass != null ) {
-            operation.get( JBossDataSourceAttributes.DRIVER_CLASS ).set( driverClass );
+            operation.get( WildflyDataSourceAttributes.DRIVER_CLASS ).set( driverClass );
         }
         if ( datasourceClass != null ) {
-            operation.get( JBossDataSourceAttributes.DATASOURCE_CLASS ).set( datasourceClass );
+            operation.get( WildflyDataSourceAttributes.DATASOURCE_CLASS ).set( datasourceClass );
         }
         if ( user != null ) {
-            operation.get( JBossDataSourceAttributes.USER_NAME ).set( user );
+            operation.get( WildflyDataSourceAttributes.USER_NAME ).set( user );
         }
         if ( password != null ) {
-            operation.get( JBossDataSourceAttributes.PASSWORD ).set( password );
+            operation.get( WildflyDataSourceAttributes.PASSWORD ).set( password );
         }
         if ( useJTA != null ) {
-            operation.get( JBossDataSourceAttributes.JTA ).set( useJTA );
+            operation.get( WildflyDataSourceAttributes.JTA ).set( useJTA );
         }
         if ( useCCM != null ) {
-            operation.get( JBossDataSourceAttributes.USE_CCM ).set( useCCM );
+            operation.get( WildflyDataSourceAttributes.USE_CCM ).set( useCCM );
         }
 
         if ( poolName != null ) {

@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.integration.jboss;
+package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
+
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
 /**
  * This Class enables the deployment of contents into a Wildfy/EAP server.
  */
-public class JBossDeploymentService extends JBossBaseService {
+public class WildflyDeploymentService extends WildflyBaseService {
 
     /**
      *

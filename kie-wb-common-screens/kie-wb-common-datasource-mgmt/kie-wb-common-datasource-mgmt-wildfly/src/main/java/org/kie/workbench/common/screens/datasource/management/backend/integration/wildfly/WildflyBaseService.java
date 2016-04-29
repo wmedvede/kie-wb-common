@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.integration.jboss;
+package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
 
 import java.io.Closeable;
 import java.net.InetAddress;
@@ -29,9 +29,9 @@ import org.slf4j.LoggerFactory;
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
-public abstract class JBossBaseService {
+public abstract class WildflyBaseService {
 
-    private static final Logger logger = LoggerFactory.getLogger( JBossBaseService.class );
+    private static final Logger logger = LoggerFactory.getLogger( WildflyBaseService.class );
 
     public ModelControllerClient createControllerClient( ) throws Exception {
         return createControllerClient( true );
@@ -39,7 +39,7 @@ public abstract class JBossBaseService {
 
     public ModelControllerClient createControllerClient( boolean checkConnection ) throws Exception {
 
-        ModelControllerClient client = ModelControllerClient.Factory.create( InetAddress.getByName( "127.0.0.1" ), 9999 );
+        ModelControllerClient client = ModelControllerClient.Factory.create( InetAddress.getByName( "127.0.0.1" ), 9990 );
         if ( checkConnection ) {
             try {
                 //dummy operation to check if the connection was properly established, since the create operation

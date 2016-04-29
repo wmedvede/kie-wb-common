@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.integration.jboss;
+package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
 
-public class JBossDataSourceAttributes {
+public class WildflyDataSourceAttributes {
 
     /**
      * A String value.

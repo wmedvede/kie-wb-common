@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.integration.jboss;
+package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -32,16 +32,17 @@ import org.uberfire.io.IOService;
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
-@ApplicationScoped
-public class JBossDriverService
-        extends JBossBaseService
+@Dependent
+@Named(value = "WildflyDriverService" )
+public class WildflyDriverService
+        extends WildflyBaseService
         implements DriverService {
 
     @Inject
     @Named("ioStrategy")
     private IOService ioService;
 
-    private JBossDeploymentService deploymentService = new JBossDeploymentService();
+    private WildflyDeploymentService deploymentService = new WildflyDeploymentService();
 
     @Override
     public DriverDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception {
@@ -71,7 +72,7 @@ public class JBossDriverService
         List<DriverDef> driverDefs = new ArrayList<>(  );
         DriverDef driverDef;
 
-        for ( JBossDriverDef internalDef : getInternalDrivers() ) {
+        for ( WildflyDriverDef internalDef : getInternalDrivers() ) {
             driverDef = new DriverDef();
             driverDef.setUuid( Util.normalizeDriverName( internalDef.getDriverName() ) );
             driverDef.setName( internalDef.getDeploymentName() );
@@ -88,7 +89,7 @@ public class JBossDriverService
         List<DriverDeploymentInfo> deploymentInfos = new ArrayList<>(  );
         DriverDeploymentInfo deploymentInfo;
 
-        for ( JBossDriverDef internalDef : getInternalDrivers() ) {
+        for ( WildflyDriverDef internalDef : getInternalDrivers() ) {
             deploymentInfo = new DriverDeploymentInfo();
             deploymentInfo.setUuid( Util.normalizeDriverName( internalDef.getDriverName() ) );
             deploymentInfo.setInternalUuid( internalDef.getDriverName() );
@@ -101,19 +102,19 @@ public class JBossDriverService
         return deploymentInfos;
     }
 
-    private List<JBossDriverDef> getInternalDrivers() throws Exception {
+    private List<WildflyDriverDef> getInternalDrivers() throws Exception {
 
         ModelNode operation = new ModelNode();
         operation.get( OP ).set( "installed-drivers-list" );
         operation.get( OP_ADDR ).add( "subsystem", "datasources" );
 
         ModelControllerClient client = null;
-        List<JBossDriverDef> drivers = new ArrayList<JBossDriverDef>();
+        List<WildflyDriverDef> drivers = new ArrayList<WildflyDriverDef>();
 
         try {
             client = createControllerClient();
             ModelNode response = client.execute( operation );
-            JBossDriverDef driver;
+            WildflyDriverDef driver;
             String driverName;
 
             if ( !isFailure( response ) ) {
@@ -124,7 +125,7 @@ public class JBossDriverService
 
                     for ( ModelNode node : nodes ) {
 
-                        driver = new JBossDriverDef();
+                        driver = new WildflyDriverDef();
                         driverName = node.get( "driver-name" ).asString();
                         driver.setDriverName( driverName );
 

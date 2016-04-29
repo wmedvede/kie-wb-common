@@ -17,12 +17,14 @@
 package org.kie.workbench.common.screens.datasource.management.backend;
 
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
+import org.guvnor.common.services.shared.exceptions.GenericPortableException;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.kie.workbench.common.screens.datasource.management.backend.integration.DriverService;
+import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceServicesProvider;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
@@ -37,12 +39,27 @@ public class DriverManagementServiceImpl
     private static final Logger logger = LoggerFactory.getLogger( DriverManagementServiceImpl.class );
 
     @Inject
-    DriverService driverService;
+    DataSourceServicesProvider servicesProvider;
+
+    @PostConstruct
+    public void init() {
+        if ( servicesProvider.getDriverService() == null ) {
+            logger.warn( "Driver services was not installed in current server." +
+                    "Drivers features won't be available.");
+        }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return servicesProvider.getDriverService() != null;
+    }
 
     @Override
     public List<DriverDef> getDrivers() {
+
+        assertDriverServices();
         try {
-            return driverService.getDrivers();
+            return servicesProvider.getDriverService().getDrivers();
         } catch ( Exception e ) {
             logger.error( "getDrivers failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
@@ -51,8 +68,10 @@ public class DriverManagementServiceImpl
 
     @Override
     public DriverDeploymentInfo getDriverDeploymentInfo( final String uuid ) {
+
+        assertDriverServices();
         try {
-            return driverService.getDeploymentInfo( uuid );
+            return servicesProvider.getDriverService().getDeploymentInfo( uuid );
         } catch ( Exception e ) {
             logger.error( "getDriverDeploymentInfo for driver: " + uuid + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
@@ -61,8 +80,10 @@ public class DriverManagementServiceImpl
 
     @Override
     public void deploy( final DriverDef driverDef ) {
+
+        assertDriverServices();
         try {
-            driverService.deploy( driverDef );
+            servicesProvider.getDriverService().deploy( driverDef );
         } catch ( Exception e ) {
             logger.error( "deployment of driver: " + driverDef + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
@@ -71,11 +92,19 @@ public class DriverManagementServiceImpl
 
     @Override
     public void undeploy( final String uuid ) {
+
+        assertDriverServices();
         try {
-            driverService.undeploy( uuid );
+            servicesProvider.getDriverService().undeploy( uuid );
         } catch ( Exception e ) {
             logger.error( "undeployment of driver: " + uuid + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
+        }
+    }
+
+    private void assertDriverServices() {
+        if ( servicesProvider.getDriverService() == null ) {
+            throw new GenericPortableException( "Driver services are not provided for current server.");
         }
     }
 }
