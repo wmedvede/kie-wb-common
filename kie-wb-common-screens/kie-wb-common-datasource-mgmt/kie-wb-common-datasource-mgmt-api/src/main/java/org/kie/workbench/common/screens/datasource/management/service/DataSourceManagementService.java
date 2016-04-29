@@ -25,6 +25,8 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 @Remote
 public interface DataSourceManagementService {
 
+    boolean isEnabled();
+
     List<DataSourceDef> getDataSources();
 
     List<DataSourceDef> getSystemDataSources();

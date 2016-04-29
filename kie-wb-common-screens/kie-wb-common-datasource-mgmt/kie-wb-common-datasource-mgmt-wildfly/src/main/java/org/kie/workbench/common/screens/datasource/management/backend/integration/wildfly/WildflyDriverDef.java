@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.integration.jboss;
+package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
 
 /**
  * This class defines the information that us used by the Wildfly/EAP server to define a data base driver.
@@ -35,7 +35,7 @@ package org.kie.workbench.common.screens.datasource.management.backend.integrati
  *  when the driver is defined in this way it should point a server module that contains the .classes.
  *
  */
-public class JBossDriverDef {
+public class WildflyDriverDef {
 
     /**
      * "driver-name": Defines the JDBC driver name. This name will later be used by a given data source as a symbolic
@@ -191,7 +191,7 @@ public class JBossDriverDef {
 
     @Override
     public String toString() {
-        return "JBossDriverDef{" +
+        return "WildflyDriverDef{" +
                 "driverName='" + driverName + '\'' +
                 ", deploymentName='" + deploymentName + '\'' +
                 ", driverModuleName='" + driverModuleName + '\'' +

@@ -14,25 +14,12 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.service;
+package org.kie.workbench.common.screens.datasource.management.backend.integration;
 
-import java.util.List;
+public interface DataSourceServicesProvider {
 
-import org.jboss.errai.bus.server.annotations.Remote;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
+    DataSourceService getDataSourceService();
 
-@Remote
-public interface DriverManagementService {
-
-    boolean isEnabled();
-
-    List<DriverDef> getDrivers();
-
-    DriverDeploymentInfo getDriverDeploymentInfo( final String uuid );
-
-    void deploy( final DriverDef driverDef );
-
-    void undeploy( final String uuid );
+    DriverService getDriverService();
 
 }
