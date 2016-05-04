@@ -19,6 +19,8 @@ package org.kie.workbench.common.screens.datasource.management.backend.integrati
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.enterprise.context.Dependent;
+
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
 
@@ -27,6 +29,7 @@ import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 /**
  * This Class enables the deployment of contents into a Wildfy/EAP server.
  */
+@Dependent
 public class WildflyDeploymentService extends WildflyBaseService {
 
     /**
