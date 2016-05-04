@@ -29,6 +29,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.kie.workbench.common.screens.datasource.management.backend.integration.ServiceUtil.*;
+
 @ApplicationScoped
 public class DataSourceServicesProviderImpl
         implements DataSourceServicesProvider
@@ -58,13 +60,15 @@ public class DataSourceServicesProviderImpl
         loadConfig();
 
         //get the references to the services
-        String serviceName = getManagedProperty( DATASOURCE_SERVICE );
+        String serviceName = getManagedProperty( properties, DATASOURCE_SERVICE );
         if ( !isEmpty( serviceName ) ) {
             try {
                 dataSourceService = ( DataSourceService ) getManagedBean( serviceName );
                 if ( dataSourceService == null ) {
                     logger.error( "It was not possible to get the reference to the data sources service: "
                             + serviceName + ". Data source services won't be available." );
+                } else {
+                    dataSourceService.loadConfig( properties );
                 }
             } catch ( Exception e ) {
                 logger.error( "An error was produced during: " + serviceName + " initialization.", e);
@@ -72,16 +76,17 @@ public class DataSourceServicesProviderImpl
         } else {
             logger.warn( "Data source serviceName: " + DATASOURCE_SERVICE +
                     " property was not properly configured. Data source services won't be available." );
-
         }
 
-        serviceName = getManagedProperty( DRIVER_SERVICE );
+        serviceName = getManagedProperty( properties, DRIVER_SERVICE );
         if ( !isEmpty( serviceName ) ) {
             try {
                 driverService = ( DriverService ) getManagedBean( serviceName );
                 if ( driverService == null ) {
                     logger.error( "It was not possible to get reference to the drivers service: "
                             + serviceName + ". Drivers services won't be available." );
+                } else {
+                    driverService.loadConfig( properties );
                 }
             } catch ( Exception e ) {
                 logger.error( "An error was produced during: " + serviceName + " initialization.", e );
@@ -89,7 +94,6 @@ public class DataSourceServicesProviderImpl
         } else {
             logger.warn( "Drivers serviceName: " + DRIVER_SERVICE +
                     " property was not properly configured. Drivers services won't be available." );
-
         }
 
         if ( dataSourceService != null ) {
@@ -149,17 +153,4 @@ public class DataSourceServicesProviderImpl
             DATASOURCE_MANAGEMENT_PROPERTIES, e );
         }
     }
-
-    private String getManagedProperty( String propertyName ) {
-        String propertyValue = System.getProperty( propertyName );
-        if ( isEmpty( propertyValue ) ) {
-            propertyValue = properties.getProperty( propertyName );
-        }
-        return propertyValue != null ? propertyValue.trim() : null;
-    }
-
-    private boolean isEmpty( final String value ) {
-        return value == null || value.trim().length() == 0;
-    }
-
 }

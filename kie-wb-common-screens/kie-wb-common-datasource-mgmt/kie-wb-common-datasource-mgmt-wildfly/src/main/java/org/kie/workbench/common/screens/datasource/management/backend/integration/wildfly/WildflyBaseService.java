@@ -17,8 +17,16 @@
 package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Date;
+import java.util.Properties;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.sasl.RealmCallback;
 
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.OperationBuilder;
@@ -28,10 +36,50 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
+import static org.kie.workbench.common.screens.datasource.management.backend.integration.ServiceUtil.*;
 
+/**
+ * Base class for Wildfly/EAP based services.
+ */
 public abstract class WildflyBaseService {
 
     private static final Logger logger = LoggerFactory.getLogger( WildflyBaseService.class );
+
+    private static final String PREFIX = "datasource.management.wildfly";
+
+    private static final String HOST = PREFIX + ".host";
+    private static final String PORT = PREFIX + ".port";
+    private static final String ADMIN = PREFIX + ".admin";
+    private static final String PASSWORD = PREFIX + ".password";
+    private static final String REALM = PREFIX + ".realm";
+
+    protected static final String DEFAULT_HOST = "localhost";
+    protected static final int DEFAULT_PORT = 9990;
+    protected static final String DEFAULT_ADMIN = null;
+    protected static final String DEFAULT_ADMIN_PASSWORD = null;
+    protected static final String DEFAULT_REALM = "ApplicationRealm";
+
+    protected String host;
+    protected int port;
+    protected String admin;
+    protected String password;
+    protected String realm;
+
+    public void loadConfig( final Properties properties ) {
+        host = getManagedProperty( properties, HOST, DEFAULT_HOST );
+        String currentPort = null;
+        try {
+            currentPort = getManagedProperty( properties, PORT, String.valueOf( DEFAULT_PORT ) );
+            port = Integer.parseInt( currentPort );
+        } catch ( Exception e ) {
+            logger.error( "It was not possible to parse port configuration from: " + currentPort +
+            " default port: " + DEFAULT_PORT + " will be used instead." );
+            port = DEFAULT_PORT;
+        }
+        admin = getManagedProperty( properties, ADMIN, DEFAULT_ADMIN );
+        password = getManagedProperty( properties, PASSWORD, DEFAULT_ADMIN_PASSWORD );
+        realm = getManagedProperty( properties, REALM, DEFAULT_REALM );
+    }
 
     public ModelControllerClient createControllerClient( ) throws Exception {
         return createControllerClient( true );
@@ -39,7 +87,27 @@ public abstract class WildflyBaseService {
 
     public ModelControllerClient createControllerClient( boolean checkConnection ) throws Exception {
 
-        ModelControllerClient client = ModelControllerClient.Factory.create( InetAddress.getByName( "127.0.0.1" ), 9990 );
+        ModelControllerClient client = ModelControllerClient.Factory.create( InetAddress.getByName( host ), port,
+                new CallbackHandler() {
+                    public void handle( Callback[] callbacks )
+                            throws IOException, UnsupportedCallbackException {
+                        for ( Callback current : callbacks ) {
+                            if ( current instanceof NameCallback ) {
+                                NameCallback ncb = ( NameCallback ) current;
+                                ncb.setName( admin );
+                            } else if ( current instanceof PasswordCallback ) {
+                                PasswordCallback pcb = ( PasswordCallback ) current;
+                                pcb.setPassword( password.toCharArray() );
+                            } else if ( current instanceof RealmCallback ) {
+                                RealmCallback rcb = ( RealmCallback ) current;
+                                rcb.setText( realm );
+                            } else {
+                                throw new UnsupportedCallbackException( current );
+                            }
+                        }
+                    }
+                } );
+
         if ( checkConnection ) {
             try {
                 //dummy operation to check if the connection was properly established, since the create operation
@@ -70,7 +138,7 @@ public abstract class WildflyBaseService {
         if ( "failed".equals( response.get( OUTCOME ) ) ) {
             throw new Exception( "operation execution failed. :" + getErrorDescription( response ) );
         } else if ( "canceled".equals( response.get( OUTCOME ) ) ) {
-            throw new Exception( "operation excecution was canceled by server: " + getErrorDescription( response ) );
+            throw new Exception( "operation execution was canceled by server: " + getErrorDescription( response ) );
         } else if ( SUCCESS.equals( response.get( OUTCOME ) ) ) {
             //great!!!
         }
@@ -92,8 +160,10 @@ public abstract class WildflyBaseService {
                 }
                 System.out.println( " Despues close" );
             } catch ( Exception e ) {
-                System.out.println(" error when closing connection: " + e.getMessage());
+                System.out.println( " error when closing connection: " + e.getMessage() );
                 e.printStackTrace();
+                logger.error( "An error was produced during ModelControllerClient closing: ", e );
+
             }
         }
     }
