@@ -16,24 +16,25 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend.integration;
 
-import java.util.List;
 import java.util.Properties;
 
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
+public class ServiceUtil {
 
-public interface DataSourceService {
+    public static String getManagedProperty( Properties properties, String propertyName ) {
+        return getManagedProperty( properties, propertyName, null );
+    }
 
-    void deploy( final DataSourceDef dataSourceDef ) throws Exception;
+    public static String getManagedProperty( Properties properties, String propertyName, String defaultValue ) {
+        String propertyValue = System.getProperty( propertyName );
+        if ( isEmpty( propertyValue ) ) {
+            propertyValue = properties.getProperty( propertyName );
+        }
+        return propertyValue != null ? propertyValue.trim() : defaultValue;
+    }
 
-    void undeploy( final String uuid ) throws Exception;
+    public static boolean isEmpty( final String value ) {
+        return value == null || value.trim().length() == 0;
+    }
 
-    DataSourceDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception;
-
-    List<DataSourceDeploymentInfo> getAllDeploymentInfo() throws Exception;
-
-    List<DataSourceDef> getDataSources() throws Exception;
-
-    void loadConfig( Properties properties );
 
 }
