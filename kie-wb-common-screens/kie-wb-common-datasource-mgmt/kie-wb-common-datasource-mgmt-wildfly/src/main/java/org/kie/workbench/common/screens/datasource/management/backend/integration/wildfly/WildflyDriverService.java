@@ -18,6 +18,7 @@ package org.kie.workbench.common.screens.datasource.management.backend.integrati
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -42,7 +43,8 @@ public class WildflyDriverService
     @Named("ioStrategy")
     private IOService ioService;
 
-    private WildflyDeploymentService deploymentService = new WildflyDeploymentService();
+    @Inject
+    private WildflyDeploymentService deploymentService;
 
     @Override
     public DriverDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception {
@@ -168,5 +170,11 @@ public class WildflyDriverService
         }
 
         return drivers;
+    }
+
+    @Override
+    public void loadConfig( Properties properties ) {
+        super.loadConfig( properties );
+        deploymentService.loadConfig( properties );
     }
 }

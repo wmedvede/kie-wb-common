@@ -17,6 +17,7 @@
 package org.kie.workbench.common.screens.datasource.management.backend.integration;
 
 import java.util.List;
+import java.util.Properties;
 
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
@@ -32,4 +33,7 @@ public interface DriverService {
     List<DriverDeploymentInfo> getAllDeploymentInfo() throws Exception;
 
     List<DriverDef> getDrivers() throws Exception;
+
+    void loadConfig( Properties properties );
+
 }
