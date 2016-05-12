@@ -25,10 +25,10 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>kie-wb-common-datasource-mgmt-application-initializer</artifactId>
+  <artifactId>kie-wb-common-datasource-mgmt-dbcp</artifactId>
 
-  <name>Kie Workbench - Common - Data Source Mgmt Application Initializaer</name>
-  <description>Kie Workbench - Common - Data Source Mgmt Application Initializaer</description>
+  <name>Kie Workbench - Common - Data Source Mgmt DBCP</name>
+  <description>Kie Workbench - Common - Data Source Mgmt DBCP</description>
 
   <dependencies>
 
@@ -38,20 +38,23 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.0_spec</artifactId>
-      <scope>provided</scope>
+      <groupId>org.uberfire</groupId>
+      <artifactId>uberfire-api</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>org.hibernate.javax.persistence</groupId>
-      <artifactId>hibernate-jpa-2.0-api</artifactId>
+      <groupId>org.uberfire</groupId>
+      <artifactId>uberfire-io</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
-      <scope>provided</scope>
+      <groupId>org.uberfire</groupId>
+      <artifactId>uberfire-nio2-model</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.uberfire</groupId>
+      <artifactId>uberfire-backend-server</artifactId>
     </dependency>
 
     <dependency>
@@ -62,6 +65,16 @@
     <dependency>
       <groupId>org.kie.workbench.screens</groupId>
       <artifactId>kie-wb-common-datasource-mgmt-backend</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-dbcp2</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-pool2</artifactId>
     </dependency>
 
   </dependencies>

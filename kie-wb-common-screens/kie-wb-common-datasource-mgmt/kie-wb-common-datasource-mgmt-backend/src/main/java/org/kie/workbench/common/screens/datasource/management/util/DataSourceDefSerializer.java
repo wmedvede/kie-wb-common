@@ -16,6 +16,8 @@
 
 package org.kie.workbench.common.screens.datasource.management.util;
 
+import java.io.Reader;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
@@ -25,6 +27,11 @@ public class DataSourceDefSerializer {
     public static DataSourceDef deserialize( final String dataSourceDefString ) {
         Gson gson = new GsonBuilder().create();
         return gson.fromJson( dataSourceDefString, DataSourceDef.class );
+    }
+
+    public static DataSourceDef deserialize( final Reader reader ) {
+        Gson gson = new GsonBuilder().create();
+        return gson.fromJson( reader, DataSourceDef.class );
     }
 
     public static String serialize( final DataSourceDef dataSourceDef ) {
