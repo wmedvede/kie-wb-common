@@ -19,6 +19,7 @@ package org.kie.workbench.common.screens.datasource.management.backend.integrati
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -76,8 +77,9 @@ public class WildflyDataSourceService
     @Override
     public void deploy( final DataSourceDef dataSourceDef ) throws Exception {
         DriverDeploymentInfo driverDeploymentInfo = driverService.getDeploymentInfo( dataSourceDef.getDriverUuid() );
-        if ( getAllDeploymentInfo() == null ) {
-            throw new Exception( "Required driver: " + dataSourceDef.getDriverUuid() + " has not been deployed." );
+        if ( driverDeploymentInfo == null ) {
+            //Uncomment this
+            //throw new Exception( "Required driver: " + dataSourceDef.getDriverUuid() + " has not been deployed." );
         }
         createDatasource( dataSourceDef.getUuid(),
                 dataSourceDef.getJndi(),
@@ -121,6 +123,12 @@ public class WildflyDataSourceService
             result.add( deploymentInfo );
         }
         return result;
+    }
+
+    @Override
+    public void loadConfig( Properties properties ) {
+        super.loadConfig( properties );
+        driverService.loadConfig( properties );
     }
 
     private List<WildflyDataSourceDef> getInternalDataSources() throws Exception {
