@@ -221,7 +221,6 @@ public class DataModelerServiceHelper {
             //uncommon case
             return packages;
         }
-        final String javaDirURI = javaDir.toUri().toString();
         //path to java directory has been calculated, now visit the subdirectories to get the package names.
         final List<Path> childDirectories = new ArrayList<Path>();
         childDirectories.add( javaDir );
@@ -244,16 +243,15 @@ public class DataModelerServiceHelper {
                 subDir = it.next();
                 childDirectories.add( subDir );
                 //store this package name
-                packages.add( getPackagePart( javaDirURI, subDir ) );
+                packages.add( getPackagePart( javaDir, subDir ) );
             }
             dirStream.close();
         }
         return packages;
     }
 
-    private String getPackagePart( final String javaPathURI, final Path path ) {
-        String pathURI = path.toUri().toString();
-        String packagePart = pathURI.substring( javaPathURI.length() + 1, pathURI.length() );
+    private String getPackagePart( final Path javaPath, final Path path ) {
+        String packagePart = javaPath.relativize( path ).toString();
         return packagePart.replace( "/", "." );
     }
 }

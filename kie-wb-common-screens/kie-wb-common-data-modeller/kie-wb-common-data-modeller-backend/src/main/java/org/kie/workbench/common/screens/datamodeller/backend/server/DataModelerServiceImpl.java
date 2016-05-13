@@ -1306,33 +1306,34 @@ public class DataModelerServiceImpl
     /**
      * Given a path within a project calculates the expected class name for the given class.
      */
-    private String calculateClassName( Project project,
-                                       Path path ) {
+    private String calculateClassName( final Project project,
+                                       final Path path ) {
 
-        String rootPathURI = decode( project.getRootPath().toURI() );
-        String pathURI = decode( path.toURI() );
-        String strPath = null;
+        final org.uberfire.java.nio.file.Path nioRootPath = Paths.convert( project.getRootPath() );
+        final org.uberfire.java.nio.file.Path nioPath = Paths.convert( path );
+        String fileProjectPath;
+        String filePath = null;
 
-        if ( !pathURI.startsWith( rootPathURI ) ) {
+        if ( !nioPath.startsWith( nioRootPath ) ) {
             return null;
         }
 
-        pathURI = pathURI.substring( rootPathURI.length() + 1, pathURI.length() );
+        fileProjectPath = nioRootPath.relativize( nioPath ).toString();
 
-        if ( pathURI.startsWith( ProjectResourcePaths.MAIN_SRC_PATH ) ) {
-            strPath = pathURI.substring( ProjectResourcePaths.MAIN_SRC_PATH.length() + 1, pathURI.length() );
-        } else if ( pathURI.startsWith( ProjectResourcePaths.TEST_SRC_PATH ) ) {
-            strPath = pathURI.substring( ProjectResourcePaths.TEST_SRC_PATH.length() + 1, pathURI.length() );
+        if ( fileProjectPath.startsWith( ProjectResourcePaths.MAIN_SRC_PATH ) ) {
+            filePath = fileProjectPath.substring( ProjectResourcePaths.MAIN_SRC_PATH.length() + 1, fileProjectPath.length() );
+        } else if ( fileProjectPath.startsWith( ProjectResourcePaths.TEST_SRC_PATH ) ) {
+            filePath = fileProjectPath.substring( ProjectResourcePaths.TEST_SRC_PATH.length() + 1, fileProjectPath.length() );
         }
 
-        if ( strPath == null ) {
+        if ( filePath == null ) {
             return null;
         }
 
-        strPath = strPath.replace( "/", "." );
-        strPath = strPath.substring( 0, strPath.indexOf( ".java" ) );
+        filePath = filePath.replace( "/", "." );
+        filePath = filePath.substring( 0, filePath.indexOf( ".java" ) );
 
-        return strPath;
+        return filePath;
     }
 
     /**
