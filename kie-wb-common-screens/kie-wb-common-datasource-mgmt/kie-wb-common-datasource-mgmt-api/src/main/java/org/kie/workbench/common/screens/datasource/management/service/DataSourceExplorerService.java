@@ -19,28 +19,14 @@ package org.kie.workbench.common.screens.datasource.management.service;
 import java.util.Collection;
 
 import org.jboss.errai.bus.server.annotations.Remote;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
 import org.uberfire.backend.vfs.Path;
-import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 
 @Remote
-public interface DataSourceDefEditorService
-        extends SupportsDelete {
+public interface DataSourceExplorerService {
 
-    DataSourceDefEditorContent loadContent( final Path path );
+    DataSourceExplorerContentQueryResult executeQuery( final DataSourceExplorerContentQuery query );
 
-    Path save( final Path path, final DataSourceDefEditorContent editorContent, final String comment );
-
-    Path create( final Path context, final String dataSourceName, final String fileName );
-
-    //TODO experimental
-    String test( final String jndi );
-
-    Collection<DataSourceDefInfo> getGlobalDataSources();
-
-    Collection<DataSourceDefInfo> getProjectDataSources( final Path path );
-
-    Path getGlobalDataSourcesContext();
+    Collection<DataSourceDefInfo> getDataSources( final Path path );
 
 }

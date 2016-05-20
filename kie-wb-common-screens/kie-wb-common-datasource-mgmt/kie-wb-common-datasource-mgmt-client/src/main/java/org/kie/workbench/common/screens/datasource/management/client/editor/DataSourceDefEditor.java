@@ -60,10 +60,10 @@ import static org.uberfire.ext.editor.commons.client.menu.MenuItems.*;
         supportedTypes = { DataSourceDefType.class } )
 public class DataSourceDefEditor
         extends BaseEditor
-        implements DataSourceDefEditorPresenter {
+        implements DataSourceDefMainPanelPresenter {
 
 
-    private DataSourceDefEditorView view;
+    private DataSourceDefMainPanelView view;
 
     private DataSourceDefType type;
 
@@ -78,7 +78,7 @@ public class DataSourceDefEditor
     private Map<String, DriverDef> driverDefMap = new HashMap<>(  );
 
     @Inject
-    public DataSourceDefEditor( final DataSourceDefEditorView view,
+    public DataSourceDefEditor( final DataSourceDefMainPanelView view,
             final DataSourceDefType type,
             final Caller<DataSourceDefEditorService> editorService,
             final Caller<DataSourceManagementService> dataSourceService,

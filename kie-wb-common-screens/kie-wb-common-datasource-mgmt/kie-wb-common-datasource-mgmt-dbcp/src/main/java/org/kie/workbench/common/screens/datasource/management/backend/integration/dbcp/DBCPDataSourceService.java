@@ -45,24 +45,17 @@ public class DBCPDataSourceService
 
     @Override
     public void deploy( DataSourceDef dataSourceDef ) throws Exception {
-        // First, we'll create a ConnectionFactory that the
-        // pool will use to create Connections.
-        // We'll use the DriverManagerConnectionFactory,
-        // using the connect string passed in the command line
-        // arguments.
-        //
+
+        //Connection Factory that the pool will use for creating connections.
         ConnectionFactory connectionFactory = new DriverManagerConnectionFactory( dataSourceDef.getConnectionURL(),
                 dataSourceDef.getUser(),
                 dataSourceDef.getPassword() );
 
-        //
         // Next we'll create the PoolableConnectionFactory, which wraps
         // the "real" Connections created by the ConnectionFactory with
         // the classes that implement the pooling functionality.
-        //
         PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory( connectionFactory, null );
 
-        //
         // Now we'll need a ObjectPool that serves as the
         // actual pool of connections.
         //
@@ -86,15 +79,11 @@ public class DBCPDataSourceService
         InitialContext context = new InitialContext(  );
 
         //The standard java:comp, java:module and java:app are typically read only
-
-        bindObject( "java:global/UNO", dataSource );
-        bindObject( "java:app/DOS", dataSource );
-        bindObject( "java:module/TRES", dataSource );
-        bindObject( "java:comp/CUATRO", dataSource );
-
-        bindObject( "java:/CINCO", dataSource );
+        //while the java:global should be r/w
+        //wildfly/eap adds to additional r/w directories, java:jboss and java:/
 
         //register in the JNDI context
+        bindObject( dataSourceDef.getJndi(), dataSource );
     }
 
     private void bindObject( String namingContext, Object object ) throws Exception {

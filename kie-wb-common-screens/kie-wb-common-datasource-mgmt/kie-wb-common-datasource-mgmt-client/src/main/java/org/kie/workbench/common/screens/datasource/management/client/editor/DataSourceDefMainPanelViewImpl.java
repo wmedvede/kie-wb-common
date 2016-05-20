@@ -39,9 +39,9 @@ import org.uberfire.ext.editor.commons.client.BaseEditorViewImpl;
 
 @Dependent
 @Templated
-public class DataSourceDefEditorViewImpl
+public class DataSourceDefMainPanelViewImpl
         extends BaseEditorViewImpl
-        implements DataSourceDefEditorPresenter.DataSourceDefEditorView {
+        implements DataSourceDefMainPanelPresenter.DataSourceDefMainPanelView {
 
     @DataField ( "name-form-group" )
     Element nameFormGroup =  DOM.createDiv();
@@ -97,12 +97,12 @@ public class DataSourceDefEditorViewImpl
     @DataField( "test-btn" )
     Button testButton;
 
-    private DataSourceDefEditorPresenter presenter;
+    private DataSourceDefMainPanelPresenter presenter;
 
     private TranslationService translationService;
 
     @Inject
-    public DataSourceDefEditorViewImpl( final TranslationService translationService ) {
+    public DataSourceDefMainPanelViewImpl( final TranslationService translationService ) {
         super();
         this.translationService = translationService;
     }
@@ -115,7 +115,7 @@ public class DataSourceDefEditorViewImpl
     }
 
     @Override
-    public void init( final DataSourceDefEditorPresenter presenter ) {
+    public void init( final DataSourceDefMainPanelPresenter presenter ) {
         this.presenter = presenter;
     }
 
