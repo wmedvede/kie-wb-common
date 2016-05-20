@@ -22,11 +22,11 @@ import org.uberfire.client.mvp.UberView;
 import org.uberfire.commons.data.Pair;
 import org.uberfire.ext.editor.commons.client.BaseEditorView;
 
-public interface DataSourceDefEditorPresenter {
+public interface DataSourceDefMainPanelPresenter {
 
-    interface DataSourceDefEditorView
+    interface DataSourceDefMainPanelView
             extends
-                UberView<DataSourceDefEditorPresenter>,
+                UberView<DataSourceDefMainPanelPresenter>,
                 BaseEditorView {
 
         void setName( final String text );

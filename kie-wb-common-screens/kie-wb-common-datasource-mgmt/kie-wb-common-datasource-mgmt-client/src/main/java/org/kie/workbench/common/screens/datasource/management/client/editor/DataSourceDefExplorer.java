@@ -15,6 +15,7 @@
  */
 package org.kie.workbench.common.screens.datasource.management.client.editor;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +83,7 @@ public class DataSourceDefExplorer
         }, new DefaultErrorCallback() ).getGlobalDataSources();
     }
 
-    private void loadDataSources( List<DataSourceDefInfo> dataSourceDefInfos ) {
+    public void loadDataSources( Collection<DataSourceDefInfo> dataSourceDefInfos ) {
         DataSourceDefItem item;
         for ( DataSourceDefInfo dataSourceDefInfo : dataSourceDefInfos ) {
             item = createItem();

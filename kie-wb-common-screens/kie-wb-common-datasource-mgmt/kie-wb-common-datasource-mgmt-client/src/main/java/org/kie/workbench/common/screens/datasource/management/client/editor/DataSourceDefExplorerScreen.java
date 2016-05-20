@@ -24,7 +24,10 @@ import com.google.gwt.user.client.ui.IsWidget;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.kie.workbench.common.screens.datasource.management.client.editor.wizard.NewDataSourceDefWizard;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.ProjectDataSourceExplorer;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.annotations.WorkbenchMenu;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
@@ -46,7 +49,11 @@ public class DataSourceDefExplorerScreen {
 
     private DataSourceDefExplorer explorer;
 
+    private ProjectDataSourceExplorer projectDataSourceExplorer;
+
     private NewDataSourcePopup newDataSourcePopup;
+
+    private NewDataSourceDefWizard newDataSourceDefWizard;
 
     private Caller<DataSourceDefEditorService> editorService;
 
@@ -60,10 +67,14 @@ public class DataSourceDefExplorerScreen {
 
     @Inject
     public DataSourceDefExplorerScreen( DataSourceDefExplorer explorer,
+            ProjectDataSourceExplorer projectDataSourceExplorer,
             NewDataSourcePopup newDataSourcePopup,
+            NewDataSourceDefWizard newDataSourceDefWizard,
             Caller<DataSourceDefEditorService> editorService,
             PlaceManager placeManager ) {
         this.explorer = explorer;
+        this.projectDataSourceExplorer = projectDataSourceExplorer;
+        this.newDataSourceDefWizard = newDataSourceDefWizard;
         this.newDataSourcePopup = newDataSourcePopup;
         this.editorService = editorService;
         this.placeManager = placeManager;
@@ -95,6 +106,8 @@ public class DataSourceDefExplorerScreen {
                 globalDataSourcesContext = path;
             }
         }, new DefaultErrorCallback() ).getGlobalDataSourcesContext();
+
+        projectDataSourceExplorer.refresh( new DataSourceExplorerContentQuery() );
     }
 
     @WorkbenchPartTitle
@@ -104,7 +117,8 @@ public class DataSourceDefExplorerScreen {
 
     @WorkbenchPartView
     public IsWidget getView() {
-        return explorer.asWidget();
+        //return explorer.asWidget();
+        return projectDataSourceExplorer.asWidget();
     }
 
     @WorkbenchMenu
@@ -142,8 +156,9 @@ public class DataSourceDefExplorerScreen {
     }
 
     public void onNewDataSource() {
-        newDataSourcePopup.clear();
-        newDataSourcePopup.show();
+        //newDataSourcePopup.clear();
+        //newDataSourcePopup.show();
+        newDataSourceDefWizard.start();
     }
 
     public void onCreateDataSource() {
