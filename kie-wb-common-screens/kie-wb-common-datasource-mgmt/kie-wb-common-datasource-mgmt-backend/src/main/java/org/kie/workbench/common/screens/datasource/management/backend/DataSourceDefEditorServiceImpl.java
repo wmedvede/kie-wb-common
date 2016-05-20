@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -30,16 +29,14 @@ import javax.inject.Named;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
-import org.guvnor.common.services.project.model.Package;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
 import org.kie.workbench.common.screens.datasource.management.util.DataSourceDefSerializer;
-import org.kie.workbench.common.services.datamodeller.util.FileUtils;
 import org.kie.workbench.common.services.shared.project.KieProject;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.slf4j.Logger;
@@ -70,6 +67,9 @@ public class DataSourceDefEditorServiceImpl
 
     @Inject
     protected KieProjectService projectService;
+
+    @Inject
+    private DataSourceExplorerService dataSourceExplorerService;
 
     /**
      * Filesystem that will hold the platform data sources. Platform data sources has global scope instead of belong
@@ -209,47 +209,25 @@ public class DataSourceDefEditorServiceImpl
         ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
     }
 
-    public List<DataSourceDefInfo> getGlobalDataSources() {
-        return getDataSources( root );
+    public Collection<DataSourceDefInfo> getGlobalDataSources() {
+        return dataSourceExplorerService.getDataSources( Paths.convert( root ) );
     }
 
-    public List<DataSourceDefInfo> getProjectDataSources( final Path path ) {
+    public Collection<DataSourceDefInfo> getProjectDataSources( final Path path ) {
         checkNotNull( "path", path );
         KieProject project = projectService.resolveProject( path );
         if ( project == null ) {
             return new ArrayList<>( );
         } else {
-            Package defaultPackage = projectService.resolveDefaultPackage( project );
-            return getDataSources( Paths.convert( defaultPackage.getPackageMainResourcesPath() ) );
+            Path rootPath = project.getRootPath();
+            org.uberfire.java.nio.file.Path dataSourcesNioPath = Paths.convert( rootPath ).resolve( "src/main/resources/META-INF" );
+            return dataSourceExplorerService.getDataSources( Paths.convert( dataSourcesNioPath ) );
         }
     }
 
     @Override
     public Path getGlobalDataSourcesContext() {
         return Paths.convert( root );
-    }
-
-    private List<DataSourceDefInfo> getDataSources( final org.uberfire.java.nio.file.Path rootPath ) {
-
-        List<DataSourceDefInfo> result = new ArrayList<>( );
-        List<String> fileTypes = new ArrayList<>();
-        fileTypes.add( "datasource" );
-        Collection<FileUtils.ScanResult> dataSources;
-
-        try {
-            dataSources = FileUtils.getInstance().scan( ioService, rootPath , fileTypes, true );
-            Path dataSourceFile;
-            if ( dataSources != null ) {
-                for ( FileUtils.ScanResult scanResult : dataSources ) {
-                    dataSourceFile = Paths.convert( scanResult.getFile() );
-                    result.add( new DataSourceDefInfo( dataSourceFile.getFileName(), dataSourceFile ) );
-                }
-            }
-            return result;
-        } catch ( Exception e ) {
-            logger.error( "It was not possible read data sources info from: " + rootPath, e );
-            throw ExceptionUtilities.handleException( e );
-        }
     }
 
     private String getGlobalFileSystemName() {
