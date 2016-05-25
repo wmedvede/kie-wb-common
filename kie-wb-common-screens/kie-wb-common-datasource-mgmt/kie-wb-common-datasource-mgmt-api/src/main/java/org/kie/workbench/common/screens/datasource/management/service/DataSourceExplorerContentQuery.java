@@ -35,6 +35,16 @@ public class DataSourceExplorerContentQuery {
     public DataSourceExplorerContentQuery() {
     }
 
+    public DataSourceExplorerContentQuery( OrganizationalUnit organizationalUnit,
+            Repository repository,
+            Project project,
+            String branch ) {
+        this.organizationalUnit = organizationalUnit;
+        this.repository = repository;
+        this.project = project;
+        this.branch = branch;
+    }
+
     public Repository getRepository() {
         return repository;
     }

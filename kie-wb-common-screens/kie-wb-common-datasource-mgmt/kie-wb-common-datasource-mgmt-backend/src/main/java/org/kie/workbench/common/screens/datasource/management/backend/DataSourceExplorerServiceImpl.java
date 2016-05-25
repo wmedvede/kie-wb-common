@@ -90,25 +90,33 @@ public class DataSourceExplorerServiceImpl
 
         //load the organizational units.
         Collection<OrganizationalUnit> organizationalUnits = getOrganizationalUnits();
-        result.setOrganizationalUnits( organizationalUnits );
+        result.getOrganizationalUnits().addAll( organizationalUnits );
         if ( query.getOrganizationalUnit() == null ||
-                !containsOU( organizationalUnits, query.getOrganizationalUnit() ) ||
-                query.getRepository() == null ) {
+                !containsOU( organizationalUnits, query.getOrganizationalUnit() ) ) {
+            //if no OU was set for filtering or the selected OU has been removed or has changed in backend.
             return result;
         }
 
+        //set the repositories for current OU.
         Map<String, Repository> repositories = getRepositories( query.getOrganizationalUnit() );
-        result.setRepositories( repositories.values() );
-        if ( !repositories.containsKey( query.getRepository().getAlias() ) || query.getProject() == null ) {
+        result.getRepositories().addAll( repositories.values() );
+        if ( query.getRepository() == null ||
+                !repositories.containsKey( query.getRepository().getAlias() ) ) {
+            //if no Repository was set for filtering or the selected Repository has been removed or has
+            // changed in backend.
             return result;
         }
 
+        //load the projects for current OU/Repository and the selected branch.
         Map<String, Project> projects = getProjects( query.getRepository(), query.getBranch() );
-        result.setProjects( projects.values() );
-        if ( !projects.containsKey( query.getProject().getProjectName() ) ) {
+        result.getProjects().addAll( projects.values() );
+        if ( query.getProject() == null || !projects.containsKey( query.getProject().getProjectName() ) ) {
+            //if no Project was set for filtering or the selected Project has been removed or has
+            // changed in backend.
             return result;
         }
 
+        //get the datasources for the selected project.
         result.setDataSourceDefs( getDataSourceDefInfos( query.getProject() ) );
         return result;
     }
@@ -141,8 +149,8 @@ public class DataSourceExplorerServiceImpl
         try {
             final DirectoryStream<org.uberfire.java.nio.file.Path> stream = ioService.newDirectoryStream( nioPath,
                     entry -> Files.isRegularFile( entry ) &&
-                            !entry.getFileName().startsWith( "." ) &&
-                            entry.getFileName().endsWith( DS_FILE_TYPE ) );
+                            !entry.getFileName().toString().startsWith( "." ) &&
+                            entry.getFileName().toString().endsWith( DS_FILE_TYPE ) );
 
             stream.forEach( file -> {
                 result.add( createInfo( file ) );

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.explorer;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -24,10 +24,12 @@ import com.google.gwt.user.client.ui.IsWidget;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.kie.workbench.common.screens.datasource.management.client.editor.NewDataSourcePopup;
+import org.kie.workbench.common.screens.datasource.management.client.editor.NewDataSourcePopupPresenter;
 import org.kie.workbench.common.screens.datasource.management.client.editor.wizard.NewDataSourceDefWizard;
-import org.kie.workbench.common.screens.datasource.management.client.explorer.ProjectDataSourceExplorer;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.project.ProjectDataSourceExplorer;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.annotations.WorkbenchMenu;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
@@ -100,14 +102,14 @@ public class DataSourceDefExplorerScreen {
         this.placeRequest = placeRequest;
         this.menu = makeMenuBar();
 
+        projectDataSourceExplorer.refresh();
+
         editorService.call( new RemoteCallback<Path>() {
             @Override
             public void callback( Path path ) {
                 globalDataSourcesContext = path;
             }
         }, new DefaultErrorCallback() ).getGlobalDataSourcesContext();
-
-        projectDataSourceExplorer.refresh( new DataSourceExplorerContentQuery() );
     }
 
     @WorkbenchPartTitle
