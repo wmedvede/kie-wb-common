@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 JBoss Inc
+ * Copyright 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.explorer;
+package org.kie.workbench.common.screens.datasource.management.client.explorer.project;
 
 import java.util.Collection;
-import java.util.Set;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -29,8 +27,7 @@ import org.guvnor.structure.repositories.Repository;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefExplorer;
-import org.kie.workbench.common.screens.explorer.client.widgets.navigator.NavigatorExpandCollapseButton;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
 
 @Dependent
 @Templated
@@ -56,12 +53,6 @@ public class ProjectDataSourceExplorerViewImpl
         this.presenter = presenter;
     }
 
-    @PostConstruct
-    void init() {
-        projectSelector.init( NavigatorExpandCollapseButton.Mode.COLLAPSED, null );
-        ///container.add( projectSelector );
-    }
-
     @Override
     public void loadContent( final Collection<OrganizationalUnit> organizationalUnits,
             final OrganizationalUnit activeOrganizationalUnit,
@@ -70,7 +61,7 @@ public class ProjectDataSourceExplorerViewImpl
             final Collection<Project> projects,
             final Project activeProject ) {
 
-        projectSelector.setupHeader( Collections.organizationalUnits,
+        projectSelector.loadOptions( organizationalUnits,
                 activeOrganizationalUnit,
                 repositories,
                 activeRepository,
@@ -79,12 +70,12 @@ public class ProjectDataSourceExplorerViewImpl
     }
 
     @Override
-    public void addProjectSelectorHandler( ProjectSelectorHandler handler ) {
+    public void addProjectSelectorHandler( final ProjectSelectorHandler handler ) {
         projectSelector.addProjectSelectorHandler( handler );
     }
 
     @Override
-    public void setDataSourceDefExplorer( DataSourceDefExplorer dataSourceDefExplorer ) {
+    public void setDataSourceDefExplorer( final DataSourceDefExplorer dataSourceDefExplorer ) {
         container.add( dataSourceDefExplorer );
     }
 }
