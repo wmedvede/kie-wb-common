@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.screens.datasource.management.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.guvnor.common.services.project.model.Project;
@@ -27,13 +28,13 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 @Portable
 public class DataSourceExplorerContentQueryResult {
 
-    private Collection<OrganizationalUnit> organizationalUnits;
+    private Collection<OrganizationalUnit> organizationalUnits = new ArrayList<>(  );
 
-    private Collection<Repository> repositories;
+    private Collection<Repository> repositories = new ArrayList<>(  );
 
-    private Collection<Project> projects;
+    private Collection<Project> projects = new ArrayList<>(  );
 
-    private Collection<DataSourceDefInfo> dataSourceDefs;
+    private Collection<DataSourceDefInfo> dataSourceDefs = new ArrayList<>(  );
 
     public DataSourceExplorerContentQueryResult() {
     }

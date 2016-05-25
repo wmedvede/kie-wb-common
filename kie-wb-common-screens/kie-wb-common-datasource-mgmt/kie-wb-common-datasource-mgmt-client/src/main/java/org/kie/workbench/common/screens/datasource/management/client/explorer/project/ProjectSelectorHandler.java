@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.explorer;
+package org.kie.workbench.common.screens.datasource.management.client.explorer.project;
 
 import org.guvnor.common.services.project.model.Project;
 import org.guvnor.structure.organizationalunit.OrganizationalUnit;
@@ -22,10 +22,10 @@ import org.guvnor.structure.repositories.Repository;
 
 public interface ProjectSelectorHandler {
 
-    void onOrganizationalUnitSelected( OrganizationalUnit ou );
+    void onOrganizationalUnitSelected( final OrganizationalUnit ou );
 
-    void onRepositorySelected( Repository repository );
+    void onRepositorySelected( final Repository repository );
 
-    void onProjectSelected( Project project );
+    void onProjectSelected( final Project project );
 
 }

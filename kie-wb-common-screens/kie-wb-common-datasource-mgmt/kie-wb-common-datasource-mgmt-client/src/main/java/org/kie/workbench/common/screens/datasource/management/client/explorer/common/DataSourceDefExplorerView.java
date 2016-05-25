@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.explorer.common;
 
+import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefItem;
 import org.uberfire.client.mvp.UberView;
 
 public interface DataSourceDefExplorerView

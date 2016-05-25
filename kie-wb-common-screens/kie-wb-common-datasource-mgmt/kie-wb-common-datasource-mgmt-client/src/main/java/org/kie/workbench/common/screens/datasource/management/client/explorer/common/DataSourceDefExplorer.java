@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.explorer.common;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,6 +28,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefItem;
+import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefItemView;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.uberfire.client.mvp.PlaceManager;
@@ -84,18 +86,21 @@ public class DataSourceDefExplorer
     }
 
     public void loadDataSources( Collection<DataSourceDefInfo> dataSourceDefInfos ) {
-        DataSourceDefItem item;
-        for ( DataSourceDefInfo dataSourceDefInfo : dataSourceDefInfos ) {
-            item = createItem();
-            item.setName( dataSourceDefInfo.getName() );
-            item.addItemHandler( new DataSourceDefItemView.ItemHandler() {
-                @Override
-                public void onClick( String itemId ) {
-                    onItemClick( itemsMap.get( itemId ) );
-                }
-            } );
-            itemsMap.put( item.getId(), dataSourceDefInfo );
-            view.addItem( item );
+        view.clear();
+        if ( dataSourceDefInfos != null ) {
+            DataSourceDefItem item;
+            for ( DataSourceDefInfo dataSourceDefInfo : dataSourceDefInfos ) {
+                item = createItem();
+                item.setName( dataSourceDefInfo.getName() );
+                item.addItemHandler( new DataSourceDefItemView.ItemHandler() {
+                    @Override
+                    public void onClick( String itemId ) {
+                        onItemClick( itemsMap.get( itemId ) );
+                    }
+                } );
+                itemsMap.put( item.getId(), dataSourceDefInfo );
+                view.addItem( item );
+            }
         }
     }
 

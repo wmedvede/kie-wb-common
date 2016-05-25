@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 JBoss Inc
+ * Copyright 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.explorer;
+package org.kie.workbench.common.screens.datasource.management.client.explorer.project;
 
 import java.util.Collection;
 
 import org.guvnor.common.services.project.model.Project;
 import org.guvnor.structure.organizationalunit.OrganizationalUnit;
 import org.guvnor.structure.repositories.Repository;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefExplorer;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
 import org.uberfire.client.mvp.UberView;
 
 public interface ProjectDataSourceExplorerView
@@ -31,14 +31,14 @@ public interface ProjectDataSourceExplorerView
 
     }
 
-    void loadContent( Collection<OrganizationalUnit> organizationalUnits,
-            OrganizationalUnit activeOrganizationalUnit,
-            Collection<Repository> repositories,
-            Repository activeRepository,
-            Collection<Project> projects,
-            Project activeProject );
+    void loadContent( final Collection<OrganizationalUnit> organizationalUnits,
+            final OrganizationalUnit activeOrganizationalUnit,
+            final Collection<Repository> repositories,
+            final Repository activeRepository,
+            final Collection<Project> projects,
+            final Project activeProject );
 
-    void addProjectSelectorHandler( ProjectSelectorHandler handler );
+    void addProjectSelectorHandler( final ProjectSelectorHandler handler );
 
-    void setDataSourceDefExplorer( DataSourceDefExplorer dataSourceDefExplorer );
+    void setDataSourceDefExplorer( final DataSourceDefExplorer dataSourceDefExplorer );
 }

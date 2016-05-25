@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.explorer;
+package org.kie.workbench.common.screens.datasource.management.client.explorer.project;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
@@ -28,7 +28,7 @@ import org.guvnor.structure.organizationalunit.OrganizationalUnit;
 import org.guvnor.structure.repositories.Repository;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefExplorer;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
@@ -37,7 +37,7 @@ import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 @Dependent
 public class ProjectDataSourceExplorer
         implements ProjectDataSourceExplorerView.Presenter,
-                   IsWidget {
+        IsWidget {
 
     private ProjectDataSourceExplorerView view;
 
@@ -45,11 +45,13 @@ public class ProjectDataSourceExplorer
 
     private Caller<DataSourceExplorerService> explorerService;
 
-    OrganizationalUnit activeOrganizationalUnit;
+    private OrganizationalUnit activeOrganizationalUnit;
 
-    Repository activeRepository;
+    private Repository activeRepository;
 
-    Project activeProject;
+    private Project activeProject;
+
+    private String activeBranch = "master";
 
     @Inject
     public ProjectDataSourceExplorer( final ProjectDataSourceExplorerView view,
@@ -81,21 +83,36 @@ public class ProjectDataSourceExplorer
         } );
     }
 
-    public void refresh( DataSourceExplorerContentQuery query ) {
-
-        explorerService.call( getLoadContentCallback(), new DefaultErrorCallback() ).executeQuery( query );
-
+    @Override
+    public Widget asWidget() {
+        return view.asWidget();
     }
 
-    public void loadContent( DataSourceExplorerContentQueryResult content ) {
+    public void refresh() {
+        refresh( new DataSourceExplorerContentQuery( activeOrganizationalUnit,
+                activeRepository,
+                activeProject,
+                activeBranch ) );
+    }
+
+    private void refresh( final DataSourceExplorerContentQuery query ) {
+        explorerService.call( getRefreshCallback(), new DefaultErrorCallback() ).executeQuery( query );
+    }
+
+    public void loadContent( final DataSourceExplorerContentQueryResult content ) {
+
+        //TODO aqui tendria que dar la oportunidad a compoarar el resultado contra la
+        //seleccion q tenia la UI, porque podria darse el caso donde la OU ya no existe por ej
+        //y en la UI la teniamos seleccionada.
+
         view.loadContent( content.getOrganizationalUnits(), activeOrganizationalUnit,
                 content.getRepositories(), activeRepository,
                 content.getProjects(), activeProject );
         dataSourceDefExplorer.loadDataSources( content.getDataSourceDefs() );
     }
 
-    private RemoteCallback<?> getLoadContentCallback() {
-        return new RemoteCallback<DataSourceExplorerContentQueryResult> () {
+    private RemoteCallback<?> getRefreshCallback() {
+        return new RemoteCallback<DataSourceExplorerContentQueryResult>() {
             @Override
             public void callback( DataSourceExplorerContentQueryResult content ) {
                 loadContent( content );
@@ -103,54 +120,64 @@ public class ProjectDataSourceExplorer
         };
     }
 
-    public void onOrganizationalUnitSelected( OrganizationalUnit ou ) {
+    public void onOrganizationalUnitSelected( final OrganizationalUnit ou ) {
         Window.alert( "OrganizationalUnit Selected: " + ou );
-        if ( ouChanged( ou ) ) {
+        if ( hasChanged( ou ) ) {
+            activeOrganizationalUnit = ou;
+            activeRepository = null;
+            activeProject = null;
             DataSourceExplorerContentQuery query = new DataSourceExplorerContentQuery();
             query.setOrganizationalUnit( ou );
             refresh( query );
         }
     }
 
-    public void onRepositorySelected( Repository repository ) {
+    public void onRepositorySelected( final Repository repository ) {
         Window.alert( "Repository Selected: " + repository );
-        if ( repositoryChanged( repository ) ) {
+        if ( hasChanged( repository ) ) {
             DataSourceExplorerContentQuery query = new DataSourceExplorerContentQuery();
             if ( activeOrganizationalUnit != null ) {
+                activeRepository = repository;
+                activeProject = null;
                 query.setOrganizationalUnit( activeOrganizationalUnit );
                 query.setRepository( repository );
+                query.setBranch( activeBranch );
+            } else {
+                activeRepository = null;
+                activeProject = null;
             }
             refresh( query );
         }
     }
 
-    public void onProjectSelected( Project project ) {
+    public void onProjectSelected( final Project project ) {
         Window.alert( "Project Selected: " + project );
-        if ( projectChanged( project ) ) {
+        if ( hasChanged( project ) ) {
             DataSourceExplorerContentQuery query = new DataSourceExplorerContentQuery();
             if ( activeOrganizationalUnit != null && activeRepository != null ) {
+                activeProject = project;
                 query.setOrganizationalUnit( activeOrganizationalUnit );
                 query.setRepository( activeRepository );
+                query.setBranch( activeBranch );
                 query.setProject( project );
+            } else {
+                activeProject = null;
             }
             refresh( query );
         }
     }
 
-    @Override
-    public Widget asWidget() {
-        return view.asWidget();
-    }
-
-    private boolean ouChanged( OrganizationalUnit ou ) {
+    private boolean hasChanged( final OrganizationalUnit ou ) {
         return activeOrganizationalUnit != null ? !activeOrganizationalUnit.equals( ou ) : ou != null;
     }
 
-    private boolean repositoryChanged( Repository repository ) {
+    private boolean hasChanged( final Repository repository ) {
         return activeRepository != null ? !activeRepository.equals( repository ) : repository != null;
     }
 
-    private boolean projectChanged( Project project ) {
+    private boolean hasChanged( final Project project ) {
         return activeProject != null ? !activeProject.equals( project ) : project != null;
     }
+
+
 }

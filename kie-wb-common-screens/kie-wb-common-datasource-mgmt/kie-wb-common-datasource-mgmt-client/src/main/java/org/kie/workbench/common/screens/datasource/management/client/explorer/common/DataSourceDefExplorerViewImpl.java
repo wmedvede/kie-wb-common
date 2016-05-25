@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.explorer.common;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Composite;
 import org.gwtbootstrap3.client.ui.LinkedGroup;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefItem;
 
 @Dependent
 @Templated
