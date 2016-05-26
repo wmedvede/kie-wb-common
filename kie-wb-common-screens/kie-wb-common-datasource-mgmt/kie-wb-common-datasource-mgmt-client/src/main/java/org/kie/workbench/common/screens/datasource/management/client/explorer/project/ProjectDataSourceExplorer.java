@@ -20,7 +20,6 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.guvnor.common.services.project.model.Project;
@@ -121,7 +120,7 @@ public class ProjectDataSourceExplorer
     }
 
     public void onOrganizationalUnitSelected( final OrganizationalUnit ou ) {
-        Window.alert( "OrganizationalUnit Selected: " + ou );
+        //Window.alert( "OrganizationalUnit Selected: " + ou );
         if ( hasChanged( ou ) ) {
             activeOrganizationalUnit = ou;
             activeRepository = null;
@@ -133,7 +132,7 @@ public class ProjectDataSourceExplorer
     }
 
     public void onRepositorySelected( final Repository repository ) {
-        Window.alert( "Repository Selected: " + repository );
+        //Window.alert( "Repository Selected: " + repository );
         if ( hasChanged( repository ) ) {
             DataSourceExplorerContentQuery query = new DataSourceExplorerContentQuery();
             if ( activeOrganizationalUnit != null ) {
@@ -151,7 +150,7 @@ public class ProjectDataSourceExplorer
     }
 
     public void onProjectSelected( final Project project ) {
-        Window.alert( "Project Selected: " + project );
+        //Window.alert( "Project Selected: " + project );
         if ( hasChanged( project ) ) {
             DataSourceExplorerContentQuery query = new DataSourceExplorerContentQuery();
             if ( activeOrganizationalUnit != null && activeRepository != null ) {
