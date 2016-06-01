@@ -21,11 +21,11 @@ import javax.inject.Inject;
 
 @Dependent
 public class NewDataSourcePopup
-        implements NewDataSourcePopupPresenter {
+        implements NewDataSourcePopupView.Presenter {
 
     private NewDataSourcePopupView view;
 
-    private NewDataSourcePopupHandler handler;
+    private NewDataSourcePopupView.NewDataSourcePopupHandler handler;
 
     @Inject
     public NewDataSourcePopup( NewDataSourcePopupView view ) {
@@ -68,7 +68,7 @@ public class NewDataSourcePopup
     }
 
     @Override
-    public void addPopupHandler( NewDataSourcePopupHandler handler ) {
+    public void addPopupHandler( NewDataSourcePopupView.NewDataSourcePopupHandler handler ) {
         this.handler = handler;
     }
 

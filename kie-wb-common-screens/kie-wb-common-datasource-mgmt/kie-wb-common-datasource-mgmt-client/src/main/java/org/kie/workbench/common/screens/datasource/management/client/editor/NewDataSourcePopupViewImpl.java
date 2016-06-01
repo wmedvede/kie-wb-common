@@ -33,7 +33,7 @@ import org.uberfire.ext.widgets.common.client.common.popups.footers.ModalFooterO
 @Dependent
 public class NewDataSourcePopupViewImpl
         extends BaseModal
-        implements NewDataSourcePopupPresenter.NewDataSourcePopupView {
+        implements NewDataSourcePopupView {
 
     interface NewDataSourcePopupViewImplBinder
             extends
@@ -52,7 +52,7 @@ public class NewDataSourcePopupViewImpl
     @UiField
     FormGroup nameGroup;
 
-    NewDataSourcePopupPresenter presenter;
+    NewDataSourcePopupView.Presenter presenter;
 
     public NewDataSourcePopupViewImpl( ) {
 
@@ -76,7 +76,7 @@ public class NewDataSourcePopupViewImpl
         add( footer );
     }
 
-    public void init( NewDataSourcePopupPresenter presenter ) {
+    public void init( NewDataSourcePopupView.Presenter presenter ) {
         this.presenter = presenter;
     }
 

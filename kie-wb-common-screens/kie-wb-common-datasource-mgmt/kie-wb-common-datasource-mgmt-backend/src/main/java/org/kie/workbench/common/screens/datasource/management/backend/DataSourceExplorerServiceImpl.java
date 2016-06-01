@@ -38,6 +38,7 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
+import org.kie.workbench.common.services.shared.project.KieProject;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,8 @@ import org.uberfire.io.IOService;
 import org.uberfire.java.nio.file.DirectoryStream;
 import org.uberfire.java.nio.file.Files;
 import org.uberfire.security.authz.AuthorizationManager;
+
+import static org.uberfire.commons.validation.PortablePreconditions.*;
 
 @Service
 @ApplicationScoped
@@ -63,6 +66,8 @@ public class DataSourceExplorerServiceImpl
 
     private OrganizationalUnitService organizationalUnitService;
 
+    private DataSourceServicesHelper serviceHelper;
+
     private AuthorizationManager authorizationManager;
 
     private User identity;
@@ -74,17 +79,46 @@ public class DataSourceExplorerServiceImpl
     public DataSourceExplorerServiceImpl( final @Named( "ioStrategy" ) IOService ioService,
             final KieProjectService projectService,
             final OrganizationalUnitService organizationalUnitService,
+            final DataSourceServicesHelper serviceHelper,
             final AuthorizationManager authorizationManager,
             final User identity ) {
         this.ioService = ioService;
         this.projectService = projectService;
+        this.serviceHelper = serviceHelper;
         this.organizationalUnitService = organizationalUnitService;
         this.authorizationManager = authorizationManager;
         this.identity = identity;
     }
 
     @Override
+    public Collection<DataSourceDefInfo> findGlobalDataSources() {
+        return getDataSources( serviceHelper.getGlobalDataSourcesContext() );
+    }
+
+    @Override
+    public Collection<DataSourceDefInfo> findProjectDataSources( final Path path ) {
+        checkNotNull( "path", path );
+        KieProject project = projectService.resolveProject( path );
+        if ( project == null ) {
+            return new ArrayList<>( );
+        } else {
+            return getDataSources( serviceHelper.getProjectDataSourcesContext( project ) );
+        }
+    }
+
+    @Override
     public DataSourceExplorerContentQueryResult executeQuery( final DataSourceExplorerContentQuery query ) {
+        checkNotNull( "query", query );
+        if ( query.isGlobalQuery() ) {
+            DataSourceExplorerContentQueryResult result = new DataSourceExplorerContentQueryResult();
+            result.setDataSourceDefs( getDataSources( serviceHelper.getGlobalDataSourcesContext() ) );
+            return result;
+        } else {
+            return resolveQuery( query );
+        }
+    }
+
+    private DataSourceExplorerContentQueryResult resolveQuery( final DataSourceExplorerContentQuery query ) {
 
         DataSourceExplorerContentQueryResult result = new DataSourceExplorerContentQueryResult();
 
@@ -141,7 +175,7 @@ public class DataSourceExplorerServiceImpl
         }
     }
 
-    public Collection<DataSourceDefInfo> getDataSources( final Path path ) {
+    private Collection<DataSourceDefInfo> getDataSources( final Path path ) {
 
         final org.uberfire.java.nio.file.Path nioPath = Paths.convert( path );
         final List<DataSourceDefInfo> result = new ArrayList<>( );
@@ -199,6 +233,7 @@ public class DataSourceExplorerServiceImpl
         return authorizedRepositories;
     }
 
+
     private Map<String, Project> getProjects( final Repository repository,
             final String branch ) {
         final Map<String, Project> authorizedProjects = new HashMap<String, Project>();
@@ -220,4 +255,5 @@ public class DataSourceExplorerServiceImpl
             return authorizedProjects;
         }
     }
+
 }

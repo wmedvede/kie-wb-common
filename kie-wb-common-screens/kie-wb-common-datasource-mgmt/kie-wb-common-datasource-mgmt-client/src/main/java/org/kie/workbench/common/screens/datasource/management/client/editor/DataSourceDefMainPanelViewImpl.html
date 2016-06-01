@@ -15,48 +15,44 @@
   ~ limitations under the License.
   -->
 
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-md-6">
-      <form>
-
-        <div id="name-form-group" class="form-group" data-field="name-form-group">
-          <label class="control-label" data-i18n-key="name"></label>
-          <input class="form-control" data-field="name"/>
-        </div>
-
-        <div class="form-group" data-field="jndi-form-group">
-          <label class="control-label" data-i18n-key="jndi"></label>
-          <input class="form-control" data-field="jndi"/>
-        </div>
-
-        <div class="form-group" data-field="connection-url-form-group">
-          <label class="control-label" data-i18n-key="connectionURL"></label>
-          <input class="form-control" data-field="connection-url"/>
-        </div>
-
-        <div class="form-group" data-field="user-form-group">
-          <label class="control-label" data-i18n-key="user"></label>
-          <input class="form-control" data-field="user"/>
-        </div>
-
-        <div class="form-group" data-field="password-form-group">
-          <label class="control-label" data-i18n-key="password"></label>
-          <input class="form-control" data-field="password"/>
-        </div>
-
-        <div class="form-group" data-field="driver-form-group">
-          <label class="control-label" data-i18n-key="driver"></label>
-          <div class="form-control" data-field="driver-selector"></div>
-        </div>
-
-        <div>
-          <button type="button" class="btn btn-primary" data-field="deploy-btn">DEPLOY</button>
-          <button type="button" class="btn btn-info" data-field="test-btn">TEST</button>
-          <button type="button" class="btn btn-danger" data-field="undeploy-btn">UN-DEPLOY</button>
-        </div>
-
-      </form>
+<form>
+  <fieldset>
+    <div id="name-form-group" class="form-group" data-field="name-form-group">
+      <label class="control-label" data-i18n-key="name"></label>
+      <input class="form-control" data-field="name"/>
+      <span data-field="name-help" class="help-block" style="visibility: hidden;"></span>
     </div>
-  </div>
-</div>
+
+    <div class="form-group" data-field="jndi-form-group">
+      <label class="control-label" data-i18n-key="jndi"></label>
+      <input class="form-control" data-field="jndi"/>
+      <span data-field="jndi-help" class="help-block" style="visibility: hidden;"></span>
+    </div>
+
+    <div class="form-group" data-field="connection-url-form-group">
+      <label class="control-label" data-i18n-key="connectionURL"></label>
+      <input class="form-control" data-field="connection-url"/>
+      <span data-field="connection-url-help" class="help-block" style="visibility: hidden;"></span>
+    </div>
+
+    <div class="form-group" data-field="user-form-group">
+      <label class="control-label" data-i18n-key="user"></label>
+      <input class="form-control" data-field="user"/>
+      <span data-field="user-help" class="help-block" style="visibility: hidden;"></span>
+    </div>
+
+    <div class="form-group" data-field="password-form-group">
+      <label class="control-label" data-i18n-key="password"></label>
+      <input class="form-control" data-field="password"/>
+      <span data-field="password-help" class="help-block" style="visibility: hidden;"></span>
+    </div>
+
+    <div class="form-group" data-field="driver-form-group">
+      <label class="control-label" data-i18n-key="driver"></label>
+      <div class="form-control" data-field="driver-selector"></div>
+      <span data-field="driver-selector-help" class="help-block" style="visibility: hidden;"></span>
+    </div>
+
+  </fieldset>
+</form>
+

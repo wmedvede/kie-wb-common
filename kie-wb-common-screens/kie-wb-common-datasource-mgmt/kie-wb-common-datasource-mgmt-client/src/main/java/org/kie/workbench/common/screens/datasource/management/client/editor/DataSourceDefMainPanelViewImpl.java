@@ -17,17 +17,16 @@
 package org.kie.workbench.common.screens.datasource.management.client.editor;
 
 import java.util.List;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
-import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.TextBox;
+import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.extras.select.client.ui.Option;
 import org.gwtbootstrap3.extras.select.client.ui.Select;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
@@ -36,12 +35,13 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.uberfire.commons.data.Pair;
 import org.uberfire.ext.editor.commons.client.BaseEditorViewImpl;
+import org.uberfire.ext.widgets.common.client.common.StyleHelper;
 
 @Dependent
 @Templated
 public class DataSourceDefMainPanelViewImpl
         extends BaseEditorViewImpl
-        implements DataSourceDefMainPanelPresenter.DataSourceDefMainPanelView {
+        implements DataSourceDefMainPanelView {
 
     @DataField ( "name-form-group" )
     Element nameFormGroup =  DOM.createDiv();
@@ -50,12 +50,18 @@ public class DataSourceDefMainPanelViewImpl
     @DataField ( "name" )
     TextBox nameTextBox;
 
+    @DataField("name-help")
+    Element nameHelp = DOM.createSpan();
+
     @DataField ( "jndi-form-group" )
     Element jndiFormGroup =  DOM.createDiv();
 
     @Inject
     @DataField ( "jndi" )
     TextBox jndiTextBox;
+
+    @DataField( "jndi-help" )
+    Element jndiHelp = DOM.createSpan();
 
     @DataField ( "connection-url-form-group" )
     Element connectionURLFormGroup =  DOM.createDiv();
@@ -64,12 +70,18 @@ public class DataSourceDefMainPanelViewImpl
     @DataField ( "connection-url" )
     TextBox connectionURLTextBox;
 
+    @DataField("connection-url-help")
+    Element connectionURLHelp = DOM.createSpan();
+
     @DataField ( "user-form-group" )
     Element userFormGroup =  DOM.createDiv();
 
     @Inject
     @DataField ( "user" )
     TextBox userTextBox;
+
+    @DataField( "user-help" )
+    Element userHelp = DOM.createSpan();
 
     @DataField ( "password-form-group" )
     Element passwordFormGroup =  DOM.createDiv();
@@ -78,6 +90,9 @@ public class DataSourceDefMainPanelViewImpl
     @DataField ( "password" )
     TextBox passwordTextBox;
 
+    @DataField( "password-help" )
+    Element passwordHelp = DOM.createSpan();
+
     @DataField ( "driver-form-group" )
     Element driverFormGroup = DOM.createDiv();
 
@@ -85,19 +100,10 @@ public class DataSourceDefMainPanelViewImpl
     @DataField ( "driver-selector" )
     Select driverSelector;
 
-    @Inject
-    @DataField( "deploy-btn" )
-    Button deployButton;
+    @DataField( "driver-selector-help" )
+    Element driverSelectorHelp = DOM.createSpan();
 
-    @Inject
-    @DataField( "undeploy-btn" )
-    Button undeployButton;
-
-    @Inject
-    @DataField( "test-btn" )
-    Button testButton;
-
-    private DataSourceDefMainPanelPresenter presenter;
+    private DataSourceDefMainPanelView.Presenter presenter;
 
     private TranslationService translationService;
 
@@ -107,15 +113,8 @@ public class DataSourceDefMainPanelViewImpl
         this.translationService = translationService;
     }
 
-    @PostConstruct
-    private void init() {
-        enableDeployButton( false );
-        enableUnDeployButton( false );
-        enableTestButton( false );
-    }
-
     @Override
-    public void init( final DataSourceDefMainPanelPresenter presenter ) {
+    public void init( final DataSourceDefMainPanelView.Presenter presenter ) {
         this.presenter = presenter;
     }
 
@@ -129,6 +128,16 @@ public class DataSourceDefMainPanelViewImpl
         return nameTextBox.getText();
     }
 
+    public void setNameErrorMessage( final String message ) {
+        setGroupOnError( nameFormGroup, true );
+        setSpanMessage( nameHelp, message );
+    }
+
+    public void clearNameErrorMessage() {
+        setGroupOnError( nameFormGroup, false );
+        clearSpanMessage( nameHelp );
+    }
+
     @Override
     public void setJndi( final String jndi ) {
         this.jndiTextBox.setText( jndi );
@@ -137,6 +146,18 @@ public class DataSourceDefMainPanelViewImpl
     @Override
     public String getJndi() {
         return jndiTextBox.getText();
+    }
+
+    @Override
+    public void setJndiErrorMessage( final String message ) {
+        setGroupOnError( jndiFormGroup, true );
+        setSpanMessage( jndiHelp, message );
+    }
+
+    @Override
+    public void clearJndiErrorMessage() {
+        setGroupOnError( jndiFormGroup, false );
+        clearSpanMessage( jndiHelp );
     }
 
     @Override
@@ -150,6 +171,18 @@ public class DataSourceDefMainPanelViewImpl
     }
 
     @Override
+    public void setConnectionURLErrorMessage( String message ) {
+        setGroupOnError( connectionURLFormGroup, true );
+        setSpanMessage( connectionURLHelp, message );
+    }
+
+    @Override
+    public void clearConnectionURLErrorMessage() {
+        setGroupOnError( connectionURLFormGroup, false );
+        clearSpanMessage( connectionURLHelp );
+    }
+
+    @Override
     public String getUser() {
         return userTextBox.getText();
     }
@@ -160,6 +193,18 @@ public class DataSourceDefMainPanelViewImpl
     }
 
     @Override
+    public void setUserErrorMessage( String message ) {
+        setGroupOnError( userFormGroup, true );
+        setSpanMessage( userHelp, message );
+    }
+
+    @Override
+    public void clearUserErrorMessage() {
+        setGroupOnError( userFormGroup, false );
+        clearSpanMessage( userHelp );
+    }
+
+    @Override
     public String getPassword() {
         return passwordTextBox.getText();
     }
@@ -167,6 +212,18 @@ public class DataSourceDefMainPanelViewImpl
     @Override
     public void setPassword( final String password ) {
         this.passwordTextBox.setText( password );
+    }
+
+    @Override
+    public void setPasswordErrorMessage( String message ) {
+        setGroupOnError( passwordFormGroup, true );
+        setSpanMessage( passwordHelp, message );
+    }
+
+    @Override
+    public void clearPasswordErrorMessage() {
+        setGroupOnError( passwordFormGroup, false );
+        clearSpanMessage( passwordHelp );
     }
 
     @Override
@@ -181,18 +238,15 @@ public class DataSourceDefMainPanelViewImpl
     }
 
     @Override
-    public void enableDeployButton( final boolean enabled ) {
-        deployButton.setEnabled( enabled );
+    public void setDriverErrorMessage( final String message ) {
+        setGroupOnError( driverFormGroup, true );
+        setSpanMessage( driverSelectorHelp, message );
     }
 
     @Override
-    public void enableUnDeployButton( final boolean enabled ) {
-        undeployButton.setEnabled( enabled );
-    }
-
-    @Override
-    public void enableTestButton( final boolean enabled ) {
-        testButton.setEnabled( enabled );
+    public void clearDriverErrorMessage() {
+        setGroupOnError( driverFormGroup, false );
+        clearSpanMessage( driverSelectorHelp );
     }
 
     @Override
@@ -237,21 +291,6 @@ public class DataSourceDefMainPanelViewImpl
         presenter.onDriverChange();
     }
 
-    @EventHandler( "deploy-btn" )
-    public void onDeploy( final ClickEvent event ) {
-        presenter.onDeployDataSource();
-    }
-
-    @EventHandler( "undeploy-btn" )
-    public void onUnDeploy( final ClickEvent event ) {
-        presenter.onUnDeployDataSource();
-    }
-
-    @EventHandler( "test-btn" )
-    public void onTest( final ClickEvent event ) {
-        presenter.onUnTestDataSource();
-    }
-
     private Option newOption( final String text, final String value ) {
         final Option option = new Option();
         option.setValue( value );
@@ -266,5 +305,20 @@ public class DataSourceDefMainPanelViewImpl
                 driverSelector.refresh();
             }
         } );
+    }
+
+    private void setGroupOnError( final Element formGroup, final boolean onError ) {
+        StyleHelper.addUniqueEnumStyleName( formGroup, ValidationState.class,
+                onError ? ValidationState.ERROR : ValidationState.NONE );
+    }
+
+    private void setSpanMessage( final Element span, final String text ) {
+        span.getStyle().setVisibility( Style.Visibility.VISIBLE );
+        span.setInnerHTML( text );
+    }
+
+    private void clearSpanMessage( final Element span ) {
+        span.getStyle().setVisibility( Style.Visibility.HIDDEN );
+        span.setInnerHTML( "" );
     }
 }
