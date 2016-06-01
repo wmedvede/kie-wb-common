@@ -38,7 +38,7 @@ import org.uberfire.ext.widgets.core.client.editors.defaulteditor.DefaultEditorF
 @Templated
 public class DriverDefEditorViewImpl
         extends BaseEditorViewImpl
-        implements DriverDefEditorPresenter.DriverDefEditorView {
+        implements DriverDefEditorView {
 
     @DataField ( "name-form-group" )
     Element nameFormGroup =  DOM.createDiv();
@@ -66,7 +66,7 @@ public class DriverDefEditorViewImpl
     @DataField( "file-upload" )
     DefaultEditorFileUpload fileUpload;
 
-    private DriverDefEditorPresenter presenter;
+    private Presenter presenter;
 
     private TranslationService translationService;
 
@@ -83,7 +83,7 @@ public class DriverDefEditorViewImpl
     }
 
     @Override
-    public void init( final DriverDefEditorPresenter presenter ) {
+    public void init( final Presenter presenter ) {
         this.presenter = presenter;
     }
 

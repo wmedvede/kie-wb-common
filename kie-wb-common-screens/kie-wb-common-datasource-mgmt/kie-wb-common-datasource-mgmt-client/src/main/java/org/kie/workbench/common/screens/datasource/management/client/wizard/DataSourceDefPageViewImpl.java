@@ -14,39 +14,35 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.explorer.common;
+package org.kie.workbench.common.screens.datasource.management.client.wizard;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Composite;
-import org.gwtbootstrap3.client.ui.LinkedGroup;
+import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefMainPanel;
 
 @Dependent
 @Templated
-public class DataSourceDefExplorerViewImpl
+public class DataSourceDefPageViewImpl
         extends Composite
-        implements DataSourceDefExplorerView {
+        implements DataSourceDefPageView {
 
     @Inject
-    @DataField
-    private com.google.gwt.user.client.ui.Label emptyLabel;
-
-    @Inject
-    @DataField
-    private LinkedGroup itemsGroup;
+    @DataField( "main-panel-container" )
+    private FlowPanel mainPanelContainer;
 
     private Presenter presenter;
 
-    public DataSourceDefExplorerViewImpl() {
+    public DataSourceDefPageViewImpl( ) {
     }
 
-    @PostConstruct
-    private void init() {
-        //set i18n or whatever any other ui initialization here.
+    @Override
+    public void setMainPanel( final DataSourceDefMainPanel mainPanel ) {
+        mainPanelContainer.add( mainPanel );
     }
 
     @Override
@@ -54,18 +50,4 @@ public class DataSourceDefExplorerViewImpl
         this.presenter = presenter;
     }
 
-    @Override
-    public void addItem( DataSourceDefItem item ) {
-        itemsGroup.add( item );
-    }
-
-    @Override
-    public void removeItem( DataSourceDefItem item ) {
-        itemsGroup.remove( item );
-    }
-
-    @Override
-    public void clear() {
-        itemsGroup.clear();
-    }
 }

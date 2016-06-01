@@ -17,23 +17,15 @@ package org.kie.workbench.common.screens.datasource.management.client.explorer.c
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.errai.common.client.api.Caller;
-import org.jboss.errai.common.client.api.RemoteCallback;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefItem;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefItemView;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.uberfire.client.mvp.PlaceManager;
-import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 import org.uberfire.mvp.impl.PathPlaceRequest;
 
 @Dependent
@@ -44,8 +36,6 @@ public class DataSourceDefExplorer
 
     private DataSourceDefExplorerView view;
 
-    private Caller<DataSourceDefEditorService> editorService;
-
     private Instance<DataSourceDefItem> itemInstance;
 
     private Map<String, DataSourceDefInfo> itemsMap = new HashMap<>(  );
@@ -54,20 +44,13 @@ public class DataSourceDefExplorer
 
     @Inject
     public DataSourceDefExplorer( DataSourceDefExplorerView view,
-            Caller<DataSourceDefEditorService> editorService,
             Instance<DataSourceDefItem> itemInstance,
             PlaceManager placeManager ) {
         this.view = view;
-        this.editorService = editorService;
         this.itemInstance = itemInstance;
         this.placeManager = placeManager;
 
         view.init( this );
-    }
-
-    @PostConstruct
-    private void init() {
-        loadDataSources();
     }
 
     @Override
@@ -75,18 +58,8 @@ public class DataSourceDefExplorer
         return view.asWidget();
     }
 
-    public void loadDataSources() {
-        view.clear();
-        editorService.call( new RemoteCallback<List<DataSourceDefInfo>>() {
-            @Override
-            public void callback( List<DataSourceDefInfo> dataSourceDefInfos ) {
-                loadDataSources( dataSourceDefInfos );
-            }
-        }, new DefaultErrorCallback() ).getGlobalDataSources();
-    }
-
     public void loadDataSources( Collection<DataSourceDefInfo> dataSourceDefInfos ) {
-        view.clear();
+        clear();
         if ( dataSourceDefInfos != null ) {
             DataSourceDefItem item;
             for ( DataSourceDefInfo dataSourceDefInfo : dataSourceDefInfos ) {
@@ -102,6 +75,11 @@ public class DataSourceDefExplorer
                 view.addItem( item );
             }
         }
+    }
+
+    public void clear() {
+        view.clear();
+        itemsMap.clear();
     }
 
     private void onItemClick( DataSourceDefInfo dataSourceDefInfo ) {

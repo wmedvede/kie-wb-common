@@ -16,36 +16,17 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor;
 
-import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.mvp.UberView;
 import org.uberfire.ext.editor.commons.client.BaseEditorView;
 
-public interface DriverDefEditorPresenter {
+public interface DataSourceDefEditorView
+        extends UberView<DataSourceDefEditorView.Presenter>,
+                BaseEditorView {
 
-    interface DriverDefEditorView
-            extends UberView<DriverDefEditorPresenter>,
-            BaseEditorView {
+    interface Presenter {
 
-        void setName( final String text );
-
-        String getName();
-
-        void setDriverClass( final String driverClass );
-
-        String getDriverClass();
-
-        void setPath( Path path );
-
-        void enableDeployButton( final boolean enable );
-
-        void enableUnDeployButton( final boolean enable );
     }
 
-    void onNameChange();
+    void setMainPanel( final DataSourceDefMainPanel mainPanel );
 
-    void onDriverClassChange();
-
-    void onDeployDriver();
-
-    void onUnDeployDriver();
 }

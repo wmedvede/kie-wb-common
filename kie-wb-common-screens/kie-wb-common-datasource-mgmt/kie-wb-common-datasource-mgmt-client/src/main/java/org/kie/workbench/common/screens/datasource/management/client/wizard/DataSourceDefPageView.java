@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.service;
+package org.kie.workbench.common.screens.datasource.management.client.wizard;
 
-import java.util.Collection;
+import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefMainPanel;
+import org.uberfire.client.mvp.UberView;
 
-import org.jboss.errai.bus.server.annotations.Remote;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
-import org.uberfire.backend.vfs.Path;
+public interface DataSourceDefPageView
+        extends UberView<DataSourceDefPageView.Presenter> {
 
-@Remote
-public interface DataSourceExplorerService {
+    interface Presenter {
 
-    DataSourceExplorerContentQueryResult executeQuery( final DataSourceExplorerContentQuery query );
+    }
 
-    Collection<DataSourceDefInfo> findGlobalDataSources();
-
-    Collection<DataSourceDefInfo> findProjectDataSources( final Path path );
+    void setMainPanel( DataSourceDefMainPanel mainPanel );
 
 }

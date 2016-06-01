@@ -60,10 +60,11 @@ import static org.uberfire.ext.editor.commons.client.menu.MenuItems.*;
         supportedTypes = { DataSourceDefType.class } )
 public class DataSourceDefEditor
         extends BaseEditor
-        implements DataSourceDefMainPanelPresenter {
+        implements DataSourceDefEditorView.Presenter {
 
+    private DataSourceDefEditorView view;
 
-    private DataSourceDefMainPanelView view;
+    private DataSourceDefMainPanel mainPanel;
 
     private DataSourceDefType type;
 
@@ -78,18 +79,47 @@ public class DataSourceDefEditor
     private Map<String, DriverDef> driverDefMap = new HashMap<>(  );
 
     @Inject
-    public DataSourceDefEditor( final DataSourceDefMainPanelView view,
+    public DataSourceDefEditor( final DataSourceDefEditorView view,
+            final DataSourceDefMainPanel mainPanel,
             final DataSourceDefType type,
             final Caller<DataSourceDefEditorService> editorService,
             final Caller<DataSourceManagementService> dataSourceService,
             final Caller<DriverManagementService> driverService ) {
         super( view );
         this.view = view;
+        this.mainPanel = mainPanel;
         this.type = type;
         this.editorService = editorService;
         this.dataSourceService = dataSourceService;
         this.driverService = driverService;
         view.init( this );
+        view.setMainPanel( mainPanel );
+
+        mainPanel.setHandler( new DataSourceDefMainPanelView.Handler() {
+            @Override public void onNameChange() {
+                DataSourceDefEditor.this.onNameChange();
+            }
+
+            @Override public void onJndiChange() {
+                DataSourceDefEditor.this.onJndiChange();
+            }
+
+            @Override public void onConnectionURLChange() {
+                DataSourceDefEditor.this.onConnectionURLChange();
+            }
+
+            @Override public void onUserChange() {
+                DataSourceDefEditor.this.onUserChange();
+            }
+
+            @Override public void onPasswordChange() {
+                DataSourceDefEditor.this.onPasswordChange();
+            }
+
+            @Override public void onDriverChange() {
+                DataSourceDefEditor.this.onDriverChange();
+            }
+        } );
     }
 
     @OnStartup
@@ -181,6 +211,29 @@ public class DataSourceDefEditor
         return super.mayClose( currentHash );
     }
 
+    @Override
+    protected void makeMenuBar() {
+        super.makeMenuBar();
+
+        menuBuilder.addCommand( "Test", new Command() {
+            @Override public void execute() {
+                onTestDataSource();
+            }
+        } );
+
+        menuBuilder.addCommand( "Deploy", new Command() {
+            @Override public void execute() {
+                onDeployDataSource();
+            }
+        } );
+
+        menuBuilder.addCommand( "Un-Deploy", new Command() {
+            @Override public void execute() {
+                onUnDeployDataSource();
+            }
+        } );
+    }
+
     private RemoteCallback<DataSourceDefEditorContent> getLoadContentSuccessCallback() {
         return new RemoteCallback<DataSourceDefEditorContent>() {
             @Override
@@ -202,8 +255,8 @@ public class DataSourceDefEditor
 
     private void onDriversLoaded( final List<DriverDef> driverDefs ) {
         List<Pair<String, String>> driverOptions = buildDriverOptions( driverDefs );
-        view.loadDriverOptions( driverOptions, true );
-        view.setDriver( getContent().getDataSourceDef().getDriverUuid()  );
+        mainPanel.loadDriverOptions( driverOptions, true );
+        mainPanel.setDriver( getContent().getDataSourceDef().getDriverUuid()  );
     }
 
     private List<Pair<String, String>> buildDriverOptions( final List<DriverDef> driverDefs ) {
@@ -233,11 +286,11 @@ public class DataSourceDefEditor
 
     protected void setContent( final DataSourceDefEditorContent editorContent ) {
         this.editorContent = editorContent;
-        view.setName( editorContent.getDataSourceDef().getName() );
-        view.setJndi( editorContent.getDataSourceDef().getJndi() );
-        view.setConnectionURL( editorContent.getDataSourceDef().getConnectionURL() );
-        view.setUser( editorContent.getDataSourceDef().getUser() );
-        view.setPassword( editorContent.getDataSourceDef().getPassword() );
+        mainPanel.setName( editorContent.getDataSourceDef().getName() );
+        mainPanel.setJndi( editorContent.getDataSourceDef().getJndi() );
+        mainPanel.setConnectionURL( editorContent.getDataSourceDef().getConnectionURL() );
+        mainPanel.setUser( editorContent.getDataSourceDef().getUser() );
+        mainPanel.setPassword( editorContent.getDataSourceDef().getPassword() );
     }
 
     protected void refreshDeploymentInfo() {
@@ -250,46 +303,34 @@ public class DataSourceDefEditor
             @Override
             public void callback( DataSourceDeploymentInfo deploymentInfo ) {
                 if ( deploymentInfo != null ) {
-                    view.enableDeployButton( false );
-                    view.enableUnDeployButton( true );
-                    view.enableTestButton( true );
-                } else {
-                    view.enableDeployButton( true );
-                    view.enableUnDeployButton( false );
-                    view.enableTestButton( false );
+                    //TODO do somethinig....
                 }
             }
         };
     }
 
-    @Override
     public void onNameChange() {
-        getContent().getDataSourceDef().setName( view.getName() );
+        getContent().getDataSourceDef().setName( mainPanel.getName() );
     }
 
-    @Override
     public void onJndiChange() {
-        getContent().getDataSourceDef().setJndi( view.getJndi() );
+        getContent().getDataSourceDef().setJndi( mainPanel.getJndi() );
     }
 
-    @Override
     public void onConnectionURLChange() {
-        getContent().getDataSourceDef().setConnectionURL( view.getConnectionURL() );
+        getContent().getDataSourceDef().setConnectionURL( mainPanel.getConnectionURL() );
     }
 
-    @Override
     public void onUserChange() {
-        getContent().getDataSourceDef().setUser( view.getUser() );
+        getContent().getDataSourceDef().setUser( mainPanel.getUser() );
     }
 
-    @Override
     public void onPasswordChange() {
-        getContent().getDataSourceDef().setPassword( view.getPassword() );
+        getContent().getDataSourceDef().setPassword( mainPanel.getPassword() );
     }
 
-    @Override
     public void onDriverChange() {
-        DriverDef driverDef = driverDefMap.get( view.getDriver() );
+        DriverDef driverDef = driverDefMap.get( mainPanel.getDriver() );
         if ( driverDef != null ) {
             getContent().getDataSourceDef().setDriverUuid( driverDef.getUuid() );
             getContent().getDataSourceDef().setDriverClass( driverDef.getDriverClass() );
@@ -299,7 +340,6 @@ public class DataSourceDefEditor
         }
     }
 
-    @Override
     public void onDeployDataSource() {
         //TODO verify all required parameters are set.
         //TODO add and verify server response.
@@ -308,14 +348,15 @@ public class DataSourceDefEditor
                     @Override
                     public void callback( Void aVoid ) {
                         Window.alert( "datasource successfully deployed" );
-                        view.enableUnDeployButton( true );
-                        view.enableDeployButton( false );
-                        view.enableTestButton( true );
+                        /*
+                        mainPanel.enableUnDeployButton( true );
+                        mainPanel.enableDeployButton( false );
+                        mainPanel.enableTestButton( true );
+                        */
                     }
                 }, new DefaultErrorCallback() ).deploy( getContent().getDataSourceDef() );
     }
 
-    @Override
     public void onUnDeployDataSource() {
         //TODO add and verify server response, etc.
         dataSourceService.call(
@@ -323,16 +364,17 @@ public class DataSourceDefEditor
                     @Override
                     public void callback( Void aVoid ) {
                         Window.alert( "datasource successfully un deployed" );
-                        view.enableUnDeployButton( false );
-                        view.enableDeployButton( true );
-                        view.enableTestButton( false );
+                        /*
+                        mainPanel.enableUnDeployButton( false );
+                        mainPanel.enableDeployButton( true );
+                        mainPanel.enableTestButton( false );
+                        */
                     }
                 }, new DefaultErrorCallback() ).undeploy( getContent().getDataSourceDef().getUuid() );
 
     }
 
-    @Override
-    public void onUnTestDataSource() {
+    public void onTestDataSource() {
         editorService.call(
                 new RemoteCallback<String>() {
                     @Override

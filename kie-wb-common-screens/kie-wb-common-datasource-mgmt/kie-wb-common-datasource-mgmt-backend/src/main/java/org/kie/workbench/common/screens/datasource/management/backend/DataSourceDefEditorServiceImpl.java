@@ -16,28 +16,26 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend;
 
-import java.net.URI;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.UUID;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
+import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.util.DataSourceDefSerializer;
-import org.kie.workbench.common.services.shared.project.KieProject;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +44,6 @@ import org.uberfire.backend.vfs.Path;
 import org.uberfire.io.IOService;
 import org.uberfire.java.nio.base.options.CommentedOption;
 import org.uberfire.java.nio.file.FileAlreadyExistsException;
-import org.uberfire.java.nio.file.FileSystem;
-import org.uberfire.java.nio.file.FileSystemAlreadyExistsException;
 
 import static org.uberfire.commons.validation.PortablePreconditions.*;
 
@@ -71,36 +67,14 @@ public class DataSourceDefEditorServiceImpl
     @Inject
     private DataSourceExplorerService dataSourceExplorerService;
 
-    /**
-     * Filesystem that will hold the platform data sources. Platform data sources has global scope instead of belong
-     * to a given project.
-     */
-    private FileSystem fileSystem;
+    @Inject
+    private DataSourceManagementService dataSourceManagementService;
 
-    /**
-     *  Root to the platform data sources repository.
-     */
-    private org.uberfire.java.nio.file.Path root;
+    @Inject
+    private DataSourceServicesHelper serviceHelper;
 
-    @PostConstruct
-    public void init() {
-        String repositoryURI = null;
-        try {
-            repositoryURI = "default://" + getGlobalFileSystemName();
-            fileSystem = ioService.newFileSystem( URI.create( repositoryURI ),
-                    new HashMap<String, Object>() {{
-                        put( "init", Boolean.TRUE );
-                        put( "internal", Boolean.TRUE );
-                    }} );
-
-            logger.debug( "Data sources platform repository: " + repositoryURI + " was successfully created." );
-
-        } catch ( FileSystemAlreadyExistsException e ) {
-            logger.debug( "Data sources platform repository: " + repositoryURI + " already exits and will be used." );
-            fileSystem = ioService.getFileSystem( URI.create( repositoryURI ) );
-        }
-        this.root = fileSystem.getRootDirectories().iterator().next();
-    }
+    @Inject
+    private Event<NewDataSourceEvent> newDataSourceEvent;
 
     @Override
     public DataSourceDefEditorContent loadContent( final Path path ) {
@@ -152,6 +126,87 @@ public class DataSourceDefEditorServiceImpl
                 content,
                 new CommentedOption( optionsFactory.getSafeIdentityName() ) );
 
+        return newPath;
+    }
+
+    @Override
+    public Path create( final DataSourceDef dataSourceDef,
+            final Project project,
+            final boolean deploy ) {
+        checkNotNull( "dataSourceDef", dataSourceDef );
+        checkNotNull( "project", project );
+
+        Path context = serviceHelper.getProjectDataSourcesContext( project );
+        Path newPath = create( dataSourceDef, context, deploy );
+
+        newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef,
+                project, optionsFactory.getSafeSessionId(), optionsFactory.getSafeIdentityName() ) );
+
+        return newPath;
+    }
+
+    @Override
+    public Path createGlobal( DataSourceDef dataSourceDef, boolean deploy ) {
+        checkNotNull( "dataSourceDef", dataSourceDef );
+
+        Path context = serviceHelper.getGlobalDataSourcesContext();
+        Path newPath = create( dataSourceDef, context, deploy );
+
+        newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef, optionsFactory.getSafeSessionId(),
+                optionsFactory.getSafeIdentityName() ) );
+
+        return newPath;
+    }
+
+    private Path create( final DataSourceDef dataSourceDef,
+            final Path context,
+            boolean deploy ) {
+        checkNotNull( "dataSourceDef", dataSourceDef );
+        checkNotNull( "context", context );
+
+        if ( dataSourceDef.getUuid() == null ) {
+            dataSourceDef.setUuid( UUID.randomUUID().toString() );
+        }
+
+        String fileName = dataSourceDef.getName() + ".datasource";
+        String content = DataSourceDefSerializer.serialize( dataSourceDef );
+
+        final org.uberfire.java.nio.file.Path nioPath = Paths.convert( context ).resolve( fileName );
+        final Path newPath = Paths.convert( nioPath );
+        boolean fileCreated = false;
+
+        if ( ioService.exists( nioPath ) ) {
+            throw new FileAlreadyExistsException( nioPath.toString() );
+        }
+
+        try {
+            ioService.startBatch( nioPath.getFileSystem() );
+
+            //create the datasource file.
+            ioService.write( nioPath,
+                    content,
+                    new CommentedOption( optionsFactory.getSafeIdentityName() ) );
+            fileCreated = true;
+
+            if ( deploy ) {
+                //deploy the datasource
+                dataSourceManagementService.deploy( dataSourceDef );
+            }
+
+        } catch ( Exception e1 ) {
+            logger.error( "An exception was produced during data source creation: {}", dataSourceDef.getName(), e1 );
+            if ( fileCreated ) {
+                //the file was created, but the deployment failed.
+                try {
+                    ioService.delete( nioPath );
+                } catch ( Exception e2 ) {
+                    logger.warn( "Removal of orphan data source file failed: {}", newPath, e2 );
+                }
+            }
+            throw ExceptionUtilities.handleException( e1 );
+        } finally {
+            ioService.endBatch();
+        }
         return newPath;
     }
 
@@ -209,32 +264,4 @@ public class DataSourceDefEditorServiceImpl
         ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
     }
 
-    public Collection<DataSourceDefInfo> getGlobalDataSources() {
-        return dataSourceExplorerService.getDataSources( Paths.convert( root ) );
-    }
-
-    public Collection<DataSourceDefInfo> getProjectDataSources( final Path path ) {
-        checkNotNull( "path", path );
-        KieProject project = projectService.resolveProject( path );
-        if ( project == null ) {
-            return new ArrayList<>( );
-        } else {
-            Path rootPath = project.getRootPath();
-            org.uberfire.java.nio.file.Path dataSourcesNioPath = Paths.convert( rootPath ).resolve( "src/main/resources/META-INF" );
-            return dataSourceExplorerService.getDataSources( Paths.convert( dataSourcesNioPath ) );
-        }
-    }
-
-    @Override
-    public Path getGlobalDataSourcesContext() {
-        return Paths.convert( root );
-    }
-
-    private String getGlobalFileSystemName() {
-        String name = System.getProperty( "org.kie.workbench.datasource-filesystem" );
-        if ( name == null || "".equals( name ) ) {
-            name = "datasources";
-        }
-        return name;
-    }
 }
