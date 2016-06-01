@@ -32,6 +32,8 @@ public class DataSourceExplorerContentQuery {
 
     private String branch;
 
+    private boolean globalQuery = false;
+
     public DataSourceExplorerContentQuery() {
     }
 
@@ -43,6 +45,10 @@ public class DataSourceExplorerContentQuery {
         this.repository = repository;
         this.project = project;
         this.branch = branch;
+    }
+
+    public DataSourceExplorerContentQuery( boolean globalQuery ) {
+        this.globalQuery = globalQuery;
     }
 
     public Repository getRepository() {
@@ -75,5 +81,9 @@ public class DataSourceExplorerContentQuery {
 
     public void setBranch( String branch ) {
         this.branch = branch;
+    }
+
+    public boolean isGlobalQuery() {
+        return globalQuery;
     }
 }

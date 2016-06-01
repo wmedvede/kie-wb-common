@@ -38,6 +38,8 @@ public interface ProjectDataSourceExplorerView
             final Collection<Project> projects,
             final Project activeProject );
 
+    void clear();
+
     void addProjectSelectorHandler( final ProjectSelectorHandler handler );
 
     void setDataSourceDefExplorer( final DataSourceDefExplorer dataSourceDefExplorer );
