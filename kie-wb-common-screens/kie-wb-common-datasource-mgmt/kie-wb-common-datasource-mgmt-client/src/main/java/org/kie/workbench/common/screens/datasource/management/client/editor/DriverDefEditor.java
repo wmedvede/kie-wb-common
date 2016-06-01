@@ -53,9 +53,9 @@ import static org.uberfire.ext.editor.commons.client.menu.MenuItems.*;
         supportedTypes = { DriverDefType.class } )
 public class DriverDefEditor
         extends BaseEditor
-        implements DriverDefEditorPresenter {
+        implements DriverDefEditorView.Presenter {
 
-    private DriverDefEditorPresenter.DriverDefEditorView view;
+    private DriverDefEditorView view;
 
     private DriverDefType type;
 
@@ -66,7 +66,7 @@ public class DriverDefEditor
     private DriverDefEditorContent editorContent;
 
     @Inject
-    public DriverDefEditor( final DriverDefEditorPresenter.DriverDefEditorView view,
+    public DriverDefEditor( final DriverDefEditorView view,
             final DriverDefType type,
             final Caller<DriverDefEditorService> editorService,
             final Caller<DriverManagementService> driverService ) {

@@ -14,58 +14,44 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.explorer.common;
+package org.kie.workbench.common.screens.datasource.management.client.explorer.global;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Composite;
-import org.gwtbootstrap3.client.ui.LinkedGroup;
+import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
 
 @Dependent
 @Templated
-public class DataSourceDefExplorerViewImpl
+public class GlobalDataSourceExplorerViewImpl
         extends Composite
-        implements DataSourceDefExplorerView {
+        implements GlobalDataSourceExplorerView {
 
     @Inject
-    @DataField
-    private com.google.gwt.user.client.ui.Label emptyLabel;
-
-    @Inject
-    @DataField
-    private LinkedGroup itemsGroup;
+    @DataField( "datasource-explorer-container")
+    private FlowPanel container;
 
     private Presenter presenter;
 
-    public DataSourceDefExplorerViewImpl() {
-    }
-
-    @PostConstruct
-    private void init() {
-        //set i18n or whatever any other ui initialization here.
+    public GlobalDataSourceExplorerViewImpl() {
     }
 
     @Override
-    public void init( Presenter presenter ) {
+    public void init( final Presenter presenter ) {
         this.presenter = presenter;
     }
 
     @Override
-    public void addItem( DataSourceDefItem item ) {
-        itemsGroup.add( item );
-    }
-
-    @Override
-    public void removeItem( DataSourceDefItem item ) {
-        itemsGroup.remove( item );
-    }
-
-    @Override
     public void clear() {
-        itemsGroup.clear();
+
+    }
+
+    @Override
+    public void setDataSourceDefExplorer( final DataSourceDefExplorer dataSourceDefExplorer ) {
+        container.add( dataSourceDefExplorer );
     }
 }

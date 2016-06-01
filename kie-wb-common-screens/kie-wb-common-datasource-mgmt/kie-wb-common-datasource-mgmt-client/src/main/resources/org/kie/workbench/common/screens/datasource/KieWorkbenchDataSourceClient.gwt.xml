@@ -28,6 +28,7 @@
   <inherits name="org.jboss.errai.ui.UI"/>
   <inherits name="org.jboss.errai.common.ErraiCommon"/>
 
+  <inherits name="org.uberfire.java.nio.UberfireNIO2Model"/>
   <inherits name="org.uberfire.UberfireAPI"/>
   <inherits name="org.uberfire.UberfireClientAPI"/>
   <inherits name="org.uberfire.commons.UberfireCommons"/>

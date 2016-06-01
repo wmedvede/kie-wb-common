@@ -16,8 +16,11 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.explorer.project;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.IsWidget;
@@ -28,6 +31,7 @@ import org.guvnor.structure.repositories.Repository;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
+import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
@@ -98,16 +102,101 @@ public class ProjectDataSourceExplorer
         explorerService.call( getRefreshCallback(), new DefaultErrorCallback() ).executeQuery( query );
     }
 
-    public void loadContent( final DataSourceExplorerContentQueryResult content ) {
+    private void loadContent( final DataSourceExplorerContentQueryResult content ) {
 
-        //TODO aqui tendria que dar la oportunidad a compoarar el resultado contra la
-        //seleccion q tenia la UI, porque podria darse el caso donde la OU ya no existe por ej
-        //y en la UI la teniamos seleccionada.
+        dataSourceDefExplorer.clear();
+        if ( activeOrganizationalUnit == null || !contains( content.getOrganizationalUnits(), activeOrganizationalUnit ) ) {
+            //no organizational unit was selected or the previously selected one has been deleted at server side.
 
-        view.loadContent( content.getOrganizationalUnits(), activeOrganizationalUnit,
-                content.getRepositories(), activeRepository,
-                content.getProjects(), activeProject );
-        dataSourceDefExplorer.loadDataSources( content.getDataSourceDefs() );
+            if ( content.getOrganizationalUnits() != null && content.getOrganizationalUnits().size() > 0 ) {
+                //let's select the first one
+                activeOrganizationalUnit = content.getOrganizationalUnits().iterator().next();
+                activeRepository = null;
+                activeProject = null;
+                //try a refresh.
+                refresh( );
+            } else {
+                //there are no organizational units, nothing to do.
+                activeOrganizationalUnit = null;
+                activeRepository = null;
+                activeProject = null;
+                view.clear();
+            }
+
+        } else if ( activeRepository == null || !contains( content.getRepositories(), activeRepository ) ) {
+            //an organizational unit was selected and is in the result but no repository was selected or the previously
+            //selected one has been deleted at server side.
+
+            if ( content.getRepositories() != null && content.getRepositories().size() > 0 ) {
+                //let's select the first one.
+                activeRepository = content.getRepositories().iterator().next();
+                activeProject = null;
+                //try a refresh.
+                refresh();
+            } else {
+                //there are no repositories for the activeOrganizationalUnit
+                activeRepository = null;
+                activeProject = null;
+                view.loadContent( content.getOrganizationalUnits(), activeOrganizationalUnit,
+                        new ArrayList<>( ), activeRepository,
+                        new ArrayList<>( ), activeProject );
+            }
+        } else if ( activeProject == null || !contains( content.getProjects(), activeProject ) ) {
+            //an organization unit and a repository were selected and both are in the result, but no project is
+            //selected or the selected one has been deleted at server side.
+            if ( content.getProjects() != null && content.getProjects().size() > 0 ) {
+                activeProject = content.getProjects().iterator().next();
+                //try a refresh.
+                refresh();
+            } else {
+                activeProject = null;
+                view.loadContent( content.getOrganizationalUnits(), activeOrganizationalUnit,
+                        content.getRepositories(), activeRepository,
+                        new ArrayList<>( ), activeProject );
+            }
+        } else {
+            //an organizational unit, repository and project are selected and are in the result.
+            //just load the view with the results.
+
+            view.loadContent( content.getOrganizationalUnits(), activeOrganizationalUnit,
+                    content.getRepositories(), activeRepository,
+                    content.getProjects(), activeProject );
+            dataSourceDefExplorer.loadDataSources( content.getDataSourceDefs() );
+        }
+
+    }
+
+    private boolean contains( Collection<Repository> repositories, Repository activeRepository ) {
+        if ( repositories != null ) {
+            for ( Repository repository : repositories ) {
+                if ( repository.getAlias().equals( activeRepository.getAlias() ) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean contains( Collection<OrganizationalUnit> organizationalUnits, OrganizationalUnit activeOrganizationalUnit ) {
+        if ( organizationalUnits != null ) {
+            for ( OrganizationalUnit ou : organizationalUnits ) {
+                if ( ou.getName().equals( activeOrganizationalUnit.getName() ) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean contains( Collection<Project> projects, Project activeProject ) {
+        if ( projects != null ) {
+            for ( Project project : projects ) {
+                if ( project.getRootPath().equals( activeProject.getRootPath() ) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private RemoteCallback<?> getRefreshCallback() {
@@ -120,7 +209,6 @@ public class ProjectDataSourceExplorer
     }
 
     public void onOrganizationalUnitSelected( final OrganizationalUnit ou ) {
-        //Window.alert( "OrganizationalUnit Selected: " + ou );
         if ( hasChanged( ou ) ) {
             activeOrganizationalUnit = ou;
             activeRepository = null;
@@ -132,7 +220,6 @@ public class ProjectDataSourceExplorer
     }
 
     public void onRepositorySelected( final Repository repository ) {
-        //Window.alert( "Repository Selected: " + repository );
         if ( hasChanged( repository ) ) {
             DataSourceExplorerContentQuery query = new DataSourceExplorerContentQuery();
             if ( activeOrganizationalUnit != null ) {
@@ -150,7 +237,6 @@ public class ProjectDataSourceExplorer
     }
 
     public void onProjectSelected( final Project project ) {
-        //Window.alert( "Project Selected: " + project );
         if ( hasChanged( project ) ) {
             DataSourceExplorerContentQuery query = new DataSourceExplorerContentQuery();
             if ( activeOrganizationalUnit != null && activeRepository != null ) {
@@ -166,6 +252,40 @@ public class ProjectDataSourceExplorer
         }
     }
 
+    public OrganizationalUnit getActiveOrganizationalUnit() {
+        return activeOrganizationalUnit;
+    }
+
+    public void setActiveOrganizationalUnit( OrganizationalUnit activeOrganizationalUnit ) {
+        this.activeOrganizationalUnit = activeOrganizationalUnit;
+    }
+
+    public Repository getActiveRepository() {
+        return activeRepository;
+    }
+
+    public void setActiveRepository( Repository activeRepository ) {
+        this.activeRepository = activeRepository;
+    }
+
+    public Project getActiveProject() {
+        return activeProject;
+    }
+
+    public void setActiveProject( Project activeProject ) {
+        this.activeProject = activeProject;
+    }
+
+    public String getActiveBranch() {
+        return activeBranch;
+    }
+
+    public void onDataSourceCreated( @Observes NewDataSourceEvent event ) {
+        if ( !event.isGlobal() && activeProject != null && activeProject.equals( event.getProject() ) ) {
+            refresh();
+        }
+    }
+
     private boolean hasChanged( final OrganizationalUnit ou ) {
         return activeOrganizationalUnit != null ? !activeOrganizationalUnit.equals( ou ) : ou != null;
     }
@@ -177,6 +297,4 @@ public class ProjectDataSourceExplorer
     private boolean hasChanged( final Project project ) {
         return activeProject != null ? !activeProject.equals( project ) : project != null;
     }
-
-
 }

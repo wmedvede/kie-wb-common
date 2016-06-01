@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.explorer.project;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -67,6 +68,13 @@ public class ProjectDataSourceExplorerViewImpl
                 activeRepository,
                 projects,
                 activeProject );
+    }
+
+    @Override
+    public void clear() {
+        loadContent( new ArrayList<OrganizationalUnit>( ), null,
+                new ArrayList<Repository>( ), null,
+                new ArrayList<Project>( ), null );
     }
 
     @Override

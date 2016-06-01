@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.explorer.common;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
