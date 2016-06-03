@@ -143,7 +143,7 @@ public class DataSourceDefEditor
 
     @WorkbenchPartTitle
     public String getTitleText() {
-        return "DataSourceEditor [" + "todo set title" + "]";
+        return super.getTitleText();
     }
 
     @WorkbenchMenu
@@ -341,40 +341,29 @@ public class DataSourceDefEditor
     }
 
     public void onDeployDataSource() {
-        //TODO verify all required parameters are set.
-        //TODO add and verify server response.
+        //Experimental method for development purposes.
         dataSourceService.call(
                 new RemoteCallback<Void>() {
                     @Override
                     public void callback( Void aVoid ) {
                         Window.alert( "datasource successfully deployed" );
-                        /*
-                        mainPanel.enableUnDeployButton( true );
-                        mainPanel.enableDeployButton( false );
-                        mainPanel.enableTestButton( true );
-                        */
                     }
                 }, new DefaultErrorCallback() ).deploy( getContent().getDataSourceDef() );
     }
 
     public void onUnDeployDataSource() {
-        //TODO add and verify server response, etc.
+        //Experimental method for development purposes.
         dataSourceService.call(
                 new RemoteCallback<Void>() {
                     @Override
                     public void callback( Void aVoid ) {
                         Window.alert( "datasource successfully un deployed" );
-                        /*
-                        mainPanel.enableUnDeployButton( false );
-                        mainPanel.enableDeployButton( true );
-                        mainPanel.enableTestButton( false );
-                        */
                     }
                 }, new DefaultErrorCallback() ).undeploy( getContent().getDataSourceDef().getUuid() );
-
     }
 
     public void onTestDataSource() {
+        //Experimental method for development purposes.
         editorService.call(
                 new RemoteCallback<String>() {
                     @Override
