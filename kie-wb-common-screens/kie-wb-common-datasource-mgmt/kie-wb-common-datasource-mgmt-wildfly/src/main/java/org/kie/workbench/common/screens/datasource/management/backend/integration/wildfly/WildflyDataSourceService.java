@@ -323,6 +323,8 @@ public class WildflyDataSourceService
 
     private void deleteDatasource( String name ) throws Exception {
 
+        //QUE en al investigacion de por qué el wildlfy 10 quiere reiniciarse cuando borro un datasource
+        //IGUAL acá se arregla con un allow-resource-service-start
         ModelNode operation = new ModelNode( );
         operation.get( OP ).set( "remove" );
         operation.get( OP_ADDR ).add( "subsystem", "datasources" );
