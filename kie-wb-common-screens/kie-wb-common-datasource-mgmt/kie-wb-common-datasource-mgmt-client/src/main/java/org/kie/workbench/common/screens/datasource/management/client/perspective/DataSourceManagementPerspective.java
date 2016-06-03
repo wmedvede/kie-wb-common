@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.perspective;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -30,8 +30,8 @@ import org.uberfire.workbench.model.impl.PartDefinitionImpl;
 import org.uberfire.workbench.model.impl.PerspectiveDefinitionImpl;
 
 @ApplicationScoped
-@WorkbenchPerspective( identifier = "DataSourceAuthoringPerspective" )
-public class DataSourceAuthoringPerspective {
+@WorkbenchPerspective( identifier = "DataSourceManagementPerspective" )
+public class DataSourceManagementPerspective {
 
     @Perspective
     public PerspectiveDefinition buildPerspective() {
