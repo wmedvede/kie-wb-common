@@ -17,6 +17,7 @@
 package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -107,6 +108,22 @@ public class WildflyDataSourceService
             }
         }
         return null;
+    }
+
+    @Override
+    public void update( DataSourceDef dataSourceDef ) throws Exception {
+
+        Map<String, Object> changeSet = new HashMap<>(  );
+
+        changeSet.put( WildflyDataSourceAttributes.JNDI_NAME, dataSourceDef.getJndi() );
+        changeSet.put( WildflyDataSourceAttributes.CONNECTION_URL, dataSourceDef.getConnectionURL() );
+        changeSet.put( WildflyDataSourceAttributes.DRIVER_CLASS, dataSourceDef.getDriverClass() );
+        changeSet.put( WildflyDataSourceAttributes.DATASOURCE_CLASS, dataSourceDef.getDataSourceClass() );
+        changeSet.put( WildflyDataSourceAttributes.DRIVER_NAME, dataSourceDef.getDriverUuid() );
+        changeSet.put( WildflyDataSourceAttributes.USER_NAME, dataSourceDef.getUser() );
+        changeSet.put( WildflyDataSourceAttributes.PASSWORD, dataSourceDef.getPassword() );
+
+        updateDatasource( dataSourceDef.getUuid(), changeSet );
     }
 
     @Override
@@ -270,7 +287,7 @@ public class WildflyDataSourceService
         stepTemplate.get( OP_ADDR ).add( "subsystem", "datasources" );
         stepTemplate.get( OP_ADDR ).add( "data-source", name );
 
-        ModelNode step = null;
+        ModelNode step;
         ModelNode stepValue;
         List<ModelNode> steps = new ArrayList<ModelNode>();
         Object value;
@@ -284,9 +301,6 @@ public class WildflyDataSourceService
             step = stepTemplate.clone();
             step.get( NAME ).set( attrName );
             stepValue = step.get( "value" );
-            //TODO, this works fine for String attributes but
-            //should be improved to support other types admitted by the ModelNode
-            //by now it's ok to assume strings.
             stepValue.set( value.toString() );
 
             steps.add( step );
@@ -323,8 +337,6 @@ public class WildflyDataSourceService
 
     private void deleteDatasource( String name ) throws Exception {
 
-        //QUE en al investigacion de por qué el wildlfy 10 quiere reiniciarse cuando borro un datasource
-        //IGUAL acá se arregla con un allow-resource-service-start
         ModelNode operation = new ModelNode( );
         operation.get( OP ).set( "remove" );
         operation.get( OP_ADDR ).add( "subsystem", "datasources" );

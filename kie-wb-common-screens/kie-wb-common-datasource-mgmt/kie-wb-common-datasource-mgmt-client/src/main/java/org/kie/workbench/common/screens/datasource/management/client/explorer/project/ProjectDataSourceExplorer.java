@@ -23,6 +23,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.guvnor.common.services.project.model.Project;
@@ -31,6 +32,8 @@ import org.guvnor.structure.repositories.Repository;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorerView;
+import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDataSourceDefWizard;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
@@ -46,6 +49,8 @@ public class ProjectDataSourceExplorer
 
     private DataSourceDefExplorer dataSourceDefExplorer;
 
+    private NewDataSourceDefWizard newDataSourceDefWizard;
+
     private Caller<DataSourceExplorerService> explorerService;
 
     private OrganizationalUnit activeOrganizationalUnit;
@@ -59,9 +64,11 @@ public class ProjectDataSourceExplorer
     @Inject
     public ProjectDataSourceExplorer( final ProjectDataSourceExplorerView view,
             final DataSourceDefExplorer dataSourceDefExplorer,
+            final NewDataSourceDefWizard newDataSourceDefWizard,
             final Caller<DataSourceExplorerService> explorerService ) {
         this.view = view;
         this.dataSourceDefExplorer = dataSourceDefExplorer;
+        this.newDataSourceDefWizard = newDataSourceDefWizard;
         this.explorerService = explorerService;
     }
 
@@ -84,6 +91,31 @@ public class ProjectDataSourceExplorer
                 ProjectDataSourceExplorer.this.onProjectSelected( project );
             }
         } );
+        dataSourceDefExplorer.setHandler( new DataSourceDefExplorerView.Handler() {
+            @Override
+            public void onAddDataSource() {
+                ProjectDataSourceExplorer.this.onAddDataSource();
+            }
+
+            @Override
+            public void onAddDriver() {
+                ProjectDataSourceExplorer.this.onAddDriver();
+            }
+        } );
+    }
+
+    private void onAddDriver() {
+        Window.alert( "Not yet implemented" );
+    }
+
+    private void onAddDataSource() {
+        final Project activeProjet = getActiveProject();
+        if ( activeProjet == null ) {
+            Window.alert( "No project has been selected" );
+        } else {
+            newDataSourceDefWizard.setProject( getActiveProject() );
+            newDataSourceDefWizard.start();
+        }
     }
 
     @Override

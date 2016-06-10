@@ -21,12 +21,15 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorerView;
 import org.kie.workbench.common.screens.datasource.management.client.explorer.project.ProjectDataSourceExplorerView;
+import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDataSourceDefWizard;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
@@ -42,20 +45,44 @@ public class GlobalDataSourceExplorer
 
     private DataSourceDefExplorer dataSourceDefExplorer;
 
+    private NewDataSourceDefWizard newDataSourceDefWizard;
+
     private Caller<DataSourceExplorerService> explorerService;
 
     @Inject
     public GlobalDataSourceExplorer( final GlobalDataSourceExplorerView view,
             final DataSourceDefExplorer dataSourceDefExplorer,
+            final NewDataSourceDefWizard newDataSourceDefWizard,
             final Caller<DataSourceExplorerService> explorerService ) {
         this.view = view;
         this.dataSourceDefExplorer = dataSourceDefExplorer;
+        this.newDataSourceDefWizard = newDataSourceDefWizard;
         this.explorerService = explorerService;
     }
 
     @PostConstruct
     private void init() {
         view.setDataSourceDefExplorer( dataSourceDefExplorer );
+        dataSourceDefExplorer.setHandler( new DataSourceDefExplorerView.Handler() {
+            @Override
+            public void onAddDataSource() {
+                GlobalDataSourceExplorer.this.onAddDataSource();
+            }
+
+            @Override
+            public void onAddDriver() {
+                GlobalDataSourceExplorer.this.onAddDriver();
+            }
+        } );
+    }
+
+    private void onAddDriver() {
+        Window.alert("Not yet implemented");
+    }
+
+    private void onAddDataSource() {
+        newDataSourceDefWizard.setGlobal();
+        newDataSourceDefWizard.start();
     }
 
     @Override
