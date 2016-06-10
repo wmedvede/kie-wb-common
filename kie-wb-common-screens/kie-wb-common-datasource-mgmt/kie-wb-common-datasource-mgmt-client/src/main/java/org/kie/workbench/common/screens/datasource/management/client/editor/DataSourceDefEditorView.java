@@ -29,4 +29,6 @@ public interface DataSourceDefEditorView
 
     void setMainPanel( final DataSourceDefMainPanel mainPanel );
 
+    void showInformationPopup( final String title, final String message );
+
 }

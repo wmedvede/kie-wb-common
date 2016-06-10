@@ -14,10 +14,65 @@
   ~ limitations under the License.
   -->
 
-<div style="width:100%;">
+<div>
 
-    <div data-field="emptyLabel" ></div>
+  <div class="row ds-mgmt-navigation-area" >
+    <div class="panel-group" id="content-accordion" data-field="content-accordion" style="padding-top:15px;">
+      <div>
+        <h4 class="panel-title">
+          <a href="#" data-parent="#content-accordion" data-toggle="collapse" data-target="#datasources-panel" aria-expanded="true" data-field="datasources-panel-link" data-i18n-key="DataSources">Data sources</a>
+        </h4>
+        <div class="panel-collapse collapse in" id="datasources-panel" data-field="datasources-panel" aria-expanded="true">
+          <div class="panel-body ds-mgmt-element-nav">
 
-    <div data-field="itemsGroup" ></div>
+            <div class="ds-mgmt-add-new-element">
+              <a href="#" data-field="add-new-datasource">
+                <i class="fa fa-plus"></i>
+                <span data-i18n-key="AddDataSource">Add DataSource</span>
+              </a>
+            </div>
+
+            <div class="ds-mgmt-element-navigation list-group" data-field="datasources-list-group">
+              <a href="#" class="list-group-item">
+                <i class="fa fa-fw fa-folder-o"></i>
+                DataSource A
+              </a>
+              <a href="#" class="list-group-item active">
+                <i class="fa fa-fw fa-folder-o"></i>
+                DataSource B
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="padding-top: 15px;">
+        <h4 class="panel-title">
+          <a href="#" class="collapsed" data-parent="#content-accordion" data-toggle="collapse" data-target="#drivers-panel" aria-expanded="true" data-field="drivers-panel-link" data-i18n-key="Drivers">Drivers</a>
+        </h4>
+        <div class="panel-collapse collapse in" id="drivers-panel" data-field="drivers-panel" aria-expanded="true">
+          <div class="panel-body ds-mgmt-element-nav">
+
+            <div class="ds-mgmt-add-new-element">
+              <a href="#" data-field="add-new-driver">
+                <i class="fa fa-plus"></i>
+                <span data-i18n-key="AddDriver">Add Driver</span>
+              </a>
+            </div>
+
+            <div class="ds-mgmt-element-navigation list-group" data-field="drivers-list-group">
+              <a href="#" class="list-group-item">
+                <i class="fa fa-server"></i>
+                Driver A
+              </a>
+              <a href="#" class="list-group-item">
+                <i class="fa fa-server"></i>
+                Driver B
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>

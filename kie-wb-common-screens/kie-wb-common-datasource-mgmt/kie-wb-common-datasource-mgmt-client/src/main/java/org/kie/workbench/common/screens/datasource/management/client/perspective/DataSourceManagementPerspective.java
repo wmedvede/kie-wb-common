@@ -40,7 +40,7 @@ public class DataSourceManagementPerspective {
         perspective.setName( "Data Source Authoring" );
 
         final PanelDefinition west = new PanelDefinitionImpl( MultiListWorkbenchPanelPresenter.class.getName() );
-        west.setWidth( 350 );
+        west.setWidth( 400 );
         west.setMinWidth( 300 );
         west.addPart( new PartDefinitionImpl( new DefaultPlaceRequest( "DataSourceDefExplorer" ) ) );
         perspective.getRoot().insertChild( CompassPosition.WEST, west );

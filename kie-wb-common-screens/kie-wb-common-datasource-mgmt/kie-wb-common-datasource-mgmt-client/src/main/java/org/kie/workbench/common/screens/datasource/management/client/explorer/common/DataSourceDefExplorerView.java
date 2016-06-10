@@ -20,7 +20,16 @@ import org.uberfire.client.mvp.UberView;
 public interface DataSourceDefExplorerView
         extends UberView<DataSourceDefExplorerView.Presenter> {
 
-    interface Presenter {
+
+    interface Presenter extends Handler {
+
+    }
+
+    interface Handler {
+
+        void onAddDataSource();
+
+        void onAddDriver();
 
     }
 

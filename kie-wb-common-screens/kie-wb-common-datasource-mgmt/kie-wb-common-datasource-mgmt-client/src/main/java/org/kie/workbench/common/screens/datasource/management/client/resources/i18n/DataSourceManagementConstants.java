@@ -21,6 +21,21 @@ import org.jboss.errai.ui.shared.api.annotations.TranslationKey;
 public interface DataSourceManagementConstants {
 
     @TranslationKey( defaultValue = "" )
-    String  DataSourceDefEditorViewImpl_name = "DataSourceDefEditorViewImpl.name";
+    String DataSourceDefEditor_InvalidNameMessage = "DataSourceDefEditor.InvalidNameMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_InvalidJndiMessage = "DataSourceDefEditor.InvalidJndiMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_InvalidConnectionURLMessage = "DataSourceDefEditor.InvalidConnectionURLMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_InvalidUserMessage = "DataSourceDefEditor.InvalidUserMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_InvalidPasswordMessage = "DataSourceDefEditor.InvalidPasswordMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_DriverRequiredMessage = "DataSourceDefEditor.DriverRequiredMessage";
 
 }

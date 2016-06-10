@@ -96,6 +96,16 @@ public class DataSourceManagementServiceImpl
     }
 
     @Override
+    public void update( DataSourceDef dataSourceDef ) {
+        assertDataSourceSerives();
+        try {
+            servicesProvider.getDataSourceService().update( dataSourceDef );
+        } catch ( Exception e ) {
+            logger.error( "update of datasourceDef: " + dataSourceDef + " failed: " + e.getMessage(), e );
+        }
+    }
+
+    @Override
     public void undeploy( final String uuid ) {
 
         assertDataSourceSerives();
