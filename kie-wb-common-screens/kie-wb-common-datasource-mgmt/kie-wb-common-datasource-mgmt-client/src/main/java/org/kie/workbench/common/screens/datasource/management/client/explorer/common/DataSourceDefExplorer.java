@@ -42,6 +42,8 @@ public class DataSourceDefExplorer
 
     private PlaceManager placeManager;
 
+    private DataSourceDefExplorerView.Handler handler;
+
     @Inject
     public DataSourceDefExplorer( DataSourceDefExplorerView view,
             Instance<DataSourceDefItem> itemInstance,
@@ -80,6 +82,24 @@ public class DataSourceDefExplorer
     public void clear() {
         view.clear();
         itemsMap.clear();
+    }
+
+    @Override
+    public void onAddDataSource() {
+        if ( handler != null ) {
+            handler.onAddDataSource();
+        }
+    }
+
+    @Override
+    public void onAddDriver() {
+        if ( handler != null ) {
+            handler.onAddDriver();
+        }
+    }
+
+    public void setHandler( DataSourceDefExplorerView.Handler handler ) {
+        this.handler = handler;
     }
 
     private void onItemClick( DataSourceDefInfo dataSourceDefInfo ) {

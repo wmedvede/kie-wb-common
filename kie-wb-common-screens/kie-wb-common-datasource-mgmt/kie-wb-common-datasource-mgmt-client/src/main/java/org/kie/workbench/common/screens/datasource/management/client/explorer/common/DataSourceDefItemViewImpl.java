@@ -16,7 +16,6 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.explorer.common;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -40,17 +39,6 @@ public class DataSourceDefItemViewImpl
     Presenter presenter;
 
     public DataSourceDefItemViewImpl() {
-    }
-
-    @PostConstruct
-    private void init() {
-
-//        item.addClickHandler( new ClickHandler() {
-//            @Override
-//            public void onClick( ClickEvent clickEvent ) {
-//                presenter.onClick();
-//            }
-//        } );
     }
 
     @Override
