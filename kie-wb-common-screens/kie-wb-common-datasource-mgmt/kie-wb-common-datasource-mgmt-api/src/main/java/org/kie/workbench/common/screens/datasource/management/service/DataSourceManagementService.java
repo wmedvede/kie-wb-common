@@ -35,6 +35,8 @@ public interface DataSourceManagementService {
 
     void deploy( final DataSourceDef dataSourceDef );
 
+    void update( final DataSourceDef dataSourceDef );
+
     void undeploy( final String uuid );
 
 }

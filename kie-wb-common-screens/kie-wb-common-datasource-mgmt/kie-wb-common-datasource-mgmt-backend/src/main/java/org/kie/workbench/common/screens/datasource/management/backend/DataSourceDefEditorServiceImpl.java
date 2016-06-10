@@ -32,6 +32,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
@@ -55,7 +56,7 @@ public class DataSourceDefEditorServiceImpl
     private static final Logger logger = LoggerFactory.getLogger( DataSourceDefEditorServiceImpl.class );
 
     @Inject
-    @Named("ioStrategy")
+    @Named( "ioStrategy" )
     private IOService ioService;
 
     @Inject
@@ -92,12 +93,33 @@ public class DataSourceDefEditorServiceImpl
     public Path save( final Path path,
             final DataSourceDefEditorContent editorContent,
             final String comment ) {
+        return save( path, editorContent, comment, true );
+    }
+
+    public Path save( final Path path,
+            final DataSourceDefEditorContent editorContent,
+            final String comment,
+            final boolean updateDeployment) {
 
         checkNotNull( "path", path );
         checkNotNull( "content", editorContent );
 
         String content = DataSourceDefSerializer.serialize( editorContent.getDataSourceDef() );
-        ioService.write( Paths.convert( path ), content, optionsFactory.makeCommentedOption( comment ) );
+
+        try {
+            if ( updateDeployment && dataSourceManagementService.isEnabled() ) {
+                DataSourceDeploymentInfo deploymentInfo = dataSourceManagementService.getDeploymentInfo(
+                        editorContent.getDataSourceDef().getUuid() );
+                if ( deploymentInfo != null ) {
+                    dataSourceManagementService.undeploy( deploymentInfo.getUuid() );
+                }
+                dataSourceManagementService.deploy( editorContent.getDataSourceDef() );
+            }
+
+            ioService.write( Paths.convert( path ), content, optionsFactory.makeCommentedOption( comment ) );
+        } catch ( Exception e ) {
+            throw ExceptionUtilities.handleException( e );
+        }
         return path;
     }
 
@@ -132,12 +154,12 @@ public class DataSourceDefEditorServiceImpl
     @Override
     public Path create( final DataSourceDef dataSourceDef,
             final Project project,
-            final boolean deploy ) {
+            final boolean updateDeployment ) {
         checkNotNull( "dataSourceDef", dataSourceDef );
         checkNotNull( "project", project );
 
         Path context = serviceHelper.getProjectDataSourcesContext( project );
-        Path newPath = create( dataSourceDef, context, deploy );
+        Path newPath = create( dataSourceDef, context, updateDeployment );
 
         newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef,
                 project, optionsFactory.getSafeSessionId(), optionsFactory.getSafeIdentityName() ) );
@@ -146,11 +168,11 @@ public class DataSourceDefEditorServiceImpl
     }
 
     @Override
-    public Path createGlobal( DataSourceDef dataSourceDef, boolean deploy ) {
+    public Path createGlobal( DataSourceDef dataSourceDef, boolean updateDeployment ) {
         checkNotNull( "dataSourceDef", dataSourceDef );
 
         Path context = serviceHelper.getGlobalDataSourcesContext();
-        Path newPath = create( dataSourceDef, context, deploy );
+        Path newPath = create( dataSourceDef, context, updateDeployment );
 
         newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef, optionsFactory.getSafeSessionId(),
                 optionsFactory.getSafeIdentityName() ) );
@@ -160,7 +182,7 @@ public class DataSourceDefEditorServiceImpl
 
     private Path create( final DataSourceDef dataSourceDef,
             final Path context,
-            boolean deploy ) {
+            boolean updateDeployment ) {
         checkNotNull( "dataSourceDef", dataSourceDef );
         checkNotNull( "context", context );
 
@@ -188,7 +210,7 @@ public class DataSourceDefEditorServiceImpl
                     new CommentedOption( optionsFactory.getSafeIdentityName() ) );
             fileCreated = true;
 
-            if ( deploy ) {
+            if ( updateDeployment && dataSourceManagementService.isEnabled() ) {
                 //deploy the datasource
                 dataSourceManagementService.deploy( dataSourceDef );
             }
@@ -261,7 +283,18 @@ public class DataSourceDefEditorServiceImpl
     @Override
     public void delete( final Path path, final String comment ) {
         checkNotNull( "path", path );
-        ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
+
+        String content = ioService.readAllString( Paths.convert( path ) );
+        DataSourceDef dataSourceDef = DataSourceDefSerializer.deserialize( content );
+
+        try {
+            if ( dataSourceDef.getUuid() != null && dataSourceManagementService.isEnabled() ) {
+                dataSourceManagementService.undeploy( dataSourceDef.getUuid() );
+            }
+            ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
+        } catch ( Exception e ) {
+            throw ExceptionUtilities.handleException( e );
+        }
     }
 
 }

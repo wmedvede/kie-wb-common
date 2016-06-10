@@ -16,10 +16,7 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -40,7 +37,6 @@ import org.uberfire.client.annotations.WorkbenchMenu;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartTitleDecoration;
 import org.uberfire.client.annotations.WorkbenchPartView;
-import org.uberfire.commons.data.Pair;
 import org.uberfire.ext.editor.commons.client.BaseEditor;
 import org.uberfire.ext.editor.commons.client.file.SaveOperationService;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
@@ -66,6 +62,8 @@ public class DataSourceDefEditor
 
     private DataSourceDefMainPanel mainPanel;
 
+    private DataSourceDefEditorHelper editorHelper;
+
     private DataSourceDefType type;
 
     private Caller<DataSourceDefEditorService> editorService;
@@ -76,11 +74,10 @@ public class DataSourceDefEditor
 
     private DataSourceDefEditorContent editorContent;
 
-    private Map<String, DriverDef> driverDefMap = new HashMap<>(  );
-
     @Inject
     public DataSourceDefEditor( final DataSourceDefEditorView view,
             final DataSourceDefMainPanel mainPanel,
+            final DataSourceDefEditorHelper editorHelper,
             final DataSourceDefType type,
             final Caller<DataSourceDefEditorService> editorService,
             final Caller<DataSourceManagementService> dataSourceService,
@@ -88,38 +85,14 @@ public class DataSourceDefEditor
         super( view );
         this.view = view;
         this.mainPanel = mainPanel;
+        this.editorHelper = editorHelper;
         this.type = type;
         this.editorService = editorService;
         this.dataSourceService = dataSourceService;
         this.driverService = driverService;
         view.init( this );
         view.setMainPanel( mainPanel );
-
-        mainPanel.setHandler( new DataSourceDefMainPanelView.Handler() {
-            @Override public void onNameChange() {
-                DataSourceDefEditor.this.onNameChange();
-            }
-
-            @Override public void onJndiChange() {
-                DataSourceDefEditor.this.onJndiChange();
-            }
-
-            @Override public void onConnectionURLChange() {
-                DataSourceDefEditor.this.onConnectionURLChange();
-            }
-
-            @Override public void onUserChange() {
-                DataSourceDefEditor.this.onUserChange();
-            }
-
-            @Override public void onPasswordChange() {
-                DataSourceDefEditor.this.onPasswordChange();
-            }
-
-            @Override public void onDriverChange() {
-                DataSourceDefEditor.this.onDriverChange();
-            }
-        } );
+        editorHelper.init( mainPanel );
     }
 
     @OnStartup
@@ -130,8 +103,6 @@ public class DataSourceDefEditor
                 true,
                 false,
                 SAVE,
-                COPY,
-                RENAME,
                 DELETE );
 
     }
@@ -186,19 +157,30 @@ public class DataSourceDefEditor
 
     @Override
     protected void save() {
-        new SaveOperationService().save( versionRecordManager.getCurrentPath(),
-                new ParameterizedCommand<String>() {
-                    @Override
-                    public void execute( final String commitMessage ) {
-                        editorService.call( getSaveSuccessCallback( getContent().hashCode() ),
-                                new HasBusyIndicatorDefaultErrorCallback( view )
-                        ).save( versionRecordManager.getCurrentPath(),
-                                getContent(),
-                                commitMessage );
+        if ( !editorHelper.isNameValid() ||
+                !editorHelper.isJndiValid() ||
+                !editorHelper.isConnectionURLValid() ||
+                !editorHelper.isUserValid() ||
+                !editorHelper.isPasswordValid() ||
+                !editorHelper.isDriverValid() ) {
+            view.showInformationPopup( "Information", "All fields needs to be validated in order to save the Data Source definition" );
+
+        } else {
+
+            new SaveOperationService().save( versionRecordManager.getCurrentPath(),
+                    new ParameterizedCommand<String>() {
+                        @Override
+                        public void execute( final String commitMessage ) {
+                            editorService.call( getSaveSuccessCallback( getContent().hashCode() ),
+                                    new HasBusyIndicatorDefaultErrorCallback( view )
+                            ).save( versionRecordManager.getCurrentPath(),
+                                    getContent(),
+                                    commitMessage );
+                        }
                     }
-                }
-        );
-        concurrentUpdateSessionInfo = null;
+            );
+            concurrentUpdateSessionInfo = null;
+        }
     }
 
     @Override
@@ -254,19 +236,8 @@ public class DataSourceDefEditor
     }
 
     private void onDriversLoaded( final List<DriverDef> driverDefs ) {
-        List<Pair<String, String>> driverOptions = buildDriverOptions( driverDefs );
-        mainPanel.loadDriverOptions( driverOptions, true );
+        editorHelper.loadDrivers( driverDefs );
         mainPanel.setDriver( getContent().getDataSourceDef().getDriverUuid()  );
-    }
-
-    private List<Pair<String, String>> buildDriverOptions( final List<DriverDef> driverDefs ) {
-        List<Pair<String, String>> options = new ArrayList<>(  );
-        driverDefMap.clear();
-        for ( DriverDef driverDef : driverDefs ) {
-            options.add( new Pair<String, String>( driverDef.getDriverClass(), driverDef.getUuid() ) );
-            driverDefMap.put( driverDef.getUuid(), driverDef );
-        }
-        return options;
     }
 
     protected void onContentLoaded( final DataSourceDefEditorContent editorContent ) {
@@ -286,11 +257,8 @@ public class DataSourceDefEditor
 
     protected void setContent( final DataSourceDefEditorContent editorContent ) {
         this.editorContent = editorContent;
-        mainPanel.setName( editorContent.getDataSourceDef().getName() );
-        mainPanel.setJndi( editorContent.getDataSourceDef().getJndi() );
-        mainPanel.setConnectionURL( editorContent.getDataSourceDef().getConnectionURL() );
-        mainPanel.setUser( editorContent.getDataSourceDef().getUser() );
-        mainPanel.setPassword( editorContent.getDataSourceDef().getPassword() );
+        editorHelper.setDataSourceDef( editorContent.getDataSourceDef() );
+        editorHelper.setValid( true );
     }
 
     protected void refreshDeploymentInfo() {
@@ -303,41 +271,10 @@ public class DataSourceDefEditor
             @Override
             public void callback( DataSourceDeploymentInfo deploymentInfo ) {
                 if ( deploymentInfo != null ) {
-                    //TODO do somethinig....
+                    //TODO do something....
                 }
             }
         };
-    }
-
-    public void onNameChange() {
-        getContent().getDataSourceDef().setName( mainPanel.getName() );
-    }
-
-    public void onJndiChange() {
-        getContent().getDataSourceDef().setJndi( mainPanel.getJndi() );
-    }
-
-    public void onConnectionURLChange() {
-        getContent().getDataSourceDef().setConnectionURL( mainPanel.getConnectionURL() );
-    }
-
-    public void onUserChange() {
-        getContent().getDataSourceDef().setUser( mainPanel.getUser() );
-    }
-
-    public void onPasswordChange() {
-        getContent().getDataSourceDef().setPassword( mainPanel.getPassword() );
-    }
-
-    public void onDriverChange() {
-        DriverDef driverDef = driverDefMap.get( mainPanel.getDriver() );
-        if ( driverDef != null ) {
-            getContent().getDataSourceDef().setDriverUuid( driverDef.getUuid() );
-            getContent().getDataSourceDef().setDriverClass( driverDef.getDriverClass() );
-        } else {
-            getContent().getDataSourceDef().setDriverUuid( null );
-            getContent().getDataSourceDef().setDriverClass( null );
-        }
     }
 
     public void onDeployDataSource() {
