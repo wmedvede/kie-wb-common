@@ -25,22 +25,21 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.Composite;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.extras.select.client.ui.Option;
 import org.gwtbootstrap3.extras.select.client.ui.Select;
-import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.uberfire.commons.data.Pair;
-import org.uberfire.ext.editor.commons.client.BaseEditorViewImpl;
 import org.uberfire.ext.widgets.common.client.common.StyleHelper;
 
 @Dependent
 @Templated
 public class DataSourceDefMainPanelViewImpl
-        extends BaseEditorViewImpl
+        extends Composite
         implements DataSourceDefMainPanelView {
 
     @DataField ( "name-form-group" )
@@ -105,12 +104,7 @@ public class DataSourceDefMainPanelViewImpl
 
     private DataSourceDefMainPanelView.Presenter presenter;
 
-    private TranslationService translationService;
-
-    @Inject
-    public DataSourceDefMainPanelViewImpl( final TranslationService translationService ) {
-        super();
-        this.translationService = translationService;
+    public DataSourceDefMainPanelViewImpl( ) {
     }
 
     @Override

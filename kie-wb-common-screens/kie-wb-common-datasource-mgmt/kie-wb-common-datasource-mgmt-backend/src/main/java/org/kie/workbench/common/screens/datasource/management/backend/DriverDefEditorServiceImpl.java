@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
+import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
@@ -43,6 +44,9 @@ public class DriverDefEditorServiceImpl
     @Inject
     @Named("ioStrategy")
     private IOService ioService;
+
+    @Inject
+    private DataSourceServicesHelper serviceHelper;
 
     @Inject
     private CommentedOptionFactory optionsFactory;
@@ -98,6 +102,40 @@ public class DriverDefEditorServiceImpl
     }
 
     @Override
+    public Path create( DriverDef driverDef, Project project, boolean deploy ) {
+        checkNotNull( "driverDef", driverDef );
+        checkNotNull( "project", project );
+
+        Path context = serviceHelper.getProjectDataSourcesContext( project );
+        Path newPath = create( driverDef, context, deploy );
+
+        return newPath;
+    }
+
+    private Path create( final DriverDef driverDef,
+            final Path context,
+            final boolean deploy ) {
+
+        if ( driverDef.getUuid() == null ) {
+            driverDef.setUuid( UUID.randomUUID().toString() );
+        }
+
+        String fileName = driverDef.getName() + ".driver";
+        String content = DriverDefSerializer.serialize( driverDef );
+
+        final org.uberfire.java.nio.file.Path nioPath = Paths.convert( context ).resolve( fileName );
+        final Path newPath = Paths.convert( nioPath );
+
+        if ( ioService.exists( nioPath ) ) {
+            throw new FileAlreadyExistsException( nioPath.toString() );
+        }
+
+        ioService.write( nioPath, content, new CommentedOption( optionsFactory.getSafeIdentityName() ) );
+
+        return newPath;
+    }
+
+    @Override
     public void delete( final Path path, final String comment ) {
         checkNotNull( "path", path );
         ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
@@ -105,6 +143,16 @@ public class DriverDefEditorServiceImpl
         if ( ioService.exists( nioJarPath ) ) {
             ioService.delete( nioJarPath, optionsFactory.makeCommentedOption( comment ) );
         }
+    }
+
+    @Override
+    public Path getGlobalDriversContext() {
+        return serviceHelper.getGlobalDataSourcesContext();
+    }
+
+    @Override
+    public Path getProjectDriversContext( Project project ) {
+        return serviceHelper.getProjectDataSourcesContext( project );
     }
 
     private Path calculateJarPath( final Path currentFile ) {

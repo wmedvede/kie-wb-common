@@ -28,6 +28,7 @@ import org.kie.workbench.common.screens.datasource.management.client.type.DataSo
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
@@ -235,7 +236,7 @@ public class DataSourceDefEditor
         };
     }
 
-    private void onDriversLoaded( final List<DriverDef> driverDefs ) {
+    private void onDriversLoaded( final List<DriverDefInfo> driverDefs ) {
         editorHelper.loadDrivers( driverDefs );
         mainPanel.setDriver( getContent().getDataSourceDef().getDriverUuid()  );
     }

@@ -23,21 +23,21 @@ import com.google.gwt.user.client.ui.Composite;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefMainPanel;
+import org.kie.workbench.common.screens.datasource.management.client.editor.DriverDefMainPanel;
 
 @Dependent
 @Templated
-public class DataSourceDefPageViewImpl
+public class DriverDefPageViewImpl
         extends Composite
-        implements DataSourceDefPageView {
+        implements DriverDefPageView {
 
     @Inject
     @DataField( "main-panel-container" )
     private FlowPanel mainPanelContainer;
 
-    private Presenter presenter;
+    private DriverDefPageView.Presenter presenter;
 
-    public DataSourceDefPageViewImpl( ) {
+    public DriverDefPageViewImpl() {
     }
 
     @Override
@@ -46,7 +46,7 @@ public class DataSourceDefPageViewImpl
     }
 
     @Override
-    public void setMainPanel( final DataSourceDefMainPanel mainPanel ) {
+    public void setMainPanel( DriverDefMainPanel mainPanel ) {
         mainPanelContainer.add( mainPanel );
     }
 }
