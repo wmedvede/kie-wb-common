@@ -26,6 +26,7 @@ import org.guvnor.common.services.project.model.Project;
 import org.kie.workbench.common.screens.datasource.management.client.explorer.global.GlobalDataSourceExplorer;
 import org.kie.workbench.common.screens.datasource.management.client.explorer.project.ProjectDataSourceExplorer;
 import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDataSourceDefWizard;
+import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDriverDefWizard;
 import org.uberfire.client.annotations.WorkbenchMenu;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
@@ -49,6 +50,8 @@ public class DataSourceDefExplorerScreen
 
     private NewDataSourceDefWizard newDataSourceDefWizard;
 
+    private NewDriverDefWizard newDriverWizard;
+
     private PlaceRequest placeRequest;
 
     private Menus menu;
@@ -62,11 +65,14 @@ public class DataSourceDefExplorerScreen
     public DataSourceDefExplorerScreen( DataSourceDefExplorerScreenView view,
             ProjectDataSourceExplorer projectDataSourceExplorer,
             GlobalDataSourceExplorer globalDataSourceExplorer,
-            NewDataSourceDefWizard newDataSourceDefWizard ) {
+            NewDataSourceDefWizard newDataSourceDefWizard,
+            NewDriverDefWizard newDriverDefWizard) {
+
         this.view = view;
         this.projectDataSourceExplorer = projectDataSourceExplorer;
         this.globalDataSourceExplorer = globalDataSourceExplorer;
         this.newDataSourceDefWizard = newDataSourceDefWizard;
+        this.newDriverWizard = newDriverDefWizard;
         view.init( this );
     }
 

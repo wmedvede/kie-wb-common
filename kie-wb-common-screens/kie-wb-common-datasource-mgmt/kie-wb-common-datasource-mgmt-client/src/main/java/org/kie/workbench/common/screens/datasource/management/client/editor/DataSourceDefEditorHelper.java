@@ -26,7 +26,7 @@ import javax.inject.Inject;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.uberfire.commons.data.Pair;
 
 @Dependent
@@ -38,7 +38,7 @@ public class DataSourceDefEditorHelper {
 
     private DataSourceDefMainPanel mainPanel;
 
-    private Map<String, DriverDef> driverDefMap = new HashMap<>(  );
+    private Map<String, DriverDefInfo> driverDefMap = new HashMap<>(  );
 
     private DataSourceDefMainPanelView.Handler handler;
 
@@ -105,16 +105,16 @@ public class DataSourceDefEditorHelper {
         this.handler = handler;
     }
 
-    public void loadDrivers( final List<DriverDef> driverDefs ) {
+    public void loadDrivers( final List<DriverDefInfo> driverDefs ) {
         List<Pair<String, String>> driverOptions = buildDriverOptions( driverDefs );
         mainPanel.loadDriverOptions( driverOptions, true );
     }
 
-    private List<Pair<String, String>> buildDriverOptions( final List<DriverDef> driverDefs ) {
+    private List<Pair<String, String>> buildDriverOptions( final List<DriverDefInfo> driverDefs ) {
         List<Pair<String, String>> options = new ArrayList<>(  );
         driverDefMap.clear();
-        for ( DriverDef driverDef : driverDefs ) {
-            options.add( new Pair<String, String>( driverDef.getDriverClass(), driverDef.getUuid() ) );
+        for ( DriverDefInfo driverDef : driverDefs ) {
+            options.add( new Pair<String, String>( driverDef.getName(), driverDef.getUuid() ) );
             driverDefMap.put( driverDef.getUuid(), driverDef );
         }
         return options;
@@ -191,17 +191,15 @@ public class DataSourceDefEditorHelper {
     }
 
     public void onDriverChange() {
-        DriverDef driverDef = driverDefMap.get( mainPanel.getDriver() );
+        DriverDefInfo driverDef = driverDefMap.get( mainPanel.getDriver() );
         driverValid = driverDef != null;
         if ( !driverValid ) {
             mainPanel.setDriverErrorMessage(
                     getMessage( DataSourceManagementConstants.DataSourceDefEditor_DriverRequiredMessage ) );
             dataSourceDef.setDriverUuid( null );
-            dataSourceDef.setDriverClass( null );
         } else {
             mainPanel.clearDriverErrorMessage();
             dataSourceDef.setDriverUuid( driverDef.getUuid() );
-            dataSourceDef.setDriverClass( driverDef.getDriverClass() );
         }
         if ( handler != null ) {
             handler.onDriverChange();

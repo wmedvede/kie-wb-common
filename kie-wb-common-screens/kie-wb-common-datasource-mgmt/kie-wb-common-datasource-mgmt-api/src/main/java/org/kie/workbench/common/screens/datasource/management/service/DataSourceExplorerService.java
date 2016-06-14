@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.uberfire.backend.vfs.Path;
 
 @Remote
@@ -30,5 +31,7 @@ public interface DataSourceExplorerService {
     Collection<DataSourceDefInfo> findGlobalDataSources();
 
     Collection<DataSourceDefInfo> findProjectDataSources( final Path path );
+
+    Collection<DriverDefInfo> findProjectDrivers( final Path path );
 
 }

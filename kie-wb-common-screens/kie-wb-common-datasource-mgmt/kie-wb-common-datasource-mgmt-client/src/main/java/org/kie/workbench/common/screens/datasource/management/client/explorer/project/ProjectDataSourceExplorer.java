@@ -34,6 +34,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
 import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorerView;
 import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDataSourceDefWizard;
+import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDriverDefWizard;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
@@ -51,6 +52,10 @@ public class ProjectDataSourceExplorer
 
     private NewDataSourceDefWizard newDataSourceDefWizard;
 
+    private NewDriverDefWizard newDriverDefWizard;
+
+    private NewDriverDefWizard driverDefWizard;
+
     private Caller<DataSourceExplorerService> explorerService;
 
     private OrganizationalUnit activeOrganizationalUnit;
@@ -65,10 +70,12 @@ public class ProjectDataSourceExplorer
     public ProjectDataSourceExplorer( final ProjectDataSourceExplorerView view,
             final DataSourceDefExplorer dataSourceDefExplorer,
             final NewDataSourceDefWizard newDataSourceDefWizard,
+            final NewDriverDefWizard newDriverDefWizard,
             final Caller<DataSourceExplorerService> explorerService ) {
         this.view = view;
         this.dataSourceDefExplorer = dataSourceDefExplorer;
         this.newDataSourceDefWizard = newDataSourceDefWizard;
+        this.newDriverDefWizard = newDriverDefWizard;
         this.explorerService = explorerService;
     }
 
@@ -105,12 +112,18 @@ public class ProjectDataSourceExplorer
     }
 
     private void onAddDriver() {
-        Window.alert( "Not yet implemented" );
+        final Project activeProject = getActiveProject();
+        if ( activeProject == null ) {
+            Window.alert( "No project has been selected" );
+        } else {
+            newDriverDefWizard.setProject( activeProject );
+            newDriverDefWizard.start();
+        }
     }
 
     private void onAddDataSource() {
-        final Project activeProjet = getActiveProject();
-        if ( activeProjet == null ) {
+        final Project activeProject = getActiveProject();
+        if ( activeProject == null ) {
             Window.alert( "No project has been selected" );
         } else {
             newDataSourceDefWizard.setProject( getActiveProject() );

@@ -16,7 +16,9 @@
 
 package org.kie.workbench.common.screens.datasource.management.service;
 
+import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Remote;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
@@ -30,5 +32,11 @@ public interface DriverDefEditorService
     Path save( final Path path, final DriverDefEditorContent editorContent, final String comment );
 
     Path create( final Path context, final String driverName, final String fileName );
+
+    Path create( final DriverDef driverDef, final Project project, final boolean deploy );
+
+    Path getGlobalDriversContext();
+
+    Path getProjectDriversContext( final Project project );
 
 }

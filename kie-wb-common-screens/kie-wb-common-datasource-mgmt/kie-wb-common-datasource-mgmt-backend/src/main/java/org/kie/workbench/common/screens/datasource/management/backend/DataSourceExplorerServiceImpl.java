@@ -35,9 +35,12 @@ import org.guvnor.structure.repositories.Repository;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
+import org.kie.workbench.common.screens.datasource.management.util.DriverDefSerializer;
 import org.kie.workbench.common.services.shared.project.KieProject;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.slf4j.Logger;
@@ -59,6 +62,8 @@ public class DataSourceExplorerServiceImpl
     private static final Logger logger = LoggerFactory.getLogger( DataSourceExplorerServiceImpl.class );
 
     private static String DS_FILE_TYPE = ".datasource";
+
+    private static String DRIVER_FILE_TYPE = ".driver";
 
     private IOService ioService;
 
@@ -103,6 +108,17 @@ public class DataSourceExplorerServiceImpl
             return new ArrayList<>( );
         } else {
             return getDataSources( serviceHelper.getProjectDataSourcesContext( project ) );
+        }
+    }
+
+    @Override
+    public Collection<DriverDefInfo> findProjectDrivers( final Path path ) {
+        checkNotNull( "path", path );
+        KieProject project = projectService.resolveProject( path );
+        if ( project == null ) {
+            return new ArrayList<>( );
+        } else {
+            return getDrivers( serviceHelper.getProjectDataSourcesContext( project ) );
         }
     }
 
@@ -175,6 +191,30 @@ public class DataSourceExplorerServiceImpl
         }
     }
 
+
+    private Collection<DriverDefInfo> getDrivers( final Path path ) {
+
+        final org.uberfire.java.nio.file.Path nioPath = Paths.convert( path );
+        final List<DriverDefInfo> result = new ArrayList<>( );
+
+        try {
+            final DirectoryStream<org.uberfire.java.nio.file.Path> stream = ioService.newDirectoryStream( nioPath,
+                    entry -> Files.isRegularFile( entry ) &&
+                            !entry.getFileName().toString().startsWith( "." ) &&
+                            entry.getFileName().toString().endsWith( DRIVER_FILE_TYPE ) );
+
+            stream.forEach( file -> {
+                result.add( createDriverInfo( file ) );
+            } );
+            stream.close();
+
+            return result;
+        } catch ( Exception e ) {
+            logger.error( "It was not possible read drivers info from: " + path, e );
+            throw ExceptionUtilities.handleException( e );
+        }
+    }
+
     private Collection<DataSourceDefInfo> getDataSources( final Path path ) {
 
         final org.uberfire.java.nio.file.Path nioPath = Paths.convert( path );
@@ -203,6 +243,13 @@ public class DataSourceExplorerServiceImpl
         name = name.substring( 0, name.lastIndexOf( DS_FILE_TYPE ) );
         return new DataSourceDefInfo( name, Paths.convert( path ) );
     }
+
+    private DriverDefInfo createDriverInfo( final org.uberfire.java.nio.file.Path path ) {
+        String content = ioService.readAllString( path );
+        DriverDef driverDef = DriverDefSerializer.deserialize( content );
+        return new DriverDefInfo( driverDef.getUuid(), driverDef.getName(), driverDef.getDriverLib() );
+    }
+
 
     private Set<OrganizationalUnit> getOrganizationalUnits() {
         final Collection<OrganizationalUnit> organizationalUnits = organizationalUnitService.getOrganizationalUnits();
