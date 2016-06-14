@@ -180,6 +180,16 @@ public class DataSourceDefEditorServiceImpl
         return newPath;
     }
 
+    @Override
+    public Path getGlobalDataSourcesContext() {
+        return serviceHelper.getGlobalDataSourcesContext();
+    }
+
+    @Override
+    public Path getProjectDataSourcesContext( final Project project ) {
+        return serviceHelper.getProjectDataSourcesContext( project );
+    }
+
     private Path create( final DataSourceDef dataSourceDef,
             final Path context,
             boolean updateDeployment ) {
