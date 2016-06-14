@@ -30,74 +30,83 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
-import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
+import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.java.nio.file.FileAlreadyExistsException;
+import org.uberfire.mvp.Command;
 import org.uberfire.workbench.events.NotificationEvent;
 
 @Dependent
-public class NewDataSourceDefWizard
+public class NewDriverDefWizard
         extends AbstractWizard {
-
 
     private final List<WizardPage> pages = new ArrayList<>(  );
 
-    private DataSourceDefPage dataSourceDefPage;
+    private DriverDefPage driverDefPage;
 
-    private DataSourceDef dataSourceDef;
+    private DriverDef driverDef;
 
-    private Caller<DataSourceDefEditorService> dataSourceDefService;
-
-    private final Caller<DataSourceExplorerService> driverDefService;
-
-    private Caller<DriverManagementService> driverService;
+    private Caller<DriverDefEditorService> driverDefService;
 
     private Event<NotificationEvent> notification;
 
     private Project project;
 
+    private Path driversContext;
+
     @Inject
-    public NewDataSourceDefWizard( final DataSourceDefPage dataSourceDefPage,
-            final Caller<DataSourceDefEditorService> dataSourceDefService,
-            final Caller<DataSourceExplorerService> driverDefService,
-            final Caller<DriverManagementService> driverService,
+    public NewDriverDefWizard( final DriverDefPage driverDefPage,
+            final Caller<DriverDefEditorService> driverDefService,
             final Event<NotificationEvent> notification ) {
-        this.dataSourceDefPage = dataSourceDefPage;
-        this.dataSourceDefService = dataSourceDefService;
+        this.driverDefPage = driverDefPage;
         this.driverDefService = driverDefService;
-        this.driverService = driverService;
         this.notification = notification;
     }
 
     @PostConstruct
     public void init() {
-        pages.add( dataSourceDefPage );
+        pages.add( driverDefPage );
     }
 
     @Override
     public void start() {
-        dataSourceDefPage.clear();
-        dataSourceDef = new DataSourceDef();
-        dataSourceDefPage.setDataSourceDef( dataSourceDef );
-
-        //TODO quede ACCAAAAAAAAAAAAAAAAAAA
+        driverDef = new DriverDef();
+        driverDefPage.setDriverDef( driverDef );
         if ( isGlobal() ) {
-
-
+            driverDefService.call( getLoadDriversContextSuccessCallback(),
+                    getLoadDriversContextErrorCallback() ).getGlobalDriversContext();
         } else {
-            driverDefService.call(
-                    getLoadDriversSuccessCallback(),
-                    getLoadDriversErrorCallback() ).findProjectDrivers( project.getRootPath() );
+            driverDefService.call( getLoadDriversContextSuccessCallback(),
+                    getLoadDriversContextErrorCallback() ).getProjectDriversContext( project );
         }
+
+        super.start();
+    }
+
+    private ErrorCallback<?> getLoadDriversContextErrorCallback() {
+        return new ErrorCallback<Object>() {
+            @Override
+            public boolean error( Object o, Throwable throwable ) {
+                Window.alert( "Wizard initialization failed, it was not possible to load driver files context. "
+                        + throwable.getMessage() );
+                return false;
+            }
+        };
+    }
+
+    private RemoteCallback<Path> getLoadDriversContextSuccessCallback() {
+        return new RemoteCallback<Path>() {
+            @Override
+            public void callback( Path path ) {
+                NewDriverDefWizard.this.driversContext = path;
+                NewDriverDefWizard.super.start();
+            }
+        };
     }
 
     @Override
@@ -112,7 +121,7 @@ public class NewDataSourceDefWizard
 
     @Override
     public String getTitle() {
-        return "New data source";
+        return "New driver";
     }
 
     @Override
@@ -127,7 +136,7 @@ public class NewDataSourceDefWizard
 
     @Override
     public void isComplete( Callback<Boolean> callback ) {
-        dataSourceDefPage.isComplete( callback );
+        driverDefPage.isComplete( callback );
     }
 
     @Override
@@ -144,12 +153,35 @@ public class NewDataSourceDefWizard
     }
 
     private void doComplete() {
+        //TODO check where to get the file name from
+        driverDefPage.setFileName( driverDef.getName() + ".driver.jar" );
+        driverDefPage.setPath( driversContext );
+
+        driverDefPage.upload( new Command() {
+            @Override
+            public void execute() {
+                onSuccessUpload();
+            }
+        }, new Command() {
+            @Override
+            public void execute() {
+                onFailedUpload();
+            }
+        } );
+    }
+
+    private void onFailedUpload() {
+        Window.alert( "File Upload Failed" );
+        super.complete();
+    }
+
+    private void onSuccessUpload() {
+        //the file was properly uploaded.
         if ( isGlobal() ) {
-            dataSourceDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).createGlobal(
-                    dataSourceDef, true );
+            //TODO create the global DS
         } else {
-            dataSourceDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).create(
-                    dataSourceDef, project, true );
+            driverDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).create(
+                    driverDef, project, true );
         }
     }
 
@@ -158,8 +190,8 @@ public class NewDataSourceDefWizard
             @Override
             public void callback( Path path ) {
                 notification.fire( new NotificationEvent(
-                        "Data source : " + path.toString() + " was successfully created." ) );
-                NewDataSourceDefWizard.super.complete();
+                        "Driver : " + path.toString() + " was successfully created." ) );
+                NewDriverDefWizard.super.complete();
             }
         };
     }
@@ -168,28 +200,8 @@ public class NewDataSourceDefWizard
         return new DefaultErrorCallback() {
             @Override
             public boolean error( Message message, Throwable throwable ) {
-                Window.alert( "Data source was not created due to the following error: " +
-                        buildOnCreateErrorMessage( throwable )  );
-                return false;
-            }
-        };
-    }
-
-    private RemoteCallback<List<DriverDefInfo>> getLoadDriversSuccessCallback() {
-        return new RemoteCallback<List<DriverDefInfo>>() {
-            @Override public void callback( List<DriverDefInfo> response ) {
-                dataSourceDefPage.loadDrivers( response );
-                NewDataSourceDefWizard.super.start();
-            }
-        };
-    }
-
-    private ErrorCallback<?> getLoadDriversErrorCallback() {
-        return new ErrorCallback<Object>() {
-            @Override
-            public boolean error( Object o, Throwable throwable ) {
-                Window.alert( "Wizard initialization failed, it was not possible to load driver definitions. "
-                        + throwable.getMessage() );
+                Window.alert( "Driver was not created due to the following error: " +
+                        buildOnCreateErrorMessage( throwable ) );
                 return false;
             }
         };
@@ -206,5 +218,4 @@ public class NewDataSourceDefWizard
     private boolean isGlobal() {
         return project == null;
     }
-
 }

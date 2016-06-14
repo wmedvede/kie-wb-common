@@ -27,7 +27,7 @@ import org.kie.workbench.common.screens.datasource.management.client.editor.Data
 import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefMainPanel;
 import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefMainPanelView;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
@@ -132,7 +132,7 @@ public class DataSourceDefPage
         return view.asWidget();
     }
 
-    public void loadDrivers( final List<DriverDef> driverDefs ) {
+    public void loadDrivers( final List<DriverDefInfo> driverDefs ) {
         editorHelper.loadDrivers( driverDefs );
     }
 
