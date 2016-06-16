@@ -20,6 +20,7 @@ import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
+import org.kie.workbench.common.screens.datasource.management.model.TestConnectionResult;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 
@@ -43,5 +44,7 @@ public interface DataSourceDefEditorService
 
     //TODO experimental
     String test( final String jndi );
+
+    TestConnectionResult testConnection( final DataSourceDef dataSourceDef, final Project project );
 
 }

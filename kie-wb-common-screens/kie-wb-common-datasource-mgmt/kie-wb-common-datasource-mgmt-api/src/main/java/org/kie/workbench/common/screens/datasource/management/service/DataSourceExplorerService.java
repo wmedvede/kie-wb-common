@@ -32,6 +32,10 @@ public interface DataSourceExplorerService {
 
     Collection<DataSourceDefInfo> findProjectDataSources( final Path path );
 
+    Collection<DriverDefInfo> findGlobalDrivers();
+
     Collection<DriverDefInfo> findProjectDrivers( final Path path );
+
+    DriverDefInfo findProjectDriver( final String uuid, final Path path );
 
 }

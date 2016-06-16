@@ -40,6 +40,8 @@ public interface DataSourceDefMainPanelView extends UberView<DataSourceDefMainPa
         void onPasswordChange();
 
         void onDriverChange();
+
+        void onTestConnection();
     }
 
     void setName( final String text );
@@ -91,5 +93,4 @@ public interface DataSourceDefMainPanelView extends UberView<DataSourceDefMainPa
     void clearDriverErrorMessage();
 
     void loadDriverOptions( final List<Pair<String,String>> driverOptions, final boolean addEmptyOption );
-
 }

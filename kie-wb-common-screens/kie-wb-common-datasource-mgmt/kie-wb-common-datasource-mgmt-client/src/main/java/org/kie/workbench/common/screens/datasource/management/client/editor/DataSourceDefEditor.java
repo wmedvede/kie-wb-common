@@ -26,12 +26,10 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.type.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
-import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.annotations.WorkbenchEditor;
 import org.uberfire.client.annotations.WorkbenchMenu;
@@ -71,7 +69,7 @@ public class DataSourceDefEditor
 
     private Caller<DataSourceManagementService> dataSourceService;
 
-    private Caller<DriverManagementService> driverService;
+    private Caller<DataSourceExplorerService> driverDefService;
 
     private DataSourceDefEditorContent editorContent;
 
@@ -82,7 +80,7 @@ public class DataSourceDefEditor
             final DataSourceDefType type,
             final Caller<DataSourceDefEditorService> editorService,
             final Caller<DataSourceManagementService> dataSourceService,
-            final Caller<DriverManagementService> driverService ) {
+            final Caller<DataSourceExplorerService> driverDefService ) {
         super( view );
         this.view = view;
         this.mainPanel = mainPanel;
@@ -90,7 +88,7 @@ public class DataSourceDefEditor
         this.type = type;
         this.editorService = editorService;
         this.dataSourceService = dataSourceService;
-        this.driverService = driverService;
+        this.driverDefService = driverDefService;
         view.init( this );
         view.setMainPanel( mainPanel );
         editorHelper.init( mainPanel );
@@ -105,7 +103,6 @@ public class DataSourceDefEditor
                 false,
                 SAVE,
                 DELETE );
-
     }
 
     @WorkbenchPartTitleDecoration
@@ -142,8 +139,8 @@ public class DataSourceDefEditor
     }
 
     protected void loadDrivers() {
-        driverService.call( getLoadDriversSuccessCallback(),
-                new DefaultErrorCallback() ).getDrivers();
+        driverDefService.call( getLoadDriversSuccessCallback(),
+                new DefaultErrorCallback() ).findProjectDrivers( versionRecordManager.getCurrentPath() );
     }
 
     @Override
@@ -199,19 +196,22 @@ public class DataSourceDefEditor
         super.makeMenuBar();
 
         menuBuilder.addCommand( "Test", new Command() {
-            @Override public void execute() {
+            @Override
+            public void execute() {
                 onTestDataSource();
             }
         } );
 
         menuBuilder.addCommand( "Deploy", new Command() {
-            @Override public void execute() {
+            @Override
+            public void execute() {
                 onDeployDataSource();
             }
         } );
 
         menuBuilder.addCommand( "Un-Deploy", new Command() {
-            @Override public void execute() {
+            @Override
+            public void execute() {
                 onUnDeployDataSource();
             }
         } );
@@ -227,10 +227,10 @@ public class DataSourceDefEditor
         };
     }
 
-    private RemoteCallback<List<DriverDef>> getLoadDriversSuccessCallback() {
-        return new RemoteCallback<List<DriverDef>>() {
+    private RemoteCallback<List<DriverDefInfo>> getLoadDriversSuccessCallback() {
+        return new RemoteCallback<List<DriverDefInfo>>() {
             @Override
-            public void callback( List<DriverDef> driverDefs ) {
+            public void callback( List<DriverDefInfo> driverDefs ) {
                 onDriversLoaded( driverDefs );
             }
         };
@@ -248,7 +248,6 @@ public class DataSourceDefEditor
         }
         setContent( editorContent );
         setOriginalHash( editorContent.hashCode() );
-        refreshDeploymentInfo();
         loadDrivers();
     }
 
@@ -260,22 +259,6 @@ public class DataSourceDefEditor
         this.editorContent = editorContent;
         editorHelper.setDataSourceDef( editorContent.getDataSourceDef() );
         editorHelper.setValid( true );
-    }
-
-    protected void refreshDeploymentInfo() {
-        dataSourceService.call( getRefreshDeploymentInfoSuccessCallback(),
-                new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDataSourceDef().getUuid() );
-    }
-
-    private RemoteCallback<DataSourceDeploymentInfo> getRefreshDeploymentInfoSuccessCallback() {
-        return new RemoteCallback<DataSourceDeploymentInfo>() {
-            @Override
-            public void callback( DataSourceDeploymentInfo deploymentInfo ) {
-                if ( deploymentInfo != null ) {
-                    //TODO do something....
-                }
-            }
-        };
     }
 
     public void onDeployDataSource() {

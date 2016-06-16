@@ -33,7 +33,9 @@ public interface DriverDefEditorService
 
     Path create( final Path context, final String driverName, final String fileName );
 
-    Path create( final DriverDef driverDef, final Project project, final boolean deploy );
+    Path create( final DriverDef driverDef, final Project project, final boolean updateDeployment );
+
+    Path createGlobal( final DriverDef driverDef, final boolean updateDeployment );
 
     Path getGlobalDriversContext();
 

@@ -16,7 +16,9 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend;
 
+import java.net.URI;
 import java.sql.Connection;
+import java.util.Properties;
 import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -27,16 +29,24 @@ import javax.sql.DataSource;
 
 import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
+import org.guvnor.common.services.project.model.GAV;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
+import org.kie.workbench.common.screens.datasource.management.model.TestConnectionResult;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
+import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.util.DataSourceDefSerializer;
+import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
+import org.kie.workbench.common.screens.datasource.management.util.URLConnectionFactory;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +83,12 @@ public class DataSourceDefEditorServiceImpl
 
     @Inject
     private DataSourceServicesHelper serviceHelper;
+
+    @Inject
+    private DriverDefEditorService driverDefService;
+
+    @Inject
+    private MavenArtifactResolver artifactResolver;
 
     @Inject
     private Event<NewDataSourceEvent> newDataSourceEvent;
@@ -288,6 +304,88 @@ public class DataSourceDefEditorServiceImpl
             e.printStackTrace();
         }
         return stringBuilder.toString();
+    }
+
+    @Override
+    public TestConnectionResult testConnection( DataSourceDef dataSourceDef, Project project ) {
+
+        TestConnectionResult result = new TestConnectionResult( );
+        result.setTestPassed( false );
+
+        if ( dataSourceDef.getConnectionURL() == null ) {
+            result.setMessage( "A valid connection url is required" );
+            return result;
+        }
+
+        if ( dataSourceDef.getUser() == null || dataSourceDef.getPassword() == null ) {
+            result.setMessage( "A valid user and password are required" );
+            return result;
+        }
+
+        DriverDefInfo driverDefInfo =
+                dataSourceExplorerService.findProjectDriver( dataSourceDef.getDriverUuid(), project.getRootPath() );
+
+        if ( driverDefInfo == null ) {
+            result.setMessage( "Data source driver: " + dataSourceDef.getUuid() + " was not found" );
+            return result;
+        }
+
+        DriverDefEditorContent driverDefEditorContent = driverDefService.loadContent( driverDefInfo.getPath() );
+        DriverDef driverDef = driverDefEditorContent.getDriverDef();
+        URI uri;
+
+        try {
+            uri = artifactResolver.resolve( new GAV( driverDef.getGroupId(),
+                    driverDef.getArtifactId(), driverDef.getVersion() ) );
+        } catch ( Exception e ) {
+            result.setMessage( "Connection could not be tested due to the following error: " + e.getMessage() );
+            return result;
+        }
+
+        if ( uri == null ) {
+            result.setMessage( "Driver artifact: " + driverDef.getGroupId() + ":"
+                    + driverDef.getArtifactId() + ":" + driverDef.getVersion() + " was not found" );
+            return result;
+        }
+
+        try {
+            Properties properties = new Properties(  );
+            properties.put( "user", dataSourceDef.getUser() );
+            properties.put("password", dataSourceDef.getPassword() );
+
+            URLConnectionFactory connectionFactory = new URLConnectionFactory( uri.toURL(), driverDef.getDriverClass(),
+                    dataSourceDef.getConnectionURL(), properties );
+
+            Connection conn = connectionFactory.createConnection();
+
+            if ( conn == null ) {
+                result.setMessage( "It was not possible to open connection" );
+            } else {
+                StringBuilder stringBuilder = new StringBuilder(  );
+                stringBuilder.append( "Connection was successfully obtained: " + conn );
+                stringBuilder.append( "\n" );
+                stringBuilder.append( "*** DatabaseProductName: " + conn.getMetaData().getDatabaseProductName() );
+                stringBuilder.append( "\n" );
+                stringBuilder.append( "*** DatabaseProductVersion: " + conn.getMetaData().getDatabaseProductVersion() );
+                stringBuilder.append( "\n" );
+                stringBuilder.append( "*** DriverName: " + conn.getMetaData().getDriverName() );
+                stringBuilder.append( "\n" );
+                stringBuilder.append( "*** DriverVersion: " + conn.getMetaData().getDriverVersion() );
+                stringBuilder.append( "\n" );
+                conn.close();
+                stringBuilder.append( "Connection was successfully released." );
+                stringBuilder.append( "\n" );
+
+                result.setTestPassed( true );
+                result.setMessage( stringBuilder.toString() );
+            }
+
+            return result;
+
+        } catch ( Exception e ) {
+            result.setMessage( e.getMessage() );
+            return result;
+        }
     }
 
     @Override

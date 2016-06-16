@@ -23,16 +23,25 @@ import java.util.Map;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.Window;
+import org.guvnor.common.services.project.model.Project;
+import org.jboss.errai.common.client.api.Caller;
+import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
+import org.kie.workbench.common.screens.datasource.management.model.TestConnectionResult;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.uberfire.commons.data.Pair;
 
 @Dependent
 public class DataSourceDefEditorHelper {
 
     private TranslationService translationService;
+
+    private Caller<DataSourceDefEditorService> editorService;
 
     private DataSourceDef dataSourceDef;
 
@@ -42,6 +51,8 @@ public class DataSourceDefEditorHelper {
 
     private DataSourceDefMainPanelView.Handler handler;
 
+    private Project project;
+
     private boolean nameValid = false;
     private boolean jndiValid = false;
     private boolean connectionURLValid = false;
@@ -50,8 +61,10 @@ public class DataSourceDefEditorHelper {
     private boolean driverValid = false;
 
     @Inject
-    public DataSourceDefEditorHelper( final TranslationService translationService ) {
+    public DataSourceDefEditorHelper( final TranslationService translationService,
+            final Caller<DataSourceDefEditorService> editorService ) {
         this.translationService = translationService;
+        this.editorService = editorService;
     }
 
     public void init( final DataSourceDefMainPanel mainPanel ) {
@@ -87,6 +100,11 @@ public class DataSourceDefEditorHelper {
             public void onDriverChange() {
                 DataSourceDefEditorHelper.this.onDriverChange();
             }
+
+            @Override
+            public void onTestConnection() {
+                DataSourceDefEditorHelper.this.onTestConnection();
+            }
         } );
     }
 
@@ -99,6 +117,10 @@ public class DataSourceDefEditorHelper {
         mainPanel.setUser( dataSourceDef.getUser() );
         mainPanel.setPassword( dataSourceDef.getPassword() );
         mainPanel.setDriver( dataSourceDef.getDriverUuid() );
+    }
+
+    public void setProject( Project project ) {
+        this.project = project;
     }
 
     public void setHandler( final DataSourceDefMainPanelView.Handler handler ) {
@@ -204,6 +226,40 @@ public class DataSourceDefEditorHelper {
         if ( handler != null ) {
             handler.onDriverChange();
         }
+    }
+
+    public void onTestConnection() {
+        editorService.call(
+                getTestConnectionSuccessCallback(),
+                getTestConnectionErrorCallback() ).testConnection( dataSourceDef, project );
+    }
+
+
+    private RemoteCallback<TestConnectionResult> getTestConnectionSuccessCallback() {
+        return new RemoteCallback<TestConnectionResult>() {
+            @Override
+            public void callback( TestConnectionResult response ) {
+                onTestConnectionSuccess( response );
+            }
+        };
+    }
+
+    public void onTestConnectionSuccess( TestConnectionResult response ) {
+        Window.alert( "Connection test " + ( response.isTestPassed() ? "Successful" : "Failed" ) + "\n" + response.getMessage() );
+    }
+
+    private ErrorCallback<?> getTestConnectionErrorCallback() {
+        return new ErrorCallback<Object>() {
+            @Override
+            public boolean error( Object message, Throwable throwable ) {
+                onTestConnectionError( message, throwable );
+                return false;
+            }
+        };
+    }
+
+    public void onTestConnectionError( Object message, Throwable throwable ) {
+        Window.alert( "An error was produced during connection testing." );
     }
 
     public void setValid( boolean valid ) {

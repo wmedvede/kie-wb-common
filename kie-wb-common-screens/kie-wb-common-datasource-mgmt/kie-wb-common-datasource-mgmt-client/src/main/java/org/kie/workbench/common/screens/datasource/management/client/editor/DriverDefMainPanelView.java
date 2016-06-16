@@ -16,9 +16,7 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor;
 
-import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.mvp.UberView;
-import org.uberfire.mvp.Command;
 
 public interface DriverDefMainPanelView extends UberView<DriverDefMainPanelView.Presenter> {
 
@@ -32,6 +30,11 @@ public interface DriverDefMainPanelView extends UberView<DriverDefMainPanelView.
 
         void onDriverClassChange();
 
+        void onGroupIdChange();
+
+        void onArtifactIdChange();
+
+        void onVersionChange();
     }
 
     void setName( final String text );
@@ -42,10 +45,16 @@ public interface DriverDefMainPanelView extends UberView<DriverDefMainPanelView.
 
     String getDriverClass();
 
-    void setPath( Path path );
+    void setGroupId( String groupId );
 
-    void setFileName( String fileName );
+    String getGroupId();
 
-    void upload( final Command successCallback, final Command errorCallback );
+    void setArtifactId( String artifactId );
+
+    String getArtifactId();
+
+    void setVersion( String version );
+
+    String getVersion();
 
 }

@@ -33,9 +33,15 @@ public class DriverDefEditorHelper {
 
     private DriverDefMainPanelView.Handler handler;
 
-    private boolean nameValid;
+    private boolean nameValid = false;
 
-    private boolean driverClassValid;
+    private boolean driverClassValid = false;
+
+    private boolean groupIdValid = false;
+
+    private boolean artifactIdValid = false;
+
+    private boolean versionValid = false;
 
     @Inject
     public DriverDefEditorHelper( TranslationService translationService ) {
@@ -55,8 +61,24 @@ public class DriverDefEditorHelper {
             public void onDriverClassChange() {
                 DriverDefEditorHelper.this.onDriverClassChange();
             }
+
+            @Override
+            public void onGroupIdChange() {
+                DriverDefEditorHelper.this.onGroupIdChange();
+            }
+
+            @Override
+            public void onArtifactIdChange() {
+                DriverDefEditorHelper.this.onArtifactIdChange();
+            }
+
+            @Override
+            public void onVersionChange() {
+                DriverDefEditorHelper.this.onVersionIdChange();
+            }
         } );
     }
+
 
     public void setHandler( DriverDefMainPanelView.Handler handler ) {
         this.handler = handler;
@@ -65,13 +87,6 @@ public class DriverDefEditorHelper {
     private void onNameChange() {
         driverDef.setName( mainPanel.getName().trim() );
         nameValid = validateName( driverDef.getName() );
-        if ( !nameValid ) {
-            //TODO
-            //SET error message
-        } else {
-            //TODO
-            //CLEAR error message
-        }
         if ( handler != null ) {
             handler.onNameChange();
         }
@@ -80,18 +95,54 @@ public class DriverDefEditorHelper {
     private void onDriverClassChange() {
         driverDef.setDriverClass( mainPanel.getDriverClass().trim() );
         driverClassValid = validateClassName( driverDef.getDriverClass() );
-        if ( !driverClassValid ) {
-            //TODO
-            //SET error message
-        } else {
-            //TODO
-            //CLEAR error message
-        }
         if ( handler != null ) {
             handler.onDriverClassChange();
         }
     }
 
+    private void onGroupIdChange() {
+        driverDef.setGroupId( mainPanel.getGroupId().trim() );
+        groupIdValid = validateGroupId( driverDef.getGroupId() );
+    }
+
+
+    private void onArtifactIdChange() {
+        driverDef.setArtifactId( mainPanel.getArtifactId().trim() );
+        artifactIdValid = validateArtifactId( driverDef.getArtifactId() );
+    }
+
+    private void onVersionIdChange() {
+        driverDef.setVersion( mainPanel.getVersion().trim() );
+        versionValid = validateVersion( driverDef.getVersion() );
+    }
+
+    public boolean isNameValid() {
+        return nameValid;
+    }
+
+    public boolean isDriverClassValid() {
+        return driverClassValid;
+    }
+
+    public boolean isGroupIdValid() {
+        return groupIdValid;
+    }
+
+    public boolean isArtifactIdValid() {
+        return artifactIdValid;
+    }
+
+    public boolean isVersionValid() {
+        return versionValid;
+    }
+
+    public void setValid( boolean valid ) {
+        this.nameValid = valid;
+        this.driverClassValid = valid;
+        this.groupIdValid = valid;
+        this.artifactIdValid = valid;
+        this.versionValid = valid;
+    }
     public boolean validateClassName( String driverClass ) {
         return !isEmpty( driverClass );
     }
@@ -100,13 +151,29 @@ public class DriverDefEditorHelper {
         return !isEmpty( name );
     }
 
+    public boolean validateGroupId( String groupId ) {
+        return !isEmpty( groupId );
+    }
+
+    public boolean validateArtifactId( String artifactId ) {
+        return !isEmpty( artifactId );
+    }
+
+    private boolean validateVersion( String version ) {
+        return !isEmpty( version );
+    }
+
     public boolean isEmpty( String value ) {
         return value == null || value.trim().isEmpty();
     }
 
     public void setDriverDef( DriverDef driverDef ) {
         this.driverDef = driverDef;
+        mainPanel.clear();
         mainPanel.setName( driverDef.getName() );
         mainPanel.setDriverClass( driverDef.getDriverClass() );
+        mainPanel.setGroupId( driverDef.getGroupId() );
+        mainPanel.setArtifactId( driverDef.getArtifactId() );
+        mainPanel.setVersion( driverDef.getVersion() );
     }
 }

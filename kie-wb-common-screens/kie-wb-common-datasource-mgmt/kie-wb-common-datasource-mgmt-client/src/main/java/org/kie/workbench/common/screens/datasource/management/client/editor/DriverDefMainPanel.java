@@ -22,7 +22,6 @@ import javax.inject.Inject;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.uberfire.backend.vfs.Path;
-import org.uberfire.mvp.Command;
 
 @Dependent
 public class DriverDefMainPanel
@@ -40,6 +39,10 @@ public class DriverDefMainPanel
         view.init( this );
     }
 
+    public void setHandler( DriverDefMainPanelView.Handler handler ) {
+        this.handler = handler;
+    }
+
     @Override
     public void onNameChange() {
         if ( handler != null ) {
@@ -54,27 +57,31 @@ public class DriverDefMainPanel
         }
     }
 
-    public void setHandler( DriverDefMainPanelView.Handler handler ) {
-        this.handler = handler;
+    @Override
+    public void onGroupIdChange() {
+        if ( handler != null ) {
+            handler.onGroupIdChange();
+        }
     }
 
-    public void upload( final Command successCallback, final Command errorCallback ) {
-        view.upload( successCallback, errorCallback );
+    @Override
+    public void onArtifactIdChange() {
+        if ( handler != null ) {
+            handler.onArtifactIdChange();
+        }
+    }
+
+    @Override
+    public void onVersionChange() {
+        if ( handler != null ) {
+            handler.onVersionChange();
+        }
     }
 
     @Override
     public Widget asWidget() {
         return view.asWidget();
     }
-
-    public void setPath( Path path ) {
-        view.setPath( path );
-    }
-
-    public void setFileName( String fileName ) {
-        view.setFileName( fileName );
-    }
-
 
     public void setName( String name ) {
         view.setName( name );
@@ -92,4 +99,35 @@ public class DriverDefMainPanel
         return view.getDriverClass();
     }
 
+    public String getGroupId() {
+        return view.getGroupId();
+    }
+
+    public void setGroupId( String groupId ) {
+        view.setGroupId( groupId );
+    }
+
+    public String getArtifactId() {
+        return view.getArtifactId();
+    }
+
+    public void setArtifactId( String artifactId ) {
+        view.setArtifactId( artifactId );
+    }
+
+    public String getVersion() {
+        return view.getVersion();
+    }
+
+    public void setVersion( String version ) {
+        view.setVersion( version );
+    }
+
+    public void clear() {
+        view.setName( null );
+        view.setGroupId( null );
+        view.setArtifactId( null );
+        view.setVersion( null );
+        view.setDriverClass( null );
+    }
 }
