@@ -26,11 +26,9 @@ import org.kie.workbench.common.screens.datasource.management.client.editor.Driv
 import org.kie.workbench.common.screens.datasource.management.client.editor.DriverDefMainPanel;
 import org.kie.workbench.common.screens.datasource.management.client.editor.DriverDefMainPanelView;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
-import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
-import org.uberfire.mvp.Command;
 
 @Dependent
 public class DriverDefPage
@@ -67,6 +65,21 @@ public class DriverDefPage
             public void onDriverClassChange() {
                 DriverDefPage.this.notifyChange();
             }
+
+            @Override
+            public void onGroupIdChange() {
+                DriverDefPage.this.notifyChange();
+            }
+
+            @Override
+            public void onArtifactIdChange() {
+                DriverDefPage.this.notifyChange();
+            }
+
+            @Override
+            public void onVersionChange() {
+                DriverDefPage.this.notifyChange();
+            }
         } );
     }
 
@@ -75,16 +88,24 @@ public class DriverDefPage
         view.setMainPanel( mainPanel );
     }
 
+    public void setDriverDef( DriverDef driverDef ) {
+        editorHelper.setDriverDef( driverDef );
+    }
+
     @Override
     public String getTitle() {
         return "Driver definition";
     }
 
-
     @Override
     public void isComplete( Callback<Boolean> callback ) {
-        //TODO, ver esto.
-        callback.callback( true );
+        boolean complete = editorHelper.isNameValid() &&
+                editorHelper.isDriverClassValid() &&
+                editorHelper.isGroupIdValid() &&
+                editorHelper.isArtifactIdValid() &&
+                editorHelper.isVersionValid();
+
+        callback.callback( complete );
     }
 
     @Override
@@ -97,29 +118,21 @@ public class DriverDefPage
 
     }
 
-    public void setPath( Path path ) {
-        mainPanel.setPath( path );
-    }
-
-    public void setFileName( String fileName ) {
-        mainPanel.setFileName( fileName );
-    }
-
-    public void upload( final Command successCallback, final Command errorCallback ) {
-        mainPanel.upload( successCallback, errorCallback );
-    }
-
     @Override
     public Widget asWidget() {
         return view.asWidget();
     }
 
-    public void setDriverDef( DriverDef driverDef ) {
-        editorHelper.setDriverDef( driverDef );
-    }
-
     public void notifyChange() {
         final WizardPageStatusChangeEvent event = new WizardPageStatusChangeEvent( this );
         statusChangeEvent.fire( event );
+    }
+
+    public void setComplete( boolean complete ) {
+        editorHelper.setValid( complete );
+    }
+
+    public void clear() {
+        mainPanel.clear();
     }
 }

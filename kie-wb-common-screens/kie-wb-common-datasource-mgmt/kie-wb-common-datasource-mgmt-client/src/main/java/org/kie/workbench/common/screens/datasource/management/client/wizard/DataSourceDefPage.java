@@ -23,6 +23,7 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Widget;
+import org.guvnor.common.services.project.model.Project;
 import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefEditorHelper;
 import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefMainPanel;
 import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefMainPanelView;
@@ -88,6 +89,10 @@ public class DataSourceDefPage
                 DataSourceDefPage.this.notifyChange();
             }
 
+            @Override
+            public void onTestConnection() {
+
+            }
         } );
     }
 
@@ -100,6 +105,10 @@ public class DataSourceDefPage
         editorHelper.setDataSourceDef( dataSourceDef );
     }
 
+    public void setProject( Project project ) {
+        editorHelper.setProject( project );
+    }
+
     @Override
     public String getTitle() {
         return "Data source info";
@@ -107,7 +116,7 @@ public class DataSourceDefPage
 
     @Override
     public void isComplete( Callback<Boolean> callback ) {
-        boolean complete = editorHelper.isDriverValid() &&
+        boolean complete = editorHelper.isNameValid() &&
                 editorHelper.isJndiValid() &&
                 editorHelper.isConnectionURLValid() &&
                 editorHelper.isUserValid() &&
@@ -141,7 +150,12 @@ public class DataSourceDefPage
         statusChangeEvent.fire( event );
     }
 
+    public void setComplete( boolean complete ) {
+        editorHelper.setValid( complete );
+    }
+
     public void clear() {
         mainPanel.clear();
     }
+
 }

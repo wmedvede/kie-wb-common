@@ -22,11 +22,17 @@ import org.uberfire.backend.vfs.Path;
 @Portable
 public class DriverDef {
 
-    String uuid;
+    private String uuid;
 
-    String name;
+    private String name;
 
-    String driverClass;
+    private String groupId;
+
+    private String artifactId;
+
+    private String version;
+
+    private String driverClass;
 
     Path driverLib;
 
@@ -63,6 +69,30 @@ public class DriverDef {
 
     public void setDriverLib( Path driverLib ) {
         this.driverLib = driverLib;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId( String groupId ) {
+        this.groupId = groupId;
+    }
+
+    public String getArtifactId() {
+        return artifactId;
+    }
+
+    public void setArtifactId( String artifactId ) {
+        this.artifactId = artifactId;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion( String version ) {
+        this.version = version;
     }
 
     @Override
