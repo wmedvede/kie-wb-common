@@ -112,6 +112,11 @@ public class DataSourceExplorerServiceImpl
     }
 
     @Override
+    public Collection<DriverDefInfo> findGlobalDrivers() {
+        return getDrivers( serviceHelper.getGlobalDataSourcesContext() );
+    }
+
+    @Override
     public Collection<DriverDefInfo> findProjectDrivers( final Path path ) {
         checkNotNull( "path", path );
         KieProject project = projectService.resolveProject( path );
@@ -123,11 +128,25 @@ public class DataSourceExplorerServiceImpl
     }
 
     @Override
+    public DriverDefInfo findProjectDriver( final String uuid, final Path path ) {
+        checkNotNull( "uuid", uuid );
+        checkNotNull( "path", path );
+
+        for ( DriverDefInfo driverDefInfo : findProjectDrivers( path ) ) {
+            if ( uuid.equals( driverDefInfo.getUuid() ) ) {
+                return driverDefInfo;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public DataSourceExplorerContentQueryResult executeQuery( final DataSourceExplorerContentQuery query ) {
         checkNotNull( "query", query );
         if ( query.isGlobalQuery() ) {
             DataSourceExplorerContentQueryResult result = new DataSourceExplorerContentQueryResult();
             result.setDataSourceDefs( getDataSources( serviceHelper.getGlobalDataSourcesContext() ) );
+            result.setDriverDefs( getDrivers( serviceHelper.getGlobalDataSourcesContext() ) );
             return result;
         } else {
             return resolveQuery( query );
@@ -166,12 +185,13 @@ public class DataSourceExplorerServiceImpl
             return result;
         }
 
-        //get the datasources for the selected project.
-        result.setDataSourceDefs( getDataSourceDefInfos( query.getProject() ) );
+        //get the datasources and drivers for the selected project.
+        result.setDataSourceDefs( getDataSources( query.getProject() ) );
+        result.setDriverDefs( getDrivers( query.getProject() ) );
         return result;
     }
 
-    private boolean containsOU( Collection<OrganizationalUnit> organizationalUnits, OrganizationalUnit ou ) {
+    private boolean containsOU( final Collection<OrganizationalUnit> organizationalUnits, final OrganizationalUnit ou ) {
         for ( OrganizationalUnit unit : organizationalUnits ) {
             if ( unit.getName().equals( ou.getName() ) ) {
                 return true;
@@ -180,17 +200,21 @@ public class DataSourceExplorerServiceImpl
         return false;
     }
 
-    private Collection<DataSourceDefInfo> getDataSourceDefInfos( final Project project ) {
+    private Collection<DataSourceDefInfo> getDataSources( final Project project ) {
         if ( project != null ) {
-            Path rootPath = project.getRootPath();
-            org.uberfire.java.nio.file.Path dataSourcesNioPath =
-                    Paths.convert( rootPath ).resolve( "src/main/resources/META-INF" );
-            return getDataSources( Paths.convert( dataSourcesNioPath ) );
+            return getDataSources( serviceHelper.getProjectDataSourcesContext( project ) );
         } else {
             return new ArrayList<>( );
         }
     }
 
+    private Collection<DriverDefInfo> getDrivers( final Project project ) {
+        if ( project != null ) {
+            return getDrivers( serviceHelper.getProjectDataSourcesContext( project ) );
+        } else {
+            return new ArrayList<>( );
+        }
+    }
 
     private Collection<DriverDefInfo> getDrivers( final Path path ) {
 
@@ -247,9 +271,8 @@ public class DataSourceExplorerServiceImpl
     private DriverDefInfo createDriverInfo( final org.uberfire.java.nio.file.Path path ) {
         String content = ioService.readAllString( path );
         DriverDef driverDef = DriverDefSerializer.deserialize( content );
-        return new DriverDefInfo( driverDef.getUuid(), driverDef.getName(), driverDef.getDriverLib() );
+        return new DriverDefInfo( driverDef.getUuid(), driverDef.getName(), Paths.convert( path ) );
     }
-
 
     private Set<OrganizationalUnit> getOrganizationalUnits() {
         final Collection<OrganizationalUnit> organizationalUnits = organizationalUnitService.getOrganizationalUnits();

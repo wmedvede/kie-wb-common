@@ -24,6 +24,7 @@ import org.guvnor.structure.organizationalunit.OrganizationalUnit;
 import org.guvnor.structure.repositories.Repository;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 
 @Portable
 public class DataSourceExplorerContentQueryResult {
@@ -35,6 +36,8 @@ public class DataSourceExplorerContentQueryResult {
     private Collection<Project> projects = new ArrayList<>(  );
 
     private Collection<DataSourceDefInfo> dataSourceDefs = new ArrayList<>(  );
+
+    private Collection<DriverDefInfo> driverDefs = new ArrayList<>(  );
 
     public DataSourceExplorerContentQueryResult() {
     }
@@ -69,5 +72,13 @@ public class DataSourceExplorerContentQueryResult {
 
     public void setDataSourceDefs( Collection<DataSourceDefInfo> dataSourceDefs ) {
         this.dataSourceDefs = dataSourceDefs;
+    }
+
+    public Collection<DriverDefInfo> getDriverDefs() {
+        return driverDefs;
+    }
+
+    public void setDriverDefs( Collection<DriverDefInfo> driverDefs ) {
+        this.driverDefs = driverDefs;
     }
 }

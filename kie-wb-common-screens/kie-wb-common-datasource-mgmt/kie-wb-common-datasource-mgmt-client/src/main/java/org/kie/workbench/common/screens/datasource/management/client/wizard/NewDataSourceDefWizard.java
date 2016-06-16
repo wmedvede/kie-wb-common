@@ -31,11 +31,9 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
-import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
@@ -48,7 +46,6 @@ import org.uberfire.workbench.events.NotificationEvent;
 public class NewDataSourceDefWizard
         extends AbstractWizard {
 
-
     private final List<WizardPage> pages = new ArrayList<>(  );
 
     private DataSourceDefPage dataSourceDefPage;
@@ -59,8 +56,6 @@ public class NewDataSourceDefWizard
 
     private final Caller<DataSourceExplorerService> driverDefService;
 
-    private Caller<DriverManagementService> driverService;
-
     private Event<NotificationEvent> notification;
 
     private Project project;
@@ -69,12 +64,10 @@ public class NewDataSourceDefWizard
     public NewDataSourceDefWizard( final DataSourceDefPage dataSourceDefPage,
             final Caller<DataSourceDefEditorService> dataSourceDefService,
             final Caller<DataSourceExplorerService> driverDefService,
-            final Caller<DriverManagementService> driverService,
             final Event<NotificationEvent> notification ) {
         this.dataSourceDefPage = dataSourceDefPage;
         this.dataSourceDefService = dataSourceDefService;
         this.driverDefService = driverDefService;
-        this.driverService = driverService;
         this.notification = notification;
     }
 
@@ -86,13 +79,15 @@ public class NewDataSourceDefWizard
     @Override
     public void start() {
         dataSourceDefPage.clear();
+        dataSourceDefPage.setComplete( false );
         dataSourceDef = new DataSourceDef();
         dataSourceDefPage.setDataSourceDef( dataSourceDef );
+        dataSourceDefPage.setProject( project );
 
-        //TODO quede ACCAAAAAAAAAAAAAAAAAAA
         if ( isGlobal() ) {
-
-
+            driverDefService.call(
+                    getLoadDriversSuccessCallback(),
+                    getLoadDriversErrorCallback() ).findGlobalDrivers();
         } else {
             driverDefService.call(
                     getLoadDriversSuccessCallback(),
@@ -146,10 +141,10 @@ public class NewDataSourceDefWizard
     private void doComplete() {
         if ( isGlobal() ) {
             dataSourceDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).createGlobal(
-                    dataSourceDef, true );
+                    dataSourceDef, false );
         } else {
             dataSourceDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).create(
-                    dataSourceDef, project, true );
+                    dataSourceDef, project, false );
         }
     }
 
@@ -177,7 +172,8 @@ public class NewDataSourceDefWizard
 
     private RemoteCallback<List<DriverDefInfo>> getLoadDriversSuccessCallback() {
         return new RemoteCallback<List<DriverDefInfo>>() {
-            @Override public void callback( List<DriverDefInfo> response ) {
+            @Override
+            public void callback( List<DriverDefInfo> response ) {
                 dataSourceDefPage.loadDrivers( response );
                 NewDataSourceDefWizard.super.start();
             }

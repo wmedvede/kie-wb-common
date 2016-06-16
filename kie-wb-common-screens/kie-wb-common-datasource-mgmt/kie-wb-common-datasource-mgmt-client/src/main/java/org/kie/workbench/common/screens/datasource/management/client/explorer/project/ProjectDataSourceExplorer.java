@@ -54,8 +54,6 @@ public class ProjectDataSourceExplorer
 
     private NewDriverDefWizard newDriverDefWizard;
 
-    private NewDriverDefWizard driverDefWizard;
-
     private Caller<DataSourceExplorerService> explorerService;
 
     private OrganizationalUnit activeOrganizationalUnit;

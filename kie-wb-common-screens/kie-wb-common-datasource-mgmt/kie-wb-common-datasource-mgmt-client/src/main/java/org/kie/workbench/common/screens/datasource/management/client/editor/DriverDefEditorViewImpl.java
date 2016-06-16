@@ -16,23 +16,13 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.DOM;
-import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.TextBox;
-import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.uberfire.backend.vfs.Path;
 import org.uberfire.ext.editor.commons.client.BaseEditorViewImpl;
-import org.uberfire.ext.widgets.core.client.editors.defaulteditor.DefaultEditorFileUpload;
 
 @Dependent
 @Templated
@@ -40,46 +30,13 @@ public class DriverDefEditorViewImpl
         extends BaseEditorViewImpl
         implements DriverDefEditorView {
 
-    @DataField ( "name-form-group" )
-    Element nameFormGroup =  DOM.createDiv();
-
     @Inject
-    @DataField ( "name" )
-    TextBox nameTextBox;
-
-    @DataField ( "driver-class-form-group" )
-    Element driverClassFormGroup =  DOM.createDiv();
-
-    @Inject
-    @DataField ( "driver-class" )
-    TextBox driverClassTextBox;
-
-    @Inject
-    @DataField( "deploy-btn" )
-    Button deployButton;
-
-    @Inject
-    @DataField( "undeploy-btn" )
-    Button undeployButton;
-
-    @Inject
-    @DataField( "file-upload" )
-    DefaultEditorFileUpload fileUpload;
+    @DataField ( "main-panel-container" )
+    FlowPanel mainPanelContainer;
 
     private Presenter presenter;
 
-    private TranslationService translationService;
-
-    @Inject
-    public DriverDefEditorViewImpl( final TranslationService translationService ) {
-        super();
-        this.translationService = translationService;
-    }
-
-    @PostConstruct
-    private void init() {
-        enableDeployButton( false );
-        enableUnDeployButton( false );
+    public DriverDefEditorViewImpl( ) {
     }
 
     @Override
@@ -88,58 +45,7 @@ public class DriverDefEditorViewImpl
     }
 
     @Override
-    public void setName( final String name ) {
-        this.nameTextBox.setText( name );
+    public void setMainPanel( DriverDefMainPanel mainPanel ) {
+        mainPanelContainer.add( mainPanel );
     }
-
-    @Override
-    public String getName() {
-        return nameTextBox.getText();
-    }
-
-    @Override
-    public void setDriverClass( final String driverClass ) {
-        this.driverClassTextBox.setText( driverClass );
-    }
-
-    @Override
-    public String getDriverClass() {
-        return driverClassTextBox.getText();
-    }
-
-    @Override
-    public void setPath( final Path path ) {
-        fileUpload.setPath( path );
-    }
-
-    @Override
-    public void enableDeployButton( final boolean enabled ) {
-        deployButton.setEnabled( enabled );
-    }
-
-    @Override
-    public void enableUnDeployButton( final boolean enabled ) {
-        undeployButton.setEnabled( enabled );
-    }
-
-    @EventHandler( "name" )
-    public void onNameChange( final ChangeEvent event ) {
-        presenter.onNameChange();
-    }
-
-    @EventHandler( "driver-class" )
-    public void onDriverClassChange( final ChangeEvent event ) {
-        presenter.onDriverClassChange();
-    }
-
-    @EventHandler( "deploy-btn" )
-    public void onDeploy( final ClickEvent event ) {
-        presenter.onDeployDriver();
-    }
-
-    @EventHandler( "undeploy-btn" )
-    public void onUnDeploy( final ClickEvent event ) {
-        presenter.onUnDeployDriver();
-    }
-
 }

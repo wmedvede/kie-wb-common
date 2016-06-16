@@ -85,6 +85,13 @@ public class DataSourceDefMainPanel
     }
 
     @Override
+    public void onTestConnection() {
+        if ( handler != null ) {
+            handler.onTestConnection();
+        }
+    }
+
+    @Override
     public Widget asWidget() {
         return view.asWidget();
     }

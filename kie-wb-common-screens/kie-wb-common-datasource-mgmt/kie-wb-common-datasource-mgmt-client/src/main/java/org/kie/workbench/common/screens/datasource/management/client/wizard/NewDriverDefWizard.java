@@ -38,7 +38,6 @@ import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.java.nio.file.FileAlreadyExistsException;
-import org.uberfire.mvp.Command;
 import org.uberfire.workbench.events.NotificationEvent;
 
 @Dependent
@@ -57,8 +56,6 @@ public class NewDriverDefWizard
 
     private Project project;
 
-    private Path driversContext;
-
     @Inject
     public NewDriverDefWizard( final DriverDefPage driverDefPage,
             final Caller<DriverDefEditorService> driverDefService,
@@ -75,38 +72,12 @@ public class NewDriverDefWizard
 
     @Override
     public void start() {
+        driverDefPage.clear();
+        driverDefPage.setComplete( false );
         driverDef = new DriverDef();
         driverDefPage.setDriverDef( driverDef );
-        if ( isGlobal() ) {
-            driverDefService.call( getLoadDriversContextSuccessCallback(),
-                    getLoadDriversContextErrorCallback() ).getGlobalDriversContext();
-        } else {
-            driverDefService.call( getLoadDriversContextSuccessCallback(),
-                    getLoadDriversContextErrorCallback() ).getProjectDriversContext( project );
-        }
 
         super.start();
-    }
-
-    private ErrorCallback<?> getLoadDriversContextErrorCallback() {
-        return new ErrorCallback<Object>() {
-            @Override
-            public boolean error( Object o, Throwable throwable ) {
-                Window.alert( "Wizard initialization failed, it was not possible to load driver files context. "
-                        + throwable.getMessage() );
-                return false;
-            }
-        };
-    }
-
-    private RemoteCallback<Path> getLoadDriversContextSuccessCallback() {
-        return new RemoteCallback<Path>() {
-            @Override
-            public void callback( Path path ) {
-                NewDriverDefWizard.this.driversContext = path;
-                NewDriverDefWizard.super.start();
-            }
-        };
     }
 
     @Override
@@ -153,35 +124,12 @@ public class NewDriverDefWizard
     }
 
     private void doComplete() {
-        //TODO check where to get the file name from
-        driverDefPage.setFileName( driverDef.getName() + ".driver.jar" );
-        driverDefPage.setPath( driversContext );
-
-        driverDefPage.upload( new Command() {
-            @Override
-            public void execute() {
-                onSuccessUpload();
-            }
-        }, new Command() {
-            @Override
-            public void execute() {
-                onFailedUpload();
-            }
-        } );
-    }
-
-    private void onFailedUpload() {
-        Window.alert( "File Upload Failed" );
-        super.complete();
-    }
-
-    private void onSuccessUpload() {
-        //the file was properly uploaded.
         if ( isGlobal() ) {
-            //TODO create the global DS
+            driverDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).createGlobal(
+                    driverDef, false );
         } else {
             driverDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).create(
-                    driverDef, project, true );
+                    driverDef, project, false );
         }
     }
 

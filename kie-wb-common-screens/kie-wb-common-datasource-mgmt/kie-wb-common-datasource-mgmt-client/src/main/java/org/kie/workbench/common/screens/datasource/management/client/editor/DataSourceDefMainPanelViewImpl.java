@@ -24,8 +24,10 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.extras.select.client.ui.Option;
@@ -101,6 +103,10 @@ public class DataSourceDefMainPanelViewImpl
 
     @DataField( "driver-selector-help" )
     Element driverSelectorHelp = DOM.createSpan();
+
+    @Inject
+    @DataField("test-connection-button")
+    Button testConnection;
 
     private DataSourceDefMainPanelView.Presenter presenter;
 
@@ -283,6 +289,11 @@ public class DataSourceDefMainPanelViewImpl
     @EventHandler( "driver-selector" )
     public void onDriverChange( final ChangeEvent event ) {
         presenter.onDriverChange();
+    }
+
+    @EventHandler( "test-connection-button" )
+    public void onTestConnection( final ClickEvent event ) {
+        presenter.onTestConnection();
     }
 
     private Option newOption( final String text, final String value ) {

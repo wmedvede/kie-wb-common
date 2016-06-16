@@ -19,7 +19,6 @@ package org.kie.workbench.common.screens.datasource.management.client.editor;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import org.gwtbootstrap3.client.ui.constants.ButtonType;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -38,6 +37,9 @@ public class DataSourceDefEditorViewImpl
     FlowPanel mainPanelContainer;
 
     private Presenter presenter;
+
+    public DataSourceDefEditorViewImpl() {
+    }
 
     @Override
     public void init( Presenter presenter ) {
