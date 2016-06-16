@@ -25,7 +25,6 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.type.DriverDefType;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.uberfire.backend.vfs.ObservablePath;
@@ -57,6 +56,10 @@ public class DriverDefEditor
 
     private DriverDefEditorView view;
 
+    private DriverDefMainPanel mainPanel;
+
+    private DriverDefEditorHelper editorHelper;
+
     private DriverDefType type;
 
     private Caller<DriverDefEditorService> editorService;
@@ -67,15 +70,21 @@ public class DriverDefEditor
 
     @Inject
     public DriverDefEditor( final DriverDefEditorView view,
+            final DriverDefMainPanel mainPanel,
+            final DriverDefEditorHelper editorHelper,
             final DriverDefType type,
             final Caller<DriverDefEditorService> editorService,
             final Caller<DriverManagementService> driverService ) {
         super( view );
         this.view = view;
+        this.mainPanel = mainPanel;
+        this.editorHelper = editorHelper;
         this.type = type;
         this.editorService = editorService;
         this.driverService = driverService;
         view.init( this );
+        view.setMainPanel( mainPanel );
+        editorHelper.init( mainPanel );
     }
 
     @OnStartup
@@ -99,7 +108,7 @@ public class DriverDefEditor
 
     @WorkbenchPartTitle
     public String getTitleText() {
-        return "DriverEditorEditor [" + "todo set title" + "]";
+        return super.getTitleText();
     }
 
     @WorkbenchMenu
@@ -122,7 +131,6 @@ public class DriverDefEditor
         editorService.call( getLoadContentSuccessCallback(),
                 new HasBusyIndicatorDefaultErrorCallback( view ) ).loadContent(
                 versionRecordManager.getCurrentPath() );
-
     }
 
     @Override
@@ -161,6 +169,25 @@ public class DriverDefEditor
         return super.mayClose( currentHash );
     }
 
+    @Override
+    protected void makeMenuBar() {
+        super.makeMenuBar();
+
+        menuBuilder.addCommand( "Deploy", new Command() {
+            @Override
+            public void execute() {
+                onDeployDriver();
+            }
+        } );
+
+        menuBuilder.addCommand( "Un-Deploy", new Command() {
+            @Override
+            public void execute() {
+                onUnDeployDriver();
+            }
+        } );
+    }
+
     private RemoteCallback<DriverDefEditorContent> getLoadContentSuccessCallback() {
         return new RemoteCallback<DriverDefEditorContent>() {
             @Override
@@ -178,7 +205,6 @@ public class DriverDefEditor
         }
         setContent( editorContent );
         setOriginalHash( editorContent.hashCode() );
-        refreshDeploymentInfo();
     }
 
     protected DriverDefEditorContent getContent() {
@@ -187,68 +213,28 @@ public class DriverDefEditor
 
     protected void setContent( final DriverDefEditorContent editorContent ) {
         this.editorContent = editorContent;
-
-        view.setName( editorContent.getDriverDef().getName() );
-        view.setDriverClass( editorContent.getDriverDef().getDriverClass() );
-        view.setPath( editorContent.getDriverDef().getDriverLib() );
+        this.editorHelper.setDriverDef( editorContent.getDriverDef() );
+        editorHelper.setValid( true );
     }
 
-    protected void refreshDeploymentInfo() {
-        driverService.call( getRefreshDeploymentInfoSuccessCallback(),
-                new DefaultErrorCallback() ).getDriverDeploymentInfo( getContent().getDriverDef().getUuid() );
-    }
-
-    private RemoteCallback<DriverDeploymentInfo> getRefreshDeploymentInfoSuccessCallback() {
-
-        return new RemoteCallback<DriverDeploymentInfo>() {
-            @Override
-            public void callback( DriverDeploymentInfo deploymentInfo ) {
-                if ( deploymentInfo != null ) {
-                    view.enableDeployButton( false );
-                    view.enableUnDeployButton( true );
-                } else {
-                    view.enableDeployButton( true );
-                    view.enableUnDeployButton( false );
-                }
-            }
-        };
-    }
-
-    @Override
-    public void onNameChange() {
-        getContent().getDriverDef().setName( view.getName() );
-    }
-
-    @Override
-    public void onDriverClassChange() {
-        getContent().getDriverDef().setDriverClass( view.getDriverClass() );
-    }
-
-    @Override
     public void onDeployDriver() {
-        //TODO verify all required parameters are set.
-        //TODO add and verify server response.
-
+        //Experimental method for development purposes.
         driverService.call(
                 new RemoteCallback<Void>() {
                     @Override
                     public void callback( Void aVoid ) {
                         Window.alert( "driver successfully deployed" );
-                        view.enableUnDeployButton( true );
-                        view.enableDeployButton( false );
                     }
                 }, new DefaultErrorCallback() ).deploy( getContent().getDriverDef() );
     }
 
-    @Override
     public void onUnDeployDriver() {
+        //Experimental method for development purposes.
         driverService.call(
                 new RemoteCallback<Void>() {
                     @Override
                     public void callback( Void aVoid ) {
                         Window.alert( "driver successfully un deployed" );
-                        view.enableUnDeployButton( false );
-                        view.enableDeployButton( true );
                     }
                 }, new DefaultErrorCallback() ).undeploy( getContent().getDriverDef().getUuid() );
     }

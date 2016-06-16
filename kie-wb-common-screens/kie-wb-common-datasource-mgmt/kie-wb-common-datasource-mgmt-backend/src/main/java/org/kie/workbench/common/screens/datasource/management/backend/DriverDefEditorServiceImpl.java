@@ -16,18 +16,26 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend;
 
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.sql.Driver;
 import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
+import org.guvnor.common.services.project.model.GAV;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.screens.datasource.management.events.NewDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.util.DriverDefSerializer;
+import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
 import org.uberfire.backend.server.util.Paths;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.io.IOService;
@@ -51,6 +59,12 @@ public class DriverDefEditorServiceImpl
     @Inject
     private CommentedOptionFactory optionsFactory;
 
+    @Inject
+    private MavenArtifactResolver artifactResolver;
+
+    @Inject
+    private Event<NewDriverEvent> newDriverEvent;
+
     @Override
     public DriverDefEditorContent loadContent( final Path path ) {
 
@@ -59,7 +73,6 @@ public class DriverDefEditorServiceImpl
         DriverDefEditorContent editorContent = new DriverDefEditorContent();
         String content = ioService.readAllString( Paths.convert( path ) );
         DriverDef driverDef = DriverDefSerializer.deserialize( content );
-        driverDef.setDriverLib( calculateJarPath( path ) );
         editorContent.setDriverDef( driverDef );
 
         return editorContent;
@@ -102,12 +115,30 @@ public class DriverDefEditorServiceImpl
     }
 
     @Override
-    public Path create( DriverDef driverDef, Project project, boolean deploy ) {
+    public Path create( final DriverDef driverDef,
+            final Project project,
+            final boolean updateDeployment ) {
         checkNotNull( "driverDef", driverDef );
         checkNotNull( "project", project );
 
         Path context = serviceHelper.getProjectDataSourcesContext( project );
-        Path newPath = create( driverDef, context, deploy );
+        Path newPath = create( driverDef, context, updateDeployment );
+
+        newDriverEvent.fire( new NewDriverEvent( driverDef,
+                project, optionsFactory.getSafeSessionId(), optionsFactory.getSafeIdentityName() ) );
+
+        return newPath;
+    }
+
+    @Override
+    public Path createGlobal( final DriverDef driverDef, final boolean updateDeployment ) {
+        checkNotNull( "driverDef", driverDef );
+
+        Path context = serviceHelper.getGlobalDataSourcesContext();
+        Path newPath = create( driverDef, context, updateDeployment );
+
+        newDriverEvent.fire( new NewDriverEvent( driverDef,
+                optionsFactory.getSafeSessionId(), optionsFactory.getSafeIdentityName() ) );
 
         return newPath;
     }
@@ -115,6 +146,12 @@ public class DriverDefEditorServiceImpl
     private Path create( final DriverDef driverDef,
             final Path context,
             final boolean deploy ) {
+
+        try {
+            validateDriver( driverDef );
+        } catch ( Exception e ) {
+            throw new RuntimeException( e.getMessage(), e );
+        }
 
         if ( driverDef.getUuid() == null ) {
             driverDef.setUuid( UUID.randomUUID().toString() );
@@ -133,6 +170,30 @@ public class DriverDefEditorServiceImpl
         ioService.write( nioPath, content, new CommentedOption( optionsFactory.getSafeIdentityName() ) );
 
         return newPath;
+    }
+
+    private void validateDriver( DriverDef driverDef ) throws Exception {
+
+        final URI uri = artifactResolver.resolve( new GAV( driverDef.getGroupId(),
+                driverDef.getArtifactId(), driverDef.getVersion() ) );
+
+        if ( uri == null ) {
+            throw new Exception( "maven artifact was not found: " + driverDef.getGroupId() + ":"
+                    + driverDef.getArtifactId() + ":" + driverDef.getVersion() );
+        }
+
+        final URL[] urls = {uri.toURL()};
+        final URLClassLoader classLoader = new URLClassLoader( urls );
+
+        try {
+            Class driverClass = classLoader.loadClass( driverDef.getDriverClass() );
+
+            if ( !Driver.class.isAssignableFrom( driverClass ) ) {
+                throw new Exception( "class: " + driverDef.getDriverClass() + " do not extend from: " + Driver.class.getName() );
+            }
+        } catch ( ClassNotFoundException e ) {
+            throw new Exception( "driver class: " + driverDef.getDriverClass() + " was not found in current gav" );
+        }
     }
 
     @Override

@@ -18,12 +18,12 @@ package org.kie.workbench.common.screens.datasource.management.events;
 
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 
 @Portable
-public class NewDataSourceEvent {
+public class NewDriverEvent {
 
-    private DataSourceDef dataSourceDef;
+    private DriverDef driverDef;
 
     private Project project;
 
@@ -31,29 +31,29 @@ public class NewDataSourceEvent {
 
     private String identity;
 
-    public NewDataSourceEvent() {
+    public NewDriverEvent() {
     }
 
-    public NewDataSourceEvent( final DataSourceDef dataSourceDef,
+    public NewDriverEvent( final DriverDef driverDef,
             final Project project,
             final String sessionId,
             final String identity ) {
-        this.dataSourceDef = dataSourceDef;
+        this.driverDef = driverDef;
         this.project = project;
         this.sessionId = sessionId;
         this.identity = identity;
     }
 
-    public NewDataSourceEvent( final DataSourceDef dataSourceDef,
+    public NewDriverEvent( final DriverDef driverDef,
             final String sessionId,
             final String identity ) {
-        this.dataSourceDef = dataSourceDef;
+        this.driverDef = driverDef;
         this.sessionId = sessionId;
         this.identity = identity;
     }
 
-    public DataSourceDef getDataSourceDef() {
-        return dataSourceDef;
+    public DriverDef getDriverDef() {
+        return driverDef;
     }
 
     public Project getProject() {

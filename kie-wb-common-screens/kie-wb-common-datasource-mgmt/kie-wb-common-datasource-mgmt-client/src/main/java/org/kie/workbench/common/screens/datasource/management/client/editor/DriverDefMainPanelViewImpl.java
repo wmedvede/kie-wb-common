@@ -27,16 +27,12 @@ import org.gwtbootstrap3.client.ui.TextBox;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.uberfire.backend.vfs.Path;
-import org.uberfire.ext.widgets.core.client.editors.defaulteditor.DefaultEditorNewFileUpload;
-import org.uberfire.mvp.Command;
 
 @Dependent
 @Templated
 public class DriverDefMainPanelViewImpl
         extends Composite
         implements DriverDefMainPanelView {
-
 
     @DataField( "name-form-group" )
     Element nameFormGroup =  DOM.createDiv();
@@ -45,6 +41,9 @@ public class DriverDefMainPanelViewImpl
     @DataField ( "name" )
     TextBox nameTextBox;
 
+    @DataField("name-help")
+    Element nameHelp = DOM.createSpan();
+
     @DataField ( "driver-class-form-group" )
     Element driverClassFormGroup =  DOM.createDiv();
 
@@ -52,9 +51,38 @@ public class DriverDefMainPanelViewImpl
     @DataField ( "driver-class" )
     TextBox driverClassTextBox;
 
+    @DataField("driver-class-help")
+    Element driverClassHelp = DOM.createSpan();
+
+    @DataField( "group-id-form-group" )
+    Element groupIdFormGroup =  DOM.createDiv();
+
     @Inject
-    @DataField( "file-upload" )
-    DefaultEditorNewFileUpload fileUpload;
+    @DataField ( "group-id" )
+    TextBox groupIdTextBox;
+
+    @DataField("group-id-help")
+    Element groupIdHelp = DOM.createSpan();
+
+    @DataField( "artifact-id-form-group" )
+    Element artifactIdFormGroup =  DOM.createDiv();
+
+    @Inject
+    @DataField ( "artifact-id" )
+    TextBox artifactIdTextBox;
+
+    @DataField("artifact-id-help")
+    Element artifactIdHelp = DOM.createSpan();
+
+    @DataField( "version-form-group" )
+    Element versionFormGroup =  DOM.createDiv();
+
+    @Inject
+    @DataField ( "version" )
+    TextBox versionTextBox;
+
+    @DataField("version-help")
+    Element versionHelp = DOM.createSpan();
 
     private DriverDefMainPanelView.Presenter presenter;
 
@@ -87,18 +115,33 @@ public class DriverDefMainPanelViewImpl
     }
 
     @Override
-    public void setPath( final Path path ) {
-        fileUpload.setFolderPath( path );
+    public void setGroupId( String groupId ) {
+        groupIdTextBox.setText( groupId );
     }
 
     @Override
-    public void setFileName( final String fileName ) {
-        fileUpload.setFileName( fileName );
+    public String getGroupId() {
+        return groupIdTextBox.getText();
     }
 
     @Override
-    public void upload( final Command successCallback, final Command errorCallback ) {
-        fileUpload.upload( successCallback, errorCallback );
+    public void setArtifactId( String artifactId ) {
+        artifactIdTextBox.setText( artifactId );
+    }
+
+    @Override
+    public String getArtifactId() {
+        return artifactIdTextBox.getText();
+    }
+
+    @Override
+    public void setVersion( String version ) {
+        versionTextBox.setText( version );
+    }
+
+    @Override
+    public String getVersion() {
+        return versionTextBox.getText();
     }
 
     @EventHandler( "name" )
@@ -111,4 +154,18 @@ public class DriverDefMainPanelViewImpl
         presenter.onDriverClassChange();
     }
 
+    @EventHandler( "group-id")
+    public void onGroupIdChange( final ChangeEvent event ) {
+        presenter.onGroupIdChange();
+    }
+
+    @EventHandler( "artifact-id")
+    public void onArtifactIdChange( final ChangeEvent event ) {
+        presenter.onArtifactIdChange();
+    }
+
+    @EventHandler( "version")
+    public void onVersionChange( final ChangeEvent event ) {
+        presenter.onVersionChange();
+    }
 }
