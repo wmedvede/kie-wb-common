@@ -21,7 +21,7 @@ import java.util.Collection;
 import org.guvnor.common.services.project.model.Project;
 import org.guvnor.structure.organizationalunit.OrganizationalUnit;
 import org.guvnor.structure.repositories.Repository;
-import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DefExplorerContent;
 import org.uberfire.client.mvp.UberView;
 
 public interface ProjectDataSourceExplorerView
@@ -42,5 +42,5 @@ public interface ProjectDataSourceExplorerView
 
     void addProjectSelectorHandler( final ProjectSelectorHandler handler );
 
-    void setDataSourceDefExplorer( final DataSourceDefExplorer dataSourceDefExplorer );
+    void setDataSourceDefExplorer( final DefExplorerContent defExplorerContent );
 }

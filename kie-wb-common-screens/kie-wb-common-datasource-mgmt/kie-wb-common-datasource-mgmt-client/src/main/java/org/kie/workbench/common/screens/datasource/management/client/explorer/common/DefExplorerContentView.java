@@ -13,29 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.kie.workbench.common.screens.datasource.management.client.explorer.common;
 
 import org.uberfire.client.mvp.UberView;
 
-public interface DataSourceDefItemView
-        extends UberView<DataSourceDefItemView.Presenter> {
+public interface DefExplorerContentView
+        extends UberView<DefExplorerContentView.Presenter> {
 
-    interface Presenter {
-
-        void onClick();
-
-        void addItemHandler( ItemHandler itemHandler );
+    interface Presenter extends Handler {
 
     }
 
-    interface ItemHandler {
-        void onClick( String itemId );
+    interface Handler {
+
+        void onAddDataSource();
+
+        void onAddDriver();
+
     }
 
-    void setName( String name );
+    void addDataSourceItem( DefItem item );
 
-    String getName();
+    void addDriverItem( DefItem item );
 
+    void clear();
+
+    void clearDataSources();
+
+    void clearDrivers();
 
 }

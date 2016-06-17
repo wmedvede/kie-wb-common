@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Window;
@@ -30,12 +29,12 @@ import org.guvnor.common.services.project.model.Project;
 import org.guvnor.structure.organizationalunit.OrganizationalUnit;
 import org.guvnor.structure.repositories.Repository;
 import org.jboss.errai.common.client.api.Caller;
-import org.jboss.errai.common.client.api.RemoteCallback;
-import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
-import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorerView;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DefExplorerBase;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DefExplorerContent;
 import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDataSourceDefWizard;
 import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDriverDefWizard;
-import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
+import org.kie.workbench.common.screens.datasource.management.events.BaseDataSourceEvent;
+import org.kie.workbench.common.screens.datasource.management.events.BaseDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
@@ -43,18 +42,11 @@ import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 
 @Dependent
 public class ProjectDataSourceExplorer
+        extends DefExplorerBase
         implements ProjectDataSourceExplorerView.Presenter,
         IsWidget {
 
     private ProjectDataSourceExplorerView view;
-
-    private DataSourceDefExplorer dataSourceDefExplorer;
-
-    private NewDataSourceDefWizard newDataSourceDefWizard;
-
-    private NewDriverDefWizard newDriverDefWizard;
-
-    private Caller<DataSourceExplorerService> explorerService;
 
     private OrganizationalUnit activeOrganizationalUnit;
 
@@ -66,20 +58,18 @@ public class ProjectDataSourceExplorer
 
     @Inject
     public ProjectDataSourceExplorer( final ProjectDataSourceExplorerView view,
-            final DataSourceDefExplorer dataSourceDefExplorer,
+            final DefExplorerContent defExplorerContent,
             final NewDataSourceDefWizard newDataSourceDefWizard,
             final NewDriverDefWizard newDriverDefWizard,
             final Caller<DataSourceExplorerService> explorerService ) {
+        super( defExplorerContent, newDataSourceDefWizard, newDriverDefWizard, explorerService );
         this.view = view;
-        this.dataSourceDefExplorer = dataSourceDefExplorer;
-        this.newDataSourceDefWizard = newDataSourceDefWizard;
-        this.newDriverDefWizard = newDriverDefWizard;
-        this.explorerService = explorerService;
     }
 
     @PostConstruct
-    private void init() {
-        view.setDataSourceDefExplorer( dataSourceDefExplorer );
+    protected void init() {
+        super.init();
+        view.setDataSourceDefExplorer( defExplorerContent );
         view.addProjectSelectorHandler( new ProjectSelectorHandler() {
             @Override
             public void onOrganizationalUnitSelected( OrganizationalUnit ou ) {
@@ -96,20 +86,10 @@ public class ProjectDataSourceExplorer
                 ProjectDataSourceExplorer.this.onProjectSelected( project );
             }
         } );
-        dataSourceDefExplorer.setHandler( new DataSourceDefExplorerView.Handler() {
-            @Override
-            public void onAddDataSource() {
-                ProjectDataSourceExplorer.this.onAddDataSource();
-            }
-
-            @Override
-            public void onAddDriver() {
-                ProjectDataSourceExplorer.this.onAddDriver();
-            }
-        } );
     }
 
-    private void onAddDriver() {
+    @Override
+    public void onAddDriver() {
         final Project activeProject = getActiveProject();
         if ( activeProject == null ) {
             Window.alert( "No project has been selected" );
@@ -119,7 +99,8 @@ public class ProjectDataSourceExplorer
         }
     }
 
-    private void onAddDataSource() {
+    @Override
+    public void onAddDataSource() {
         final Project activeProject = getActiveProject();
         if ( activeProject == null ) {
             Window.alert( "No project has been selected" );
@@ -134,20 +115,22 @@ public class ProjectDataSourceExplorer
         return view.asWidget();
     }
 
-    public void refresh() {
-        refresh( new DataSourceExplorerContentQuery( activeOrganizationalUnit,
+    @Override
+    protected DataSourceExplorerContentQuery createRefreshQuery() {
+        return new DataSourceExplorerContentQuery( activeOrganizationalUnit,
                 activeRepository,
                 activeProject,
-                activeBranch ) );
+                activeBranch );
     }
 
     private void refresh( final DataSourceExplorerContentQuery query ) {
         explorerService.call( getRefreshCallback(), new DefaultErrorCallback() ).executeQuery( query );
     }
 
-    private void loadContent( final DataSourceExplorerContentQueryResult content ) {
+    @Override
+    protected void loadContent( final DataSourceExplorerContentQueryResult content ) {
 
-        dataSourceDefExplorer.clear();
+        defExplorerContent.clear();
         if ( activeOrganizationalUnit == null || !contains( content.getOrganizationalUnits(), activeOrganizationalUnit ) ) {
             //no organizational unit was selected or the previously selected one has been deleted at server side.
 
@@ -204,7 +187,8 @@ public class ProjectDataSourceExplorer
             view.loadContent( content.getOrganizationalUnits(), activeOrganizationalUnit,
                     content.getRepositories(), activeRepository,
                     content.getProjects(), activeProject );
-            dataSourceDefExplorer.loadDataSources( content.getDataSourceDefs() );
+            defExplorerContent.loadDataSources( content.getDataSourceDefs() );
+            defExplorerContent.loadDrivers( content.getDriverDefs() );
         }
 
     }
@@ -240,15 +224,6 @@ public class ProjectDataSourceExplorer
             }
         }
         return false;
-    }
-
-    private RemoteCallback<?> getRefreshCallback() {
-        return new RemoteCallback<DataSourceExplorerContentQueryResult>() {
-            @Override
-            public void callback( DataSourceExplorerContentQueryResult content ) {
-                loadContent( content );
-            }
-        };
     }
 
     public void onOrganizationalUnitSelected( final OrganizationalUnit ou ) {
@@ -323,10 +298,14 @@ public class ProjectDataSourceExplorer
         return activeBranch;
     }
 
-    public void onDataSourceCreated( @Observes NewDataSourceEvent event ) {
-        if ( !event.isGlobal() && activeProject != null && activeProject.equals( event.getProject() ) ) {
-            refresh();
-        }
+    @Override
+    protected boolean refreshOnDataSourceEvent( BaseDataSourceEvent event ) {
+        return !event.isGlobal() && activeProject != null && activeProject.equals( event.getProject() );
+    }
+
+    @Override
+    protected boolean refreshOnDriverEvent( BaseDriverEvent event ) {
+        return !event.isGlobal() && activeProject != null && activeProject.equals( event.getProject() );
     }
 
     private boolean hasChanged( final OrganizationalUnit ou ) {

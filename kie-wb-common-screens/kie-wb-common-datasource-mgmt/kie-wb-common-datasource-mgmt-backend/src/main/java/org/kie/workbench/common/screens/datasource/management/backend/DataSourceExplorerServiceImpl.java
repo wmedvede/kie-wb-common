@@ -41,7 +41,6 @@ import org.kie.workbench.common.screens.datasource.management.service.DataSource
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
 import org.kie.workbench.common.screens.datasource.management.util.DriverDefSerializer;
-import org.kie.workbench.common.services.shared.project.KieProject;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,34 +64,26 @@ public class DataSourceExplorerServiceImpl
 
     private static String DRIVER_FILE_TYPE = ".driver";
 
+    @Inject
+    @Named( "ioStrategy" )
     private IOService ioService;
 
+    @Inject
     private KieProjectService projectService;
 
+    @Inject
     private OrganizationalUnitService organizationalUnitService;
 
+    @Inject
     private DataSourceServicesHelper serviceHelper;
 
+    @Inject
     private AuthorizationManager authorizationManager;
 
+    @Inject
     private User identity;
 
     public DataSourceExplorerServiceImpl() {
-    }
-
-    @Inject
-    public DataSourceExplorerServiceImpl( final @Named( "ioStrategy" ) IOService ioService,
-            final KieProjectService projectService,
-            final OrganizationalUnitService organizationalUnitService,
-            final DataSourceServicesHelper serviceHelper,
-            final AuthorizationManager authorizationManager,
-            final User identity ) {
-        this.ioService = ioService;
-        this.projectService = projectService;
-        this.serviceHelper = serviceHelper;
-        this.organizationalUnitService = organizationalUnitService;
-        this.authorizationManager = authorizationManager;
-        this.identity = identity;
     }
 
     @Override
@@ -103,7 +94,7 @@ public class DataSourceExplorerServiceImpl
     @Override
     public Collection<DataSourceDefInfo> findProjectDataSources( final Path path ) {
         checkNotNull( "path", path );
-        KieProject project = projectService.resolveProject( path );
+        Project project = projectService.resolveProject( path );
         if ( project == null ) {
             return new ArrayList<>( );
         } else {
@@ -119,7 +110,7 @@ public class DataSourceExplorerServiceImpl
     @Override
     public Collection<DriverDefInfo> findProjectDrivers( final Path path ) {
         checkNotNull( "path", path );
-        KieProject project = projectService.resolveProject( path );
+        Project project = projectService.resolveProject( path );
         if ( project == null ) {
             return new ArrayList<>( );
         } else {
@@ -133,6 +124,18 @@ public class DataSourceExplorerServiceImpl
         checkNotNull( "path", path );
 
         for ( DriverDefInfo driverDefInfo : findProjectDrivers( path ) ) {
+            if ( uuid.equals( driverDefInfo.getUuid() ) ) {
+                return driverDefInfo;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public DriverDefInfo findGlobalDriver( String uuid ) {
+        checkNotNull( "uuid", uuid );
+
+        for ( DriverDefInfo driverDefInfo : findGlobalDrivers() ) {
             if ( uuid.equals( driverDefInfo.getUuid() ) ) {
                 return driverDefInfo;
             }
@@ -306,7 +309,7 @@ public class DataSourceExplorerServiceImpl
 
     private Map<String, Project> getProjects( final Repository repository,
             final String branch ) {
-        final Map<String, Project> authorizedProjects = new HashMap<String, Project>();
+        final Map<String, Project> authorizedProjects = new HashMap<>();
 
         if ( repository == null ) {
             return authorizedProjects;

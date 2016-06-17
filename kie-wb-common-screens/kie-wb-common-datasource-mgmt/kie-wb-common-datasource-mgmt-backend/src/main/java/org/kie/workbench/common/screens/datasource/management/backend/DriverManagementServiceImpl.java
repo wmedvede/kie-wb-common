@@ -41,6 +41,9 @@ public class DriverManagementServiceImpl
     @Inject
     DataSourceServicesProvider servicesProvider;
 
+    public DriverManagementServiceImpl() {
+    }
+
     @PostConstruct
     public void init() {
         if ( servicesProvider.getDriverService() == null ) {

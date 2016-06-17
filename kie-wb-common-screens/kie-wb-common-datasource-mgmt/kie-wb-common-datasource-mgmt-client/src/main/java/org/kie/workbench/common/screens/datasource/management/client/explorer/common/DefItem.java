@@ -23,21 +23,21 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
 @Dependent
-public class DataSourceDefItem
+public class DefItem
         implements IsWidget,
-        DataSourceDefItemView.Presenter {
+        DefItemView.Presenter {
 
 
-    private DataSourceDefItemView view;
+    private DefItemView view;
 
-    private DataSourceDefItemView.ItemHandler itemHandler;
+    private DefItemView.ItemHandler itemHandler;
 
     private static int itemIds = 0;
 
     private String itemId = "item_"+ itemIds++;
 
     @Inject
-    public DataSourceDefItem( DataSourceDefItemView view ) {
+    public DefItem( DefItemView view ) {
         this.view = view;
         view.init( this );
     }
@@ -59,7 +59,7 @@ public class DataSourceDefItem
     }
 
     @Override
-    public void addItemHandler( DataSourceDefItemView.ItemHandler itemHandler ) {
+    public void addItemHandler( DefItemView.ItemHandler itemHandler ) {
         this.itemHandler = itemHandler;
     }
 

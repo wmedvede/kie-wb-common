@@ -30,12 +30,14 @@ import org.guvnor.common.services.backend.util.CommentedOptionFactory;
 import org.guvnor.common.services.project.model.GAV;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.screens.datasource.management.events.DeleteDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.util.DriverDefSerializer;
 import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
+import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.uberfire.backend.server.util.Paths;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.io.IOService;
@@ -57,6 +59,9 @@ public class DriverDefEditorServiceImpl
     private DataSourceServicesHelper serviceHelper;
 
     @Inject
+    protected KieProjectService projectService;
+
+    @Inject
     private CommentedOptionFactory optionsFactory;
 
     @Inject
@@ -64,6 +69,12 @@ public class DriverDefEditorServiceImpl
 
     @Inject
     private Event<NewDriverEvent> newDriverEvent;
+
+    @Inject
+    private Event<DeleteDriverEvent> deleteDriverEvent;
+
+    public DriverDefEditorServiceImpl() {
+    }
 
     @Override
     public DriverDefEditorContent loadContent( final Path path ) {
@@ -199,10 +210,14 @@ public class DriverDefEditorServiceImpl
     @Override
     public void delete( final Path path, final String comment ) {
         checkNotNull( "path", path );
-        ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
-        final org.uberfire.java.nio.file.Path nioJarPath = Paths.convert( calculateJarPath( path ) );
-        if ( ioService.exists( nioJarPath ) ) {
-            ioService.delete( nioJarPath, optionsFactory.makeCommentedOption( comment ) );
+        final org.uberfire.java.nio.file.Path nioPath = Paths.convert( path );
+        if ( ioService.exists( nioPath ) ) {
+            final String content = ioService.readAllString( nioPath );
+            DriverDef driverDef = DriverDefSerializer.deserialize( content );
+            Project project = projectService.resolveProject( path );
+            ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
+            deleteDriverEvent.fire( new DeleteDriverEvent( driverDef,
+                    project, optionsFactory.getSafeSessionId(), optionsFactory.getSafeIdentityName() ) );
         }
     }
 
@@ -214,11 +229,5 @@ public class DriverDefEditorServiceImpl
     @Override
     public Path getProjectDriversContext( Project project ) {
         return serviceHelper.getProjectDataSourcesContext( project );
-    }
-
-    private Path calculateJarPath( final Path currentFile ) {
-        String jarFileName = currentFile.getFileName() + ".jar";
-        org.uberfire.java.nio.file.Path nioJarPath = Paths.convert( currentFile ).resolveSibling( jarFileName );
-        return Paths.convert( nioJarPath );
     }
 }

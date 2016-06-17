@@ -229,11 +229,16 @@ public class DataSourceDefEditorHelper {
     }
 
     public void onTestConnection() {
-        editorService.call(
-                getTestConnectionSuccessCallback(),
-                getTestConnectionErrorCallback() ).testConnection( dataSourceDef, project );
+        if ( project != null ) {
+            editorService.call(
+                    getTestConnectionSuccessCallback(),
+                    getTestConnectionErrorCallback() ).testConnection( dataSourceDef, project );
+        } else {
+            editorService.call(
+                    getTestConnectionSuccessCallback(),
+                    getTestConnectionErrorCallback() ).testConnection( dataSourceDef );
+        }
     }
-
 
     private RemoteCallback<TestConnectionResult> getTestConnectionSuccessCallback() {
         return new RemoteCallback<TestConnectionResult>() {
