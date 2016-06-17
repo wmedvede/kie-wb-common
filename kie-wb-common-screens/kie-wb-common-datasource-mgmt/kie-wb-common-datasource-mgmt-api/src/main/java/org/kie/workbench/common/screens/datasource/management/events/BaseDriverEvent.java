@@ -17,26 +17,57 @@
 package org.kie.workbench.common.screens.datasource.management.events;
 
 import org.guvnor.common.services.project.model.Project;
-import org.jboss.errai.common.client.api.annotations.Portable;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 
-@Portable
-public class NewDriverEvent
-        extends BaseDriverEvent {
+public abstract class BaseDriverEvent {
 
-    public NewDriverEvent() {
+    private DriverDef driverDef;
+
+    private Project project;
+
+    private String sessionId;
+
+    private String identity;
+
+    protected BaseDriverEvent() {
     }
 
-    public NewDriverEvent( final DriverDef driverDef,
+    protected BaseDriverEvent( final DriverDef driverDef,
             final Project project,
             final String sessionId,
             final String identity ) {
-        super( driverDef, project, sessionId, identity );
+        this.driverDef = driverDef;
+        this.project = project;
+        this.sessionId = sessionId;
+        this.identity = identity;
     }
 
-    public NewDriverEvent( final DriverDef driverDef,
+    protected BaseDriverEvent( final DriverDef driverDef,
             final String sessionId,
             final String identity ) {
-        super( driverDef, sessionId, identity );
+        this.driverDef = driverDef;
+        this.sessionId = sessionId;
+        this.identity = identity;
     }
+
+    public DriverDef getDriverDef() {
+        return driverDef;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public String getIdentity() {
+        return identity;
+    }
+
+    public boolean isGlobal() {
+        return project == null;
+    }
+
 }

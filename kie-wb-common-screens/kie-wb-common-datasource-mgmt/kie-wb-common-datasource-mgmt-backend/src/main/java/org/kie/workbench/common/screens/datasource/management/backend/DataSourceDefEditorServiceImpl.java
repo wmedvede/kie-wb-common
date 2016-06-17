@@ -32,6 +32,7 @@ import org.guvnor.common.services.backend.util.CommentedOptionFactory;
 import org.guvnor.common.services.project.model.GAV;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.screens.datasource.management.events.DeleteDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
@@ -93,6 +94,12 @@ public class DataSourceDefEditorServiceImpl
     @Inject
     private Event<NewDataSourceEvent> newDataSourceEvent;
 
+    @Inject
+    private Event<DeleteDataSourceEvent> deleteDataSourceEvent;
+
+    public DataSourceDefEditorServiceImpl() {
+    }
+
     @Override
     public DataSourceDefEditorContent loadContent( final Path path ) {
 
@@ -102,6 +109,7 @@ public class DataSourceDefEditorServiceImpl
         String content = ioService.readAllString( Paths.convert( path ) );
         DataSourceDef dataSourceDef = DataSourceDefSerializer.deserialize( content );
         editorContent.setDataSourceDef( dataSourceDef );
+        editorContent.setProject( projectService.resolveProject( path ) );
         return editorContent;
     }
 
@@ -109,7 +117,7 @@ public class DataSourceDefEditorServiceImpl
     public Path save( final Path path,
             final DataSourceDefEditorContent editorContent,
             final String comment ) {
-        return save( path, editorContent, comment, true );
+        return save( path, editorContent, comment, false );
     }
 
     public Path save( final Path path,
@@ -307,6 +315,11 @@ public class DataSourceDefEditorServiceImpl
     }
 
     @Override
+    public TestConnectionResult testConnection( DataSourceDef dataSourceDef ) {
+        return testConnection( dataSourceDef, null );
+    }
+
+    @Override
     public TestConnectionResult testConnection( DataSourceDef dataSourceDef, Project project ) {
 
         TestConnectionResult result = new TestConnectionResult( );
@@ -322,8 +335,12 @@ public class DataSourceDefEditorServiceImpl
             return result;
         }
 
-        DriverDefInfo driverDefInfo =
-                dataSourceExplorerService.findProjectDriver( dataSourceDef.getDriverUuid(), project.getRootPath() );
+        DriverDefInfo driverDefInfo = null;
+        if ( project != null ) {
+            driverDefInfo = dataSourceExplorerService.findProjectDriver( dataSourceDef.getDriverUuid(), project.getRootPath() );
+        } else {
+            driverDefInfo = dataSourceExplorerService.findGlobalDriver( dataSourceDef.getDriverUuid() );
+        }
 
         if ( driverDefInfo == null ) {
             result.setMessage( "Data source driver: " + dataSourceDef.getUuid() + " was not found" );
@@ -392,16 +409,22 @@ public class DataSourceDefEditorServiceImpl
     public void delete( final Path path, final String comment ) {
         checkNotNull( "path", path );
 
-        String content = ioService.readAllString( Paths.convert( path ) );
-        DataSourceDef dataSourceDef = DataSourceDefSerializer.deserialize( content );
+        final org.uberfire.java.nio.file.Path nioPath = Paths.convert( path );
+        if ( ioService.exists( nioPath ) ) {
+            String content = ioService.readAllString( Paths.convert( path ) );
+            DataSourceDef dataSourceDef = DataSourceDefSerializer.deserialize( content );
+            Project project = projectService.resolveProject( path );
+            try {
+                if ( dataSourceDef.getUuid() != null && dataSourceManagementService.isEnabled() ) {
+                    dataSourceManagementService.undeploy( dataSourceDef.getUuid() );
+                }
+                ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
+                deleteDataSourceEvent.fire( new DeleteDataSourceEvent( dataSourceDef,
+                        project, optionsFactory.getSafeSessionId(), optionsFactory.getSafeIdentityName() ) );
 
-        try {
-            if ( dataSourceDef.getUuid() != null && dataSourceManagementService.isEnabled() ) {
-                dataSourceManagementService.undeploy( dataSourceDef.getUuid() );
+            } catch ( Exception e ) {
+                throw ExceptionUtilities.handleException( e );
             }
-            ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
-        } catch ( Exception e ) {
-            throw ExceptionUtilities.handleException( e );
         }
     }
 

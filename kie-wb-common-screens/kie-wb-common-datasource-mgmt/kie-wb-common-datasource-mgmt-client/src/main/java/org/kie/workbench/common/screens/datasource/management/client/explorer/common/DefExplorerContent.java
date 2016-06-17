@@ -25,28 +25,31 @@ import javax.inject.Inject;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.mvp.impl.PathPlaceRequest;
 
 @Dependent
-public class DataSourceDefExplorer
+public class DefExplorerContent
         implements IsWidget,
-        DataSourceDefExplorerView.Presenter {
+        DefExplorerContentView.Presenter {
 
 
-    private DataSourceDefExplorerView view;
+    private DefExplorerContentView view;
 
-    private Instance<DataSourceDefItem> itemInstance;
+    private Instance<DefItem> itemInstance;
 
-    private Map<String, DataSourceDefInfo> itemsMap = new HashMap<>(  );
+    private Map<String, DataSourceDefInfo> dataSourceItemsMap = new HashMap<>(  );
+
+    private Map<String, DriverDefInfo> driverItemsMap = new HashMap<>(  );
 
     private PlaceManager placeManager;
 
-    private DataSourceDefExplorerView.Handler handler;
+    private DefExplorerContentView.Handler handler;
 
     @Inject
-    public DataSourceDefExplorer( DataSourceDefExplorerView view,
-            Instance<DataSourceDefItem> itemInstance,
+    public DefExplorerContent( DefExplorerContentView view,
+            Instance<DefItem> itemInstance,
             PlaceManager placeManager ) {
         this.view = view;
         this.itemInstance = itemInstance;
@@ -61,27 +64,56 @@ public class DataSourceDefExplorer
     }
 
     public void loadDataSources( Collection<DataSourceDefInfo> dataSourceDefInfos ) {
-        clear();
+        clearDataSources();
         if ( dataSourceDefInfos != null ) {
-            DataSourceDefItem item;
+            DefItem item;
             for ( DataSourceDefInfo dataSourceDefInfo : dataSourceDefInfos ) {
                 item = createItem();
                 item.setName( dataSourceDefInfo.getName() );
-                item.addItemHandler( new DataSourceDefItemView.ItemHandler() {
+                item.addItemHandler( new DefItemView.ItemHandler() {
                     @Override
                     public void onClick( String itemId ) {
-                        onItemClick( itemsMap.get( itemId ) );
+                        onDataSourceItemClick( dataSourceItemsMap.get( itemId ) );
                     }
                 } );
-                itemsMap.put( item.getId(), dataSourceDefInfo );
-                view.addItem( item );
+                dataSourceItemsMap.put( item.getId(), dataSourceDefInfo );
+                view.addDataSourceItem( item );
+            }
+        }
+    }
+
+    public void loadDrivers( Collection<DriverDefInfo> driverDefInfos ) {
+        clearDrivers();
+        if ( driverDefInfos != null ) {
+            DefItem item;
+            for ( DriverDefInfo driverDefInfo : driverDefInfos ) {
+                item = createItem();
+                item.setName( driverDefInfo.getName() );
+                item.addItemHandler( new DefItemView.ItemHandler() {
+                    @Override
+                    public void onClick( String itemId ) {
+                        onDriverItemClick( driverItemsMap.get( itemId ) );
+                    }
+                } );
+                driverItemsMap.put( item.getId(), driverDefInfo );
+                view.addDriverItem( item );
             }
         }
     }
 
     public void clear() {
-        view.clear();
-        itemsMap.clear();
+        clearDataSources();
+        clearDrivers();
+    }
+
+    public void clearDataSources() {
+        view.clearDataSources();
+        dataSourceItemsMap.clear();
+    }
+
+    private void clearDrivers() {
+        view.clearDrivers();
+        driverItemsMap.clear();
     }
 
     @Override
@@ -98,15 +130,19 @@ public class DataSourceDefExplorer
         }
     }
 
-    public void setHandler( DataSourceDefExplorerView.Handler handler ) {
+    public void setHandler( DefExplorerContentView.Handler handler ) {
         this.handler = handler;
     }
 
-    private void onItemClick( DataSourceDefInfo dataSourceDefInfo ) {
+    private void onDataSourceItemClick( DataSourceDefInfo dataSourceDefInfo ) {
         placeManager.goTo( new PathPlaceRequest( dataSourceDefInfo.getPath() ) );
     }
 
-    private DataSourceDefItem createItem() {
+    private void onDriverItemClick( DriverDefInfo driverDefInfo ) {
+        placeManager.goTo( new PathPlaceRequest( driverDefInfo.getPath() ) );
+    }
+
+    private DefItem createItem() {
         return itemInstance.get();
     }
 }

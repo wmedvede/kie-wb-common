@@ -47,4 +47,6 @@ public interface DataSourceDefEditorService
 
     TestConnectionResult testConnection( final DataSourceDef dataSourceDef, final Project project );
 
+    TestConnectionResult testConnection( final DataSourceDef dataSourceDef );
+
 }

@@ -139,8 +139,13 @@ public class DataSourceDefEditor
     }
 
     protected void loadDrivers() {
-        driverDefService.call( getLoadDriversSuccessCallback(),
-                new DefaultErrorCallback() ).findProjectDrivers( versionRecordManager.getCurrentPath() );
+        if ( getContent().getProject() != null ) {
+            driverDefService.call( getLoadDriversSuccessCallback(),
+                    new DefaultErrorCallback() ).findProjectDrivers( versionRecordManager.getCurrentPath() );
+        } else {
+            driverDefService.call( getLoadDriversSuccessCallback(),
+                    new DefaultErrorCallback() ).findGlobalDrivers();
+        }
     }
 
     @Override
@@ -258,6 +263,7 @@ public class DataSourceDefEditor
     protected void setContent( final DataSourceDefEditorContent editorContent ) {
         this.editorContent = editorContent;
         editorHelper.setDataSourceDef( editorContent.getDataSourceDef() );
+        editorHelper.setProject( editorContent.getProject() );
         editorHelper.setValid( true );
     }
 

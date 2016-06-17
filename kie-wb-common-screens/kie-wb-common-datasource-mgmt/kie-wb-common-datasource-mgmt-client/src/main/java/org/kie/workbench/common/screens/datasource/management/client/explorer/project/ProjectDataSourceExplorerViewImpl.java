@@ -28,7 +28,7 @@ import org.guvnor.structure.repositories.Repository;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DataSourceDefExplorer;
+import org.kie.workbench.common.screens.datasource.management.client.explorer.common.DefExplorerContent;
 
 @Dependent
 @Templated
@@ -72,9 +72,9 @@ public class ProjectDataSourceExplorerViewImpl
 
     @Override
     public void clear() {
-        loadContent( new ArrayList<OrganizationalUnit>( ), null,
-                new ArrayList<Repository>( ), null,
-                new ArrayList<Project>( ), null );
+        loadContent( new ArrayList<>( ), null,
+                new ArrayList<>( ), null,
+                new ArrayList<>( ), null );
     }
 
     @Override
@@ -83,7 +83,7 @@ public class ProjectDataSourceExplorerViewImpl
     }
 
     @Override
-    public void setDataSourceDefExplorer( final DataSourceDefExplorer dataSourceDefExplorer ) {
-        container.add( dataSourceDefExplorer );
+    public void setDataSourceDefExplorer( final DefExplorerContent defExplorerContent ) {
+        container.add( defExplorerContent );
     }
 }

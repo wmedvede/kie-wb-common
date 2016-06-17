@@ -16,12 +16,15 @@
 
 package org.kie.workbench.common.screens.datasource.management.model;
 
+import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
 public class DataSourceDefEditorContent {
 
     private DataSourceDef dataSourceDef;
+
+    private Project project;
 
     public DataSourceDefEditorContent() {
     }
@@ -32,6 +35,14 @@ public class DataSourceDefEditorContent {
 
     public void setDataSourceDef( DataSourceDef dataSourceDef ) {
         this.dataSourceDef = dataSourceDef;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject( Project project ) {
+        this.project = project;
     }
 
     @Override

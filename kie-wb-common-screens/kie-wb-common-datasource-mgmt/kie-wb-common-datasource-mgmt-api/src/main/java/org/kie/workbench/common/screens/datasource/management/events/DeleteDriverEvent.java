@@ -21,20 +21,20 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 
 @Portable
-public class NewDriverEvent
+public class DeleteDriverEvent
         extends BaseDriverEvent {
 
-    public NewDriverEvent() {
+    public DeleteDriverEvent() {
     }
 
-    public NewDriverEvent( final DriverDef driverDef,
+    public DeleteDriverEvent( final DriverDef driverDef,
             final Project project,
             final String sessionId,
             final String identity ) {
         super( driverDef, project, sessionId, identity );
     }
 
-    public NewDriverEvent( final DriverDef driverDef,
+    public DeleteDriverEvent( final DriverDef driverDef,
             final String sessionId,
             final String identity ) {
         super( driverDef, sessionId, identity );
