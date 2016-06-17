@@ -37,6 +37,8 @@ public class DataSourceServicesHelper {
 
     private static final Logger logger = LoggerFactory.getLogger( DataSourceServicesHelper.class );
 
+    @Inject
+    @Named( "ioStrategy" )
     private IOService ioService;
 
     /**
@@ -51,11 +53,6 @@ public class DataSourceServicesHelper {
     private FileSystem fileSystem;
 
     public DataSourceServicesHelper() {
-    }
-
-    @Inject
-    public DataSourceServicesHelper( final @Named( "ioStrategy" ) IOService ioService ) {
-        this.ioService = ioService;
     }
 
     @PostConstruct

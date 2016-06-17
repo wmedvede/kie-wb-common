@@ -20,13 +20,9 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
-import org.guvnor.common.services.project.model.Project;
 import org.kie.workbench.common.screens.datasource.management.client.explorer.global.GlobalDataSourceExplorer;
 import org.kie.workbench.common.screens.datasource.management.client.explorer.project.ProjectDataSourceExplorer;
-import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDataSourceDefWizard;
-import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDriverDefWizard;
 import org.uberfire.client.annotations.WorkbenchMenu;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
@@ -48,10 +44,6 @@ public class DataSourceDefExplorerScreen
 
     private GlobalDataSourceExplorer globalDataSourceExplorer;
 
-    private NewDataSourceDefWizard newDataSourceDefWizard;
-
-    private NewDriverDefWizard newDriverWizard;
-
     private PlaceRequest placeRequest;
 
     private Menus menu;
@@ -64,15 +56,11 @@ public class DataSourceDefExplorerScreen
     @Inject
     public DataSourceDefExplorerScreen( DataSourceDefExplorerScreenView view,
             ProjectDataSourceExplorer projectDataSourceExplorer,
-            GlobalDataSourceExplorer globalDataSourceExplorer,
-            NewDataSourceDefWizard newDataSourceDefWizard,
-            NewDriverDefWizard newDriverDefWizard) {
+            GlobalDataSourceExplorer globalDataSourceExplorer ) {
 
         this.view = view;
         this.projectDataSourceExplorer = projectDataSourceExplorer;
         this.globalDataSourceExplorer = globalDataSourceExplorer;
-        this.newDataSourceDefWizard = newDataSourceDefWizard;
-        this.newDriverWizard = newDriverDefWizard;
         view.init( this );
     }
 
@@ -114,9 +102,6 @@ public class DataSourceDefExplorerScreen
                 .newTopLevelMenu( "Refresh" )
                 .respondsWith( getRefreshCommand() )
                 .endMenu()
-                .newTopLevelMenu( "New" )
-                .respondsWith( getNewCommand() )
-                .endMenu()
                 .build();
     }
 
@@ -131,31 +116,6 @@ public class DataSourceDefExplorerScreen
                 }
             }
         };
-    }
-
-    private Command getNewCommand() {
-        return new Command() {
-            @Override
-            public void execute() {
-                onNewDataSource();
-            }
-        };
-    }
-
-    public void onNewDataSource() {
-
-        if ( projectExplorerSelected ) {
-            final Project activeProjet = projectDataSourceExplorer.getActiveProject();
-            if ( activeProjet == null ) {
-                Window.alert( "No project has been selected" );
-            } else {
-                newDataSourceDefWizard.setProject( projectDataSourceExplorer.getActiveProject() );
-                newDataSourceDefWizard.start();
-            }
-        } else {
-            newDataSourceDefWizard.setGlobal();
-            newDataSourceDefWizard.start();
-        }
     }
 
     @Override

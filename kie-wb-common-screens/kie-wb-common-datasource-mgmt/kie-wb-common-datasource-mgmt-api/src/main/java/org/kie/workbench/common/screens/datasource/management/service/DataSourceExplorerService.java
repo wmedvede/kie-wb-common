@@ -38,4 +38,6 @@ public interface DataSourceExplorerService {
 
     DriverDefInfo findProjectDriver( final String uuid, final Path path );
 
+    DriverDefInfo findGlobalDriver( final String uuid );
+
 }

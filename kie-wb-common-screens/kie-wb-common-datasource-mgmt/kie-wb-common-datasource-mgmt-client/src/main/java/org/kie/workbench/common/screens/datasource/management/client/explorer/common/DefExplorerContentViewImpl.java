@@ -33,9 +33,9 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 @Dependent
 @Templated
-public class DataSourceDefExplorerViewImpl
+public class DefExplorerContentViewImpl
         extends Composite
-        implements DataSourceDefExplorerView {
+        implements DefExplorerContentView {
 
 
     @DataField( "content-accordion" )
@@ -74,7 +74,7 @@ public class DataSourceDefExplorerViewImpl
 
     private Presenter presenter;
 
-    public DataSourceDefExplorerViewImpl() {
+    public DefExplorerContentViewImpl() {
     }
 
     @PostConstruct
@@ -103,18 +103,29 @@ public class DataSourceDefExplorerViewImpl
     }
 
     @Override
-    public void addItem( DataSourceDefItem item ) {
+    public void addDataSourceItem( DefItem item ) {
         dataSourcesListGroup.add( item );
     }
 
     @Override
-    public void removeItem( DataSourceDefItem item ) {
-        dataSourcesListGroup.remove( item );
+    public void addDriverItem( DefItem item ) {
+        driversListGroup.add( item );
     }
 
     @Override
     public void clear() {
         dataSourcesListGroup.clear();
+        driversListGroup.clear();
+    }
+
+    @Override
+    public void clearDataSources() {
+        dataSourcesListGroup.clear();
+    }
+
+    @Override
+    public void clearDrivers() {
+        driversListGroup.clear();
     }
 
     @EventHandler( "add-new-datasource" )

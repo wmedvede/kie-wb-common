@@ -41,6 +41,9 @@ public class DataSourceManagementServiceImpl
     @Inject
     DataSourceServicesProvider servicesProvider;
 
+    public DataSourceManagementServiceImpl() {
+    }
+
     @PostConstruct
     public void init() {
         if ( servicesProvider.getDataSourceService() == null ) {
