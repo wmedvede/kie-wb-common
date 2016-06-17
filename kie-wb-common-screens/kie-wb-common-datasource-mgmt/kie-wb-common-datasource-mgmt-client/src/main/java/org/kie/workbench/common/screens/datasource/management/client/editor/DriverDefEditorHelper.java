@@ -103,17 +103,26 @@ public class DriverDefEditorHelper {
     private void onGroupIdChange() {
         driverDef.setGroupId( mainPanel.getGroupId().trim() );
         groupIdValid = validateGroupId( driverDef.getGroupId() );
+        if ( handler != null ) {
+            handler.onGroupIdChange();
+        }
     }
 
 
     private void onArtifactIdChange() {
         driverDef.setArtifactId( mainPanel.getArtifactId().trim() );
         artifactIdValid = validateArtifactId( driverDef.getArtifactId() );
+        if ( handler != null ) {
+            handler.onArtifactIdChange();
+        }
     }
 
     private void onVersionIdChange() {
         driverDef.setVersion( mainPanel.getVersion().trim() );
         versionValid = validateVersion( driverDef.getVersion() );
+        if ( handler != null ) {
+            handler.onVersionChange();
+        }
     }
 
     public boolean isNameValid() {

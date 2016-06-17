@@ -17,26 +17,57 @@
 package org.kie.workbench.common.screens.datasource.management.events;
 
 import org.guvnor.common.services.project.model.Project;
-import org.jboss.errai.common.client.api.annotations.Portable;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 
-@Portable
-public class NewDataSourceEvent
-        extends BaseDataSourceEvent {
+public abstract class BaseDataSourceEvent {
 
-    public NewDataSourceEvent() {
+    private DataSourceDef dataSourceDef;
+
+    private Project project;
+
+    private String sessionId;
+
+    private String identity;
+
+    protected BaseDataSourceEvent() {
     }
 
-    public NewDataSourceEvent( final DataSourceDef dataSourceDef,
+    protected BaseDataSourceEvent( final DataSourceDef dataSourceDef,
             final Project project,
             final String sessionId,
             final String identity ) {
-        super( dataSourceDef, project, sessionId, identity );
+        this.dataSourceDef = dataSourceDef;
+        this.project = project;
+        this.sessionId = sessionId;
+        this.identity = identity;
     }
 
-    public NewDataSourceEvent( final DataSourceDef dataSourceDef,
+    protected BaseDataSourceEvent( final DataSourceDef dataSourceDef,
             final String sessionId,
             final String identity ) {
-        super( dataSourceDef, sessionId, identity );
+        this.dataSourceDef = dataSourceDef;
+        this.sessionId = sessionId;
+        this.identity = identity;
     }
+
+    public DataSourceDef getDataSourceDef() {
+        return dataSourceDef;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public String getIdentity() {
+        return identity;
+    }
+
+    public boolean isGlobal() {
+        return project == null;
+    }
+
 }

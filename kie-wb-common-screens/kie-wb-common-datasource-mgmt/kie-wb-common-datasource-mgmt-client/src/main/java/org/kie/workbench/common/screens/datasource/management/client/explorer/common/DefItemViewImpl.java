@@ -28,9 +28,9 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 @Dependent
 @Templated
-public class DataSourceDefItemViewImpl
+public class DefItemViewImpl
         extends Composite
-        implements DataSourceDefItemView {
+        implements DefItemView {
 
     @Inject
     @DataField( "item" )
@@ -38,7 +38,7 @@ public class DataSourceDefItemViewImpl
 
     Presenter presenter;
 
-    public DataSourceDefItemViewImpl() {
+    public DefItemViewImpl() {
     }
 
     @Override
@@ -52,7 +52,7 @@ public class DataSourceDefItemViewImpl
     }
 
     @Override
-    public void init( DataSourceDefItemView.Presenter presenter ) {
+    public void init( DefItemView.Presenter presenter ) {
         this.presenter = presenter;
     }
 
