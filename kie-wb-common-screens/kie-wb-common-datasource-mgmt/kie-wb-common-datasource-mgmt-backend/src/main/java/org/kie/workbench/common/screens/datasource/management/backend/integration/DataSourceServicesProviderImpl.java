@@ -29,7 +29,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.kie.workbench.common.screens.datasource.management.backend.integration.ServiceUtil.*;
+import static org.kie.workbench.common.screens.datasource.management.util.ServiceUtil.*;
 
 @ApplicationScoped
 public class DataSourceServicesProviderImpl

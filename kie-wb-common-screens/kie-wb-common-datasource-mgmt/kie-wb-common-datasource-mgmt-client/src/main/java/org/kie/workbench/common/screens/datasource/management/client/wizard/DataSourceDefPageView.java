@@ -16,7 +16,7 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.wizard;
 
-import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefMainPanel;
+import org.kie.workbench.common.screens.datasource.management.client.editor.datasource.DataSourceDefMainPanel;
 import org.uberfire.client.mvp.UberView;
 
 public interface DataSourceDefPageView

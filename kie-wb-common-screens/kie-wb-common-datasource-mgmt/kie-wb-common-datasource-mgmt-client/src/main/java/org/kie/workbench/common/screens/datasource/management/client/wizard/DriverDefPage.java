@@ -22,9 +22,9 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Widget;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DriverDefEditorHelper;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DriverDefMainPanel;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DriverDefMainPanelView;
+import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefEditorHelper;
+import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanel;
+import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanelView;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;

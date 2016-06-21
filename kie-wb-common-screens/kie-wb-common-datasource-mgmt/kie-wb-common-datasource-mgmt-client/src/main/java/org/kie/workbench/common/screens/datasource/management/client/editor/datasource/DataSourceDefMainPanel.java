@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.editor.datasource;
 
 import java.util.List;
 import javax.enterprise.context.Dependent;
@@ -214,5 +214,9 @@ public class DataSourceDefMainPanel
 
         view.setDriver( ""  );
         view.clearDriverErrorMessage();
+    }
+
+    public void showInformationPopup( final String message ) {
+        view.showInformationPopup( message );
     }
 }

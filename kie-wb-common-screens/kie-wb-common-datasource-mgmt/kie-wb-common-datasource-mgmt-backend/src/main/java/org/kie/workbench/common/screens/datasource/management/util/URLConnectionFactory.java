@@ -22,6 +22,9 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.util.Properties;
 
+/**
+ * Utility class for opening jdbc connections.
+ */
 public class URLConnectionFactory {
 
     private String driverClass;

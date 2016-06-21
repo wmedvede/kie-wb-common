@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.editor.driver;
 
+import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
+import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.type.DriverDefType;
@@ -43,6 +45,8 @@ import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.ParameterizedCommand;
 import org.uberfire.mvp.PlaceRequest;
+import org.uberfire.workbench.events.NotificationEvent;
+import org.uberfire.workbench.model.menu.MenuFactory;
 import org.uberfire.workbench.model.menu.Menus;
 
 import static org.uberfire.ext.editor.commons.client.menu.MenuItems.*;
@@ -95,10 +99,8 @@ public class DriverDefEditor
                 true,
                 false,
                 SAVE,
-                COPY,
-                RENAME,
-                DELETE );
-
+                DELETE,
+                VALIDATE );
     }
 
     @WorkbenchPartTitleDecoration
@@ -138,7 +140,7 @@ public class DriverDefEditor
         return new Command() {
             @Override
             public void execute() {
-                Window.alert( "Validate Driver Definition");
+                validate();
             }
         };
     }
@@ -172,20 +174,7 @@ public class DriverDefEditor
     @Override
     protected void makeMenuBar() {
         super.makeMenuBar();
-
-        menuBuilder.addCommand( "Deploy", new Command() {
-            @Override
-            public void execute() {
-                onDeployDriver();
-            }
-        } );
-
-        menuBuilder.addCommand( "Un-Deploy", new Command() {
-            @Override
-            public void execute() {
-                onUnDeployDriver();
-            }
-        } );
+        addDevelopMenu();
     }
 
     private RemoteCallback<DriverDefEditorContent> getLoadContentSuccessCallback() {
@@ -217,7 +206,51 @@ public class DriverDefEditor
         editorHelper.setValid( true );
     }
 
-    public void onDeployDriver() {
+    private void validate() {
+        editorService.call(
+                getValidationSuccessCallback(), new DefaultErrorCallback() ).validate( getContent().getDriverDef() );
+    }
+
+    private RemoteCallback<List<ValidationMessage>> getValidationSuccessCallback() {
+        return new RemoteCallback<List<ValidationMessage>>() {
+            @Override
+            public void callback( List<ValidationMessage> messages ) {
+
+                if ( messages == null || messages.isEmpty() ) {
+                    notification.fire( new NotificationEvent(
+                            org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants.INSTANCE.ItemValidatedSuccessfully(),
+                            NotificationEvent.NotificationType.SUCCESS ) );
+                } else {
+                    mainPanel.showValidationMessages( messages );
+                }
+            }
+        };
+    }
+
+    private void addDevelopMenu() {
+        //for development purposes menu entries, will be removed.
+        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-Deploy" )
+                .respondsWith( new Command() {
+                    @Override
+                    public void execute() {
+                        onDeployDriver();
+                    }
+                } )
+                .endMenu()
+                .build().getItems().get( 0 ) );
+
+        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-UnDeploy" )
+                .respondsWith( new Command() {
+                    @Override
+                    public void execute() {
+                        onUnDeployDriver();
+                    }
+                } )
+                .endMenu()
+                .build().getItems().get( 0 ) );
+    }
+
+    private void onDeployDriver() {
         //Experimental method for development purposes.
         driverService.call(
                 new RemoteCallback<Void>() {
@@ -228,7 +261,7 @@ public class DriverDefEditor
                 }, new DefaultErrorCallback() ).deploy( getContent().getDriverDef() );
     }
 
-    public void onUnDeployDriver() {
+    private void onUnDeployDriver() {
         //Experimental method for development purposes.
         driverService.call(
                 new RemoteCallback<Void>() {

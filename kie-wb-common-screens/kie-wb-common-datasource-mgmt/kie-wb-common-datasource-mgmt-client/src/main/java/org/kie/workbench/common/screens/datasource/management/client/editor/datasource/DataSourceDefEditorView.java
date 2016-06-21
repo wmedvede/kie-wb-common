@@ -14,44 +14,19 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.editor.datasource;
 
 import org.uberfire.client.mvp.UberView;
+import org.uberfire.ext.editor.commons.client.BaseEditorView;
 
-public interface NewDataSourcePopupView
-        extends
-            UberView<NewDataSourcePopupView.Presenter> {
+public interface DataSourceDefEditorView
+        extends UberView<DataSourceDefEditorView.Presenter>,
+                BaseEditorView {
 
     interface Presenter {
 
-        String getName();
-
-        void setName( String name );
-
-        void show();
-
-        void hide();
-
-        void onOk();
-
-        void onCancel();
-
-        void addPopupHandler( NewDataSourcePopupHandler handler );
     }
 
-    interface NewDataSourcePopupHandler {
-
-        void onOk();
-
-        void onCancel();
-    }
-
-    void show();
-
-    void hide();
-
-    String getName();
-
-    void setName( String name );
+    void setMainPanel( final DataSourceDefMainPanel mainPanel );
 
 }

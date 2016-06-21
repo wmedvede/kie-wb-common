@@ -38,4 +38,7 @@ public interface DataSourceManagementConstants {
     @TranslationKey( defaultValue = "" )
     String DataSourceDefEditor_DriverRequiredMessage = "DataSourceDefEditor.DriverRequiredMessage";
 
+    @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_AllFieldsRequiresValidation = "DataSourceDefEditor.AllFieldsRequiresValidation";
+
 }

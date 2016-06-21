@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.editor.datasource;
 
 import java.util.List;
 import javax.enterprise.context.Dependent;
@@ -24,6 +24,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.client.type.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
@@ -46,6 +47,7 @@ import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.ParameterizedCommand;
 import org.uberfire.mvp.PlaceRequest;
+import org.uberfire.workbench.model.menu.MenuFactory;
 import org.uberfire.workbench.model.menu.Menus;
 
 import static org.uberfire.ext.editor.commons.client.menu.MenuItems.*;
@@ -102,7 +104,8 @@ public class DataSourceDefEditor
                 true,
                 false,
                 SAVE,
-                DELETE );
+                DELETE,
+                VALIDATE );
     }
 
     @WorkbenchPartTitleDecoration
@@ -166,7 +169,8 @@ public class DataSourceDefEditor
                 !editorHelper.isUserValid() ||
                 !editorHelper.isPasswordValid() ||
                 !editorHelper.isDriverValid() ) {
-            view.showInformationPopup( "Information", "All fields needs to be validated in order to save the Data Source definition" );
+            mainPanel.showInformationPopup( editorHelper.getMessage(
+                    DataSourceManagementConstants.DataSourceDefEditor_AllFieldsRequiresValidation ) );
 
         } else {
 
@@ -199,27 +203,7 @@ public class DataSourceDefEditor
     @Override
     protected void makeMenuBar() {
         super.makeMenuBar();
-
-        menuBuilder.addCommand( "Test", new Command() {
-            @Override
-            public void execute() {
-                onTestDataSource();
-            }
-        } );
-
-        menuBuilder.addCommand( "Deploy", new Command() {
-            @Override
-            public void execute() {
-                onDeployDataSource();
-            }
-        } );
-
-        menuBuilder.addCommand( "Un-Deploy", new Command() {
-            @Override
-            public void execute() {
-                onUnDeployDataSource();
-            }
-        } );
+        addDevelopMenu();
     }
 
     private RemoteCallback<DataSourceDefEditorContent> getLoadContentSuccessCallback() {
@@ -241,7 +225,7 @@ public class DataSourceDefEditor
         };
     }
 
-    private void onDriversLoaded( final List<DriverDefInfo> driverDefs ) {
+    protected void onDriversLoaded( final List<DriverDefInfo> driverDefs ) {
         editorHelper.loadDrivers( driverDefs );
         mainPanel.setDriver( getContent().getDataSourceDef().getDriverUuid()  );
     }
@@ -267,7 +251,40 @@ public class DataSourceDefEditor
         editorHelper.setValid( true );
     }
 
-    public void onDeployDataSource() {
+    private void addDevelopMenu() {
+        //for development purposes menu entries, will be removed.
+        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-Deploy" )
+                .respondsWith( new Command() {
+                    @Override
+                    public void execute() {
+                        onDeployDataSource();
+                    }
+                } )
+                .endMenu()
+                .build().getItems().get( 0 ) );
+
+        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-UnDeploy" )
+                .respondsWith( new Command() {
+                    @Override
+                    public void execute() {
+                        onUnDeployDataSource();
+                    }
+                } )
+                .endMenu()
+                .build().getItems().get( 0 ) );
+
+        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-DS" )
+                .respondsWith( new Command() {
+                    @Override
+                    public void execute() {
+                        onTestDataSource();
+                    }
+                } )
+                .endMenu()
+                .build().getItems().get( 0 ) );
+    }
+
+    protected void onDeployDataSource() {
         //Experimental method for development purposes.
         dataSourceService.call(
                 new RemoteCallback<Void>() {
@@ -278,7 +295,7 @@ public class DataSourceDefEditor
                 }, new DefaultErrorCallback() ).deploy( getContent().getDataSourceDef() );
     }
 
-    public void onUnDeployDataSource() {
+    protected void onUnDeployDataSource() {
         //Experimental method for development purposes.
         dataSourceService.call(
                 new RemoteCallback<Void>() {
@@ -289,7 +306,7 @@ public class DataSourceDefEditor
                 }, new DefaultErrorCallback() ).undeploy( getContent().getDataSourceDef().getUuid() );
     }
 
-    public void onTestDataSource() {
+    protected void onTestDataSource() {
         //Experimental method for development purposes.
         editorService.call(
                 new RemoteCallback<String>() {
