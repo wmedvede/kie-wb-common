@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.editor.datasource;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -23,8 +23,6 @@ import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.uberfire.ext.editor.commons.client.BaseEditorViewImpl;
-import org.uberfire.ext.widgets.common.client.common.popups.YesNoCancelPopup;
-import org.uberfire.mvp.Command;
 
 @Dependent
 @Templated
@@ -51,23 +49,4 @@ public class DataSourceDefEditorViewImpl
         mainPanelContainer.add( mainPanel );
     }
 
-    @Override
-    public void showInformationPopup( final String title, final String message ) {
-
-        YesNoCancelPopup yesNoCancelPopup = YesNoCancelPopup.newYesNoCancelPopup( title,
-                message,
-                new Command() {
-                    @Override public void execute() {
-
-                    }
-                },
-                "Ok",
-                null,
-                null,
-                null,
-                null );
-
-        yesNoCancelPopup.setClosable( false );
-        yesNoCancelPopup.show();
-    }
 }

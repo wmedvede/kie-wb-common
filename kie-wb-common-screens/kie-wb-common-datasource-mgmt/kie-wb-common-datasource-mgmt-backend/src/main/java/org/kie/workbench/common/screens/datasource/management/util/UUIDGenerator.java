@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.util;
 
-import org.uberfire.client.mvp.UberView;
-import org.uberfire.ext.editor.commons.client.BaseEditorView;
+import java.util.UUID;
 
-public interface DriverDefEditorView
-        extends UberView<DriverDefEditorView.Presenter>,
-        BaseEditorView {
+public class UUIDGenerator {
 
-    interface Presenter {
-
+    public static String generateUUID() {
+        return UUID.randomUUID().toString();
     }
-
-    void setMainPanel( final DriverDefMainPanel mainPanel );
 
 }

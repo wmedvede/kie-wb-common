@@ -17,7 +17,6 @@
 package org.kie.workbench.common.screens.datasource.management.model;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.uberfire.backend.vfs.Path;
 
 @Portable
 public class DriverDef {
@@ -33,8 +32,6 @@ public class DriverDef {
     private String version;
 
     private String driverClass;
-
-    Path driverLib;
 
     public DriverDef() {
     }
@@ -63,14 +60,6 @@ public class DriverDef {
         this.driverClass = driverClass;
     }
 
-    public Path getDriverLib() {
-        return driverLib;
-    }
-
-    public void setDriverLib( Path driverLib ) {
-        this.driverLib = driverLib;
-    }
-
     public String getGroupId() {
         return groupId;
     }
@@ -96,16 +85,6 @@ public class DriverDef {
     }
 
     @Override
-    public String toString() {
-        return "DriverDef{" +
-                "uuid='" + uuid + '\'' +
-                ", name='" + name + '\'' +
-                ", driverClass='" + driverClass + '\'' +
-                ", driverLib=" + driverLib +
-                '}';
-    }
-
-    @Override
     public boolean equals( Object o ) {
         if ( this == o ) {
             return true;
@@ -122,10 +101,16 @@ public class DriverDef {
         if ( name != null ? !name.equals( driverDef.name ) : driverDef.name != null ) {
             return false;
         }
-        if ( driverClass != null ? !driverClass.equals( driverDef.driverClass ) : driverDef.driverClass != null ) {
+        if ( groupId != null ? !groupId.equals( driverDef.groupId ) : driverDef.groupId != null ) {
             return false;
         }
-        return !( driverLib != null ? !driverLib.equals( driverDef.driverLib ) : driverDef.driverLib != null );
+        if ( artifactId != null ? !artifactId.equals( driverDef.artifactId ) : driverDef.artifactId != null ) {
+            return false;
+        }
+        if ( version != null ? !version.equals( driverDef.version ) : driverDef.version != null ) {
+            return false;
+        }
+        return !( driverClass != null ? !driverClass.equals( driverDef.driverClass ) : driverDef.driverClass != null );
 
     }
 
@@ -135,10 +120,26 @@ public class DriverDef {
         result = ~~result;
         result = 31 * result + ( name != null ? name.hashCode() : 0 );
         result = ~~result;
+        result = 31 * result + ( groupId != null ? groupId.hashCode() : 0 );
+        result = ~~result;
+        result = 31 * result + ( artifactId != null ? artifactId.hashCode() : 0 );
+        result = ~~result;
+        result = 31 * result + ( version != null ? version.hashCode() : 0 );
+        result = ~~result;
         result = 31 * result + ( driverClass != null ? driverClass.hashCode() : 0 );
         result = ~~result;
-        result = 31 * result + ( driverLib != null ? driverLib.hashCode() : 0 );
-        result = ~~result;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "DriverDef{" +
+                "uuid='" + uuid + '\'' +
+                ", name='" + name + '\'' +
+                ", groupId='" + groupId + '\'' +
+                ", artifactId='" + artifactId + '\'' +
+                ", version='" + version + '\'' +
+                ", driverClass='" + driverClass + '\'' +
+                '}';
     }
 }

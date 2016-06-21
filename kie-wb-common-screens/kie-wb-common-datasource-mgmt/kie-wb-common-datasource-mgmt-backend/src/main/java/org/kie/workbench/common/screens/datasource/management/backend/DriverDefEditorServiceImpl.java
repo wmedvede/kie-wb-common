@@ -20,26 +20,31 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Driver;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
-import org.guvnor.common.services.project.model.GAV;
 import org.guvnor.common.services.project.model.Project;
+import org.guvnor.common.services.shared.message.Level;
+import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.events.DeleteDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDriverEvent;
+import org.kie.workbench.common.screens.datasource.management.events.UpdateDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.util.DriverDefSerializer;
 import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
+import org.kie.workbench.common.screens.datasource.management.util.UUIDGenerator;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.uberfire.backend.server.util.Paths;
 import org.uberfire.backend.vfs.Path;
+import org.uberfire.ext.editor.commons.service.RenameService;
 import org.uberfire.io.IOService;
 import org.uberfire.java.nio.base.options.CommentedOption;
 import org.uberfire.java.nio.file.FileAlreadyExistsException;
@@ -59,7 +64,10 @@ public class DriverDefEditorServiceImpl
     private DataSourceServicesHelper serviceHelper;
 
     @Inject
-    protected KieProjectService projectService;
+    private KieProjectService projectService;
+
+    @Inject
+    private RenameService renameService;
 
     @Inject
     private CommentedOptionFactory optionsFactory;
@@ -72,6 +80,9 @@ public class DriverDefEditorServiceImpl
 
     @Inject
     private Event<DeleteDriverEvent> deleteDriverEvent;
+
+    @Inject
+    private Event<UpdateDriverEvent> updateDriverEvent;
 
     public DriverDefEditorServiceImpl() {
     }
@@ -90,27 +101,47 @@ public class DriverDefEditorServiceImpl
     }
 
     @Override
-    public Path save( final Path path, final DriverDefEditorContent editorContent, final String comment ) {
+    public Path save( final Path path,
+            final DriverDefEditorContent editorContent,
+            final String comment ) {
 
         checkNotNull( "path", path );
         checkNotNull( "content", editorContent );
 
-        String content = DriverDefSerializer.serialize( editorContent.getDriverDef() );
+        final Project project = projectService.resolveProject( path );
+        final DriverDef originalDriverDef = DriverDefSerializer.deserialize(
+                ioService.readAllString( Paths.convert( path ) ) );
+        final String content = DriverDefSerializer.serialize( editorContent.getDriverDef() );
+
         ioService.write( Paths.convert( path ), content, optionsFactory.makeCommentedOption( comment ) );
+
+        if ( originalDriverDef.getName() != null &&
+                !originalDriverDef.getName().equals( editorContent.getDriverDef().getName() ) ) {
+            renameService.rename( path, editorContent.getDriverDef().getName(), comment );
+        }
+
+        updateDriverEvent.fire( new UpdateDriverEvent( originalDriverDef,
+                editorContent.getDriverDef(),
+                project,
+                optionsFactory.getSafeSessionId(),
+                optionsFactory.getSafeIdentityName()  ) );
+
         return path;
     }
 
     @Override
     public Path create( final Path context, final String driverName, final String fileName ) {
+
         checkNotNull( "context", context );
         checkNotNull( "driverName", driverName );
         checkNotNull( "fileName", fileName );
 
-        DriverDef driverDef = new DriverDef();
-        driverDef.setUuid( UUID.randomUUID().toString() );
+        final DriverDef driverDef = new DriverDef();
+        driverDef.setUuid( UUIDGenerator.generateUUID() );
         driverDef.setName( driverName );
-        String content = DriverDefSerializer.serialize( driverDef );
+        final String content = DriverDefSerializer.serialize( driverDef );
 
+        final Project project = projectService.resolveProject( context );
         final org.uberfire.java.nio.file.Path nioPath = Paths.convert( context ).resolve( fileName );
         final Path newPath = Paths.convert( nioPath );
 
@@ -122,6 +153,11 @@ public class DriverDefEditorServiceImpl
                 content,
                 new CommentedOption( optionsFactory.getSafeIdentityName() ) );
 
+        newDriverEvent.fire( new NewDriverEvent( driverDef,
+                project,
+                optionsFactory.getSafeSessionId(),
+                optionsFactory.getSafeIdentityName() ) );
+
         return newPath;
     }
 
@@ -129,6 +165,7 @@ public class DriverDefEditorServiceImpl
     public Path create( final DriverDef driverDef,
             final Project project,
             final boolean updateDeployment ) {
+
         checkNotNull( "driverDef", driverDef );
         checkNotNull( "project", project );
 
@@ -136,20 +173,24 @@ public class DriverDefEditorServiceImpl
         Path newPath = create( driverDef, context, updateDeployment );
 
         newDriverEvent.fire( new NewDriverEvent( driverDef,
-                project, optionsFactory.getSafeSessionId(), optionsFactory.getSafeIdentityName() ) );
+                project,
+                optionsFactory.getSafeSessionId(),
+                optionsFactory.getSafeIdentityName() ) );
 
         return newPath;
     }
 
     @Override
     public Path createGlobal( final DriverDef driverDef, final boolean updateDeployment ) {
+
         checkNotNull( "driverDef", driverDef );
 
         Path context = serviceHelper.getGlobalDataSourcesContext();
         Path newPath = create( driverDef, context, updateDeployment );
 
         newDriverEvent.fire( new NewDriverEvent( driverDef,
-                optionsFactory.getSafeSessionId(), optionsFactory.getSafeIdentityName() ) );
+                optionsFactory.getSafeSessionId(),
+                optionsFactory.getSafeIdentityName() ) );
 
         return newPath;
     }
@@ -165,7 +206,7 @@ public class DriverDefEditorServiceImpl
         }
 
         if ( driverDef.getUuid() == null ) {
-            driverDef.setUuid( UUID.randomUUID().toString() );
+            driverDef.setUuid( UUIDGenerator.generateUUID() );
         }
 
         String fileName = driverDef.getName() + ".driver";
@@ -183,10 +224,26 @@ public class DriverDefEditorServiceImpl
         return newPath;
     }
 
+    @Override
+    public List<ValidationMessage> validate( DriverDef driverDef ) {
+
+        List<ValidationMessage> messages = new ArrayList<>(  );
+        ValidationMessage message;
+        try {
+            validateDriver( driverDef );
+        } catch ( Exception e ) {
+            message = new ValidationMessage();
+            message.setLevel( Level.ERROR );
+            message.setText( e.getMessage() );
+            messages.add( message );
+        }
+        return messages;
+    }
+
     private void validateDriver( DriverDef driverDef ) throws Exception {
 
-        final URI uri = artifactResolver.resolve( new GAV( driverDef.getGroupId(),
-                driverDef.getArtifactId(), driverDef.getVersion() ) );
+        final URI uri = artifactResolver.resolve( driverDef.getGroupId(),
+                driverDef.getArtifactId(), driverDef.getVersion() );
 
         if ( uri == null ) {
             throw new Exception( "maven artifact was not found: " + driverDef.getGroupId() + ":"
@@ -209,7 +266,9 @@ public class DriverDefEditorServiceImpl
 
     @Override
     public void delete( final Path path, final String comment ) {
+
         checkNotNull( "path", path );
+
         final org.uberfire.java.nio.file.Path nioPath = Paths.convert( path );
         if ( ioService.exists( nioPath ) ) {
             final String content = ioService.readAllString( nioPath );
@@ -229,5 +288,10 @@ public class DriverDefEditorServiceImpl
     @Override
     public Path getProjectDriversContext( Project project ) {
         return serviceHelper.getProjectDataSourcesContext( project );
+    }
+
+    @Override
+    public boolean isDevelopmentMode() {
+        return System.getProperty( "DSDevMode" ) != null;
     }
 }
