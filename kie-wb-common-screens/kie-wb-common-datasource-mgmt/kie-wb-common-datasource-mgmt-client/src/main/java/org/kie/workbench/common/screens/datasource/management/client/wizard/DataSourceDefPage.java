@@ -24,9 +24,9 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Widget;
 import org.guvnor.common.services.project.model.Project;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefEditorHelper;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefMainPanel;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefMainPanelView;
+import org.kie.workbench.common.screens.datasource.management.client.editor.datasource.DataSourceDefEditorHelper;
+import org.kie.workbench.common.screens.datasource.management.client.editor.datasource.DataSourceDefMainPanel;
+import org.kie.workbench.common.screens.datasource.management.client.editor.datasource.DataSourceDefMainPanelView;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.uberfire.client.callbacks.Callback;

@@ -16,7 +16,10 @@
 
 package org.kie.workbench.common.screens.datasource.management.service;
 
+import java.util.List;
+
 import org.guvnor.common.services.project.model.Project;
+import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
@@ -37,8 +40,13 @@ public interface DriverDefEditorService
 
     Path createGlobal( final DriverDef driverDef, final boolean updateDeployment );
 
+    List<ValidationMessage> validate( final DriverDef driverDef );
+
     Path getGlobalDriversContext();
 
     Path getProjectDriversContext( final Project project );
+
+    //will be removed, by now it's used for enabling the deploy/undeploy buttons.
+    boolean isDevelopmentMode();
 
 }

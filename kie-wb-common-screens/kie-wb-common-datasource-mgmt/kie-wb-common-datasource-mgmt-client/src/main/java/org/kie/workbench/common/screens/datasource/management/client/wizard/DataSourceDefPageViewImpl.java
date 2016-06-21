@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Composite;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.kie.workbench.common.screens.datasource.management.client.editor.DataSourceDefMainPanel;
+import org.kie.workbench.common.screens.datasource.management.client.editor.datasource.DataSourceDefMainPanel;
 
 @Dependent
 @Templated

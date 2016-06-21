@@ -16,7 +16,7 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.wizard;
 
-import org.kie.workbench.common.screens.datasource.management.client.editor.DriverDefMainPanel;
+import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanel;
 import org.uberfire.client.mvp.UberView;
 
 public interface DriverDefPageView

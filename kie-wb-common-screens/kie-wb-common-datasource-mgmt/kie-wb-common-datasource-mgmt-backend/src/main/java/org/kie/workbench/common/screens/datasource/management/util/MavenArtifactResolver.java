@@ -45,33 +45,36 @@ public class MavenArtifactResolver {
     public MavenArtifactResolver() {
     }
 
-    public URI resolve( GAV artifact ) throws Exception {
+    public URI resolve( final String groupId, final String artifactId, final String version ) throws Exception {
 
         final POM projectPom = new POM( new GAV( "resolver-dummy-group",
                 "resolver-dummy-artifact",
                 "resolver-dummy-version" ) );
 
-        projectPom.getDependencies().add( new Dependency( artifact ) );
+        projectPom.getDependencies().add( new Dependency( new GAV( groupId, artifactId, version ) ) );
 
         try {
 
-            final String pomXML = pomContentHandler.toString(projectPom );
+            final String pomXML = pomContentHandler.toString( projectPom );
 
             final InputStream pomStream = new ByteArrayInputStream( pomXML.getBytes( StandardCharsets.UTF_8 ) );
             final MavenProject mavenProject = MavenProjectLoader.parseMavenPom( pomStream );
 
             for ( Artifact mavenArtifact : mavenProject.getArtifacts() ) {
-                if ( artifact.getGroupId().equals( mavenArtifact.getGroupId() ) &&
-                        artifact.getArtifactId().equals( mavenArtifact.getArtifactId() ) &&
-                        artifact.getVersion().equals( mavenArtifact.getVersion() ) ) {
+                if ( groupId.equals( mavenArtifact.getGroupId() ) &&
+                        artifactId.equals( mavenArtifact.getArtifactId() ) &&
+                        version.equals( mavenArtifact.getVersion() ) &&
+                        mavenArtifact.getFile().exists() ) {
                     return mavenArtifact.getFile().toURI();
                 }
             }
 
             return null;
         } catch ( IOException e ) {
-            logger.error( "Unable to get artifact: " + artifact.toString() + " from maven repository", e );
-            throw new Exception( "Unable to get artifact: " + artifact.toString() + " from maven repository", e );
+            logger.error( "Unable to get artifact: " + groupId + ":" + artifactId + ":" + version +
+                    " from maven repository", e );
+            throw new Exception( "Unable to get artifact: " + groupId + ":" + artifactId + ":" + version +
+                    " from maven repository", e );
         }
     }
 

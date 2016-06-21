@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.editor.driver;
 
+import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.uberfire.backend.vfs.Path;
 
 @Dependent
@@ -123,6 +125,9 @@ public class DriverDefMainPanel
         view.setVersion( version );
     }
 
+    public void showValidationMessages( List<ValidationMessage> messages ) {
+        view.showValidationMessages( messages );
+    }
     public void clear() {
         view.setName( null );
         view.setGroupId( null );

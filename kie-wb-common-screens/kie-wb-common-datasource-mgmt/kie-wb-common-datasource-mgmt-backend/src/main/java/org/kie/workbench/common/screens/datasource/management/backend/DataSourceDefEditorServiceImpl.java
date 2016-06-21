@@ -19,7 +19,6 @@ package org.kie.workbench.common.screens.datasource.management.backend;
 import java.net.URI;
 import java.sql.Connection;
 import java.util.Properties;
-import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -29,11 +28,11 @@ import javax.sql.DataSource;
 
 import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
-import org.guvnor.common.services.project.model.GAV;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.events.DeleteDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
+import org.kie.workbench.common.screens.datasource.management.events.UpdateDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
@@ -48,16 +47,19 @@ import org.kie.workbench.common.screens.datasource.management.service.DriverDefE
 import org.kie.workbench.common.screens.datasource.management.util.DataSourceDefSerializer;
 import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
 import org.kie.workbench.common.screens.datasource.management.util.URLConnectionFactory;
+import org.kie.workbench.common.screens.datasource.management.util.UUIDGenerator;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uberfire.backend.server.util.Paths;
 import org.uberfire.backend.vfs.Path;
+import org.uberfire.ext.editor.commons.service.RenameService;
 import org.uberfire.io.IOService;
 import org.uberfire.java.nio.base.options.CommentedOption;
 import org.uberfire.java.nio.file.FileAlreadyExistsException;
 
 import static org.uberfire.commons.validation.PortablePreconditions.*;
+import static org.kie.workbench.common.screens.datasource.management.util.ServiceUtil.isEmpty;
 
 @Service
 @ApplicationScoped
@@ -92,10 +94,16 @@ public class DataSourceDefEditorServiceImpl
     private MavenArtifactResolver artifactResolver;
 
     @Inject
+    private RenameService renameService;
+
+    @Inject
     private Event<NewDataSourceEvent> newDataSourceEvent;
 
     @Inject
     private Event<DeleteDataSourceEvent> deleteDataSourceEvent;
+
+    @Inject
+    private Event<UpdateDataSourceEvent> updateDataSourceEvent;
 
     public DataSourceDefEditorServiceImpl() {
     }
@@ -128,9 +136,12 @@ public class DataSourceDefEditorServiceImpl
         checkNotNull( "path", path );
         checkNotNull( "content", editorContent );
 
-        String content = DataSourceDefSerializer.serialize( editorContent.getDataSourceDef() );
-
+        Path newPath = path;
         try {
+            final DataSourceDef originalDataSourceDef = DataSourceDefSerializer.deserialize(
+                    ioService.readAllString( Paths.convert( path ) ) );
+            final String content = DataSourceDefSerializer.serialize( editorContent.getDataSourceDef() );
+
             if ( updateDeployment && dataSourceManagementService.isEnabled() ) {
                 DataSourceDeploymentInfo deploymentInfo = dataSourceManagementService.getDeploymentInfo(
                         editorContent.getDataSourceDef().getUuid() );
@@ -141,10 +152,22 @@ public class DataSourceDefEditorServiceImpl
             }
 
             ioService.write( Paths.convert( path ), content, optionsFactory.makeCommentedOption( comment ) );
+
+            if ( originalDataSourceDef.getName() != null &&
+                    !originalDataSourceDef.getName().equals( editorContent.getDataSourceDef().getName() ) ) {
+                newPath = renameService.rename( path, editorContent.getDataSourceDef().getName(), comment );
+            }
+
+            updateDataSourceEvent.fire( new UpdateDataSourceEvent( editorContent.getDataSourceDef(),
+                    editorContent.getProject(),
+                    optionsFactory.getSafeSessionId(),
+                    optionsFactory.getSafeIdentityName(),
+                    originalDataSourceDef ) );
+
         } catch ( Exception e ) {
             throw ExceptionUtilities.handleException( e );
         }
-        return path;
+        return newPath;
     }
 
     @Override
@@ -157,10 +180,11 @@ public class DataSourceDefEditorServiceImpl
         checkNotNull( "fileName", fileName );
 
         DataSourceDef dataSourceDef = new DataSourceDef();
-        dataSourceDef.setUuid( UUID.randomUUID().toString() );
+        dataSourceDef.setUuid( UUIDGenerator.generateUUID() );
         dataSourceDef.setName( dataSourceName );
         String content = DataSourceDefSerializer.serialize( dataSourceDef );
 
+        final Project project = projectService.resolveProject( context );
         final org.uberfire.java.nio.file.Path nioPath = Paths.convert( context ).resolve( fileName );
         final Path newPath = Paths.convert( nioPath );
 
@@ -171,6 +195,12 @@ public class DataSourceDefEditorServiceImpl
         ioService.write( nioPath,
                 content,
                 new CommentedOption( optionsFactory.getSafeIdentityName() ) );
+
+
+        newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef,
+                project,
+                optionsFactory.getSafeSessionId(),
+                optionsFactory.getSafeIdentityName() ) );
 
         return newPath;
     }
@@ -186,7 +216,9 @@ public class DataSourceDefEditorServiceImpl
         Path newPath = create( dataSourceDef, context, updateDeployment );
 
         newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef,
-                project, optionsFactory.getSafeSessionId(), optionsFactory.getSafeIdentityName() ) );
+                project,
+                optionsFactory.getSafeSessionId(),
+                optionsFactory.getSafeIdentityName() ) );
 
         return newPath;
     }
@@ -198,7 +230,8 @@ public class DataSourceDefEditorServiceImpl
         Path context = serviceHelper.getGlobalDataSourcesContext();
         Path newPath = create( dataSourceDef, context, updateDeployment );
 
-        newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef, optionsFactory.getSafeSessionId(),
+        newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef,
+                optionsFactory.getSafeSessionId(),
                 optionsFactory.getSafeIdentityName() ) );
 
         return newPath;
@@ -221,7 +254,7 @@ public class DataSourceDefEditorServiceImpl
         checkNotNull( "context", context );
 
         if ( dataSourceDef.getUuid() == null ) {
-            dataSourceDef.setUuid( UUID.randomUUID().toString() );
+            dataSourceDef.setUuid( UUIDGenerator.generateUUID() );
         }
 
         String fileName = dataSourceDef.getName() + ".datasource";
@@ -325,17 +358,21 @@ public class DataSourceDefEditorServiceImpl
         TestConnectionResult result = new TestConnectionResult( );
         result.setTestPassed( false );
 
-        if ( dataSourceDef.getConnectionURL() == null ) {
+        if ( isEmpty( dataSourceDef.getConnectionURL() ) ) {
             result.setMessage( "A valid connection url is required" );
             return result;
         }
 
-        if ( dataSourceDef.getUser() == null || dataSourceDef.getPassword() == null ) {
+        if ( isEmpty( dataSourceDef.getUser() ) || isEmpty( dataSourceDef.getPassword() ) ) {
             result.setMessage( "A valid user and password are required" );
             return result;
         }
 
         DriverDefInfo driverDefInfo = null;
+        if ( isEmpty( dataSourceDef.getDriverUuid() ) ) {
+            result.setMessage( "A valid driver is required" );
+            return result;
+        }
         if ( project != null ) {
             driverDefInfo = dataSourceExplorerService.findProjectDriver( dataSourceDef.getDriverUuid(), project.getRootPath() );
         } else {
@@ -352,8 +389,7 @@ public class DataSourceDefEditorServiceImpl
         URI uri;
 
         try {
-            uri = artifactResolver.resolve( new GAV( driverDef.getGroupId(),
-                    driverDef.getArtifactId(), driverDef.getVersion() ) );
+            uri = artifactResolver.resolve( driverDef.getGroupId(), driverDef.getArtifactId(), driverDef.getVersion() );
         } catch ( Exception e ) {
             result.setMessage( "Connection could not be tested due to the following error: " + e.getMessage() );
             return result;

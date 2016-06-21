@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.editor.driver;
 
+import java.util.List;
+
+import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.uberfire.client.mvp.UberView;
 
 public interface DriverDefMainPanelView extends UberView<DriverDefMainPanelView.Presenter> {
@@ -45,16 +48,18 @@ public interface DriverDefMainPanelView extends UberView<DriverDefMainPanelView.
 
     String getDriverClass();
 
-    void setGroupId( String groupId );
+    void setGroupId( final String groupId );
 
     String getGroupId();
 
-    void setArtifactId( String artifactId );
+    void setArtifactId( final String artifactId );
 
     String getArtifactId();
 
     void setVersion( String version );
 
     String getVersion();
+
+    void showValidationMessages( final List<ValidationMessage> messages );
 
 }

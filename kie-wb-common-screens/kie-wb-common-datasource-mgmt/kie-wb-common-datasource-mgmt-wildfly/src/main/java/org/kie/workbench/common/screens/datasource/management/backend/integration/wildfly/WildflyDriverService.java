@@ -16,6 +16,9 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
 
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -28,8 +31,7 @@ import org.jboss.dmr.ModelNode;
 import org.kie.workbench.common.screens.datasource.management.backend.integration.DriverService;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
-import org.uberfire.backend.server.util.Paths;
-import org.uberfire.io.IOService;
+import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
@@ -40,8 +42,7 @@ public class WildflyDriverService
         implements DriverService {
 
     @Inject
-    @Named("ioStrategy")
-    private IOService ioService;
+    private MavenArtifactResolver artifactResolver;
 
     @Inject
     private WildflyDeploymentService deploymentService;
@@ -59,9 +60,16 @@ public class WildflyDriverService
     @Override
     public void deploy( final DriverDef driverDef ) throws Exception {
 
-        byte[] libContent = ioService.readAllBytes( Paths.convert( driverDef.getDriverLib() ) );
-        deploymentService.deployContent( driverDef.getUuid(), driverDef.getUuid(), libContent, true );
+        final URI uri = artifactResolver.resolve( driverDef.getGroupId(),
+                driverDef.getArtifactId(), driverDef.getVersion() );
 
+        if ( uri == null ) {
+            throw new Exception( "Unable to get maven artifact for driver: " + driverDef );
+        }
+
+        final Path path = java.nio.file.Paths.get( uri );
+        byte[] libContent = Files.readAllBytes( path );
+        deploymentService.deployContent( driverDef.getUuid(), driverDef.getUuid(), libContent, true );
     }
 
     @Override
