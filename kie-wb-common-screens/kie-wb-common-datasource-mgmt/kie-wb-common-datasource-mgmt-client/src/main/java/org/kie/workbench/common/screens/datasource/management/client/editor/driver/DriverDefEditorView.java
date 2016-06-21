@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor;
+package org.kie.workbench.common.screens.datasource.management.client.editor.driver;
 
 import org.uberfire.client.mvp.UberView;
 import org.uberfire.ext.editor.commons.client.BaseEditorView;
 
-public interface DataSourceDefEditorView
-        extends UberView<DataSourceDefEditorView.Presenter>,
-                BaseEditorView {
+public interface DriverDefEditorView
+        extends UberView<DriverDefEditorView.Presenter>,
+        BaseEditorView {
 
     interface Presenter {
 
     }
 
-    void setMainPanel( final DataSourceDefMainPanel mainPanel );
-
-    void showInformationPopup( final String title, final String message );
-
+    void setMainPanel( final DriverDefMainPanel mainPanel );
 }

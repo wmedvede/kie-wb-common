@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.integration;
+package org.kie.workbench.common.screens.datasource.management.util;
 
 import java.util.Properties;
 

@@ -79,8 +79,7 @@ public class WildflyDataSourceService
     public void deploy( final DataSourceDef dataSourceDef ) throws Exception {
         DriverDeploymentInfo driverDeploymentInfo = driverService.getDeploymentInfo( dataSourceDef.getDriverUuid() );
         if ( driverDeploymentInfo == null ) {
-            //Uncomment this
-            //throw new Exception( "Required driver: " + dataSourceDef.getDriverUuid() + " has not been deployed." );
+            throw new Exception( "Required driver: " + dataSourceDef.getDriverUuid() + " has not been deployed." );
         }
         createDatasource( dataSourceDef.getUuid(),
                 dataSourceDef.getJndi(),

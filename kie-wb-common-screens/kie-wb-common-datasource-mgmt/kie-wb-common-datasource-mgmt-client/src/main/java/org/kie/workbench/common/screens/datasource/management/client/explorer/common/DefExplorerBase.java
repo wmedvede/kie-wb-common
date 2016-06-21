@@ -28,6 +28,8 @@ import org.kie.workbench.common.screens.datasource.management.events.DeleteDataS
 import org.kie.workbench.common.screens.datasource.management.events.DeleteDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDriverEvent;
+import org.kie.workbench.common.screens.datasource.management.events.UpdateDataSourceEvent;
+import org.kie.workbench.common.screens.datasource.management.events.UpdateDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
@@ -104,7 +106,19 @@ public abstract class DefExplorerBase {
         }
     }
 
+    protected void onDataSourceUpdated( @Observes UpdateDataSourceEvent event ) {
+        if ( refreshOnDataSourceEvent( event ) ) {
+            refresh();
+        }
+    }
+
     protected void onDriverCreated( @Observes NewDriverEvent event ) {
+        if ( refreshOnDriverEvent( event ) ) {
+            refresh();
+        }
+    }
+
+    protected void onDriverUpdated( @Observes UpdateDriverEvent event ) {
         if ( refreshOnDriverEvent( event ) ) {
             refresh();
         }
