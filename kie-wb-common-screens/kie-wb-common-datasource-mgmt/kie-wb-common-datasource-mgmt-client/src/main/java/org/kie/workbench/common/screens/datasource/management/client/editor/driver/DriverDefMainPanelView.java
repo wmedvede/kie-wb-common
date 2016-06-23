@@ -44,21 +44,41 @@ public interface DriverDefMainPanelView extends UberView<DriverDefMainPanelView.
 
     String getName();
 
+    void setNameErrorMessage( final String message );
+
+    void clearNameErrorMessage();
+
     void setDriverClass( final String driverClass );
 
     String getDriverClass();
+
+    void setDriverClassErrorMessage( final String message );
+
+    void clearDriverClassErrorMessage();
 
     void setGroupId( final String groupId );
 
     String getGroupId();
 
+    void setGroupIdErrorMessage( final String message );
+
+    void clearGroupIdErrorMessage();
+
     void setArtifactId( final String artifactId );
 
     String getArtifactId();
 
+    void setArtifactIdErrorMessage( final String message );
+
+    void clearArtifactIdErrorMessage();
+
     void setVersion( String version );
 
     String getVersion();
+
+    void setVersionErrorMessage( final String message );
+
+    void clearVersionErrorMessage();
 
     void showValidationMessages( final List<ValidationMessage> messages );
 

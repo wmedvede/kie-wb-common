@@ -33,7 +33,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
@@ -54,7 +54,7 @@ public class NewDataSourceDefWizard
 
     private Caller<DataSourceDefEditorService> dataSourceDefService;
 
-    private final Caller<DataSourceExplorerService> driverDefService;
+    private final Caller<DataSourceDefQueryService> driverDefService;
 
     private Event<NotificationEvent> notification;
 
@@ -63,7 +63,7 @@ public class NewDataSourceDefWizard
     @Inject
     public NewDataSourceDefWizard( final DataSourceDefPage dataSourceDefPage,
             final Caller<DataSourceDefEditorService> dataSourceDefService,
-            final Caller<DataSourceExplorerService> driverDefService,
+            final Caller<DataSourceDefQueryService> driverDefService,
             final Event<NotificationEvent> notification ) {
         this.dataSourceDefPage = dataSourceDefPage;
         this.dataSourceDefService = dataSourceDefService;
@@ -141,10 +141,10 @@ public class NewDataSourceDefWizard
     private void doComplete() {
         if ( isGlobal() ) {
             dataSourceDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).createGlobal(
-                    dataSourceDef, false );
+                    dataSourceDef );
         } else {
             dataSourceDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).create(
-                    dataSourceDef, project, false );
+                    dataSourceDef, project );
         }
     }
 

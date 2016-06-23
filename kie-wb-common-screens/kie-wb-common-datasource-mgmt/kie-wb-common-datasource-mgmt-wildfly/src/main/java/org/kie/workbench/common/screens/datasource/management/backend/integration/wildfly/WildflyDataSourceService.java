@@ -42,7 +42,6 @@ public class WildflyDataSourceService
         extends WildflyBaseService
         implements DataSourceService {
 
-
     @Inject
     WildflyDriverService driverService;
 
@@ -50,19 +49,33 @@ public class WildflyDataSourceService
     }
 
     @Override
-    public List<DataSourceDef> getDataSources() throws Exception {
+    public List<DataSourceDef> getDeployments() throws Exception {
 
         List<WildflyDataSourceDef> dataSources;
         List<DataSourceDef> dataSourceDefs = new ArrayList<>( );
         DataSourceDef dataSourceDef;
+        String dataSourceUuid;
+        String driverUuid;
 
         dataSources = getInternalDataSources();
         for ( WildflyDataSourceDef internalDef : dataSources ) {
             dataSourceDef = new DataSourceDef();
+            try {
+                dataSourceUuid = DeploymentIdGenerator.extractUuid( internalDef.getName() );
+            } catch ( Exception e ) {
+                dataSourceUuid = internalDef.getName();
+            }
+            try {
+                driverUuid = DeploymentIdGenerator.extractUuid( internalDef.getDriverName() );
+            } catch ( Exception e ) {
+                driverUuid = internalDef.getDriverName();
+            }
+
+            dataSourceDef.setUuid( dataSourceUuid );
             dataSourceDef.setName( internalDef.getName() );
             dataSourceDef.setJndi( internalDef.getJndi() );
             dataSourceDef.setConnectionURL( internalDef.getConnectionURL() );
-            dataSourceDef.setDriverUuid( Util.normalizeDriverName( internalDef.getDriverName() ) );
+            dataSourceDef.setDriverUuid( driverUuid );
             dataSourceDef.setDriverClass( internalDef.getDriverClass() );
             dataSourceDef.setDataSourceClass( internalDef.getDataSourceClass() );
             dataSourceDef.setUser( internalDef.getUser() );
@@ -76,32 +89,35 @@ public class WildflyDataSourceService
     }
 
     @Override
-    public void deploy( final DataSourceDef dataSourceDef ) throws Exception {
+    public DataSourceDeploymentInfo deploy( final DataSourceDef dataSourceDef ) throws Exception {
         DriverDeploymentInfo driverDeploymentInfo = driverService.getDeploymentInfo( dataSourceDef.getDriverUuid() );
         if ( driverDeploymentInfo == null ) {
             throw new Exception( "Required driver: " + dataSourceDef.getDriverUuid() + " has not been deployed." );
         }
-        createDatasource( dataSourceDef.getUuid(),
+        final String deploymentId = DeploymentIdGenerator.generateDeploymentId( dataSourceDef );
+        createDatasource( deploymentId,
                 dataSourceDef.getJndi(),
                 dataSourceDef.getConnectionURL(),
                 dataSourceDef.getDriverClass(),
                 dataSourceDef.getDataSourceClass(),
-                driverDeploymentInfo.getInternalUuid(),
+                driverDeploymentInfo.getDeploymentId(),
                 dataSourceDef.getUser(),
                 dataSourceDef.getPassword(),
                 null,
                 dataSourceDef.isUseJTA(),
                 dataSourceDef.isUseCCM() );
+
+        return new DataSourceDeploymentInfo( deploymentId, true, dataSourceDef.getUuid(), dataSourceDef.getJndi() );
     }
 
     @Override
-    public void undeploy( final String uuid ) throws Exception {
-        deleteDatasource( uuid );
+    public void undeploy( final DataSourceDeploymentInfo deploymentInfo ) throws Exception {
+        deleteDatasource( deploymentInfo.getDeploymentId() );
     }
 
     @Override
     public DataSourceDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception {
-        for ( DataSourceDeploymentInfo deploymentInfo : getAllDeploymentInfo() ) {
+        for ( DataSourceDeploymentInfo deploymentInfo : getDeploymentsInfo() ) {
             if ( uuid.equals( deploymentInfo.getUuid() ) ) {
                 return deploymentInfo;
             }
@@ -126,16 +142,23 @@ public class WildflyDataSourceService
     }
 
     @Override
-    public List<DataSourceDeploymentInfo> getAllDeploymentInfo() throws Exception {
+    public List<DataSourceDeploymentInfo> getDeploymentsInfo() throws Exception {
         List<WildflyDataSourceDef> dataSources = getInternalDataSources();
-        List<DataSourceDeploymentInfo> result = new ArrayList<DataSourceDeploymentInfo>( );
+        List<DataSourceDeploymentInfo> result = new ArrayList<>( );
         DataSourceDeploymentInfo deploymentInfo;
+        String uuid;
+        boolean managed;
 
         for ( WildflyDataSourceDef internalDef : dataSources ) {
-            deploymentInfo = new DataSourceDeploymentInfo();
-            deploymentInfo.setUuid( internalDef.getName() );
-            deploymentInfo.setJndi( internalDef.getJndi() );
-            deploymentInfo.setManaged( true );
+            try {
+                uuid = DeploymentIdGenerator.extractUuid( internalDef.getName() );
+                managed = true;
+            } catch ( Exception e ) {
+                uuid = internalDef.getName();
+                managed = false;
+            }
+            deploymentInfo = new DataSourceDeploymentInfo( internalDef.getName(),
+                    managed, uuid, internalDef.getJndi() );
             result.add( deploymentInfo );
         }
         return result;
@@ -149,7 +172,7 @@ public class WildflyDataSourceService
 
     private List<WildflyDataSourceDef> getInternalDataSources() throws Exception {
 
-        List<WildflyDataSourceDef> dataSources = new ArrayList<WildflyDataSourceDef>( );
+        List<WildflyDataSourceDef> dataSources = new ArrayList<>( );
         WildflyDataSourceDef dataSource;
         ModelNode response = null;
         ModelControllerClient client = null;

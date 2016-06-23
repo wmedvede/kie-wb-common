@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.service;
+package org.kie.workbench.common.screens.datasource.management.model;
 
-import java.util.List;
+public abstract class DeploymentInfo {
 
-import org.jboss.errai.bus.server.annotations.Remote;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
+    protected String deploymentId;
 
-@Remote
-public interface DriverManagementService {
+    protected boolean managed;
 
-    boolean isEnabled();
+    public DeploymentInfo() {
+    }
 
-    List<DriverDef> getDeployments();
+    public DeploymentInfo( String deploymentId, boolean managed ) {
+        this.deploymentId = deploymentId;
+        this.managed = managed;
+    }
 
-    DriverDeploymentInfo getDeploymentInfo( final String uuid );
+    public String getDeploymentId() {
+        return deploymentId;
+    }
 
-    DriverDeploymentInfo deploy( final DriverDef driverDef );
-
-    void undeploy( final DriverDeploymentInfo deploymentInfo );
-
+    public boolean isManaged() {
+        return managed;
+    }
 }

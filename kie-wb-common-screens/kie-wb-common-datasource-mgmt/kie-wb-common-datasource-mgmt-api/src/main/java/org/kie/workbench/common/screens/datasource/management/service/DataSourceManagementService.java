@@ -27,16 +27,14 @@ public interface DataSourceManagementService {
 
     boolean isEnabled();
 
-    List<DataSourceDef> getDataSources();
-
-    List<DataSourceDef> getSystemDataSources();
+    List<DataSourceDef> getDeployments();
 
     DataSourceDeploymentInfo getDeploymentInfo( final String uuid );
 
-    void deploy( final DataSourceDef dataSourceDef );
+    DataSourceDeploymentInfo deploy( final DataSourceDef dataSourceDef );
 
     void update( final DataSourceDef dataSourceDef );
 
-    void undeploy( final String uuid );
+    void undeploy( final DataSourceDeploymentInfo deploymentInfo );
 
 }

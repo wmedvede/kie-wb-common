@@ -20,6 +20,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 
 @Dependent
@@ -87,6 +88,12 @@ public class DriverDefEditorHelper {
     private void onNameChange() {
         driverDef.setName( mainPanel.getName().trim() );
         nameValid = validateName( driverDef.getName() );
+        if ( !nameValid ) {
+            mainPanel.setNameErrorMessage(
+                    getMessage( DataSourceManagementConstants.DriverDefEditor_InvalidNameMessage ) );
+        } else {
+            mainPanel.clearNameErrorMessage();
+        }
         if ( handler != null ) {
             handler.onNameChange();
         }
@@ -95,6 +102,12 @@ public class DriverDefEditorHelper {
     private void onDriverClassChange() {
         driverDef.setDriverClass( mainPanel.getDriverClass().trim() );
         driverClassValid = validateClassName( driverDef.getDriverClass() );
+        if ( !driverClassValid ) {
+            mainPanel.setDriverClassErrorMessage(
+                    getMessage( DataSourceManagementConstants.DriverDefEditor_InvalidDriverClassMessage ) );
+        } else {
+            mainPanel.clearDriverClassErrorMessage();
+        }
         if ( handler != null ) {
             handler.onDriverClassChange();
         }
@@ -103,6 +116,12 @@ public class DriverDefEditorHelper {
     private void onGroupIdChange() {
         driverDef.setGroupId( mainPanel.getGroupId().trim() );
         groupIdValid = validateGroupId( driverDef.getGroupId() );
+        if ( !groupIdValid ) {
+            mainPanel.setGroupIdErrorMessage(
+                    getMessage( DataSourceManagementConstants.DriverDefEditor_InvalidGroupIdMessage ) );
+        } else {
+            mainPanel.clearGroupIdErrorMessage();
+        }
         if ( handler != null ) {
             handler.onGroupIdChange();
         }
@@ -112,6 +131,12 @@ public class DriverDefEditorHelper {
     private void onArtifactIdChange() {
         driverDef.setArtifactId( mainPanel.getArtifactId().trim() );
         artifactIdValid = validateArtifactId( driverDef.getArtifactId() );
+        if ( !artifactIdValid ) {
+            mainPanel.setArtifactIdErrorMessage(
+                    getMessage( DataSourceManagementConstants.DriverDefEditor_InvalidArtifactIdMessage ) );
+        } else {
+            mainPanel.clearArtifactIdErrorMessage();
+        }
         if ( handler != null ) {
             handler.onArtifactIdChange();
         }
@@ -120,6 +145,12 @@ public class DriverDefEditorHelper {
     private void onVersionIdChange() {
         driverDef.setVersion( mainPanel.getVersion().trim() );
         versionValid = validateVersion( driverDef.getVersion() );
+        if ( !versionValid ) {
+            mainPanel.setVersionErrorMessage(
+                    getMessage( DataSourceManagementConstants.DriverDefEditor_InvalidVersionMessage ) );
+        } else {
+            mainPanel.clearVersionErrorMessage();
+        }
         if ( handler != null ) {
             handler.onVersionChange();
         }
@@ -184,5 +215,13 @@ public class DriverDefEditorHelper {
         mainPanel.setGroupId( driverDef.getGroupId() );
         mainPanel.setArtifactId( driverDef.getArtifactId() );
         mainPanel.setVersion( driverDef.getVersion() );
+    }
+
+    public String getMessage( String messageKey ) {
+        return translationService.getTranslation( messageKey );
+    }
+
+    public String getMessage( String messageKey, Object... args ) {
+        return translationService.format( messageKey, args );
     }
 }

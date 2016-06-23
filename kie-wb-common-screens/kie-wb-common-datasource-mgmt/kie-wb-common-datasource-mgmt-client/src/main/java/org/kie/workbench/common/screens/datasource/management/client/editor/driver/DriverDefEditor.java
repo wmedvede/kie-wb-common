@@ -27,6 +27,7 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.type.DriverDefType;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.uberfire.backend.vfs.ObservablePath;
@@ -229,6 +230,16 @@ public class DriverDefEditor
 
     private void addDevelopMenu() {
         //for development purposes menu entries, will be removed.
+        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Check-Status" )
+                .respondsWith( new Command() {
+                    @Override
+                    public void execute() {
+                        onCheckDeploymentStatus();
+                    }
+                } )
+                .endMenu()
+                .build().getItems().get( 0 ) );
+
         menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-Deploy" )
                 .respondsWith( new Command() {
                     @Override
@@ -250,13 +261,28 @@ public class DriverDefEditor
                 .build().getItems().get( 0 ) );
     }
 
+    private void onCheckDeploymentStatus() {
+        //Experimental method for development purposes.
+        driverService.call(
+                new RemoteCallback<DriverDeploymentInfo>() {
+                    @Override
+                    public void callback( DriverDeploymentInfo deploymentInfo ) {
+                        if ( deploymentInfo != null ) {
+                            Window.alert( "driver is deployed as: " + deploymentInfo.getDeploymentId() );
+                        } else {
+                            Window.alert( "driver is not deployed" );
+                        }
+                    }
+                }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDriverDef().getUuid() );
+    }
+
     private void onDeployDriver() {
         //Experimental method for development purposes.
         driverService.call(
-                new RemoteCallback<Void>() {
+                new RemoteCallback<DriverDeploymentInfo>() {
                     @Override
-                    public void callback( Void aVoid ) {
-                        Window.alert( "driver successfully deployed" );
+                    public void callback( DriverDeploymentInfo deploymentInfo ) {
+                        Window.alert( "driver successfully deployed: " + deploymentInfo.getDeploymentId() );
                     }
                 }, new DefaultErrorCallback() ).deploy( getContent().getDriverDef() );
     }
@@ -264,11 +290,21 @@ public class DriverDefEditor
     private void onUnDeployDriver() {
         //Experimental method for development purposes.
         driverService.call(
-                new RemoteCallback<Void>() {
+                new RemoteCallback<DriverDeploymentInfo>() {
                     @Override
-                    public void callback( Void aVoid ) {
-                        Window.alert( "driver successfully un deployed" );
+                    public void callback( DriverDeploymentInfo deploymentInfo ) {
+
+                        if ( deploymentInfo == null ) {
+                            Window.alert( "driver is not deployed in current server" );
+                        } else {
+                            driverService.call( new RemoteCallback<Void>() {
+                                @Override
+                                public void callback( Void aVoid ) {
+                                    Window.alert( "driver was successfully un-deployed" );
+                                }
+                            }, new DefaultErrorCallback() ).undeploy( deploymentInfo );
+                        }
                     }
-                }, new DefaultErrorCallback() ).undeploy( getContent().getDriverDef().getUuid() );
+                }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDriverDef().getUuid() );
     }
 }
