@@ -58,35 +58,35 @@ public class DriverManagementServiceImpl
     }
 
     @Override
-    public List<DriverDef> getDrivers() {
+    public List<DriverDef> getDeployments() {
 
         assertDriverServices();
         try {
-            return servicesProvider.getDriverService().getDrivers();
+            return servicesProvider.getDriverService().getDeployments();
         } catch ( Exception e ) {
-            logger.error( "getDrivers failed: " + e.getMessage(), e );
+            logger.error( "getDeployments failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }
 
     @Override
-    public DriverDeploymentInfo getDriverDeploymentInfo( final String uuid ) {
+    public DriverDeploymentInfo getDeploymentInfo( final String uuid ) {
 
         assertDriverServices();
         try {
             return servicesProvider.getDriverService().getDeploymentInfo( uuid );
         } catch ( Exception e ) {
-            logger.error( "getDriverDeploymentInfo for driver: " + uuid + " failed: " + e.getMessage(), e );
+            logger.error( "getDeploymentInfo for driver: " + uuid + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }
 
     @Override
-    public void deploy( final DriverDef driverDef ) {
+    public DriverDeploymentInfo deploy( final DriverDef driverDef ) {
 
         assertDriverServices();
         try {
-            servicesProvider.getDriverService().deploy( driverDef );
+            return servicesProvider.getDriverService().deploy( driverDef );
         } catch ( Exception e ) {
             logger.error( "deployment of driver: " + driverDef + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
@@ -94,13 +94,13 @@ public class DriverManagementServiceImpl
     }
 
     @Override
-    public void undeploy( final String uuid ) {
+    public void undeploy( final DriverDeploymentInfo deploymentInfo ) {
 
         assertDriverServices();
         try {
-            servicesProvider.getDriverService().undeploy( uuid );
+            servicesProvider.getDriverService().undeploy( deploymentInfo );
         } catch ( Exception e ) {
-            logger.error( "undeployment of driver: " + uuid + " failed: " + e.getMessage(), e );
+            logger.error( "undeployment of driver: " + deploymentInfo + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }

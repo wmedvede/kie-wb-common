@@ -27,7 +27,7 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 
 @Portable
-public class DataSourceExplorerContentQueryResult {
+public class DataSourceDefQueryResult {
 
     private Collection<OrganizationalUnit> organizationalUnits = new ArrayList<>(  );
 
@@ -39,7 +39,7 @@ public class DataSourceExplorerContentQueryResult {
 
     private Collection<DriverDefInfo> driverDefs = new ArrayList<>(  );
 
-    public DataSourceExplorerContentQueryResult() {
+    public DataSourceDefQueryResult() {
     }
 
     public Collection<OrganizationalUnit> getOrganizationalUnits() {

@@ -41,7 +41,7 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDefEdi
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.model.TestConnectionResult;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.util.DataSourceDefSerializer;
@@ -79,7 +79,7 @@ public class DataSourceDefEditorServiceImpl
     protected KieProjectService projectService;
 
     @Inject
-    private DataSourceExplorerService dataSourceExplorerService;
+    private DataSourceDefQueryService dataSourceDefQueryService;
 
     @Inject
     private DataSourceManagementService dataSourceManagementService;
@@ -125,10 +125,10 @@ public class DataSourceDefEditorServiceImpl
     public Path save( final Path path,
             final DataSourceDefEditorContent editorContent,
             final String comment ) {
-        return save( path, editorContent, comment, false );
+        return save( path, editorContent, comment, serviceHelper.autoDeploy() );
     }
 
-    public Path save( final Path path,
+    private Path save( final Path path,
             final DataSourceDefEditorContent editorContent,
             final String comment,
             final boolean updateDeployment) {
@@ -146,7 +146,7 @@ public class DataSourceDefEditorServiceImpl
                 DataSourceDeploymentInfo deploymentInfo = dataSourceManagementService.getDeploymentInfo(
                         editorContent.getDataSourceDef().getUuid() );
                 if ( deploymentInfo != null ) {
-                    dataSourceManagementService.undeploy( deploymentInfo.getUuid() );
+                    dataSourceManagementService.undeploy( deploymentInfo );
                 }
                 dataSourceManagementService.deploy( editorContent.getDataSourceDef() );
             }
@@ -206,14 +206,12 @@ public class DataSourceDefEditorServiceImpl
     }
 
     @Override
-    public Path create( final DataSourceDef dataSourceDef,
-            final Project project,
-            final boolean updateDeployment ) {
+    public Path create( final DataSourceDef dataSourceDef, final Project project ) {
         checkNotNull( "dataSourceDef", dataSourceDef );
         checkNotNull( "project", project );
 
         Path context = serviceHelper.getProjectDataSourcesContext( project );
-        Path newPath = create( dataSourceDef, context, updateDeployment );
+        Path newPath = create( dataSourceDef, context, serviceHelper.autoDeploy() );
 
         newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef,
                 project,
@@ -224,11 +222,11 @@ public class DataSourceDefEditorServiceImpl
     }
 
     @Override
-    public Path createGlobal( DataSourceDef dataSourceDef, boolean updateDeployment ) {
+    public Path createGlobal( DataSourceDef dataSourceDef ) {
         checkNotNull( "dataSourceDef", dataSourceDef );
 
         Path context = serviceHelper.getGlobalDataSourcesContext();
-        Path newPath = create( dataSourceDef, context, updateDeployment );
+        Path newPath = create( dataSourceDef, context, serviceHelper.autoDeploy() );
 
         newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef,
                 optionsFactory.getSafeSessionId(),
@@ -272,9 +270,7 @@ public class DataSourceDefEditorServiceImpl
             ioService.startBatch( nioPath.getFileSystem() );
 
             //create the datasource file.
-            ioService.write( nioPath,
-                    content,
-                    new CommentedOption( optionsFactory.getSafeIdentityName() ) );
+            ioService.write( nioPath, content, new CommentedOption( optionsFactory.getSafeIdentityName() ) );
             fileCreated = true;
 
             if ( updateDeployment && dataSourceManagementService.isEnabled() ) {
@@ -283,7 +279,7 @@ public class DataSourceDefEditorServiceImpl
             }
 
         } catch ( Exception e1 ) {
-            logger.error( "An exception was produced during data source creation: {}", dataSourceDef.getName(), e1 );
+            logger.error( "It was not possible to create data source: {}", dataSourceDef.getName(), e1 );
             if ( fileCreated ) {
                 //the file was created, but the deployment failed.
                 try {
@@ -374,9 +370,9 @@ public class DataSourceDefEditorServiceImpl
             return result;
         }
         if ( project != null ) {
-            driverDefInfo = dataSourceExplorerService.findProjectDriver( dataSourceDef.getDriverUuid(), project.getRootPath() );
+            driverDefInfo = dataSourceDefQueryService.findProjectDriver( dataSourceDef.getDriverUuid(), project.getRootPath() );
         } else {
-            driverDefInfo = dataSourceExplorerService.findGlobalDriver( dataSourceDef.getDriverUuid() );
+            driverDefInfo = dataSourceDefQueryService.findGlobalDriver( dataSourceDef.getDriverUuid() );
         }
 
         if ( driverDefInfo == null ) {
@@ -443,6 +439,10 @@ public class DataSourceDefEditorServiceImpl
 
     @Override
     public void delete( final Path path, final String comment ) {
+        delete( path, comment, serviceHelper.autoDeploy() );
+    }
+
+    private void delete( final Path path, final String comment, final boolean updateDeployment ) {
         checkNotNull( "path", path );
 
         final org.uberfire.java.nio.file.Path nioPath = Paths.convert( path );
@@ -451,9 +451,15 @@ public class DataSourceDefEditorServiceImpl
             DataSourceDef dataSourceDef = DataSourceDefSerializer.deserialize( content );
             Project project = projectService.resolveProject( path );
             try {
-                if ( dataSourceDef.getUuid() != null && dataSourceManagementService.isEnabled() ) {
-                    dataSourceManagementService.undeploy( dataSourceDef.getUuid() );
+
+                if ( updateDeployment && dataSourceManagementService.isEnabled() ) {
+                    DataSourceDeploymentInfo deploymentInfo = dataSourceManagementService.getDeploymentInfo(
+                            dataSourceDef.getUuid() );
+                    if ( deploymentInfo != null ) {
+                        dataSourceManagementService.undeploy( deploymentInfo );
+                    }
                 }
+
                 ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
                 deleteDataSourceEvent.fire( new DeleteDataSourceEvent( dataSourceDef,
                         project, optionsFactory.getSafeSessionId(), optionsFactory.getSafeIdentityName() ) );
@@ -463,5 +469,4 @@ public class DataSourceDefEditorServiceImpl
             }
         }
     }
-
 }

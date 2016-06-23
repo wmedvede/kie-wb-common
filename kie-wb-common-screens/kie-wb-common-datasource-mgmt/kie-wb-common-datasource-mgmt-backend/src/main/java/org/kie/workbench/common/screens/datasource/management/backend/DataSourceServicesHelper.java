@@ -85,6 +85,10 @@ public class DataSourceServicesHelper {
         return Paths.convert( dataSourcesNioPath );
     }
 
+    protected boolean autoDeploy() {
+        return Boolean.parseBoolean( System.getProperty( "datasource.management.autoDeploy" ) );
+    }
+
     private String getGlobalFileSystemName() {
         String name = System.getProperty( "org.kie.workbench.datasource-filesystem" );
         if ( name == null || "".equals( name ) ) {

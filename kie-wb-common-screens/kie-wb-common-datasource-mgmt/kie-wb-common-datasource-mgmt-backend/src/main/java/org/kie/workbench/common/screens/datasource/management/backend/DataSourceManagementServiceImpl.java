@@ -58,20 +58,15 @@ public class DataSourceManagementServiceImpl
     }
 
     @Override
-    public List<DataSourceDef> getDataSources() {
+    public List<DataSourceDef> getDeployments() {
 
         assertDataSourceSerives();
         try {
-            return servicesProvider.getDataSourceService().getDataSources();
+            return servicesProvider.getDataSourceService().getDeployments();
         } catch ( Exception e ) {
-            logger.error( "getDataSources failed: " + e.getMessage(), e );
+            logger.error( "getDeployments failed: " + e.getMessage(), e );
             throw new RuntimeException( e.getMessage() );
         }
-    }
-
-    @Override
-    public List<DataSourceDef> getSystemDataSources() {
-        return getDataSources();
     }
 
     @Override
@@ -87,11 +82,11 @@ public class DataSourceManagementServiceImpl
     }
 
     @Override
-    public void deploy( final DataSourceDef dataSourceDef ) {
+    public DataSourceDeploymentInfo deploy( final DataSourceDef dataSourceDef ) {
 
         assertDataSourceSerives();
         try {
-            servicesProvider.getDataSourceService().deploy( dataSourceDef );
+            return servicesProvider.getDataSourceService().deploy( dataSourceDef );
         } catch ( Exception e ) {
             logger.error( "deployment of dataSourceDef: " + dataSourceDef + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
@@ -109,13 +104,13 @@ public class DataSourceManagementServiceImpl
     }
 
     @Override
-    public void undeploy( final String uuid ) {
+    public void undeploy( final DataSourceDeploymentInfo deploymentInfo ) {
 
         assertDataSourceSerives();
         try {
-            servicesProvider.getDataSourceService().undeploy( uuid );
+            servicesProvider.getDataSourceService().undeploy( deploymentInfo );
         } catch ( Exception e ) {
-            logger.error( "undeployment of dataSource: " + uuid + " failed: " + e.getMessage(), e );
+            logger.error( "undeployment of dataSource: " + deploymentInfo + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
     }

@@ -20,6 +20,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -83,7 +84,7 @@ public class URLConnectionFactory {
         }
     }
 
-    public Connection createConnection() throws Exception {
+    public Connection createConnection() throws SQLException {
         return driver.connect( connectionURL, properties );
     }
 

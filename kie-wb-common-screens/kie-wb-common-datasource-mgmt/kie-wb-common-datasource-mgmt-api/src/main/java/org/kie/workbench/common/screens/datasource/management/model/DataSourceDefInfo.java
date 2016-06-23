@@ -49,4 +49,12 @@ public class DataSourceDefInfo {
     public void setPath( Path path ) {
         this.path = path;
     }
+
+    @Override
+    public String toString() {
+        return "DataSourceDefInfo{" +
+                "name='" + name + '\'' +
+                ", path=" + path +
+                '}';
+    }
 }

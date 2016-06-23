@@ -85,7 +85,7 @@ public class DriverDefMainPanel
         return view.asWidget();
     }
 
-    public void setName( String name ) {
+    public void setName( final String name ) {
         view.setName( name );
     }
 
@@ -93,7 +93,15 @@ public class DriverDefMainPanel
         return view.getName();
     }
 
-    public void setDriverClass( String driverClass ) {
+    public void setNameErrorMessage( final String message ) {
+        view.setNameErrorMessage( message );
+    }
+
+    public void clearNameErrorMessage() {
+        view.clearNameErrorMessage();
+    }
+
+    public void setDriverClass( final String driverClass ) {
         view.setDriverClass( driverClass );
     }
 
@@ -101,38 +109,76 @@ public class DriverDefMainPanel
         return view.getDriverClass();
     }
 
+    public void setDriverClassErrorMessage( final String message ) {
+        view.setDriverClassErrorMessage( message );
+    }
+
+    public void clearDriverClassErrorMessage() {
+        view.clearDriverClassErrorMessage();
+    }
+
     public String getGroupId() {
         return view.getGroupId();
     }
 
-    public void setGroupId( String groupId ) {
+    public void setGroupId( final String groupId ) {
         view.setGroupId( groupId );
+    }
+
+    public void setGroupIdErrorMessage( final String message ) {
+        view.setGroupIdErrorMessage( message );
+    }
+
+    public void clearGroupIdErrorMessage() {
+        view.clearGroupIdErrorMessage();
     }
 
     public String getArtifactId() {
         return view.getArtifactId();
     }
 
-    public void setArtifactId( String artifactId ) {
+    public void setArtifactId( final String artifactId ) {
         view.setArtifactId( artifactId );
+    }
+
+    public void setArtifactIdErrorMessage( final String message ) {
+        view.setArtifactIdErrorMessage( message );
+    }
+
+    public void clearArtifactIdErrorMessage() {
+        view.clearArtifactIdErrorMessage();
     }
 
     public String getVersion() {
         return view.getVersion();
     }
 
-    public void setVersion( String version ) {
+    public void setVersion( final String version ) {
         view.setVersion( version );
     }
 
-    public void showValidationMessages( List<ValidationMessage> messages ) {
+    public void setVersionErrorMessage( final String message ) {
+        view.setVersionErrorMessage( message );
+    }
+
+    public void clearVersionErrorMessage() {
+        view.clearVersionErrorMessage();
+    }
+
+    public void showValidationMessages( final List<ValidationMessage> messages ) {
         view.showValidationMessages( messages );
     }
+
     public void clear() {
         view.setName( null );
+        view.clearNameErrorMessage();
         view.setGroupId( null );
+        view.clearGroupIdErrorMessage();
         view.setArtifactId( null );
+        view.clearArtifactIdErrorMessage();
         view.setVersion( null );
+        view.clearVersionErrorMessage();
         view.setDriverClass( null );
+        view.clearDriverClassErrorMessage();
     }
 }

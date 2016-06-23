@@ -30,9 +30,9 @@ import org.kie.workbench.common.screens.datasource.management.events.NewDataSour
 import org.kie.workbench.common.screens.datasource.management.events.NewDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.events.UpdateDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.UpdateDriverEvent;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQuery;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryResult;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 
 public abstract class DefExplorerBase {
@@ -43,12 +43,12 @@ public abstract class DefExplorerBase {
 
     protected NewDriverDefWizard newDriverDefWizard;
 
-    protected Caller<DataSourceExplorerService> explorerService;
+    protected Caller<DataSourceDefQueryService> explorerService;
 
     protected DefExplorerBase( final DefExplorerContent defExplorerContent,
             final NewDataSourceDefWizard newDataSourceDefWizard,
             final NewDriverDefWizard newDriverDefWizard,
-            final Caller<DataSourceExplorerService> explorerService ) {
+            final Caller<DataSourceDefQueryService> explorerService ) {
         this.defExplorerContent = defExplorerContent;
         this.newDataSourceDefWizard = newDataSourceDefWizard;
         this.newDriverDefWizard = newDriverDefWizard;
@@ -77,18 +77,18 @@ public abstract class DefExplorerBase {
         explorerService.call( getRefreshCallback(), new DefaultErrorCallback() ).executeQuery( createRefreshQuery() );
     }
 
-    protected abstract DataSourceExplorerContentQuery createRefreshQuery();
+    protected abstract DataSourceDefQuery createRefreshQuery();
 
     protected RemoteCallback<?> getRefreshCallback() {
-        return new RemoteCallback<DataSourceExplorerContentQueryResult>() {
+        return new RemoteCallback<DataSourceDefQueryResult>() {
             @Override
-            public void callback( DataSourceExplorerContentQueryResult content ) {
+            public void callback( DataSourceDefQueryResult content ) {
                 loadContent( content );
             }
         };
     }
 
-    protected abstract void loadContent( DataSourceExplorerContentQueryResult content );
+    protected abstract void loadContent( DataSourceDefQueryResult content );
 
     protected abstract boolean refreshOnDataSourceEvent( BaseDataSourceEvent event );
 
