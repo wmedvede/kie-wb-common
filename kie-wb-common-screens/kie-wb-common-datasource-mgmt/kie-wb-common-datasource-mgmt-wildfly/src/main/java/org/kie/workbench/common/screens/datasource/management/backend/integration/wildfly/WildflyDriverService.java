@@ -49,7 +49,7 @@ public class WildflyDriverService
 
     @Override
     public DriverDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception {
-        for ( DriverDeploymentInfo deploymentInfo : getAllDeploymentInfo() ) {
+        for ( DriverDeploymentInfo deploymentInfo : getDeploymentsInfo() ) {
             if ( uuid.equals( deploymentInfo.getUuid() ) ) {
                 return deploymentInfo;
             }
@@ -58,33 +58,43 @@ public class WildflyDriverService
     }
 
     @Override
-    public void deploy( final DriverDef driverDef ) throws Exception {
+    public DriverDeploymentInfo deploy( final DriverDef driverDef ) throws Exception {
 
         final URI uri = artifactResolver.resolve( driverDef.getGroupId(),
                 driverDef.getArtifactId(), driverDef.getVersion() );
 
         if ( uri == null ) {
-            throw new Exception( "Unable to get maven artifact for driver: " + driverDef );
+            throw new Exception( "Unable to get driver library artifact for driver: " + driverDef );
         }
 
         final Path path = java.nio.file.Paths.get( uri );
         byte[] libContent = Files.readAllBytes( path );
-        deploymentService.deployContent( driverDef.getUuid(), driverDef.getUuid(), libContent, true );
+        final String deploymentId = DeploymentIdGenerator.generateDeploymentId( driverDef );
+        deploymentService.deployContent( deploymentId, deploymentId, libContent, true );
+
+        return new DriverDeploymentInfo( deploymentId, true, driverDef.getUuid(), driverDef.getDriverClass() );
     }
 
     @Override
-    public void undeploy( final String uuid ) throws Exception {
-        deploymentService.removeDeployment( uuid );
+    public void undeploy( final DriverDeploymentInfo deploymentInfo ) throws Exception {
+
+        deploymentService.removeDeployment( deploymentInfo.getDeploymentId() );
     }
 
-    public List<DriverDef> getDrivers() throws Exception {
+    public List<DriverDef> getDeployments() throws Exception {
 
         List<DriverDef> driverDefs = new ArrayList<>(  );
         DriverDef driverDef;
+        String uuid;
 
         for ( WildflyDriverDef internalDef : getInternalDrivers() ) {
             driverDef = new DriverDef();
-            driverDef.setUuid( Util.normalizeDriverName( internalDef.getDriverName() ) );
+            try {
+                uuid = DeploymentIdGenerator.extractUuid( internalDef.getDriverName() );
+            } catch ( Exception e ) {
+                uuid = internalDef.getDriverName();
+            }
+            driverDef.setUuid( uuid );
             driverDef.setName( internalDef.getDeploymentName() );
             driverDef.setDriverClass( internalDef.getDriverClass() );
             driverDefs.add( driverDef );
@@ -94,22 +104,29 @@ public class WildflyDriverService
     }
 
     @Override
-    public List<DriverDeploymentInfo> getAllDeploymentInfo() throws Exception {
+    public List<DriverDeploymentInfo> getDeploymentsInfo() throws Exception {
 
-        List<DriverDeploymentInfo> deploymentInfos = new ArrayList<>(  );
+        List<DriverDeploymentInfo> deploymentsInfo = new ArrayList<>(  );
         DriverDeploymentInfo deploymentInfo;
+        String uuid;
+        boolean managed;
 
         for ( WildflyDriverDef internalDef : getInternalDrivers() ) {
-            deploymentInfo = new DriverDeploymentInfo();
-            deploymentInfo.setUuid( Util.normalizeDriverName( internalDef.getDriverName() ) );
-            deploymentInfo.setInternalUuid( internalDef.getDriverName() );
-            deploymentInfo.setDriverClass( internalDef.getDriverClass() );
-            deploymentInfo.setManaged( true );
+            try {
+                uuid = DeploymentIdGenerator.extractUuid( internalDef.getDriverName() );
+                managed = true;
+            } catch ( Exception e ) {
+                uuid = internalDef.getDriverName();
+                managed = false;
+            }
 
-            deploymentInfos.add( deploymentInfo );
+            deploymentInfo = new DriverDeploymentInfo( internalDef.getDriverName(),
+                    managed, uuid, internalDef.getDriverClass() );
+
+            deploymentsInfo.add( deploymentInfo );
         }
 
-        return deploymentInfos;
+        return deploymentsInfo;
     }
 
     private List<WildflyDriverDef> getInternalDrivers() throws Exception {

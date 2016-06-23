@@ -35,9 +35,9 @@ import org.kie.workbench.common.screens.datasource.management.client.wizard.NewD
 import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDriverDefWizard;
 import org.kie.workbench.common.screens.datasource.management.events.BaseDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.BaseDriverEvent;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQuery;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryResult;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 
 @Dependent
@@ -61,7 +61,7 @@ public class ProjectDataSourceExplorer
             final DefExplorerContent defExplorerContent,
             final NewDataSourceDefWizard newDataSourceDefWizard,
             final NewDriverDefWizard newDriverDefWizard,
-            final Caller<DataSourceExplorerService> explorerService ) {
+            final Caller<DataSourceDefQueryService> explorerService ) {
         super( defExplorerContent, newDataSourceDefWizard, newDriverDefWizard, explorerService );
         this.view = view;
     }
@@ -116,19 +116,19 @@ public class ProjectDataSourceExplorer
     }
 
     @Override
-    protected DataSourceExplorerContentQuery createRefreshQuery() {
-        return new DataSourceExplorerContentQuery( activeOrganizationalUnit,
+    protected DataSourceDefQuery createRefreshQuery() {
+        return new DataSourceDefQuery( activeOrganizationalUnit,
                 activeRepository,
                 activeProject,
                 activeBranch );
     }
 
-    private void refresh( final DataSourceExplorerContentQuery query ) {
+    private void refresh( final DataSourceDefQuery query ) {
         explorerService.call( getRefreshCallback(), new DefaultErrorCallback() ).executeQuery( query );
     }
 
     @Override
-    protected void loadContent( final DataSourceExplorerContentQueryResult content ) {
+    protected void loadContent( final DataSourceDefQueryResult content ) {
 
         defExplorerContent.clear();
         if ( activeOrganizationalUnit == null || !contains( content.getOrganizationalUnits(), activeOrganizationalUnit ) ) {
@@ -231,7 +231,7 @@ public class ProjectDataSourceExplorer
             activeOrganizationalUnit = ou;
             activeRepository = null;
             activeProject = null;
-            DataSourceExplorerContentQuery query = new DataSourceExplorerContentQuery();
+            DataSourceDefQuery query = new DataSourceDefQuery();
             query.setOrganizationalUnit( ou );
             refresh( query );
         }
@@ -239,7 +239,7 @@ public class ProjectDataSourceExplorer
 
     public void onRepositorySelected( final Repository repository ) {
         if ( hasChanged( repository ) ) {
-            DataSourceExplorerContentQuery query = new DataSourceExplorerContentQuery();
+            DataSourceDefQuery query = new DataSourceDefQuery();
             if ( activeOrganizationalUnit != null ) {
                 activeRepository = repository;
                 activeProject = null;
@@ -256,7 +256,7 @@ public class ProjectDataSourceExplorer
 
     public void onProjectSelected( final Project project ) {
         if ( hasChanged( project ) ) {
-            DataSourceExplorerContentQuery query = new DataSourceExplorerContentQuery();
+            DataSourceDefQuery query = new DataSourceDefQuery();
             if ( activeOrganizationalUnit != null && activeRepository != null ) {
                 activeProject = project;
                 query.setOrganizationalUnit( activeOrganizationalUnit );

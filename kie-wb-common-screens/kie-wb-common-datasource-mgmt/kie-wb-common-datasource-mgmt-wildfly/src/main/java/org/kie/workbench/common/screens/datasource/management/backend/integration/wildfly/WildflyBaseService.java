@@ -19,7 +19,6 @@ package org.kie.workbench.common.screens.datasource.management.backend.integrati
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Date;
 import java.util.Properties;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -135,41 +134,44 @@ public abstract class WildflyBaseService {
      */
     public void checkResponse( ModelNode response ) throws Exception {
 
-        if ( "failed".equals( response.get( OUTCOME ) ) ) {
+        final String outcome = response.get( OUTCOME ) != null ? response.get( OUTCOME ).asString() : "";
+
+        if ( outcome.contains( "failed" ) ) {
             throw new Exception( "operation execution failed. :" + getErrorDescription( response ) );
-        } else if ( "canceled".equals( response.get( OUTCOME ) ) ) {
+        } else if ( outcome.contains( "canceled" ) ) {
             throw new Exception( "operation execution was canceled by server: " + getErrorDescription( response ) );
-        } else if ( SUCCESS.equals( response.get( OUTCOME ) ) ) {
+        } else if ( outcome.contains( SUCCESS ) ) {
             //great!!!
         }
     }
 
     public boolean isFailure( ModelNode response ) {
-        return "failed".equals( response.get( OUTCOME ) );
+        final String outcome = response.get( OUTCOME ) != null ? response.get( OUTCOME ).asString() : "";
+        return outcome.contains( "failed" );
     }
 
     public void safeClose( final Closeable closeable ) {
         if ( closeable != null ) {
             try {
-                System.out.println( " Antes close: " + new Date() );
+                if ( logger.isDebugEnabled() ) {
+                    logger.debug( "starting ModelControllerClient connection close" );
+                }
                 boolean disableClose = Boolean.valueOf( System.getProperty( "disableClose" ) );
                 if ( disableClose ) {
-                    System.out.println( " XXXXXXXX close disabled: " + new Date() );
+                    logger.warn( "ModelControllerClient connection closing was disabled" );
                 } else {
                     closeable.close();
                 }
-                System.out.println( " Despues close" );
+                if ( logger.isDebugEnabled() ) {
+                    logger.debug( "ModelControllerClient connection was closed successfully" );
+                }
             } catch ( Exception e ) {
-                System.out.println( " error when closing connection: " + e.getMessage() );
-                e.printStackTrace();
                 logger.error( "An error was produced during ModelControllerClient closing: ", e );
-
             }
         }
     }
 
     private String getErrorDescription( ModelNode response ) {
-
         if ( response.hasDefined( FAILURE_DESCRIPTION ) ) {
             return response.get( FAILURE_DESCRIPTION ).asString();
         } else {

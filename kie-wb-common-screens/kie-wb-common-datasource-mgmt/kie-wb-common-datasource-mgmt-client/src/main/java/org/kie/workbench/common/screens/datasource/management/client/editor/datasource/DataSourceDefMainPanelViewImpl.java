@@ -22,24 +22,23 @@ import javax.inject.Inject;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.TextBox;
-import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.extras.select.client.ui.Option;
 import org.gwtbootstrap3.extras.select.client.ui.Select;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.uberfire.commons.data.Pair;
-import org.uberfire.ext.widgets.common.client.common.StyleHelper;
 import org.uberfire.ext.widgets.common.client.common.popups.YesNoCancelPopup;
 import org.uberfire.ext.widgets.common.client.resources.i18n.CommonConstants;
 import org.uberfire.mvp.Command;
+
+import static org.kie.workbench.common.screens.datasource.management.client.util.UIUtil.*;
 
 @Dependent
 @Templated
@@ -335,18 +334,4 @@ public class DataSourceDefMainPanelViewImpl
         } );
     }
 
-    private void setGroupOnError( final Element formGroup, final boolean onError ) {
-        StyleHelper.addUniqueEnumStyleName( formGroup, ValidationState.class,
-                onError ? ValidationState.ERROR : ValidationState.NONE );
-    }
-
-    private void setSpanMessage( final Element span, final String text ) {
-        span.getStyle().setVisibility( Style.Visibility.VISIBLE );
-        span.setInnerHTML( text );
-    }
-
-    private void clearSpanMessage( final Element span ) {
-        span.getStyle().setVisibility( Style.Visibility.HIDDEN );
-        span.setInnerHTML( "" );
-    }
 }

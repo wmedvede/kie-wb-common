@@ -37,9 +37,9 @@ import org.jboss.errai.security.shared.api.identity.User;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQuery;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerContentQueryResult;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQuery;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryResult;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
 import org.kie.workbench.common.screens.datasource.management.util.DriverDefSerializer;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.slf4j.Logger;
@@ -55,10 +55,10 @@ import static org.uberfire.commons.validation.PortablePreconditions.*;
 
 @Service
 @ApplicationScoped
-public class DataSourceExplorerServiceImpl
-        implements DataSourceExplorerService {
+public class DataSourceDefQueryServiceImpl
+        implements DataSourceDefQueryService {
 
-    private static final Logger logger = LoggerFactory.getLogger( DataSourceExplorerServiceImpl.class );
+    private static final Logger logger = LoggerFactory.getLogger( DataSourceDefQueryServiceImpl.class );
 
     private static String DS_FILE_TYPE = ".datasource";
 
@@ -83,7 +83,7 @@ public class DataSourceExplorerServiceImpl
     @Inject
     private User identity;
 
-    public DataSourceExplorerServiceImpl() {
+    public DataSourceDefQueryServiceImpl() {
     }
 
     @Override
@@ -144,10 +144,10 @@ public class DataSourceExplorerServiceImpl
     }
 
     @Override
-    public DataSourceExplorerContentQueryResult executeQuery( final DataSourceExplorerContentQuery query ) {
+    public DataSourceDefQueryResult executeQuery( final DataSourceDefQuery query ) {
         checkNotNull( "query", query );
         if ( query.isGlobalQuery() ) {
-            DataSourceExplorerContentQueryResult result = new DataSourceExplorerContentQueryResult();
+            DataSourceDefQueryResult result = new DataSourceDefQueryResult();
             result.setDataSourceDefs( getDataSources( serviceHelper.getGlobalDataSourcesContext() ) );
             result.setDriverDefs( getDrivers( serviceHelper.getGlobalDataSourcesContext() ) );
             return result;
@@ -156,9 +156,9 @@ public class DataSourceExplorerServiceImpl
         }
     }
 
-    private DataSourceExplorerContentQueryResult resolveQuery( final DataSourceExplorerContentQuery query ) {
+    private DataSourceDefQueryResult resolveQuery( final DataSourceDefQuery query ) {
 
-        DataSourceExplorerContentQueryResult result = new DataSourceExplorerContentQueryResult();
+        DataSourceDefQueryResult result = new DataSourceDefQueryResult();
 
         //load the organizational units.
         Collection<OrganizationalUnit> organizationalUnits = getOrganizationalUnits();

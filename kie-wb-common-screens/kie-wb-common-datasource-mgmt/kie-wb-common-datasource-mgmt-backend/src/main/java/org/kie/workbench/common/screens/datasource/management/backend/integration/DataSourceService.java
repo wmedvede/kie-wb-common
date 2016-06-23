@@ -24,15 +24,15 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 
 public interface DataSourceService {
 
-    void deploy( final DataSourceDef dataSourceDef ) throws Exception;
+    DataSourceDeploymentInfo deploy( final DataSourceDef dataSourceDef ) throws Exception;
 
-    void undeploy( final String uuid ) throws Exception;
+    void undeploy( final DataSourceDeploymentInfo deploymentInfo ) throws Exception;
 
     DataSourceDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception;
 
-    List<DataSourceDeploymentInfo> getAllDeploymentInfo() throws Exception;
+    List<DataSourceDeploymentInfo> getDeploymentsInfo() throws Exception;
 
-    List<DataSourceDef> getDataSources() throws Exception;
+    List<DataSourceDef> getDeployments() throws Exception;
 
     void loadConfig( Properties properties );
 

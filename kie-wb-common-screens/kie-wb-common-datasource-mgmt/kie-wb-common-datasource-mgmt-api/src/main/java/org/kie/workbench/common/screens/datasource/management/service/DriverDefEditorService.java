@@ -36,17 +36,14 @@ public interface DriverDefEditorService
 
     Path create( final Path context, final String driverName, final String fileName );
 
-    Path create( final DriverDef driverDef, final Project project, final boolean updateDeployment );
+    Path create( final DriverDef driverDef, final Project project );
 
-    Path createGlobal( final DriverDef driverDef, final boolean updateDeployment );
+    Path createGlobal( final DriverDef driverDef );
 
     List<ValidationMessage> validate( final DriverDef driverDef );
 
     Path getGlobalDriversContext();
 
     Path getProjectDriversContext( final Project project );
-
-    //will be removed, by now it's used for enabling the deploy/undeploy buttons.
-    boolean isDevelopmentMode();
 
 }

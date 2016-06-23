@@ -41,4 +41,19 @@ public interface DataSourceManagementConstants {
     @TranslationKey( defaultValue = "" )
     String DataSourceDefEditor_AllFieldsRequiresValidation = "DataSourceDefEditor.AllFieldsRequiresValidation";
 
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_InvalidNameMessage = "DriverDefEditor.InvalidNameMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_InvalidDriverClassMessage = "DriverDefEditor.InvalidDriverClassMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_InvalidGroupIdMessage = "DriverDefEditor.InvalidGroupIdMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_InvalidArtifactIdMessage = "DriverDefEditor.InvalidArtifactIdMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_InvalidVersionMessage = "DriverDefEditor.InvalidVersionMessage";
+
 }

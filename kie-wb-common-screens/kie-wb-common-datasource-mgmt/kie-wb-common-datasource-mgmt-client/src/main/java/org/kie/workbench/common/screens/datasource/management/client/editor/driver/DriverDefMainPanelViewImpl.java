@@ -31,6 +31,8 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.kie.workbench.common.widgets.client.popups.validation.ValidationPopup;
 
+import static org.kie.workbench.common.screens.datasource.management.client.util.UIUtil.*;
+
 @Dependent
 @Templated
 public class DriverDefMainPanelViewImpl
@@ -108,6 +110,18 @@ public class DriverDefMainPanelViewImpl
     }
 
     @Override
+    public void setNameErrorMessage( final String message ) {
+        setGroupOnError( nameFormGroup, true );
+        setSpanMessage( nameHelp, message );
+    }
+
+    @Override
+    public void clearNameErrorMessage() {
+        setGroupOnError( nameFormGroup, false );
+        clearSpanMessage( nameHelp );
+    }
+
+    @Override
     public void setDriverClass( final String driverClass ) {
         this.driverClassTextBox.setText( driverClass );
     }
@@ -118,7 +132,19 @@ public class DriverDefMainPanelViewImpl
     }
 
     @Override
-    public void setGroupId( String groupId ) {
+    public void setDriverClassErrorMessage( final String message ) {
+        setGroupOnError( driverClassFormGroup, true );
+        setSpanMessage( driverClassHelp, message );
+    }
+
+    @Override
+    public void clearDriverClassErrorMessage() {
+        setGroupOnError( driverClassFormGroup, false );
+        clearSpanMessage( driverClassHelp );
+    }
+
+    @Override
+    public void setGroupId( final String groupId ) {
         groupIdTextBox.setText( groupId );
     }
 
@@ -128,7 +154,19 @@ public class DriverDefMainPanelViewImpl
     }
 
     @Override
-    public void setArtifactId( String artifactId ) {
+    public void setGroupIdErrorMessage( final String message ) {
+        setGroupOnError( groupIdFormGroup, true );
+        setSpanMessage( groupIdHelp, message );
+    }
+
+    @Override
+    public void clearGroupIdErrorMessage() {
+        setGroupOnError( groupIdFormGroup, false );
+        clearSpanMessage( groupIdHelp );
+    }
+
+    @Override
+    public void setArtifactId( final String artifactId ) {
         artifactIdTextBox.setText( artifactId );
     }
 
@@ -138,13 +176,37 @@ public class DriverDefMainPanelViewImpl
     }
 
     @Override
-    public void setVersion( String version ) {
+    public void setArtifactIdErrorMessage( final String message ) {
+        setGroupOnError( artifactIdFormGroup, true );
+        setSpanMessage( artifactIdHelp, message );
+    }
+
+    @Override
+    public void clearArtifactIdErrorMessage() {
+        setGroupOnError( artifactIdFormGroup, false );
+        clearSpanMessage( artifactIdHelp );
+    }
+
+    @Override
+    public void setVersion( final String version ) {
         versionTextBox.setText( version );
     }
 
     @Override
     public String getVersion() {
         return versionTextBox.getText();
+    }
+
+    @Override
+    public void setVersionErrorMessage( final String message ) {
+        setGroupOnError( versionFormGroup, true );
+        setSpanMessage( versionHelp, message );
+    }
+
+    @Override
+    public void clearVersionErrorMessage() {
+        setGroupOnError( versionFormGroup, false );
+        clearSpanMessage( versionHelp );
     }
 
     @EventHandler( "name" )

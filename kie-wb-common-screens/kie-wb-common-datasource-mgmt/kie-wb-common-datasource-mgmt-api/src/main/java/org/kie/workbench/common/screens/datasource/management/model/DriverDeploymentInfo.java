@@ -19,48 +19,37 @@ package org.kie.workbench.common.screens.datasource.management.model;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
-public class DriverDeploymentInfo {
+public class DriverDeploymentInfo
+        extends DeploymentInfo {
 
     String uuid;
-
-    String internalUuid;
-
-    boolean managed;
 
     String driverClass;
 
     public DriverDeploymentInfo() {
     }
 
+    public DriverDeploymentInfo( String deploymentId, boolean managed, String uuid, String driverClass ) {
+        super( deploymentId, managed );
+        this.uuid = uuid;
+        this.driverClass = driverClass;
+    }
+
     public String getUuid() {
         return uuid;
-    }
-
-    public void setUuid( String uuid ) {
-        this.uuid = uuid;
-    }
-
-    public String getInternalUuid() {
-        return internalUuid;
-    }
-
-    public void setInternalUuid( String internalUuid ) {
-        this.internalUuid = internalUuid;
-    }
-
-    public boolean isManaged() {
-        return managed;
-    }
-
-    public void setManaged( boolean managed ) {
-        this.managed = managed;
     }
 
     public String getDriverClass() {
         return driverClass;
     }
 
-    public void setDriverClass( String driverClass ) {
-        this.driverClass = driverClass;
+    @Override
+    public String toString() {
+        return "DriverDeploymentInfo{" +
+                "deploymentId='" + deploymentId + '\'' +
+                ", managed=" + managed +
+                "uuid='" + uuid + '\'' +
+                ", driverClass='" + driverClass + '\'' +
+                "} " + super.toString();
     }
 }
