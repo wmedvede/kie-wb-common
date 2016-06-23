@@ -34,9 +34,9 @@ public interface DataSourceDefEditorService
 
     Path create( final Path context, final String dataSourceName, final String fileName );
 
-    Path create( final DataSourceDef dataSourceDef, final Project project, final boolean deploy );
+    Path create( final DataSourceDef dataSourceDef, final Project project );
 
-    Path createGlobal( final DataSourceDef dataSourceDef, final boolean deploy );
+    Path createGlobal( final DataSourceDef dataSourceDef );
 
     Path getGlobalDataSourcesContext();
 

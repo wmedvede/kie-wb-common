@@ -19,38 +19,37 @@ package org.kie.workbench.common.screens.datasource.management.model;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
-public class DataSourceDeploymentInfo {
+public class DataSourceDeploymentInfo
+        extends DeploymentInfo {
 
     String uuid;
 
     String jndi;
 
-    boolean managed;
-
     public DataSourceDeploymentInfo() {
+    }
+
+    public DataSourceDeploymentInfo( String deploymentId, boolean managed, String uuid, String jndi ) {
+        super( deploymentId, managed );
+        this.uuid = uuid;
+        this.jndi = jndi;
     }
 
     public String getUuid() {
         return uuid;
     }
 
-    public void setUuid( String uuid ) {
-        this.uuid = uuid;
-    }
-
     public String getJndi() {
         return jndi;
     }
 
-    public void setJndi( String jndi ) {
-        this.jndi = jndi;
-    }
-
-    public boolean isManaged() {
-        return managed;
-    }
-
-    public void setManaged( boolean managed ) {
-        this.managed = managed;
+    @Override
+    public String toString() {
+        return "DataSourceDeploymentInfo{" +
+                "deploymentId='" + deploymentId + '\'' +
+                ", managed=" + managed +
+                "uuid='" + uuid + '\'' +
+                ", jndi='" + jndi + '\'' +
+                "} ";
     }
 }

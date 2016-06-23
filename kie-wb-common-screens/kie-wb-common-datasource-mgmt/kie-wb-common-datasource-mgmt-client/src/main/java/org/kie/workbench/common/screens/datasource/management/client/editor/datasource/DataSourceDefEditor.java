@@ -27,9 +27,10 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.client.type.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceExplorerService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.annotations.WorkbenchEditor;
@@ -71,7 +72,7 @@ public class DataSourceDefEditor
 
     private Caller<DataSourceManagementService> dataSourceService;
 
-    private Caller<DataSourceExplorerService> driverDefService;
+    private Caller<DataSourceDefQueryService> driverDefService;
 
     private DataSourceDefEditorContent editorContent;
 
@@ -82,7 +83,7 @@ public class DataSourceDefEditor
             final DataSourceDefType type,
             final Caller<DataSourceDefEditorService> editorService,
             final Caller<DataSourceManagementService> dataSourceService,
-            final Caller<DataSourceExplorerService> driverDefService ) {
+            final Caller<DataSourceDefQueryService> driverDefService ) {
         super( view );
         this.view = view;
         this.mainPanel = mainPanel;
@@ -227,7 +228,7 @@ public class DataSourceDefEditor
 
     protected void onDriversLoaded( final List<DriverDefInfo> driverDefs ) {
         editorHelper.loadDrivers( driverDefs );
-        mainPanel.setDriver( getContent().getDataSourceDef().getDriverUuid()  );
+        mainPanel.setDriver( getContent().getDataSourceDef().getDriverUuid() );
     }
 
     protected void onContentLoaded( final DataSourceDefEditorContent editorContent ) {
@@ -253,6 +254,16 @@ public class DataSourceDefEditor
 
     private void addDevelopMenu() {
         //for development purposes menu entries, will be removed.
+        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Check-Status" )
+                .respondsWith( new Command() {
+                    @Override
+                    public void execute() {
+                        onCheckDeploymentStatus();
+                    }
+                } )
+                .endMenu()
+                .build().getItems().get( 0 ) );
+
         menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-Deploy" )
                 .respondsWith( new Command() {
                     @Override
@@ -284,26 +295,51 @@ public class DataSourceDefEditor
                 .build().getItems().get( 0 ) );
     }
 
+    private void onCheckDeploymentStatus() {
+        //Experimental method for development purposes.
+        dataSourceService.call(
+                new RemoteCallback<DataSourceDeploymentInfo>() {
+                    @Override
+                    public void callback( DataSourceDeploymentInfo deploymentInfo ) {
+                        if ( deploymentInfo != null ) {
+                            Window.alert( "datasource is deployed as: " + deploymentInfo.getDeploymentId() );
+                        } else {
+                            Window.alert( "datasource is not deployed" );
+                        }
+                    }
+                }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDataSourceDef().getUuid() );
+    }
+
     protected void onDeployDataSource() {
         //Experimental method for development purposes.
         dataSourceService.call(
-                new RemoteCallback<Void>() {
+                new RemoteCallback<DataSourceDeploymentInfo>() {
                     @Override
-                    public void callback( Void aVoid ) {
-                        Window.alert( "datasource successfully deployed" );
+                    public void callback( DataSourceDeploymentInfo deploymentInfo ) {
+                        Window.alert( "datasource successfully deployed: " + deploymentInfo.getDeploymentId() );
                     }
                 }, new DefaultErrorCallback() ).deploy( getContent().getDataSourceDef() );
     }
 
     protected void onUnDeployDataSource() {
         //Experimental method for development purposes.
-        dataSourceService.call(
-                new RemoteCallback<Void>() {
-                    @Override
-                    public void callback( Void aVoid ) {
-                        Window.alert( "datasource successfully un deployed" );
-                    }
-                }, new DefaultErrorCallback() ).undeploy( getContent().getDataSourceDef().getUuid() );
+        dataSourceService.call( new RemoteCallback<DataSourceDeploymentInfo>() {
+            @Override
+            public void callback( DataSourceDeploymentInfo deploymentInfo ) {
+                if ( deploymentInfo == null ) {
+                    Window.alert( "datasource is not deployed in current server" );
+                } else {
+                    dataSourceService.call( new RemoteCallback<Void>() {
+                        @Override
+                        public void callback( Void aVoid ) {
+                            Window.alert( "datasource was successfully un-deployed" );
+                        }
+                    } ).undeploy( deploymentInfo );
+                }
+
+            }
+        }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDataSourceDef().getUuid() );
+
     }
 
     protected void onTestDataSource() {

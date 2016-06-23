@@ -125,11 +125,9 @@ public class NewDriverDefWizard
 
     private void doComplete() {
         if ( isGlobal() ) {
-            driverDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).createGlobal(
-                    driverDef, false );
+            driverDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).createGlobal( driverDef );
         } else {
-            driverDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).create(
-                    driverDef, project, false );
+            driverDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).create( driverDef, project );
         }
     }
 

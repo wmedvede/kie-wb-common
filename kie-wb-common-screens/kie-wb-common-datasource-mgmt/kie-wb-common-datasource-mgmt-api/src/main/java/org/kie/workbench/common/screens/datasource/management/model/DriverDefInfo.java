@@ -48,4 +48,13 @@ public class DriverDefInfo {
     public Path getPath() {
         return path;
     }
+
+    @Override
+    public String toString() {
+        return "DriverDefInfo{" +
+                "uuid='" + uuid + '\'' +
+                ", name='" + name + '\'' +
+                ", path=" + path +
+                '}';
+    }
 }

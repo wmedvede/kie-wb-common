@@ -24,9 +24,9 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDefInf
 import org.uberfire.backend.vfs.Path;
 
 @Remote
-public interface DataSourceExplorerService {
+public interface DataSourceDefQueryService {
 
-    DataSourceExplorerContentQueryResult executeQuery( final DataSourceExplorerContentQuery query );
+    DataSourceDefQueryResult executeQuery( final DataSourceDefQuery query );
 
     Collection<DataSourceDefInfo> findGlobalDataSources();
 
