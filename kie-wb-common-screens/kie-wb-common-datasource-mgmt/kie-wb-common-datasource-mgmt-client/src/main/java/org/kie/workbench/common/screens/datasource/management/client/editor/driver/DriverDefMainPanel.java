@@ -23,15 +23,12 @@ import javax.inject.Inject;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.guvnor.common.services.shared.validation.model.ValidationMessage;
-import org.uberfire.backend.vfs.Path;
 
 @Dependent
 public class DriverDefMainPanel
         implements DriverDefMainPanelView.Presenter, IsWidget {
 
     private DriverDefMainPanelView view;
-
-    private Path path;
 
     private DriverDefMainPanelView.Handler handler;
 

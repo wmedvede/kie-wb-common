@@ -21,7 +21,9 @@ import javax.inject.Inject;
 
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
+import org.kie.workbench.common.screens.datasource.management.client.validation.ClientValidationService;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
+import org.uberfire.ext.editor.commons.client.validation.ValidatorCallback;
 
 @Dependent
 public class DriverDefEditorHelper {
@@ -34,6 +36,8 @@ public class DriverDefEditorHelper {
 
     private DriverDefMainPanelView.Handler handler;
 
+    private ClientValidationService validationService;
+
     private boolean nameValid = false;
 
     private boolean driverClassValid = false;
@@ -45,11 +49,13 @@ public class DriverDefEditorHelper {
     private boolean versionValid = false;
 
     @Inject
-    public DriverDefEditorHelper( TranslationService translationService ) {
+    public DriverDefEditorHelper( final TranslationService translationService,
+            final ClientValidationService validationService ) {
         this.translationService = translationService;
+        this.validationService = validationService;
     }
 
-    public void init( DriverDefMainPanel mainPanel ) {
+    public void init( final DriverDefMainPanel mainPanel ) {
         this.mainPanel = mainPanel;
 
         mainPanel.setHandler( new DriverDefMainPanelView.Handler() {
@@ -80,14 +86,28 @@ public class DriverDefEditorHelper {
         } );
     }
 
-
-    public void setHandler( DriverDefMainPanelView.Handler handler ) {
+    public void setHandler( final DriverDefMainPanelView.Handler handler ) {
         this.handler = handler;
     }
 
-    private void onNameChange() {
-        driverDef.setName( mainPanel.getName().trim() );
-        nameValid = validateName( driverDef.getName() );
+    public void onNameChange() {
+        final String newValue = mainPanel.getName().trim();
+        validationService.isValidDriverName( newValue, new ValidatorCallback() {
+            @Override
+            public void onSuccess() {
+                onNameChange( newValue, true );
+            }
+
+            @Override
+            public void onFailure() {
+                onNameChange( newValue, false );
+            }
+        } );
+    }
+
+    private void onNameChange( String newValue, boolean isValid ) {
+        driverDef.setName( newValue );
+        nameValid = isValid;
         if ( !nameValid ) {
             mainPanel.setNameErrorMessage(
                     getMessage( DataSourceManagementConstants.DriverDefEditor_InvalidNameMessage ) );
@@ -99,9 +119,24 @@ public class DriverDefEditorHelper {
         }
     }
 
-    private void onDriverClassChange() {
-        driverDef.setDriverClass( mainPanel.getDriverClass().trim() );
-        driverClassValid = validateClassName( driverDef.getDriverClass() );
+    public void onDriverClassChange() {
+        final String newValue = mainPanel.getDriverClass().trim();
+        validationService.isValidClassName( newValue, new ValidatorCallback() {
+            @Override
+            public void onSuccess() {
+                onDriverClassChange( newValue, true );
+            }
+
+            @Override
+            public void onFailure() {
+                onDriverClassChange( newValue, false );
+            }
+        } );
+    }
+
+    private void onDriverClassChange( String newValue, boolean isValid ) {
+        driverDef.setDriverClass( newValue );
+        driverClassValid = isValid;
         if ( !driverClassValid ) {
             mainPanel.setDriverClassErrorMessage(
                     getMessage( DataSourceManagementConstants.DriverDefEditor_InvalidDriverClassMessage ) );
@@ -113,9 +148,24 @@ public class DriverDefEditorHelper {
         }
     }
 
-    private void onGroupIdChange() {
-        driverDef.setGroupId( mainPanel.getGroupId().trim() );
-        groupIdValid = validateGroupId( driverDef.getGroupId() );
+    public void onGroupIdChange() {
+        final String newValue = mainPanel.getGroupId().trim();
+        validationService.isValidGroupId( newValue, new ValidatorCallback() {
+            @Override
+            public void onSuccess() {
+                onGroupIdChange( newValue, true );
+            }
+
+            @Override
+            public void onFailure() {
+                onGroupIdChange( newValue, false );
+            }
+        } );
+    }
+
+    private void onGroupIdChange( String newValue, boolean isValid ) {
+        driverDef.setGroupId( newValue );
+        groupIdValid = isValid;
         if ( !groupIdValid ) {
             mainPanel.setGroupIdErrorMessage(
                     getMessage( DataSourceManagementConstants.DriverDefEditor_InvalidGroupIdMessage ) );
@@ -127,10 +177,24 @@ public class DriverDefEditorHelper {
         }
     }
 
+    public void onArtifactIdChange() {
+        final String newValue = mainPanel.getArtifactId().trim();
+        validationService.isValidArtifactId( newValue, new ValidatorCallback() {
+            @Override
+            public void onSuccess() {
+                onArtifactIdChange( newValue, true );
+            }
 
-    private void onArtifactIdChange() {
-        driverDef.setArtifactId( mainPanel.getArtifactId().trim() );
-        artifactIdValid = validateArtifactId( driverDef.getArtifactId() );
+            @Override
+            public void onFailure() {
+                onArtifactIdChange( newValue, false );
+            }
+        } );
+    }
+
+    private void onArtifactIdChange( String newValue, boolean isValid ) {
+        driverDef.setArtifactId( newValue );
+        artifactIdValid = isValid;
         if ( !artifactIdValid ) {
             mainPanel.setArtifactIdErrorMessage(
                     getMessage( DataSourceManagementConstants.DriverDefEditor_InvalidArtifactIdMessage ) );
@@ -142,9 +206,24 @@ public class DriverDefEditorHelper {
         }
     }
 
-    private void onVersionIdChange() {
-        driverDef.setVersion( mainPanel.getVersion().trim() );
-        versionValid = validateVersion( driverDef.getVersion() );
+    public void onVersionIdChange() {
+        final String newValue = mainPanel.getVersion().trim();
+        validationService.isValidVersionId( newValue, new ValidatorCallback() {
+            @Override
+            public void onSuccess() {
+                onVersionIdChange( newValue, true );
+            }
+
+            @Override
+            public void onFailure() {
+                onVersionIdChange( newValue, false );
+            }
+        } );
+    }
+
+    private void onVersionIdChange( String newValue, boolean isValid ) {
+        driverDef.setVersion( newValue );
+        versionValid = isValid;
         if ( !versionValid ) {
             mainPanel.setVersionErrorMessage(
                     getMessage( DataSourceManagementConstants.DriverDefEditor_InvalidVersionMessage ) );
@@ -182,29 +261,6 @@ public class DriverDefEditorHelper {
         this.groupIdValid = valid;
         this.artifactIdValid = valid;
         this.versionValid = valid;
-    }
-    public boolean validateClassName( String driverClass ) {
-        return !isEmpty( driverClass );
-    }
-
-    public boolean validateName( String name ) {
-        return !isEmpty( name );
-    }
-
-    public boolean validateGroupId( String groupId ) {
-        return !isEmpty( groupId );
-    }
-
-    public boolean validateArtifactId( String artifactId ) {
-        return !isEmpty( artifactId );
-    }
-
-    private boolean validateVersion( String version ) {
-        return !isEmpty( version );
-    }
-
-    public boolean isEmpty( String value ) {
-        return value == null || value.trim().isEmpty();
     }
 
     public void setDriverDef( DriverDef driverDef ) {
