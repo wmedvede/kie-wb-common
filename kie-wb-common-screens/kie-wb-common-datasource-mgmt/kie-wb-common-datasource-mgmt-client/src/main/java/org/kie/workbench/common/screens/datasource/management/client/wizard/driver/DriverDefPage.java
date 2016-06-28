@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.wizard;
+package org.kie.workbench.common.screens.datasource.management.client.wizard.driver;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
