@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.wizard;
+package org.kie.workbench.common.screens.datasource.management.client.wizard.datasource;
 
-import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanel;
+import org.kie.workbench.common.screens.datasource.management.client.editor.datasource.DataSourceDefMainPanel;
 import org.uberfire.client.mvp.UberView;
 
-public interface DriverDefPageView
-        extends UberView<DriverDefPageView.Presenter> {
+public interface DataSourceDefPageView
+        extends UberView<DataSourceDefPageView.Presenter> {
 
     interface Presenter {
 
     }
 
-    void setMainPanel( DriverDefMainPanel mainPanel );
+    void setMainPanel( DataSourceDefMainPanel mainPanel );
 
 }

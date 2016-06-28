@@ -51,6 +51,6 @@ public class DriverDefEditorContent {
 
     @Override
     public int hashCode() {
-        return driverDef != null ? driverDef.hashCode() : 0;
+        return driverDef != null ? ~driverDef.hashCode() : 0;
     }
 }

@@ -20,8 +20,8 @@ import javax.enterprise.event.Observes;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDataSourceDefWizard;
-import org.kie.workbench.common.screens.datasource.management.client.wizard.NewDriverDefWizard;
+import org.kie.workbench.common.screens.datasource.management.client.wizard.datasource.NewDataSourceDefWizard;
+import org.kie.workbench.common.screens.datasource.management.client.wizard.driver.NewDriverDefWizard;
 import org.kie.workbench.common.screens.datasource.management.events.BaseDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.BaseDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.events.DeleteDataSourceEvent;
