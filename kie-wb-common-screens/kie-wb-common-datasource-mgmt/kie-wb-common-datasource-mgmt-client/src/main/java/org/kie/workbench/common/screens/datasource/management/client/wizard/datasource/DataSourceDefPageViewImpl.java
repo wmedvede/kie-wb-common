@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.wizard;
+package org.kie.workbench.common.screens.datasource.management.client.wizard.datasource;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -23,21 +23,21 @@ import com.google.gwt.user.client.ui.Composite;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanel;
+import org.kie.workbench.common.screens.datasource.management.client.editor.datasource.DataSourceDefMainPanel;
 
 @Dependent
 @Templated
-public class DriverDefPageViewImpl
+public class DataSourceDefPageViewImpl
         extends Composite
-        implements DriverDefPageView {
+        implements DataSourceDefPageView {
 
     @Inject
     @DataField( "main-panel-container" )
     private FlowPanel mainPanelContainer;
 
-    private DriverDefPageView.Presenter presenter;
+    private Presenter presenter;
 
-    public DriverDefPageViewImpl() {
+    public DataSourceDefPageViewImpl( ) {
     }
 
     @Override
@@ -46,7 +46,7 @@ public class DriverDefPageViewImpl
     }
 
     @Override
-    public void setMainPanel( DriverDefMainPanel mainPanel ) {
+    public void setMainPanel( final DataSourceDefMainPanel mainPanel ) {
         mainPanelContainer.add( mainPanel );
     }
 }

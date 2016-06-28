@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.wizard;
+package org.kie.workbench.common.screens.datasource.management.client.wizard.driver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,7 +136,7 @@ public class NewDriverDefWizard
             @Override
             public void callback( Path path ) {
                 notification.fire( new NotificationEvent(
-                        "Driver : " + path.toString() + " was successfully created." ) );
+                        "Driver: " + path.toString() + " was successfully created." ) );
                 NewDriverDefWizard.super.complete();
             }
         };
