@@ -20,12 +20,12 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.type.DriverDefType;
+import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
@@ -65,6 +65,8 @@ public class DriverDefEditor
 
     private DriverDefEditorHelper editorHelper;
 
+    private PopupsUtil popupsUtil;
+
     private DriverDefType type;
 
     private Caller<DriverDefEditorService> editorService;
@@ -77,6 +79,7 @@ public class DriverDefEditor
     public DriverDefEditor( final DriverDefEditorView view,
             final DriverDefMainPanel mainPanel,
             final DriverDefEditorHelper editorHelper,
+            final PopupsUtil popupsUtil,
             final DriverDefType type,
             final Caller<DriverDefEditorService> editorService,
             final Caller<DriverManagementService> driverService ) {
@@ -84,6 +87,7 @@ public class DriverDefEditor
         this.view = view;
         this.mainPanel = mainPanel;
         this.editorHelper = editorHelper;
+        this.popupsUtil = popupsUtil;
         this.type = type;
         this.editorService = editorService;
         this.driverService = driverService;
@@ -222,7 +226,7 @@ public class DriverDefEditor
                             org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants.INSTANCE.ItemValidatedSuccessfully(),
                             NotificationEvent.NotificationType.SUCCESS ) );
                 } else {
-                    mainPanel.showValidationMessages( messages );
+                    popupsUtil.showValidationMessages( messages );
                 }
             }
         };
@@ -268,9 +272,9 @@ public class DriverDefEditor
                     @Override
                     public void callback( DriverDeploymentInfo deploymentInfo ) {
                         if ( deploymentInfo != null ) {
-                            Window.alert( "driver is deployed as: " + deploymentInfo.getDeploymentId() );
+                            popupsUtil.showInformationPopup( "driver is deployed as: " + deploymentInfo.getDeploymentId() );
                         } else {
-                            Window.alert( "driver is not deployed" );
+                            popupsUtil.showInformationPopup( "driver is not deployed" );
                         }
                     }
                 }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDriverDef().getUuid() );
@@ -282,7 +286,7 @@ public class DriverDefEditor
                 new RemoteCallback<DriverDeploymentInfo>() {
                     @Override
                     public void callback( DriverDeploymentInfo deploymentInfo ) {
-                        Window.alert( "driver successfully deployed: " + deploymentInfo.getDeploymentId() );
+                        popupsUtil.showInformationPopup( "driver successfully deployed: " + deploymentInfo.getDeploymentId() );
                     }
                 }, new DefaultErrorCallback() ).deploy( getContent().getDriverDef() );
     }
@@ -295,12 +299,12 @@ public class DriverDefEditor
                     public void callback( DriverDeploymentInfo deploymentInfo ) {
 
                         if ( deploymentInfo == null ) {
-                            Window.alert( "driver is not deployed in current server" );
+                            popupsUtil.showInformationPopup( "driver is not deployed in current server" );
                         } else {
                             driverService.call( new RemoteCallback<Void>() {
                                 @Override
                                 public void callback( Void aVoid ) {
-                                    Window.alert( "driver was successfully un-deployed" );
+                                    popupsUtil.showInformationPopup( "driver was successfully un-deployed" );
                                 }
                             }, new DefaultErrorCallback() ).undeploy( deploymentInfo );
                         }

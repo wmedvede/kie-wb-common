@@ -99,7 +99,23 @@ public class ClientValidationService {
     }
 
     public void isValidDriverName( final String driverName, final ValidatorCallback callback ) {
-        if ( !isEmpty( driverName ) ) {
+        isNotEmpty( driverName, callback );
+    }
+
+    public void isValidDataSourceName( final String dataSourceName, final ValidatorCallback callback ) {
+        isNotEmpty( dataSourceName, callback );
+    }
+
+    public void isValidJndiName( String jndiName, ValidatorCallback callback ) {
+        isNotEmpty( jndiName, callback );
+    }
+
+    public void isValidConnectionURL( String connectionURL, ValidatorCallback callback ) {
+        isNotEmpty( connectionURL, callback );
+    }
+
+    public void isNotEmpty( String value, ValidatorCallback callback ) {
+        if ( !isEmpty( value ) ) {
             callback.onSuccess();
         } else {
             callback.onFailure();
@@ -109,4 +125,5 @@ public class ClientValidationService {
     public boolean isEmpty( String value ) {
         return value == null || value.trim().isEmpty();
     }
+
 }

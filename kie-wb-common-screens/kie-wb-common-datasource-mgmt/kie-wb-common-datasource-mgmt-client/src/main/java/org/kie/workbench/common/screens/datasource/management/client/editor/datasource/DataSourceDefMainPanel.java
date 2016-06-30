@@ -215,8 +215,4 @@ public class DataSourceDefMainPanel
         view.setDriver( ""  );
         view.clearDriverErrorMessage();
     }
-
-    public void showInformationPopup( final String message ) {
-        view.showInformationPopup( message );
-    }
 }
