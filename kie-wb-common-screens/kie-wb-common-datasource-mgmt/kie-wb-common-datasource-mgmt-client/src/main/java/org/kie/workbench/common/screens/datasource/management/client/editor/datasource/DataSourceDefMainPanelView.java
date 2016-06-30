@@ -93,7 +93,4 @@ public interface DataSourceDefMainPanelView extends UberView<DataSourceDefMainPa
     void clearDriverErrorMessage();
 
     void loadDriverOptions( final List<Pair<String,String>> driverOptions, final boolean addEmptyOption );
-
-    void showInformationPopup( final String message );
-
 }

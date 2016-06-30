@@ -16,13 +16,12 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.util;
 
-import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefTestConstants;
 import org.kie.workbench.common.screens.datasource.management.client.validation.ClientValidationService;
 import org.uberfire.ext.editor.commons.client.validation.ValidatorCallback;
 
 public class ClientValidationServiceMock
         extends ClientValidationService
-        implements DriverDefTestConstants {
+        implements DataSourceManagementTestConstants {
 
     public ClientValidationServiceMock() {
         super( null );
@@ -72,4 +71,33 @@ public class ClientValidationServiceMock
             callback.onFailure();
         }
     }
+
+    @Override
+    public void isValidDataSourceName( String dataSourceName, ValidatorCallback callback ) {
+        if ( NAME.equals( dataSourceName ) ) {
+            callback.onSuccess();
+        } else {
+            callback.onFailure();
+        }
+    }
+
+    @Override
+    public void isValidJndiName( String jndiName, ValidatorCallback callback ) {
+        if ( JNDI.equals( jndiName ) ) {
+            callback.onSuccess();
+        } else {
+            callback.onFailure();
+        }
+    }
+
+    @Override
+    public void isValidConnectionURL( String connectionURL, ValidatorCallback callback ) {
+        if ( CONNECTION_URL.equals( connectionURL ) ) {
+            callback.onSuccess();
+        } else {
+            callback.onFailure();
+        }
+    }
+
+
 }

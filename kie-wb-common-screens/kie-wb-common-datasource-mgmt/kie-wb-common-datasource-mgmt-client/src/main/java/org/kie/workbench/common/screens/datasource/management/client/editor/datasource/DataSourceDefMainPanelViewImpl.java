@@ -34,9 +34,6 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.uberfire.commons.data.Pair;
-import org.uberfire.ext.widgets.common.client.common.popups.YesNoCancelPopup;
-import org.uberfire.ext.widgets.common.client.resources.i18n.CommonConstants;
-import org.uberfire.mvp.Command;
 
 import static org.kie.workbench.common.screens.datasource.management.client.util.UIUtil.*;
 
@@ -261,26 +258,6 @@ public class DataSourceDefMainPanelViewImpl
             driverSelector.add( newOption( optionPair.getK1(), optionPair.getK2() ));
         }
         refreshDriverSelector();
-    }
-
-    @Override
-    public void showInformationPopup( final String message ) {
-
-        YesNoCancelPopup yesNoCancelPopup = YesNoCancelPopup.newYesNoCancelPopup( CommonConstants.INSTANCE.Information(),
-                message,
-                new Command() {
-                    @Override public void execute() {
-
-                    }
-                },
-                CommonConstants.INSTANCE.OK(),
-                null,
-                null,
-                null,
-                null );
-
-        yesNoCancelPopup.setClosable( false );
-        yesNoCancelPopup.show();
     }
 
     @EventHandler( "name" )

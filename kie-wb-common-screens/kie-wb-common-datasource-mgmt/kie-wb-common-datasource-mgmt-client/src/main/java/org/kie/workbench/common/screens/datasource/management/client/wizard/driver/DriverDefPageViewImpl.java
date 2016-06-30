@@ -21,9 +21,11 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Composite;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanel;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 
 @Dependent
 @Templated
@@ -37,6 +39,9 @@ public class DriverDefPageViewImpl
 
     private DriverDefPageView.Presenter presenter;
 
+    @Inject
+    private TranslationService translationService;
+
     public DriverDefPageViewImpl() {
     }
 
@@ -48,5 +53,10 @@ public class DriverDefPageViewImpl
     @Override
     public void setMainPanel( DriverDefMainPanel mainPanel ) {
         mainPanelContainer.add( mainPanel );
+    }
+
+    @Override
+    public String getPageTitle() {
+        return translationService.getTranslation( DataSourceManagementConstants.DriverDefDefPageViewImpl_pageTitle );
     }
 }

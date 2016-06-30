@@ -16,13 +16,11 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor.driver;
 
-import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 
 @Dependent
 public class DriverDefMainPanel
@@ -160,10 +158,6 @@ public class DriverDefMainPanel
 
     public void clearVersionErrorMessage() {
         view.clearVersionErrorMessage();
-    }
-
-    public void showValidationMessages( final List<ValidationMessage> messages ) {
-        view.showValidationMessages( messages );
     }
 
     public void clear() {

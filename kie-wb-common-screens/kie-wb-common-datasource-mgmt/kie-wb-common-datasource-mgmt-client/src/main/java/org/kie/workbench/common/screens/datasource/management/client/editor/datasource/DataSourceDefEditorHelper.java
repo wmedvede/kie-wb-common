@@ -23,18 +23,24 @@ import java.util.Map;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
+import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
+import org.kie.workbench.common.screens.datasource.management.client.validation.ClientValidationService;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.model.TestConnectionResult;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
 import org.uberfire.commons.data.Pair;
+import org.uberfire.ext.editor.commons.client.validation.ValidatorCallback;
+import org.uberfire.mvp.Command;
+import org.uberfire.mvp.ParameterizedCommand;
 
 @Dependent
 public class DataSourceDefEditorHelper {
@@ -42,6 +48,12 @@ public class DataSourceDefEditorHelper {
     private TranslationService translationService;
 
     private Caller<DataSourceDefEditorService> editorService;
+
+    private Caller<DataSourceDefQueryService> queryService;
+
+    private ClientValidationService validationService;
+
+    private PopupsUtil popupsUtil;
 
     private DataSourceDef dataSourceDef;
 
@@ -62,9 +74,15 @@ public class DataSourceDefEditorHelper {
 
     @Inject
     public DataSourceDefEditorHelper( final TranslationService translationService,
-            final Caller<DataSourceDefEditorService> editorService ) {
+            final Caller<DataSourceDefEditorService> editorService,
+            final Caller<DataSourceDefQueryService> queryService,
+            final ClientValidationService validationService,
+            final PopupsUtil popupsUtil ) {
         this.translationService = translationService;
         this.editorService = editorService;
+        this.queryService = queryService;
+        this.validationService = validationService;
+        this.popupsUtil = popupsUtil;
     }
 
     public void init( final DataSourceDefMainPanel mainPanel ) {
@@ -127,24 +145,67 @@ public class DataSourceDefEditorHelper {
         this.handler = handler;
     }
 
-    public void loadDrivers( final List<DriverDefInfo> driverDefs ) {
-        List<Pair<String, String>> driverOptions = buildDriverOptions( driverDefs );
-        mainPanel.loadDriverOptions( driverOptions, true );
+    public void loadDrivers( final Command onSuccessCommand,
+            final ParameterizedCommand<Throwable> onErrorCommand ) {
+        if ( project == null ) {
+            queryService.call(
+                    getLoadDriversSuccessCallback( onSuccessCommand ),
+                    getLoadDriversErrorCallback( onErrorCommand ) ).findGlobalDrivers();
+        } else {
+            queryService.call(
+                    getLoadDriversSuccessCallback( onSuccessCommand ),
+                    getLoadDriversErrorCallback( onErrorCommand ) ).findProjectDrivers( project.getRootPath() );
+        }
+    }
+
+    private RemoteCallback<List<DriverDefInfo>> getLoadDriversSuccessCallback( final Command onSuccessCommand ) {
+        return new RemoteCallback<List<DriverDefInfo>>() {
+            @Override
+            public void callback( List<DriverDefInfo> response ) {
+                mainPanel.loadDriverOptions( buildDriverOptions( response ), true );
+                onSuccessCommand.execute();
+            }
+        };
+    }
+
+    private ErrorCallback<?> getLoadDriversErrorCallback( final ParameterizedCommand<Throwable> onErrorCommand ) {
+        return new ErrorCallback<Object>() {
+            @Override
+            public boolean error( Object o, Throwable throwable ) {
+                onErrorCommand.execute( throwable );
+                return false;
+            }
+        };
     }
 
     private List<Pair<String, String>> buildDriverOptions( final List<DriverDefInfo> driverDefs ) {
         List<Pair<String, String>> options = new ArrayList<>(  );
         driverDefMap.clear();
         for ( DriverDefInfo driverDef : driverDefs ) {
-            options.add( new Pair<String, String>( driverDef.getName(), driverDef.getUuid() ) );
+            options.add( new Pair<>( driverDef.getName(), driverDef.getUuid() ) );
             driverDefMap.put( driverDef.getUuid(), driverDef );
         }
         return options;
     }
 
     public void onNameChange() {
-        dataSourceDef.setName( mainPanel.getName().trim() );
-        nameValid = validateName( dataSourceDef.getName() );
+        final String newValue = mainPanel.getName().trim();
+        validationService.isValidDataSourceName( newValue, new ValidatorCallback() {
+            @Override
+            public void onSuccess() {
+                onNameChange( newValue, true );
+            }
+
+            @Override
+            public void onFailure() {
+                onNameChange( newValue, false );
+            }
+        } );
+    }
+
+    private void onNameChange( String newValue, boolean isValid ) {
+        dataSourceDef.setName( newValue );
+        nameValid = isValid;
         if ( !nameValid ) {
             mainPanel.setNameErrorMessage(
                     getMessage( DataSourceManagementConstants.DataSourceDefEditor_InvalidNameMessage ) );
@@ -157,8 +218,23 @@ public class DataSourceDefEditorHelper {
     }
 
     public void onJndiChange() {
-        dataSourceDef.setJndi( mainPanel.getJndi().trim() );
-        jndiValid = validateJndiName( dataSourceDef.getJndi() );
+        final String newValue = mainPanel.getJndi().trim();
+        validationService.isValidJndiName( newValue, new ValidatorCallback() {
+            @Override
+            public void onSuccess() {
+                onJndiChange( newValue, true );
+            }
+
+            @Override
+            public void onFailure() {
+                onJndiChange( newValue, false );
+            }
+        } );
+    }
+
+    private void onJndiChange( String newValue, boolean isValid ) {
+        dataSourceDef.setJndi( newValue );
+        jndiValid = isValid;
         if ( !jndiValid ) {
             mainPanel.setJndiErrorMessage(
                     getMessage( DataSourceManagementConstants.DataSourceDefEditor_InvalidJndiMessage ) );
@@ -171,8 +247,23 @@ public class DataSourceDefEditorHelper {
     }
 
     public void onConnectionURLChange() {
-        dataSourceDef.setConnectionURL( mainPanel.getConnectionURL().trim() );
-        connectionURLValid = validateConnectionURL( dataSourceDef.getConnectionURL() );
+        final String newValue = mainPanel.getConnectionURL().trim();
+        validationService.isValidConnectionURL( newValue, new ValidatorCallback() {
+            @Override
+            public void onSuccess() {
+                onConnectionURLChange( newValue, true );
+            }
+
+            @Override
+            public void onFailure() {
+                onConnectionURLChange( newValue, false );
+            }
+        } );
+    }
+
+    private void onConnectionURLChange( String newValue, boolean isValid ) {
+        dataSourceDef.setConnectionURL( newValue );
+        connectionURLValid = isValid;
         if ( !connectionURLValid ) {
             mainPanel.setConnectionURLErrorMessage(
                     getMessage( DataSourceManagementConstants.DataSourceDefEditor_InvalidConnectionURLMessage ) );
@@ -185,8 +276,23 @@ public class DataSourceDefEditorHelper {
     }
 
     public void onUserChange() {
-        dataSourceDef.setUser( mainPanel.getUser().trim() );
-        userValid = validateUser( dataSourceDef.getUser() );
+        final String newValue = mainPanel.getUser().trim();
+        validationService.isNotEmpty( newValue, new ValidatorCallback() {
+            @Override
+            public void onSuccess() {
+                onUserChange( newValue, true );
+            }
+
+            @Override
+            public void onFailure() {
+                onUserChange( newValue, false );
+            }
+        } );
+    }
+
+    private void onUserChange( String newValue, boolean isValid ) {
+        dataSourceDef.setUser( newValue );
+        userValid = isValid;
         if ( !userValid ) {
             mainPanel.setUserErrorMessage(
                     getMessage( DataSourceManagementConstants.DataSourceDefEditor_InvalidUserMessage ) );
@@ -199,8 +305,23 @@ public class DataSourceDefEditorHelper {
     }
 
     public void onPasswordChange() {
-        dataSourceDef.setPassword( mainPanel.getPassword().trim() );
-        passwordValid = validatePassword( dataSourceDef.getPassword() );
+        final String newValue = mainPanel.getPassword().trim();
+        validationService.isNotEmpty( newValue, new ValidatorCallback() {
+            @Override
+            public void onSuccess() {
+                onPasswordChange( newValue, true );
+            }
+
+            @Override
+            public void onFailure() {
+                onPasswordChange( newValue, false );
+            }
+        } );
+    }
+
+    private void onPasswordChange( String newValue, boolean isValid ) {
+        dataSourceDef.setPassword( newValue );
+        passwordValid = isValid;
         if ( !passwordValid ) {
             mainPanel.setPasswordErrorMessage(
                     getMessage( DataSourceManagementConstants.DataSourceDefEditor_InvalidPasswordMessage ) );
@@ -250,7 +371,16 @@ public class DataSourceDefEditorHelper {
     }
 
     public void onTestConnectionSuccess( TestConnectionResult response ) {
-        Window.alert( "Connection test " + ( response.isTestPassed() ? "Successful" : "Failed" ) + "\n" + response.getMessage() );
+        SafeHtmlBuilder builder = new SafeHtmlBuilder();
+        if ( response.isTestPassed() ) {
+            builder.appendEscapedLines(
+                    getMessage( DataSourceManagementConstants.DataSourceDefEditor_ConnectionTestSuccessfulMessage ) + "\n" );
+        } else {
+            builder.appendEscapedLines(
+                    getMessage( DataSourceManagementConstants.DataSourceDefEditor_ConnectionTestFailedMessage ) + "\n" );
+        }
+        builder.appendEscapedLines( response.getMessage() );
+        popupsUtil.showInformationPopup( builder.toSafeHtml().asString() );
     }
 
     private ErrorCallback<?> getTestConnectionErrorCallback() {
@@ -264,7 +394,11 @@ public class DataSourceDefEditorHelper {
     }
 
     public void onTestConnectionError( Object message, Throwable throwable ) {
-        Window.alert( "An error was produced during connection testing." );
+        SafeHtmlBuilder builder = new SafeHtmlBuilder();
+        builder.appendEscapedLines(
+                getMessage( DataSourceManagementConstants.DataSourceDefEditor_ConnectionTestFailedMessage ) + "\n" );
+        builder.appendEscapedLines( throwable.getMessage() );
+        popupsUtil.showErrorPopup( builder.toSafeHtml().asString() );
     }
 
     public void setValid( boolean valid ) {
@@ -284,44 +418,20 @@ public class DataSourceDefEditorHelper {
         return nameValid;
     }
 
-    public boolean validateName( String name ) {
-        return !isEmpty( name );
-    }
-
     public boolean isJndiValid() {
         return jndiValid;
-    }
-
-    public boolean validateJndiName( String jndiName ) {
-        return !isEmpty( jndiName );
     }
 
     public boolean isConnectionURLValid() {
         return connectionURLValid;
     }
 
-    public boolean validateConnectionURL( String connectionURL ) {
-        return !isEmpty( connectionURL );
-    }
-
     public boolean isUserValid() {
         return userValid;
     }
 
-    public boolean validateUser( String user ) {
-        return !isEmpty( user );
-    }
-
     public boolean isPasswordValid() {
         return passwordValid;
-    }
-
-    public boolean validatePassword( String password ) {
-        return !isEmpty( password );
-    }
-
-    public boolean isEmpty( String value ) {
-        return value == null || value.trim().isEmpty();
     }
 
     public String getMessage( String messageKey ) {

@@ -23,23 +23,25 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
+import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.java.nio.file.FileAlreadyExistsException;
+import org.uberfire.mvp.Command;
+import org.uberfire.mvp.ParameterizedCommand;
 import org.uberfire.workbench.events.NotificationEvent;
 
 @Dependent
@@ -54,7 +56,9 @@ public class NewDataSourceDefWizard
 
     private Caller<DataSourceDefEditorService> dataSourceDefService;
 
-    private final Caller<DataSourceDefQueryService> driverDefService;
+    private TranslationService translationService;
+
+    private PopupsUtil popupsUtil;
 
     private Event<NotificationEvent> notification;
 
@@ -63,11 +67,13 @@ public class NewDataSourceDefWizard
     @Inject
     public NewDataSourceDefWizard( final DataSourceDefPage dataSourceDefPage,
             final Caller<DataSourceDefEditorService> dataSourceDefService,
-            final Caller<DataSourceDefQueryService> driverDefService,
+            final TranslationService translationService,
+            final PopupsUtil popupsUtil,
             final Event<NotificationEvent> notification ) {
         this.dataSourceDefPage = dataSourceDefPage;
         this.dataSourceDefService = dataSourceDefService;
-        this.driverDefService = driverDefService;
+        this.translationService = translationService;
+        this.popupsUtil = popupsUtil;
         this.notification = notification;
     }
 
@@ -83,16 +89,7 @@ public class NewDataSourceDefWizard
         dataSourceDef = new DataSourceDef();
         dataSourceDefPage.setDataSourceDef( dataSourceDef );
         dataSourceDefPage.setProject( project );
-
-        if ( isGlobal() ) {
-            driverDefService.call(
-                    getLoadDriversSuccessCallback(),
-                    getLoadDriversErrorCallback() ).findGlobalDrivers();
-        } else {
-            driverDefService.call(
-                    getLoadDriversSuccessCallback(),
-                    getLoadDriversErrorCallback() ).findProjectDrivers( project.getRootPath() );
-        }
+        dataSourceDefPage.loadDrivers( getLoadDriversSuccessCommand(), getLoadDriversFailureCommand() );
     }
 
     @Override
@@ -107,7 +104,7 @@ public class NewDataSourceDefWizard
 
     @Override
     public String getTitle() {
-        return "New data source";
+        return translationService.getTranslation( DataSourceManagementConstants.NewDataSourceDefWizard_title );
     }
 
     @Override
@@ -153,7 +150,9 @@ public class NewDataSourceDefWizard
             @Override
             public void callback( Path path ) {
                 notification.fire( new NotificationEvent(
-                        "Data source : " + path.toString() + " was successfully created." ) );
+                        translationService.format(
+                                DataSourceManagementConstants.NewDataSourceDefWizard_DataSourceCreatedMessage,
+                                path.toString() ) ) );
                 NewDataSourceDefWizard.super.complete();
             }
         };
@@ -163,37 +162,40 @@ public class NewDataSourceDefWizard
         return new DefaultErrorCallback() {
             @Override
             public boolean error( Message message, Throwable throwable ) {
-                Window.alert( "Data source was not created due to the following error: " +
-                        buildOnCreateErrorMessage( throwable )  );
+                popupsUtil.showErrorPopup( translationService.format(
+                        DataSourceManagementConstants.NewDataSourceDefWizard_DataSourceCreateErrorMessage,
+                        buildOnCreateErrorMessage( throwable ) ) );
                 return false;
             }
         };
     }
 
-    private RemoteCallback<List<DriverDefInfo>> getLoadDriversSuccessCallback() {
-        return new RemoteCallback<List<DriverDefInfo>>() {
+    private Command getLoadDriversSuccessCommand() {
+        return new Command() {
             @Override
-            public void callback( List<DriverDefInfo> response ) {
-                dataSourceDefPage.loadDrivers( response );
+            public void execute() {
                 NewDataSourceDefWizard.super.start();
             }
         };
     }
 
-    private ErrorCallback<?> getLoadDriversErrorCallback() {
-        return new ErrorCallback<Object>() {
+    private ParameterizedCommand<Throwable> getLoadDriversFailureCommand() {
+        return new ParameterizedCommand<Throwable>() {
             @Override
-            public boolean error( Object o, Throwable throwable ) {
-                Window.alert( "Wizard initialization failed, it was not possible to load driver definitions. "
-                        + throwable.getMessage() );
-                return false;
+            public void execute( Throwable parameter ) {
+                popupsUtil.showErrorPopup(
+                        translationService.format(
+                                DataSourceManagementConstants.NewDataSourceDefWizard_WizardStartErrorMessage,
+                                parameter.getMessage() ) );
             }
         };
     }
 
     private String buildOnCreateErrorMessage( Throwable t ) {
         if ( t instanceof FileAlreadyExistsException ) {
-            return "File already exists: " + ((FileAlreadyExistsException )t).getFile();
+            return translationService.format(
+                    DataSourceManagementConstants.NewDataSourceDefWizard_FileExistsErrorMessage,
+                    ((FileAlreadyExistsException )t).getFile() );
         } else {
             return t.getMessage();
         }

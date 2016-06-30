@@ -26,8 +26,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefEditorHelper;
 import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanel;
-import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefTestConstants;
+import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanelView;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
+import org.kie.workbench.common.screens.datasource.management.client.util.DataSourceManagementTestConstants;
 import org.kie.workbench.common.screens.datasource.management.client.util.ClientValidationServiceMock;
+import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.mockito.Mock;
@@ -42,7 +45,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith( GwtMockitoTestRunner.class )
 public class NewDriverWizardTest
-        implements DriverDefTestConstants {
+        implements DataSourceManagementTestConstants {
 
     private DriverDefPage driverDefPage;
 
@@ -55,6 +58,8 @@ public class NewDriverWizardTest
     private DriverDefPageView driverDefPageView;
 
     @GwtMock
+    private DriverDefMainPanelView mainPanelView;
+
     private DriverDefMainPanel mainPanel;
 
     @Mock
@@ -79,13 +84,18 @@ public class NewDriverWizardTest
     @GwtMock
     WizardView wizardView;
 
+    @GwtMock
+    PopupsUtil popupsUtil;
+
     @Before
     public void setup() {
+        mainPanel = new DriverDefMainPanel( mainPanelView );
         editorHelper = new DriverDefEditorHelper( translationService, new ClientValidationServiceMock() );
         driverDefServiceCaller = new CallerMock<>( driverDefService );
 
         driverDefPage = new DriverDefPage( driverDefPageView, mainPanel, editorHelper, statusChangeEvent );
-        driverDefWizard = new NewDriverDefWizard( driverDefPage, driverDefServiceCaller, notificationEvent ) {
+        driverDefWizard = new NewDriverDefWizard( driverDefPage,
+                driverDefServiceCaller, translationService, popupsUtil, notificationEvent ) {
             {
                 this.view = wizardView;
             }
@@ -107,11 +117,15 @@ public class NewDriverWizardTest
      */
     private void testCreate( final Project project ) {
 
-        when( mainPanel.getName() ).thenReturn( NAME );
-        when( mainPanel.getGroupId() ).thenReturn( GROUP_ID );
-        when( mainPanel.getArtifactId() ).thenReturn( ARTIFACT_ID );
-        when( mainPanel.getVersion() ).thenReturn( VERSION );
-        when( mainPanel.getDriverClass() ).thenReturn( DRIVER_CLASS );
+        when( mainPanelView.getName() ).thenReturn( NAME );
+        when( mainPanelView.getGroupId() ).thenReturn( GROUP_ID );
+        when( mainPanelView.getArtifactId() ).thenReturn( ARTIFACT_ID );
+        when( mainPanelView.getVersion() ).thenReturn( VERSION );
+        when( mainPanelView.getDriverClass() ).thenReturn( DRIVER_CLASS );
+
+        when( path.toString() ).thenReturn( "target_driver_path" );
+        when( translationService.format( eq( DataSourceManagementConstants.NewDriverDefWizard_DriverCreatedMessage ),
+                anyVararg() ) ).thenReturn( "OkMessage" );
 
         if ( project != null ) {
             when( driverDefService.create( any( DriverDef.class ), eq( project ) ) ).thenReturn( path );
@@ -119,15 +133,14 @@ public class NewDriverWizardTest
         } else {
             when( driverDefService.createGlobal( any( DriverDef.class ) ) ).thenReturn( path );
         }
-        when( path.toString() ).thenReturn( "target_driver_path" );
 
         driverDefWizard.start();
 
-        editorHelper.onNameChange();
-        editorHelper.onGroupIdChange();
-        editorHelper.onArtifactIdChange();
-        editorHelper.onDriverClassChange();
-        editorHelper.onVersionIdChange();
+        mainPanel.onNameChange();
+        mainPanel.onGroupIdChange();
+        mainPanel.onArtifactIdChange();
+        mainPanel.onDriverClassChange();
+        mainPanel.onVersionChange();
 
         DriverDef expectedDriverDef = new DriverDef();
         expectedDriverDef.setName( NAME );
@@ -145,7 +158,6 @@ public class NewDriverWizardTest
             verify( driverDefService, times( 1 ) ).createGlobal( expectedDriverDef );
         }
         verify( notificationEvent, times( 1 ) ).fire(
-                new NotificationEvent( "Driver: " + path.toString() + " was successfully created." ) );
+                new NotificationEvent( "OkMessage" ) );
     }
 }
-

@@ -20,6 +20,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.kie.workbench.common.screens.datasource.management.client.util.DataSourceManagementTestConstants;
 import org.mockito.Mock;
 
 import static org.junit.Assert.*;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith( GwtMockitoTestRunner.class )
 public class DriverDefMainPanelTest
-        implements DriverDefTestConstants {
+        implements DataSourceManagementTestConstants {
 
     @Mock
     private DriverDefMainPanelView view;
@@ -55,27 +56,27 @@ public class DriverDefMainPanelTest
         mainPanel.setHandler( new DriverDefMainPanelView.Handler() {
             @Override
             public void onNameChange() {
-                DriverDefMainPanelTest.this.name = view.getName();
+                name = view.getName();
             }
 
             @Override
             public void onDriverClassChange() {
-                DriverDefMainPanelTest.this.driverClass = view.getDriverClass();
+                driverClass = view.getDriverClass();
             }
 
             @Override
             public void onGroupIdChange() {
-                DriverDefMainPanelTest.this.groupId = view.getGroupId();
+                groupId = view.getGroupId();
             }
 
             @Override
             public void onArtifactIdChange() {
-                DriverDefMainPanelTest.this.artifactId = view.getArtifactId();
+                artifactId = view.getArtifactId();
             }
 
             @Override
             public void onVersionChange() {
-                DriverDefMainPanelTest.this.version = view.getVersion();
+                version = view.getVersion();
             }
         } );
     }

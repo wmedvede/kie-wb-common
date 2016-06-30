@@ -16,7 +16,6 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor.driver;
 
-import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -24,12 +23,10 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
-import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.kie.workbench.common.widgets.client.popups.validation.ValidationPopup;
 
 import static org.kie.workbench.common.screens.datasource.management.client.util.UIUtil.*;
 
@@ -232,10 +229,5 @@ public class DriverDefMainPanelViewImpl
     @EventHandler( "version")
     public void onVersionChange( final ChangeEvent event ) {
         presenter.onVersionChange();
-    }
-
-    @Override
-    public void showValidationMessages( final List<ValidationMessage> messages ) {
-        ValidationPopup.showMessages( messages );
     }
 }
