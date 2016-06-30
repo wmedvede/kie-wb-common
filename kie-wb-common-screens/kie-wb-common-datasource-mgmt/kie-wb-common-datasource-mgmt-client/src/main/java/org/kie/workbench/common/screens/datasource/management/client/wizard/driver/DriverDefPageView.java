@@ -28,4 +28,6 @@ public interface DriverDefPageView
 
     void setMainPanel( DriverDefMainPanel mainPanel );
 
+    String getPageTitle();
+
 }

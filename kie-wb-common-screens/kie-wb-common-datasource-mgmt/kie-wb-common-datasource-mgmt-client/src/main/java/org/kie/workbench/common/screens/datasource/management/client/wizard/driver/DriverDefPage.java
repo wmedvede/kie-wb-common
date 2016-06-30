@@ -94,7 +94,7 @@ public class DriverDefPage
 
     @Override
     public String getTitle() {
-        return "Driver definition";
+        return view.getPageTitle();
     }
 
     @Override

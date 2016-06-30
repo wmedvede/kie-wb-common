@@ -24,7 +24,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefEditorHelper;
 import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanel;
-import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefTestConstants;
+import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanelView;
+import org.kie.workbench.common.screens.datasource.management.client.util.DataSourceManagementTestConstants;
 import org.kie.workbench.common.screens.datasource.management.client.util.ClientValidationServiceMock;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.mockito.Mock;
@@ -37,12 +38,14 @@ import static org.mockito.Mockito.*;
 
 @RunWith( GwtMockitoTestRunner.class )
 public class DriverDefPageTest
-        implements DriverDefTestConstants {
+        implements DataSourceManagementTestConstants {
 
     @GwtMock
     private DriverDefPageView view;
 
     @GwtMock
+    private DriverDefMainPanelView mainPanelView;
+
     private DriverDefMainPanel mainPanel;
 
     @Mock
@@ -59,6 +62,7 @@ public class DriverDefPageTest
 
     @Before
     public void setup() {
+        mainPanel = new DriverDefMainPanel( mainPanelView );
         driverDef = new DriverDef();
         editorHelper = new DriverDefEditorHelper( translationService, new ClientValidationServiceMock( ) );
         defPage = new DriverDefPage( view, mainPanel, editorHelper, statusChangeEvent );
@@ -68,17 +72,17 @@ public class DriverDefPageTest
     //@Test
     public void testValidChanges() {
         //emulates the user completing the page by typing valid values in all fields.
-        when( mainPanel.getName() ).thenReturn( NAME );
-        when( mainPanel.getGroupId() ).thenReturn( GROUP_ID );
-        when( mainPanel.getArtifactId() ).thenReturn( ARTIFACT_ID );
-        when( mainPanel.getVersion() ).thenReturn( VERSION );
-        when( mainPanel.getDriverClass() ).thenReturn( DRIVER_CLASS );
+        when( mainPanelView.getName() ).thenReturn( NAME );
+        when( mainPanelView.getGroupId() ).thenReturn( GROUP_ID );
+        when( mainPanelView.getArtifactId() ).thenReturn( ARTIFACT_ID );
+        when( mainPanelView.getVersion() ).thenReturn( VERSION );
+        when( mainPanelView.getDriverClass() ).thenReturn( DRIVER_CLASS );
 
-        editorHelper.onNameChange();
-        editorHelper.onGroupIdChange();
-        editorHelper.onArtifactIdChange();
-        editorHelper.onVersionIdChange();
-        editorHelper.onDriverClassChange();
+        mainPanel.onNameChange();
+        mainPanel.onGroupIdChange();
+        mainPanel.onArtifactIdChange();
+        mainPanel.onVersionChange();
+        mainPanel.onDriverClassChange();
 
         //modification event should have been fired.
         verify( statusChangeEvent, times( 5 ) ).fire( any( WizardPageStatusChangeEvent.class ) );
@@ -115,7 +119,7 @@ public class DriverDefPageTest
         } );
 
         //now emulates the entering of a wrong value e.g. for the driver class name
-        when( mainPanel.getDriverClass() ).thenReturn( "SomeWrongClassName" );
+        when( mainPanelView.getDriverClass() ).thenReturn( "SomeWrongClassName" );
         editorHelper.onDriverClassChange();
 
         //now the page should be in un-completed state.

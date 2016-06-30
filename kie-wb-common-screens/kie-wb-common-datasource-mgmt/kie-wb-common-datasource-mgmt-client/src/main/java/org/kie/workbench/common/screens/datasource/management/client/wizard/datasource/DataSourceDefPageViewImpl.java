@@ -21,9 +21,11 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Composite;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.kie.workbench.common.screens.datasource.management.client.editor.datasource.DataSourceDefMainPanel;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 
 @Dependent
 @Templated
@@ -37,6 +39,9 @@ public class DataSourceDefPageViewImpl
 
     private Presenter presenter;
 
+    @Inject
+    TranslationService translationService;
+
     public DataSourceDefPageViewImpl( ) {
     }
 
@@ -48,5 +53,10 @@ public class DataSourceDefPageViewImpl
     @Override
     public void setMainPanel( final DataSourceDefMainPanel mainPanel ) {
         mainPanelContainer.add( mainPanel );
+    }
+
+    @Override
+    public String getPageTitle() {
+        return translationService.getTranslation( DataSourceManagementConstants.DataSourceDefPage_pagetTitle );
     }
 }

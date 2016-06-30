@@ -20,6 +20,9 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.uberfire.ext.widgets.common.client.common.StyleHelper;
+import org.uberfire.ext.widgets.common.client.common.popups.YesNoCancelPopup;
+import org.uberfire.ext.widgets.common.client.resources.i18n.CommonConstants;
+import org.uberfire.mvp.Command;
 
 public class UIUtil {
 
@@ -37,5 +40,4 @@ public class UIUtil {
         span.getStyle().setVisibility( Style.Visibility.HIDDEN );
         span.setInnerHTML( "" );
     }
-
 }

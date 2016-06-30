@@ -23,13 +23,15 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
+import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.uberfire.backend.vfs.Path;
@@ -52,6 +54,10 @@ public class NewDriverDefWizard
 
     private Caller<DriverDefEditorService> driverDefService;
 
+    private TranslationService translationService;
+
+    private PopupsUtil popupsUtil;
+
     private Event<NotificationEvent> notification;
 
     private Project project;
@@ -59,9 +65,13 @@ public class NewDriverDefWizard
     @Inject
     public NewDriverDefWizard( final DriverDefPage driverDefPage,
             final Caller<DriverDefEditorService> driverDefService,
+            final TranslationService translationService,
+            final PopupsUtil popupsUtil,
             final Event<NotificationEvent> notification ) {
         this.driverDefPage = driverDefPage;
         this.driverDefService = driverDefService;
+        this.translationService = translationService;
+        this.popupsUtil = popupsUtil;
         this.notification = notification;
     }
 
@@ -92,7 +102,7 @@ public class NewDriverDefWizard
 
     @Override
     public String getTitle() {
-        return "New driver";
+        return translationService.getTranslation( DataSourceManagementConstants.NewDriverDefWizard_title );
     }
 
     @Override
@@ -136,7 +146,8 @@ public class NewDriverDefWizard
             @Override
             public void callback( Path path ) {
                 notification.fire( new NotificationEvent(
-                        "Driver: " + path.toString() + " was successfully created." ) );
+                        translationService.format( DataSourceManagementConstants.NewDriverDefWizard_DriverCreatedMessage,
+                                path.toString() ) ) );
                 NewDriverDefWizard.super.complete();
             }
         };
@@ -146,8 +157,9 @@ public class NewDriverDefWizard
         return new DefaultErrorCallback() {
             @Override
             public boolean error( Message message, Throwable throwable ) {
-                Window.alert( "Driver was not created due to the following error: " +
-                        buildOnCreateErrorMessage( throwable ) );
+                popupsUtil.showErrorPopup(
+                        translationService.format( DataSourceManagementConstants.NewDriverDefWizard_DriverCreateErrorMessage,
+                        buildOnCreateErrorMessage( throwable ) ) );
                 return false;
             }
         };
@@ -155,7 +167,9 @@ public class NewDriverDefWizard
 
     private String buildOnCreateErrorMessage( Throwable t ) {
         if ( t instanceof FileAlreadyExistsException ) {
-            return "File already exists: " + ((FileAlreadyExistsException )t).getFile();
+            return translationService.format(
+                    DataSourceManagementConstants.NewDataSourceDefWizard_FileExistsErrorMessage,
+                    ((FileAlreadyExistsException )t).getFile() );
         } else {
             return t.getMessage();
         }

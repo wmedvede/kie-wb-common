@@ -16,7 +16,6 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.wizard.datasource;
 
-import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
@@ -28,10 +27,11 @@ import org.kie.workbench.common.screens.datasource.management.client.editor.data
 import org.kie.workbench.common.screens.datasource.management.client.editor.datasource.DataSourceDefMainPanel;
 import org.kie.workbench.common.screens.datasource.management.client.editor.datasource.DataSourceDefMainPanelView;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
+import org.uberfire.mvp.Command;
+import org.uberfire.mvp.ParameterizedCommand;
 
 @Dependent
 public class DataSourceDefPage
@@ -111,7 +111,7 @@ public class DataSourceDefPage
 
     @Override
     public String getTitle() {
-        return "Data source info";
+        return view.getPageTitle();
     }
 
     @Override
@@ -141,8 +141,8 @@ public class DataSourceDefPage
         return view.asWidget();
     }
 
-    public void loadDrivers( final List<DriverDefInfo> driverDefs ) {
-        editorHelper.loadDrivers( driverDefs );
+    public void loadDrivers( final Command onSuccessCommand, final ParameterizedCommand<Throwable> onFailureCommand ) {
+        editorHelper.loadDrivers( onSuccessCommand, onFailureCommand );
     }
 
     public void notifyChange() {
