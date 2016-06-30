@@ -16,36 +16,27 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor.driver;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
+import org.kie.workbench.common.screens.datasource.management.client.util.ClientValidationServiceMock;
+import org.kie.workbench.common.screens.datasource.management.client.util.DataSourceManagementTestConstants;
 import org.kie.workbench.common.screens.datasource.management.client.validation.ClientValidationService;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
-import org.kie.workbench.common.services.shared.validation.ValidationService;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.uberfire.ext.editor.commons.client.validation.ValidatorCallback;
-import org.uberfire.mocks.CallerMock;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
 public class DriverDefEditorHelperTest
-        implements DriverDefTestConstants {
+        implements DataSourceManagementTestConstants {
 
     @Mock
     private TranslationService translationService;
-
-    @Mock
-    private ValidationService validationService;
-
-    private CallerMock<ValidationService> validationServiceCaller;
 
     private ClientValidationService clientValidationService;
 
@@ -61,17 +52,7 @@ public class DriverDefEditorHelperTest
 
     @Before
     public void setup() {
-        validationServiceCaller = new CallerMock<>( validationService );
-        clientValidationService = new ClientValidationService ( validationServiceCaller ) {
-            @Override
-            public void isValidDriverName( String driverName, ValidatorCallback callback ) {
-                if ( driverName.equals( NAME ) ) {
-                    callback.onSuccess();
-                } else {
-                    callback.onFailure();
-                }
-            }
-        };
+        clientValidationService = new ClientValidationServiceMock();
 
         editorHelper = new DriverDefEditorHelper( translationService, clientValidationService );
         editorHelper.setHandler( handler );
@@ -101,10 +82,10 @@ public class DriverDefEditorHelperTest
         if ( isValid ) {
             when( mainPanel.getName() ).thenReturn( NAME );
         } else {
-            when( mainPanel.getName() ).thenReturn( "InvalidName" );
-            when( translationService.getTranslation(
-                    DataSourceManagementConstants.DriverDefEditor_InvalidNameMessage ) ).thenReturn( "ErrorMessage" );
+            when( mainPanel.getName() ).thenReturn( INVALID_NAME );
         }
+        when( translationService.getTranslation(
+                DataSourceManagementConstants.DriverDefEditor_InvalidNameMessage ) ).thenReturn( ERROR );
 
         //emulates the helper receiving the change event
         editorHelper.onNameChange();
@@ -115,8 +96,8 @@ public class DriverDefEditorHelperTest
             verify( mainPanel, times( 1 ) ).clearNameErrorMessage();
         } else {
             assertFalse( editorHelper.isNameValid() );
-            assertEquals( "InvalidName", driverDef.getName() );
-            verify( mainPanel, times( 1 ) ).setNameErrorMessage( "ErrorMessage" );
+            assertEquals( INVALID_NAME, driverDef.getName() );
+            verify( mainPanel, times( 1 ) ).setNameErrorMessage( ERROR );
         }
         verify( handler, times( 1 ) ).onNameChange();
     }
@@ -133,20 +114,25 @@ public class DriverDefEditorHelperTest
 
     private void testGroupIdChange( boolean isValid ) {
 
-        when( mainPanel.getGroupId() ).thenReturn( GROUP_ID );
-        when( validationService.validateGroupId( GROUP_ID ) ).thenReturn( isValid );
+        if ( isValid ) {
+            when( mainPanel.getGroupId() ).thenReturn( GROUP_ID );
+        } else {
+            when( mainPanel.getGroupId() ).thenReturn( INVALID_GROUP_ID );
+        }
         when( translationService.getTranslation(
-                DataSourceManagementConstants.DriverDefEditor_InvalidGroupIdMessage ) ).thenReturn( "ErrorMessage" );
+                DataSourceManagementConstants.DriverDefEditor_InvalidGroupIdMessage ) ).thenReturn( ERROR );
 
         //emulates the helper receiving the change event
         editorHelper.onGroupIdChange();
 
         if ( isValid ) {
             assertTrue( editorHelper.isGroupIdValid() );
+            assertEquals( GROUP_ID, driverDef.getGroupId() );
             verify( mainPanel, times( 1 ) ).clearGroupIdErrorMessage();
         } else {
             assertFalse( editorHelper.isGroupIdValid() );
-            verify( mainPanel, times( 1 ) ).setGroupIdErrorMessage( "ErrorMessage" );
+            assertEquals( INVALID_GROUP_ID, driverDef.getGroupId() );
+            verify( mainPanel, times( 1 ) ).setGroupIdErrorMessage( ERROR );
         }
         verify( handler, times( 1 ) ).onGroupIdChange();
     }
@@ -163,20 +149,25 @@ public class DriverDefEditorHelperTest
 
     private void testArtifactIdChange( boolean isValid ) {
 
-        when( mainPanel.getArtifactId() ).thenReturn( ARTIFACT_ID );
-        when( validationService.validateArtifactId( ARTIFACT_ID ) ).thenReturn( isValid );
+        if ( isValid ) {
+            when( mainPanel.getArtifactId() ).thenReturn( ARTIFACT_ID );
+        } else {
+            when( mainPanel.getArtifactId() ).thenReturn( INVALID_ARTIFACT_ID );
+        }
         when( translationService.getTranslation(
-                DataSourceManagementConstants.DriverDefEditor_InvalidArtifactIdMessage ) ).thenReturn( "ErrorMessage" );
+                DataSourceManagementConstants.DriverDefEditor_InvalidArtifactIdMessage ) ).thenReturn( ERROR );
 
         //emulates the helper receiving the change event
         editorHelper.onArtifactIdChange();
 
         if ( isValid ) {
             assertTrue( editorHelper.isArtifactIdValid() );
+            assertEquals( ARTIFACT_ID, driverDef.getArtifactId() );
             verify( mainPanel, times( 1 ) ).clearArtifactIdErrorMessage();
         } else {
             assertFalse( editorHelper.isArtifactIdValid() );
-            verify( mainPanel, times( 1 ) ).setArtifactIdErrorMessage( "ErrorMessage" );
+            assertEquals( INVALID_ARTIFACT_ID, driverDef.getArtifactId() );
+            verify( mainPanel, times( 1 ) ).setArtifactIdErrorMessage( ERROR );
         }
         verify( handler, times( 1 ) ).onArtifactIdChange();
     }
@@ -193,20 +184,26 @@ public class DriverDefEditorHelperTest
 
     private void testVersionChange( boolean isValid ) {
 
-        when( mainPanel.getVersion() ).thenReturn( VERSION );
-        when( validationService.validateGAVVersion( VERSION ) ).thenReturn( isValid );
+        if ( isValid ) {
+            when( mainPanel.getVersion() ).thenReturn( VERSION );
+        } else {
+            when( mainPanel.getVersion() ).thenReturn( INVALID_VERSION );
+        }
+
         when( translationService.getTranslation(
-                DataSourceManagementConstants.DriverDefEditor_InvalidVersionMessage ) ).thenReturn( "ErrorMessage" );
+                DataSourceManagementConstants.DriverDefEditor_InvalidVersionMessage ) ).thenReturn( ERROR );
 
         //emulates the helper receiving the change event
         editorHelper.onVersionIdChange();
 
         if ( isValid ) {
             assertTrue( editorHelper.isVersionValid() );
+            assertEquals( VERSION, driverDef.getVersion() );
             verify( mainPanel, times( 1 ) ).clearVersionErrorMessage();
         } else {
             assertFalse( editorHelper.isVersionValid() );
-            verify( mainPanel, times( 1 ) ).setVersionErrorMessage( "ErrorMessage" );
+            assertEquals( INVALID_VERSION, driverDef.getVersion() );
+            verify( mainPanel, times( 1 ) ).setVersionErrorMessage( ERROR );
         }
         verify( handler, times( 1 ) ).onVersionChange();
     }
@@ -221,24 +218,26 @@ public class DriverDefEditorHelperTest
 
     private void testDriverClassChange( boolean isValid ) {
 
-        when( mainPanel.getDriverClass() ).thenReturn( DRIVER_CLASS );
-        Map<String, Boolean> validationResult = new HashMap<>(  );
-        validationResult.put( DRIVER_CLASS, isValid );
-        when( validationService.evaluateJavaIdentifiers( new String[] { DRIVER_CLASS } ) ).thenReturn( validationResult );
+        if ( isValid ) {
+            when( mainPanel.getDriverClass() ).thenReturn( DRIVER_CLASS );
+        } else {
+            when( mainPanel.getDriverClass() ).thenReturn( INVALID_DRIVER_CLASS );
+        }
         when( translationService.getTranslation(
-                DataSourceManagementConstants.DriverDefEditor_InvalidDriverClassMessage ) ).thenReturn( "ErrorMessage" );
+                DataSourceManagementConstants.DriverDefEditor_InvalidDriverClassMessage ) ).thenReturn( ERROR );
 
         //emulates the helper receiving the change event
         editorHelper.onDriverClassChange();
 
         if ( isValid ) {
             assertTrue( editorHelper.isDriverClassValid() );
+            assertEquals( DRIVER_CLASS, driverDef.getDriverClass() );
             verify( mainPanel, times( 1 ) ).clearDriverClassErrorMessage();
         } else {
             assertFalse( editorHelper.isDriverClassValid() );
-            verify( mainPanel, times( 1 ) ).setDriverClassErrorMessage( "ErrorMessage" );
+            assertEquals( INVALID_DRIVER_CLASS, driverDef.getDriverClass() );
+            verify( mainPanel, times( 1 ) ).setDriverClassErrorMessage( ERROR );
         }
         verify( handler, times( 1 ) ).onDriverClassChange();
     }
-
 }

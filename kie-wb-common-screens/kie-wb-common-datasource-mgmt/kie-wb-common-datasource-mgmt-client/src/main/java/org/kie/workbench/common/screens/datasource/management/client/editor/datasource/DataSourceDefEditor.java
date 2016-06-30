@@ -16,21 +16,20 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.editor.datasource;
 
-import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.client.type.DataSourceDefType;
+import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.annotations.WorkbenchEditor;
@@ -66,13 +65,13 @@ public class DataSourceDefEditor
 
     private DataSourceDefEditorHelper editorHelper;
 
+    private PopupsUtil popupsUtil;
+
     private DataSourceDefType type;
 
     private Caller<DataSourceDefEditorService> editorService;
 
     private Caller<DataSourceManagementService> dataSourceService;
-
-    private Caller<DataSourceDefQueryService> driverDefService;
 
     private DataSourceDefEditorContent editorContent;
 
@@ -80,18 +79,18 @@ public class DataSourceDefEditor
     public DataSourceDefEditor( final DataSourceDefEditorView view,
             final DataSourceDefMainPanel mainPanel,
             final DataSourceDefEditorHelper editorHelper,
+            final PopupsUtil popupsUtil,
             final DataSourceDefType type,
             final Caller<DataSourceDefEditorService> editorService,
-            final Caller<DataSourceManagementService> dataSourceService,
-            final Caller<DataSourceDefQueryService> driverDefService ) {
+            final Caller<DataSourceManagementService> dataSourceService ) {
         super( view );
         this.view = view;
         this.mainPanel = mainPanel;
         this.editorHelper = editorHelper;
+        this.popupsUtil = popupsUtil;
         this.type = type;
         this.editorService = editorService;
         this.dataSourceService = dataSourceService;
-        this.driverDefService = driverDefService;
         view.init( this );
         view.setMainPanel( mainPanel );
         editorHelper.init( mainPanel );
@@ -142,22 +141,12 @@ public class DataSourceDefEditor
 
     }
 
-    protected void loadDrivers() {
-        if ( getContent().getProject() != null ) {
-            driverDefService.call( getLoadDriversSuccessCallback(),
-                    new DefaultErrorCallback() ).findProjectDrivers( versionRecordManager.getCurrentPath() );
-        } else {
-            driverDefService.call( getLoadDriversSuccessCallback(),
-                    new DefaultErrorCallback() ).findGlobalDrivers();
-        }
-    }
-
     @Override
     protected Command onValidate() {
         return new Command() {
             @Override
             public void execute() {
-                Window.alert( "Validate DataSource");
+                Window.alert( "Validate DataSource, not yet implemented.");
             }
         };
     }
@@ -170,7 +159,7 @@ public class DataSourceDefEditor
                 !editorHelper.isUserValid() ||
                 !editorHelper.isPasswordValid() ||
                 !editorHelper.isDriverValid() ) {
-            mainPanel.showInformationPopup( editorHelper.getMessage(
+            popupsUtil.showInformationPopup( editorHelper.getMessage(
                     DataSourceManagementConstants.DataSourceDefEditor_AllFieldsRequiresValidation ) );
 
         } else {
@@ -217,20 +206,6 @@ public class DataSourceDefEditor
         };
     }
 
-    private RemoteCallback<List<DriverDefInfo>> getLoadDriversSuccessCallback() {
-        return new RemoteCallback<List<DriverDefInfo>>() {
-            @Override
-            public void callback( List<DriverDefInfo> driverDefs ) {
-                onDriversLoaded( driverDefs );
-            }
-        };
-    }
-
-    protected void onDriversLoaded( final List<DriverDefInfo> driverDefs ) {
-        editorHelper.loadDrivers( driverDefs );
-        mainPanel.setDriver( getContent().getDataSourceDef().getDriverUuid() );
-    }
-
     protected void onContentLoaded( final DataSourceDefEditorContent editorContent ) {
         //Path is set to null when the Editor is closed (which can happen before async calls complete).
         if ( versionRecordManager.getCurrentPath() == null ) {
@@ -238,7 +213,7 @@ public class DataSourceDefEditor
         }
         setContent( editorContent );
         setOriginalHash( editorContent.hashCode() );
-        loadDrivers();
+        editorHelper.loadDrivers( getLoadDriversSuccessCommand(), getLoadDriversErrorCommand() );
     }
 
     protected DataSourceDefEditorContent getContent() {
@@ -250,6 +225,25 @@ public class DataSourceDefEditor
         editorHelper.setDataSourceDef( editorContent.getDataSourceDef() );
         editorHelper.setProject( editorContent.getProject() );
         editorHelper.setValid( true );
+    }
+
+    public Command getLoadDriversSuccessCommand() {
+        return new Command() {
+            @Override public void execute() {
+                mainPanel.setDriver( getContent().getDataSourceDef().getDriverUuid() );
+            }
+        };
+    }
+
+    public ParameterizedCommand<Throwable> getLoadDriversErrorCommand() {
+        return new ParameterizedCommand<Throwable>() {
+            @Override
+            public void execute( Throwable parameter ) {
+                popupsUtil.showErrorPopup( editorHelper.getMessage(
+                        DataSourceManagementConstants.DataSourceDefEditor_LoadDriversErrorMessage,
+                        parameter.getMessage() ) );
+            }
+        };
     }
 
     private void addDevelopMenu() {
@@ -302,37 +296,37 @@ public class DataSourceDefEditor
                     @Override
                     public void callback( DataSourceDeploymentInfo deploymentInfo ) {
                         if ( deploymentInfo != null ) {
-                            Window.alert( "datasource is deployed as: " + deploymentInfo.getDeploymentId() );
+                            popupsUtil.showInformationPopup( "datasource is deployed as: " + deploymentInfo.getDeploymentId() );
                         } else {
-                            Window.alert( "datasource is not deployed" );
+                            popupsUtil.showInformationPopup( "datasource is not deployed" );
                         }
                     }
                 }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDataSourceDef().getUuid() );
     }
 
-    protected void onDeployDataSource() {
+    private void onDeployDataSource() {
         //Experimental method for development purposes.
         dataSourceService.call(
                 new RemoteCallback<DataSourceDeploymentInfo>() {
                     @Override
                     public void callback( DataSourceDeploymentInfo deploymentInfo ) {
-                        Window.alert( "datasource successfully deployed: " + deploymentInfo.getDeploymentId() );
+                        popupsUtil.showInformationPopup( "datasource successfully deployed: " + deploymentInfo.getDeploymentId() );
                     }
                 }, new DefaultErrorCallback() ).deploy( getContent().getDataSourceDef() );
     }
 
-    protected void onUnDeployDataSource() {
+    private void onUnDeployDataSource() {
         //Experimental method for development purposes.
         dataSourceService.call( new RemoteCallback<DataSourceDeploymentInfo>() {
             @Override
             public void callback( DataSourceDeploymentInfo deploymentInfo ) {
                 if ( deploymentInfo == null ) {
-                    Window.alert( "datasource is not deployed in current server" );
+                    popupsUtil.showInformationPopup( "datasource is not deployed in current server" );
                 } else {
                     dataSourceService.call( new RemoteCallback<Void>() {
                         @Override
                         public void callback( Void aVoid ) {
-                            Window.alert( "datasource was successfully un-deployed" );
+                            popupsUtil.showInformationPopup( "datasource was successfully un-deployed" );
                         }
                     } ).undeploy( deploymentInfo );
                 }
@@ -342,13 +336,13 @@ public class DataSourceDefEditor
 
     }
 
-    protected void onTestDataSource() {
+    private void onTestDataSource() {
         //Experimental method for development purposes.
         editorService.call(
                 new RemoteCallback<String>() {
                     @Override
                     public void callback( String result ) {
-                        Window.alert( result );
+                        popupsUtil.showInformationPopup( new SafeHtmlBuilder().appendEscapedLines( result ).toSafeHtml().asString() );
                     }
                 }, new DefaultErrorCallback() ).test( getContent().getDataSourceDef().getJndi() );
     }

@@ -42,6 +42,33 @@ public interface DataSourceManagementConstants {
     String DataSourceDefEditor_AllFieldsRequiresValidation = "DataSourceDefEditor.AllFieldsRequiresValidation";
 
     @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_LoadDriversErrorMessage = "DataSourceDefEditor.LoadDriversErrorMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_ConnectionTestSuccessfulMessage = "DataSourceDefEditor.ConnectionTestSuccessfulMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_ConnectionTestFailedMessage = "DataSourceDefEditor.ConnectionTestFailedMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String NewDataSourceDefWizard_title = "NewDataSourceDefWizard.title";
+
+    @TranslationKey( defaultValue = "" )
+    String NewDataSourceDefWizard_DataSourceCreatedMessage = "NewDataSourceDefWizard.DataSourceCreatedMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String NewDataSourceDefWizard_DataSourceCreateErrorMessage = "NewDataSourceDefWizard.DataSourceCreateErrorMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String NewDataSourceDefWizard_FileExistsErrorMessage = "NewDataSourceDefWizard.FileExistsErrorMessage";
+
+    @TranslationKey( defaultValue = "")
+    String NewDataSourceDefWizard_WizardStartErrorMessage = "NewDataSourceDefWizard.WizardStartErrorMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceDefPage_pagetTitle = "DataSourceDefPageViewImpl.pageTitle";
+
+    @TranslationKey( defaultValue = "" )
     String DriverDefEditor_InvalidNameMessage = "DriverDefEditor.InvalidNameMessage";
 
     @TranslationKey( defaultValue = "" )
@@ -55,5 +82,18 @@ public interface DataSourceManagementConstants {
 
     @TranslationKey( defaultValue = "" )
     String DriverDefEditor_InvalidVersionMessage = "DriverDefEditor.InvalidVersionMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String NewDriverDefWizard_title = "NewDriverDefWizard.title";
+
+    @TranslationKey( defaultValue = "" )
+    String NewDriverDefWizard_DriverCreatedMessage = "NewDriverDefWizard.DriverCreatedMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String NewDriverDefWizard_DriverCreateErrorMessage = "NewDriverDefWizard.DriverCreateErrorMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefDefPageViewImpl_pageTitle = "DriverDefDefPageViewImpl.pageTitle";
+
 
 }
