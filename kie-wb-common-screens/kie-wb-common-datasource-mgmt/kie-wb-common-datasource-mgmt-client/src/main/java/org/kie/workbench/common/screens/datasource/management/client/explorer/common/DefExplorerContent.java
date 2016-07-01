@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.Widget;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.uberfire.client.mvp.PlaceManager;
-import org.uberfire.mvp.impl.PathPlaceRequest;
 
 @Dependent
 public class DefExplorerContent
@@ -134,15 +133,15 @@ public class DefExplorerContent
         this.handler = handler;
     }
 
-    private void onDataSourceItemClick( DataSourceDefInfo dataSourceDefInfo ) {
-        placeManager.goTo( new PathPlaceRequest( dataSourceDefInfo.getPath() ) );
+    protected void onDataSourceItemClick( DataSourceDefInfo dataSourceDefInfo ) {
+        placeManager.goTo( view.createPlaceRequest( dataSourceDefInfo.getPath() ) );
     }
 
-    private void onDriverItemClick( DriverDefInfo driverDefInfo ) {
-        placeManager.goTo( new PathPlaceRequest( driverDefInfo.getPath() ) );
+    protected void onDriverItemClick( DriverDefInfo driverDefInfo ) {
+        placeManager.goTo( view.createPlaceRequest( driverDefInfo.getPath() ) );
     }
 
-    private DefItem createItem() {
+    protected DefItem createItem() {
         return itemInstance.get();
     }
 }

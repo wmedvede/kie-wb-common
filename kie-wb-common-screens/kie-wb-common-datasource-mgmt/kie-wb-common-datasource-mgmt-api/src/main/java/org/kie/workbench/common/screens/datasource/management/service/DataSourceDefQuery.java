@@ -86,4 +86,46 @@ public class DataSourceDefQuery {
     public boolean isGlobalQuery() {
         return globalQuery;
     }
+
+    @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) {
+            return true;
+        }
+        if ( o == null || getClass() != o.getClass() ) {
+            return false;
+        }
+
+        DataSourceDefQuery that = ( DataSourceDefQuery ) o;
+
+        if ( globalQuery != that.globalQuery ) {
+            return false;
+        }
+        if ( repository != null ? !repository.equals( that.repository ) : that.repository != null ) {
+            return false;
+        }
+        if ( organizationalUnit != null ? !organizationalUnit.equals( that.organizationalUnit ) : that.organizationalUnit != null ) {
+            return false;
+        }
+        if ( project != null ? !project.equals( that.project ) : that.project != null ) {
+            return false;
+        }
+        return !( branch != null ? !branch.equals( that.branch ) : that.branch != null );
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = repository != null ? repository.hashCode() : 0;
+        result = ~~result;
+        result = 31 * result + ( organizationalUnit != null ? organizationalUnit.hashCode() : 0 );
+        result = ~~result;
+        result = 31 * result + ( project != null ? project.hashCode() : 0 );
+        result = ~~result;
+        result = 31 * result + ( branch != null ? branch.hashCode() : 0 );
+        result = ~~result;
+        result = 31 * result + ( globalQuery ? 1 : 0 );
+        result = ~~result;
+        return result;
+    }
 }
