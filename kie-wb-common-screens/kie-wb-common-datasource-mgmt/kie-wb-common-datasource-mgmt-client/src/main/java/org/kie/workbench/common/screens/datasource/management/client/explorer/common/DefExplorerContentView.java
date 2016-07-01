@@ -15,7 +15,9 @@
  */
 package org.kie.workbench.common.screens.datasource.management.client.explorer.common;
 
+import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.mvp.UberView;
+import org.uberfire.mvp.impl.PathPlaceRequest;
 
 public interface DefExplorerContentView
         extends UberView<DefExplorerContentView.Presenter> {
@@ -41,5 +43,7 @@ public interface DefExplorerContentView
     void clearDataSources();
 
     void clearDrivers();
+
+    PathPlaceRequest createPlaceRequest( Path path );
 
 }

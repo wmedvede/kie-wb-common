@@ -16,73 +16,32 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.wizard.driver;
 
-import com.google.gwtmockito.GwtMock;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefEditorHelper;
-import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanel;
-import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanelView;
-import org.kie.workbench.common.screens.datasource.management.client.util.DataSourceManagementTestConstants;
-import org.kie.workbench.common.screens.datasource.management.client.util.ClientValidationServiceMock;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
-import org.mockito.Mock;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
-import org.uberfire.mocks.EventSourceMock;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith( GwtMockitoTestRunner.class )
 public class DriverDefPageTest
-        implements DataSourceManagementTestConstants {
-
-    @GwtMock
-    private DriverDefPageView view;
-
-    @GwtMock
-    private DriverDefMainPanelView mainPanelView;
-
-    private DriverDefMainPanel mainPanel;
-
-    @Mock
-    private TranslationService translationService;
-
-    private DriverDefEditorHelper editorHelper;
-
-    @Mock
-    private EventSourceMock<WizardPageStatusChangeEvent> statusChangeEvent;
-
-    DriverDefPage defPage;
-
-    DriverDef driverDef;
+        extends DriverWizardTestBase {
 
     @Before
     public void setup() {
-        mainPanel = new DriverDefMainPanel( mainPanelView );
-        driverDef = new DriverDef();
-        editorHelper = new DriverDefEditorHelper( translationService, new ClientValidationServiceMock( ) );
-        defPage = new DriverDefPage( view, mainPanel, editorHelper, statusChangeEvent );
-        defPage.setDriverDef( driverDef );
+        super.setup();
     }
 
-    //@Test
-    public void testValidChanges() {
+    /**
+     * Tests the case where the user completes the page by entering correct values.
+     */
+    @Test
+    public void testValidCompletion() {
         //emulates the user completing the page by typing valid values in all fields.
-        when( mainPanelView.getName() ).thenReturn( NAME );
-        when( mainPanelView.getGroupId() ).thenReturn( GROUP_ID );
-        when( mainPanelView.getArtifactId() ).thenReturn( ARTIFACT_ID );
-        when( mainPanelView.getVersion() ).thenReturn( VERSION );
-        when( mainPanelView.getDriverClass() ).thenReturn( DRIVER_CLASS );
-
-        mainPanel.onNameChange();
-        mainPanel.onGroupIdChange();
-        mainPanel.onArtifactIdChange();
-        mainPanel.onVersionChange();
-        mainPanel.onDriverClassChange();
+        completeValidDefPage();
 
         //modification event should have been fired.
         verify( statusChangeEvent, times( 5 ) ).fire( any( WizardPageStatusChangeEvent.class ) );
@@ -103,12 +62,12 @@ public class DriverDefPageTest
         } );
     }
 
+    /**
+     * Tests the case where the user enters incorrect values and thus the page won't be in completed status.
+     */
     @Test
-    public void testInvalidChanges() {
-        //emulates the completion of a field with an invalid value. The page should be set automatically in un-completed
-        //state.
-
-        //first force the editor to be in valid state.
+    public void testInvalidCompletion() {
+        //first force the page to be in valid state.
         editorHelper.setValid( true );
         //now the page should be in completed state.
         defPage.isComplete( new Callback<Boolean>() {

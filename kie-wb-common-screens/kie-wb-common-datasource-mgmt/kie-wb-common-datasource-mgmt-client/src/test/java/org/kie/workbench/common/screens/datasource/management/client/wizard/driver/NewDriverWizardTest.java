@@ -20,16 +20,10 @@ import com.google.gwtmockito.GwtMock;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.common.client.api.Caller;
-import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefEditorHelper;
-import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanel;
-import org.kie.workbench.common.screens.datasource.management.client.editor.driver.DriverDefMainPanelView;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
-import org.kie.workbench.common.screens.datasource.management.client.util.DataSourceManagementTestConstants;
-import org.kie.workbench.common.screens.datasource.management.client.util.ClientValidationServiceMock;
 import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
@@ -45,68 +39,57 @@ import static org.mockito.Mockito.*;
 
 @RunWith( GwtMockitoTestRunner.class )
 public class NewDriverWizardTest
-        implements DataSourceManagementTestConstants {
-
-    private DriverDefPage driverDefPage;
+        extends DriverWizardTestBase {
 
     @Mock
     private DriverDefEditorService driverDefService;
 
     private Caller<DriverDefEditorService> driverDefServiceCaller;
 
-    @GwtMock
-    private DriverDefPageView driverDefPageView;
-
-    @GwtMock
-    private DriverDefMainPanelView mainPanelView;
-
-    private DriverDefMainPanel mainPanel;
-
-    @Mock
-    private TranslationService translationService;
-
-    private DriverDefEditorHelper editorHelper;
-
     @Mock
     private EventSourceMock<WizardPageStatusChangeEvent> statusChangeEvent;
 
-    NewDriverDefWizard driverDefWizard;
+    private NewDriverDefWizard driverDefWizard;
 
     @Mock
     private EventSourceMock<NotificationEvent> notificationEvent;
 
     @Mock
-    Project project;
+    private Project project;
 
     @Mock
-    Path path;
+    private Path path;
 
     @GwtMock
-    WizardView wizardView;
+    private WizardView wizardView;
 
     @GwtMock
-    PopupsUtil popupsUtil;
+    private PopupsUtil popupsUtil;
 
     @Before
     public void setup() {
-        mainPanel = new DriverDefMainPanel( mainPanelView );
-        editorHelper = new DriverDefEditorHelper( translationService, new ClientValidationServiceMock() );
+        super.setup();
         driverDefServiceCaller = new CallerMock<>( driverDefService );
-
-        driverDefPage = new DriverDefPage( driverDefPageView, mainPanel, editorHelper, statusChangeEvent );
-        driverDefWizard = new NewDriverDefWizard( driverDefPage,
+        driverDefWizard = new NewDriverDefWizard( defPage,
                 driverDefServiceCaller, translationService, popupsUtil, notificationEvent ) {
             {
                 this.view = wizardView;
             }
         };
+        when ( project.getRootPath() ).thenReturn( path );
     }
 
+    /**
+     * Emulates the wizard completion and creation of a Driver related to a project.
+     */
     @Test
     public void testCreateProjectDriver() {
         testCreate( project  );
     }
 
+    /**
+     * Emulates the wizard completion and creation of a global Driver.
+     */
     @Test
     public void testCreateGlobalDriver() {
         testCreate( null );
@@ -116,12 +99,6 @@ public class NewDriverWizardTest
      * Emulates a sequence of valid data entering and the wizard completion.
      */
     private void testCreate( final Project project ) {
-
-        when( mainPanelView.getName() ).thenReturn( NAME );
-        when( mainPanelView.getGroupId() ).thenReturn( GROUP_ID );
-        when( mainPanelView.getArtifactId() ).thenReturn( ARTIFACT_ID );
-        when( mainPanelView.getVersion() ).thenReturn( VERSION );
-        when( mainPanelView.getDriverClass() ).thenReturn( DRIVER_CLASS );
 
         when( path.toString() ).thenReturn( "target_driver_path" );
         when( translationService.format( eq( DataSourceManagementConstants.NewDriverDefWizard_DriverCreatedMessage ),
@@ -136,11 +113,9 @@ public class NewDriverWizardTest
 
         driverDefWizard.start();
 
-        mainPanel.onNameChange();
-        mainPanel.onGroupIdChange();
-        mainPanel.onArtifactIdChange();
-        mainPanel.onDriverClassChange();
-        mainPanel.onVersionChange();
+        completeValidDefPage();
+
+        driverDefWizard.complete();
 
         DriverDef expectedDriverDef = new DriverDef();
         expectedDriverDef.setName( NAME );
@@ -148,8 +123,6 @@ public class NewDriverWizardTest
         expectedDriverDef.setArtifactId( ARTIFACT_ID );
         expectedDriverDef.setVersion( VERSION );
         expectedDriverDef.setDriverClass( DRIVER_CLASS );
-
-        driverDefWizard.complete();
 
         if ( project != null ) {
             verify( driverDefService, times( 1 ) ).create( expectedDriverDef, project );
