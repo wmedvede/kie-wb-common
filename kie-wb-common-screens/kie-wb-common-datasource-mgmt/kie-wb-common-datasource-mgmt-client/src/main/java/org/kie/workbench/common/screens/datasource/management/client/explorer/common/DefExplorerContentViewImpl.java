@@ -30,6 +30,8 @@ import org.gwtbootstrap3.client.ui.LinkedGroup;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.uberfire.backend.vfs.Path;
+import org.uberfire.mvp.impl.PathPlaceRequest;
 
 @Dependent
 @Templated
@@ -126,6 +128,11 @@ public class DefExplorerContentViewImpl
     @Override
     public void clearDrivers() {
         driversListGroup.clear();
+    }
+
+    @Override
+    public PathPlaceRequest createPlaceRequest( Path path ) {
+        return new PathPlaceRequest( path );
     }
 
     @EventHandler( "add-new-datasource" )
