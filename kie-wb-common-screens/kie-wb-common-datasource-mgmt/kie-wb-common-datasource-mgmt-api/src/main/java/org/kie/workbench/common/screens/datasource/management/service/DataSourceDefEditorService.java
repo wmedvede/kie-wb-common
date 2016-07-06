@@ -38,10 +38,6 @@ public interface DataSourceDefEditorService
 
     Path createGlobal( final DataSourceDef dataSourceDef );
 
-    Path getGlobalDataSourcesContext();
-
-    Path getProjectDataSourcesContext( final Project project );
-
     //TODO experimental
     String test( final String jndi );
 

@@ -42,15 +42,15 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
 import org.kie.workbench.common.screens.datasource.management.util.URLConnectionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 @Dependent
 @Named(value = "DBCPDataSourceService" )
 public class DBCPDataSourceService
     implements DataSourceService {
 
-    private static final Logger logger = LoggerFactory.getLogger( DBCPDataSourceService.class );
+    //private static final Logger logger = LoggerFactory.getLogger( DBCPDataSourceService.class );
 
     @Inject
     private DataSourceServicesProvider servicesProvider;
@@ -137,7 +137,7 @@ public class DBCPDataSourceService
             try {
                 dataSource.close();
             } catch ( Exception e ) {
-                logger.warn( "An error was produced during datasource close", e );
+                //logger.warn( "An error was produced during datasource close", e );
             }
         }
         unbindObject( currentDeploymentInfo.getJndi() );
@@ -194,7 +194,7 @@ public class DBCPDataSourceService
         try {
             context.bind( namingContext, object );
         } catch ( Exception e ) {
-            logger.error( "unable to bind datasource: {} in namingContext: {}", object, namingContext );
+            //logger.error( "unable to bind datasource: {} in namingContext: {}", object, namingContext );
             throw new Exception( "unable to bind datasource in namingContext: " + namingContext, e );
         }
     }
@@ -204,7 +204,7 @@ public class DBCPDataSourceService
         try {
             context.unbind( namingContext );
         } catch ( Exception e ) {
-            logger.error( "unable to unbind datasource from namingContext: " + namingContext );
+            //logger.error( "unable to unbind datasource from namingContext: " + namingContext );
         }
     }
 }

@@ -18,26 +18,86 @@ package org.kie.workbench.common.screens.datasource.management.service;
 
 import java.util.Collection;
 
+import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.uberfire.backend.vfs.Path;
 
+/**
+ * Service for getting information about the different data sources and drivers defined globally or for a given project.
+ */
 @Remote
 public interface DataSourceDefQueryService {
 
-    DataSourceDefQueryResult executeQuery( final DataSourceDefQuery query );
-
+    /**
+     * Finds the DataSourceDefInfos for the platform global data sources.
+     *
+     * @return a collection containing the data sources information.
+     */
     Collection<DataSourceDefInfo> findGlobalDataSources();
 
+    /**
+     * Finds the DataSourceDefInfos for the data sources defined for a given project.
+     *
+     * @param path a path within the project.
+     *
+     * @return a collection containing the data sources information
+     */
     Collection<DataSourceDefInfo> findProjectDataSources( final Path path );
 
+    /**
+     * Finds the DataSourceDefInfos for the data sources defined for a given project.
+     *
+     * @param project the project containing the data sources.
+     *
+     * @return a collection containing the data sources information
+     */
+    Collection<DataSourceDefInfo> findProjectDataSources( final Project project );
+
+    /**
+     * Finds the DriverDefInfos for the platform global drivers.
+     *
+     * @return a collection containing the drivers information.
+     */
     Collection<DriverDefInfo> findGlobalDrivers();
 
+    /**
+     * Finds the DriverDefInfos for the drivers defined for a given project.
+     *
+     * @param path a path within the project.
+     *
+     * @return a collection containing the drivers information.
+     */
     Collection<DriverDefInfo> findProjectDrivers( final Path path );
 
+    /**
+     * Finds the DriverDefInfos for the drivers defined for a given project.
+     *
+     * @param project the project containing the drivers.
+     *
+     * @return a collection containing the drivers information.
+     */
+
+    Collection<DriverDefInfo> findProjectDrivers( final Project project );
+
+    /**
+     * Finds the DriverDefInfo for a driver defined within a project.
+     *
+     * @param uuid the UUID for the given Driver.
+     *
+     * @param path a path within the given project.
+     *
+     * @return the driver information for the given driver, or null if the driver was not found.
+     */
     DriverDefInfo findProjectDriver( final String uuid, final Path path );
 
+    /**
+     * Finds the DriverDefInfo for platform global driver.
+     * @param uuid
+     *
+     * @return the driver information for the given driver, or null if the driver was not found.
+     */
     DriverDefInfo findGlobalDriver( final String uuid );
 
 }
