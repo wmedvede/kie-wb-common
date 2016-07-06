@@ -22,7 +22,7 @@ import org.guvnor.structure.repositories.Repository;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
-public class DataSourceDefQuery {
+public class DefExplorerQuery {
 
     private Repository repository;
 
@@ -34,10 +34,10 @@ public class DataSourceDefQuery {
 
     private boolean globalQuery = false;
 
-    public DataSourceDefQuery() {
+    public DefExplorerQuery() {
     }
 
-    public DataSourceDefQuery( OrganizationalUnit organizationalUnit,
+    public DefExplorerQuery( OrganizationalUnit organizationalUnit,
             Repository repository,
             Project project,
             String branch ) {
@@ -47,7 +47,7 @@ public class DataSourceDefQuery {
         this.branch = branch;
     }
 
-    public DataSourceDefQuery( boolean globalQuery ) {
+    public DefExplorerQuery( boolean globalQuery ) {
         this.globalQuery = globalQuery;
     }
 
@@ -96,7 +96,7 @@ public class DataSourceDefQuery {
             return false;
         }
 
-        DataSourceDefQuery that = ( DataSourceDefQuery ) o;
+        DefExplorerQuery that = ( DefExplorerQuery ) o;
 
         if ( globalQuery != that.globalQuery ) {
             return false;

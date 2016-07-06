@@ -41,9 +41,4 @@ public interface DriverDefEditorService
     Path createGlobal( final DriverDef driverDef );
 
     List<ValidationMessage> validate( final DriverDef driverDef );
-
-    Path getGlobalDriversContext();
-
-    Path getProjectDriversContext( final Project project );
-
 }

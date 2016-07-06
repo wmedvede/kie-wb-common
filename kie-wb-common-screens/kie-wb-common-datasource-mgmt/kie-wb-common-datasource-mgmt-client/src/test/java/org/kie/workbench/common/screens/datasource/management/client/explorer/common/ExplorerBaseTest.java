@@ -21,8 +21,8 @@ import org.jboss.errai.common.client.api.Caller;
 import org.junit.Test;
 import org.kie.workbench.common.screens.datasource.management.client.wizard.datasource.NewDataSourceDefWizard;
 import org.kie.workbench.common.screens.datasource.management.client.wizard.driver.NewDriverDefWizard;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryResult;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
+import org.kie.workbench.common.screens.datasource.management.service.DefExplorerQueryResult;
+import org.kie.workbench.common.screens.datasource.management.service.DefExplorerQueryService;
 import org.mockito.Mock;
 import org.uberfire.mocks.CallerMock;
 
@@ -43,15 +43,15 @@ public abstract class ExplorerBaseTest {
     protected NewDriverDefWizard driverDefWizard;
 
     @Mock
-    protected DataSourceDefQueryService queryService;
+    protected DefExplorerQueryService queryService;
 
-    protected Caller<DataSourceDefQueryService> queryServiceCaller;
+    protected Caller<DefExplorerQueryService> queryServiceCaller;
 
-    protected DataSourceDefQueryResult result;
+    protected DefExplorerQueryResult result;
 
     protected void setup() {
         queryServiceCaller = new CallerMock<>( queryService );
-        result = new DataSourceDefQueryResult();
+        result = new DefExplorerQueryResult();
     }
 
     /**

@@ -30,9 +30,9 @@ import org.kie.workbench.common.screens.datasource.management.client.wizard.data
 import org.kie.workbench.common.screens.datasource.management.client.wizard.driver.NewDriverDefWizard;
 import org.kie.workbench.common.screens.datasource.management.events.BaseDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.BaseDriverEvent;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQuery;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryResult;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
+import org.kie.workbench.common.screens.datasource.management.service.DefExplorerQuery;
+import org.kie.workbench.common.screens.datasource.management.service.DefExplorerQueryResult;
+import org.kie.workbench.common.screens.datasource.management.service.DefExplorerQueryService;
 
 @Dependent
 public class GlobalDataSourceExplorer
@@ -47,7 +47,7 @@ public class GlobalDataSourceExplorer
             final DefExplorerContent defExplorerContent,
             final NewDataSourceDefWizard newDataSourceDefWizard,
             final NewDriverDefWizard newDriverDefWizard,
-            final Caller<DataSourceDefQueryService> explorerService ) {
+            final Caller<DefExplorerQueryService> explorerService ) {
         super( defExplorerContent, newDataSourceDefWizard, newDriverDefWizard, explorerService );
         this.view = view;
     }
@@ -76,12 +76,12 @@ public class GlobalDataSourceExplorer
     }
 
     @Override
-    protected DataSourceDefQuery createRefreshQuery() {
-        return new DataSourceDefQuery( true );
+    protected DefExplorerQuery createRefreshQuery() {
+        return new DefExplorerQuery( true );
     }
 
     @Override
-    protected void loadContent( final DataSourceDefQueryResult content ) {
+    protected void loadContent( final DefExplorerQueryResult content ) {
         defExplorerContent.loadDataSources( content.getDataSourceDefs() );
         defExplorerContent.loadDrivers( content.getDriverDefs() );
     }
