@@ -30,9 +30,9 @@ import org.kie.workbench.common.screens.datasource.management.events.NewDataSour
 import org.kie.workbench.common.screens.datasource.management.events.NewDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.events.UpdateDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.UpdateDriverEvent;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQuery;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryResult;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
+import org.kie.workbench.common.screens.datasource.management.service.DefExplorerQuery;
+import org.kie.workbench.common.screens.datasource.management.service.DefExplorerQueryResult;
+import org.kie.workbench.common.screens.datasource.management.service.DefExplorerQueryService;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 
 public abstract class DefExplorerBase {
@@ -43,12 +43,12 @@ public abstract class DefExplorerBase {
 
     protected NewDriverDefWizard newDriverDefWizard;
 
-    protected Caller<DataSourceDefQueryService> explorerService;
+    protected Caller<DefExplorerQueryService> explorerService;
 
     protected DefExplorerBase( final DefExplorerContent defExplorerContent,
             final NewDataSourceDefWizard newDataSourceDefWizard,
             final NewDriverDefWizard newDriverDefWizard,
-            final Caller<DataSourceDefQueryService> explorerService ) {
+            final Caller<DefExplorerQueryService> explorerService ) {
         this.defExplorerContent = defExplorerContent;
         this.newDataSourceDefWizard = newDataSourceDefWizard;
         this.newDriverDefWizard = newDriverDefWizard;
@@ -77,18 +77,18 @@ public abstract class DefExplorerBase {
         explorerService.call( getRefreshCallback(), new DefaultErrorCallback() ).executeQuery( createRefreshQuery() );
     }
 
-    protected abstract DataSourceDefQuery createRefreshQuery();
+    protected abstract DefExplorerQuery createRefreshQuery();
 
     protected RemoteCallback<?> getRefreshCallback() {
-        return new RemoteCallback<DataSourceDefQueryResult>() {
+        return new RemoteCallback<DefExplorerQueryResult>() {
             @Override
-            public void callback( DataSourceDefQueryResult content ) {
+            public void callback( DefExplorerQueryResult content ) {
                 loadContent( content );
             }
         };
     }
 
-    protected abstract void loadContent( DataSourceDefQueryResult content );
+    protected abstract void loadContent( DefExplorerQueryResult content );
 
     protected abstract boolean refreshOnDataSourceEvent( BaseDataSourceEvent event );
 

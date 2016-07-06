@@ -342,14 +342,4 @@ public class DriverDefEditorServiceImpl
             }
         }
     }
-
-    @Override
-    public Path getGlobalDriversContext() {
-        return serviceHelper.getGlobalDataSourcesContext();
-    }
-
-    @Override
-    public Path getProjectDriversContext( Project project ) {
-        return serviceHelper.getProjectDataSourcesContext( project );
-    }
 }

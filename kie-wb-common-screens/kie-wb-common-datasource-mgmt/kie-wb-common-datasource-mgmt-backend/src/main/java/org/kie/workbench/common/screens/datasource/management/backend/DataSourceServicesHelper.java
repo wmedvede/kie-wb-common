@@ -32,6 +32,9 @@ import org.uberfire.io.IOService;
 import org.uberfire.java.nio.file.FileSystem;
 import org.uberfire.java.nio.file.FileSystemAlreadyExistsException;
 
+/**
+ * Help methods to be used by the different services related to data sources and drivers.
+ */
 @ApplicationScoped
 public class DataSourceServicesHelper {
 
@@ -56,7 +59,7 @@ public class DataSourceServicesHelper {
     }
 
     @PostConstruct
-    public void init() {
+    protected void init() {
         String repositoryURI = null;
         try {
             repositoryURI = "default://" + getGlobalFileSystemName();
@@ -75,10 +78,16 @@ public class DataSourceServicesHelper {
         this.root = fileSystem.getRootDirectories().iterator().next();
     }
 
+    /**
+     * Returns the path where platform global data sources and drivers al located.
+     */
     public Path getGlobalDataSourcesContext() {
         return Paths.convert( root );
     }
 
+    /**
+     * Returns the path where data sources and drivers are located for a given project.
+     */
     public Path getProjectDataSourcesContext( final Project project ) {
         Path rootPath = project.getRootPath();
         org.uberfire.java.nio.file.Path dataSourcesNioPath = Paths.convert( rootPath ).resolve( "src/main/resources/META-INF" );
