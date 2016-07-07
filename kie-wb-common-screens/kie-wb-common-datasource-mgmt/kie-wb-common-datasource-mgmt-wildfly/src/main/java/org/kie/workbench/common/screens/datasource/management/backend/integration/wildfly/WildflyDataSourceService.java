@@ -29,6 +29,7 @@ import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.OperationBuilder;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
+import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSource;
 import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceService;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
@@ -44,6 +45,8 @@ public class WildflyDataSourceService
 
     @Inject
     WildflyDriverService driverService;
+
+    private Map<String, String > jndiNameRegistry = new HashMap<>( );
 
     public WildflyDataSourceService() {
     }
@@ -95,8 +98,9 @@ public class WildflyDataSourceService
             throw new Exception( "Required driver: " + dataSourceDef.getDriverUuid() + " has not been deployed." );
         }
         final String deploymentId = DeploymentIdGenerator.generateDeploymentId( dataSourceDef );
+        final String jndi = JndiNameGenerator.generateJNDIName( dataSourceDef );
         createDatasource( deploymentId,
-                dataSourceDef.getJndi(),
+                jndi,
                 dataSourceDef.getConnectionURL(),
                 dataSourceDef.getDriverClass(),
                 dataSourceDef.getDataSourceClass(),
@@ -106,13 +110,14 @@ public class WildflyDataSourceService
                 null,
                 dataSourceDef.isUseJTA(),
                 dataSourceDef.isUseCCM() );
-
-        return new DataSourceDeploymentInfo( deploymentId, true, dataSourceDef.getUuid(), dataSourceDef.getJndi() );
+        jndiNameRegistry.put( deploymentId, jndi);
+        return new DataSourceDeploymentInfo( deploymentId, true, dataSourceDef.getUuid() );
     }
 
     @Override
     public void undeploy( final DataSourceDeploymentInfo deploymentInfo ) throws Exception {
         deleteDatasource( deploymentInfo.getDeploymentId() );
+        jndiNameRegistry.remove( deploymentInfo.getDeploymentId() );
     }
 
     @Override
@@ -158,10 +163,20 @@ public class WildflyDataSourceService
                 managed = false;
             }
             deploymentInfo = new DataSourceDeploymentInfo( internalDef.getName(),
-                    managed, uuid, internalDef.getJndi() );
+                    managed, uuid );
             result.add( deploymentInfo );
         }
         return result;
+    }
+
+    @Override
+    public DataSource lookupDataSource( DataSourceDeploymentInfo deploymentInfo ) throws Exception {
+        String jndi = jndiNameRegistry.get( deploymentInfo.getDeploymentId() );
+        if ( jndi != null ) {
+            return new WildlfyDataSource( jndi );
+        } else{
+            throw new Exception( "DataSource for deploymentInfo: " + deploymentInfo + " was not found." );
+        }
     }
 
     @Override

@@ -338,12 +338,20 @@ public class DataSourceDefEditor
 
     private void onTestDataSource() {
         //Experimental method for development purposes.
-        editorService.call(
-                new RemoteCallback<String>() {
-                    @Override
-                    public void callback( String result ) {
-                        popupsUtil.showInformationPopup( new SafeHtmlBuilder().appendEscapedLines( result ).toSafeHtml().asString() );
-                    }
-                }, new DefaultErrorCallback() ).test( getContent().getDataSourceDef().getJndi() );
+        dataSourceService.call( new RemoteCallback<DataSourceDeploymentInfo>() {
+            @Override
+            public void callback( DataSourceDeploymentInfo deploymentInfo ) {
+                if ( deploymentInfo == null ) {
+                    popupsUtil.showInformationPopup( "Data source is not deployed in current server" );
+                } else {
+                    editorService.call( new RemoteCallback<String>() {
+                        @Override
+                        public void callback( String result ) {
+                            popupsUtil.showInformationPopup( new SafeHtmlBuilder().appendEscapedLines( result ).toSafeHtml().asString() );
+                        }
+                    }, new DefaultErrorCallback() ).test( deploymentInfo );
+                }
+            }
+        }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDataSourceDef().getUuid() );
     }
 }

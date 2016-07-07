@@ -37,4 +37,6 @@ public interface DataSourceService {
     void loadConfig( Properties properties );
 
     void update( DataSourceDef dataSourceDef ) throws Exception;
+
+    DataSource lookupDataSource( DataSourceDeploymentInfo deploymentInfo ) throws Exception;
 }
