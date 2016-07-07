@@ -24,23 +24,16 @@ public class DataSourceDeploymentInfo
 
     String uuid;
 
-    String jndi;
-
     public DataSourceDeploymentInfo() {
     }
 
-    public DataSourceDeploymentInfo( String deploymentId, boolean managed, String uuid, String jndi ) {
+    public DataSourceDeploymentInfo( String deploymentId, boolean managed, String uuid ) {
         super( deploymentId, managed );
         this.uuid = uuid;
-        this.jndi = jndi;
     }
 
     public String getUuid() {
         return uuid;
-    }
-
-    public String getJndi() {
-        return jndi;
     }
 
     @Override
@@ -49,7 +42,6 @@ public class DataSourceDeploymentInfo
                 "deploymentId='" + deploymentId + '\'' +
                 ", managed=" + managed +
                 "uuid='" + uuid + '\'' +
-                ", jndi='" + jndi + '\'' +
                 "} ";
     }
 }
