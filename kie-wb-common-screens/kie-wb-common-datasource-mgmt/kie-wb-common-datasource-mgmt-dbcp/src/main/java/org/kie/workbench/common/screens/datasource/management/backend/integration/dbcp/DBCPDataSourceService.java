@@ -35,6 +35,7 @@ import org.apache.commons.dbcp2.PoolableConnectionFactory;
 import org.apache.commons.dbcp2.PoolingDataSource;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSource;
 import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceService;
 import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceServicesProvider;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
@@ -42,15 +43,15 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
 import org.kie.workbench.common.screens.datasource.management.util.URLConnectionFactory;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Dependent
 @Named(value = "DBCPDataSourceService" )
 public class DBCPDataSourceService
     implements DataSourceService {
 
-    //private static final Logger logger = LoggerFactory.getLogger( DBCPDataSourceService.class );
+    private static final Logger logger = LoggerFactory.getLogger( DBCPDataSourceService.class );
 
     @Inject
     private DataSourceServicesProvider servicesProvider;
@@ -112,10 +113,10 @@ public class DBCPDataSourceService
         //while the java:global should be r/w
         //wildfly/eap adds to additional r/w directories, java:jboss and java:/
 
-        bindObject( dataSourceDef.getJndi(), dataSource );
+        //bindObject( dataSourceDef.getJndi(), dataSource );
 
         DataSourceDeploymentInfo deploymentInfo = new DataSourceDeploymentInfo( dataSourceDef.getUuid(),
-                true, dataSourceDef.getUuid(), dataSourceDef.getJndi() );
+                true, dataSourceDef.getUuid() );
 
         deploymentRegistry.put( deploymentInfo.getDeploymentId(), dataSource );
         deploymentInfos.put( deploymentInfo.getDeploymentId(), deploymentInfo );
@@ -137,10 +138,10 @@ public class DBCPDataSourceService
             try {
                 dataSource.close();
             } catch ( Exception e ) {
-                //logger.warn( "An error was produced during datasource close", e );
+                logger.warn( "An error was produced during datasource close", e );
             }
         }
-        unbindObject( currentDeploymentInfo.getJndi() );
+        //unbindObject( currentDeploymentInfo.getJndi() );
         deploymentRegistry.remove( currentDeploymentInfo.getDeploymentId() );
         deployedDataSources.remove( currentDeploymentInfo.getDeploymentId() );
         deploymentInfos.remove( currentDeploymentInfo.getDeploymentId() );
@@ -189,6 +190,16 @@ public class DBCPDataSourceService
         }
     }
 
+    @Override
+    public DataSource lookupDataSource( DataSourceDeploymentInfo deploymentInfo ) throws Exception {
+        javax.sql.DataSource internalDataSource = deploymentRegistry.get( deploymentInfo.getDeploymentId() );
+        if ( internalDataSource != null ) {
+            return new DBCPDataSource( internalDataSource );
+        } else {
+            throw new Exception( "DataSource for deploymentInfo: " + deploymentInfo + " was not found." );
+        }
+    }
+
     private void bindObject( String namingContext, Object object ) throws Exception {
         final InitialContext context = new InitialContext( );
         try {
@@ -205,6 +216,20 @@ public class DBCPDataSourceService
             context.unbind( namingContext );
         } catch ( Exception e ) {
             //logger.error( "unable to unbind datasource from namingContext: " + namingContext );
+        }
+    }
+
+    private class DBCPDataSource implements DataSource {
+
+        javax.sql.DataSource dataSource;
+
+        public DBCPDataSource( javax.sql.DataSource dataSource ) {
+            this.dataSource = dataSource;
+        }
+
+        @Override
+        public Connection getConnection() throws Exception {
+            return dataSource.getConnection();
         }
     }
 }

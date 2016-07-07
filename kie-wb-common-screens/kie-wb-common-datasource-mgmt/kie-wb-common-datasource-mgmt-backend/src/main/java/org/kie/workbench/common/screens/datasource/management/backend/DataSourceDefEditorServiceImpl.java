@@ -23,13 +23,13 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
 
 import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSource;
+import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceServicesProvider;
 import org.kie.workbench.common.screens.datasource.management.events.DeleteDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.UpdateDataSourceEvent;
@@ -58,8 +58,8 @@ import org.uberfire.io.IOService;
 import org.uberfire.java.nio.base.options.CommentedOption;
 import org.uberfire.java.nio.file.FileAlreadyExistsException;
 
+import static org.kie.workbench.common.screens.datasource.management.util.ServiceUtil.*;
 import static org.uberfire.commons.validation.PortablePreconditions.*;
-import static org.kie.workbench.common.screens.datasource.management.util.ServiceUtil.isEmpty;
 
 @Service
 @ApplicationScoped
@@ -104,6 +104,9 @@ public class DataSourceDefEditorServiceImpl
 
     @Inject
     private Event<UpdateDataSourceEvent> updateDataSourceEvent;
+
+    @Inject
+    private DataSourceServicesProvider servicesProvider;
 
     public DataSourceDefEditorServiceImpl() {
     }
@@ -286,18 +289,17 @@ public class DataSourceDefEditorServiceImpl
     }
 
     @Override
-    public String test( final String jndi ) {
+    public String test( final DataSourceDeploymentInfo deploymentInfo ) {
         StringBuilder stringBuilder = new StringBuilder();
         try {
 
-            InitialContext context = new InitialContext();
-            DataSource ds = ( DataSource ) context.lookup( jndi );
+            DataSource ds = servicesProvider.getDataSourceService().lookupDataSource( deploymentInfo );
             if ( ds == null ) {
-                stringBuilder.append( "Reference to datasource ds: " + jndi + " couldn't be obtained " );
+                stringBuilder.append( "Reference to datasource ds: " + deploymentInfo.getUuid() + " couldn't be obtained " );
                 stringBuilder.append( "\n" );
                 stringBuilder.append( "Test Failed" );
             } else {
-                stringBuilder.append( "Reference to datasource ds: " + jndi + " was successfully obtained: " + ds );
+                stringBuilder.append( "Reference to datasource ds: " + deploymentInfo.getUuid() + " was successfully obtained: " + ds );
                 stringBuilder.append( "\n" );
 
                 Connection conn = ds.getConnection();
