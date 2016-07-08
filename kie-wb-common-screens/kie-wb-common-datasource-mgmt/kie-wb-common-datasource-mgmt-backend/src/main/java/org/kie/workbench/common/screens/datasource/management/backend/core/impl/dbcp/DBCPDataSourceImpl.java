@@ -14,32 +14,23 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
+package org.kie.workbench.common.screens.datasource.management.backend.core.impl.dbcp;
 
 import java.sql.Connection;
 
-import javax.naming.InitialContext;
-import javax.naming.NameNotFoundException;
-
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
 
-public class WildlfyDataSource
+public class DBCPDataSourceImpl
         implements DataSource {
 
-    private String jndi;
+    private javax.sql.DataSource dataSource;
 
-    public WildlfyDataSource( String jndi ) {
-        this.jndi = jndi;
+    public DBCPDataSourceImpl( javax.sql.DataSource dataSource ) {
+        this.dataSource = dataSource;
     }
 
     @Override
     public Connection getConnection() throws Exception {
-        InitialContext initialContext = new InitialContext( );
-        try {
-            javax.sql.DataSource dataSource = (javax.sql.DataSource) initialContext.lookup( jndi );
-            return dataSource.getConnection();
-        } catch ( NameNotFoundException e ) {
-            throw new Exception( "DataSource: " + jndi + " was not found in current server.");
-        }
+        return dataSource.getConnection();
     }
 }

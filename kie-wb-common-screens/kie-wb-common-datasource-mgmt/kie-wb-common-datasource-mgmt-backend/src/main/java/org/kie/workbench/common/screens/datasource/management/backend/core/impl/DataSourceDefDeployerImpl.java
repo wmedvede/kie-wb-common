@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend;
+package org.kie.workbench.common.screens.datasource.management.backend.core.impl;
 
+import java.util.Collection;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceDefDeployer;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.util.DataSourceDefSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uberfire.backend.server.util.Paths;
+import org.uberfire.backend.vfs.Path;
 import org.uberfire.io.IOService;
 
 @ApplicationScoped
 public class DataSourceDefDeployerImpl
         implements DataSourceDefDeployer {
 
-    Logger logger = LoggerFactory.getLogger( DataSourceDefDeployerImpl.class );
+    private static final Logger logger = LoggerFactory.getLogger( DataSourceDefDeployerImpl.class );
 
     @Inject
     @Named("ioStrategy")
@@ -44,17 +46,33 @@ public class DataSourceDefDeployerImpl
     private DataSourceDefQueryService queryService;
 
     @Inject
-    private DataSourceManagementService managementService;
+    private DataSourceDefRegistry dataSourceDefRegistry;
 
     @Override
-    public void deployGlobalDataSources() {
+    public void deployGlobalDefs() {
         try {
             logger.debug( "Starting global data sources deployment" );
-            for ( DataSourceDefInfo dataSourceDefInfo : queryService.findGlobalDataSources() ) {
-                deployDataSource( dataSourceDefInfo );
-            }
+            deployDefs( queryService.findGlobalDataSources() );
+            logger.debug( "End of global data sources deployment" );
         } catch ( Exception e ) {
-            logger.error( "An error was produced during global data sources deployment.", e );
+            logger.error( "Global data sources deployment failed.", e );
+        }
+    }
+
+    @Override
+    public void deployProjectDefs( Path path ) {
+        try {
+            logger.debug( "Starting project data sources deployment for path: " + path );
+            deployDefs( queryService.findProjectDataSources( path ) );
+            logger.debug( "End of project data sources deployment for path: " + path );
+        } catch ( Exception e ) {
+            logger.error( "Project data sources deployment failed for paht: " + path, e );
+        }
+    }
+
+    private void deployDefs( Collection<DataSourceDefInfo> defs ) {
+        for ( DataSourceDefInfo dataSourceDefInfo : defs ) {
+            deployDataSource( dataSourceDefInfo );
         }
     }
 
@@ -62,10 +80,9 @@ public class DataSourceDefDeployerImpl
         try {
             String source = ioService.readAllString( Paths.convert( dataSourceDefInfo.getPath() ) );
             DataSourceDef dataSourceDef = DataSourceDefSerializer.deserialize( source );
-            managementService.deploy( dataSourceDef );
+            dataSourceDefRegistry.register( dataSourceDef );
         } catch ( Exception e ) {
             logger.error( "Data source deployment failed, dataSourceDefInfo: " + dataSourceDefInfo, e );
         }
     }
-
 }

@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend;
+package org.kie.workbench.common.screens.datasource.management.backend.core.impl;
 
+import java.util.Collection;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefDeployer;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefRegistry;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
-import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.kie.workbench.common.screens.datasource.management.util.DriverDefSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,27 +37,32 @@ import org.uberfire.io.IOService;
 public class DriverDefDeployerImpl
         implements DriverDefDeployer {
 
-    Logger logger = LoggerFactory.getLogger( DriverDefDeployerImpl.class );
+    private static final Logger logger = LoggerFactory.getLogger( DriverDefDeployerImpl.class );
 
     @Inject
     @Named("ioStrategy")
     private IOService ioService;
 
     @Inject
-    DataSourceDefQueryService queryService;
+    private DataSourceDefQueryService queryService;
 
     @Inject
-    DriverManagementService managementService;
+    private DriverDefRegistry driverDefRegistry;
 
     @Override
-    public void deployGlobalDrivers() {
+    public void deployGlobalDefs() {
         try {
             logger.debug( "Starting global drivers deployment." );
-            for ( DriverDefInfo driverDefInfo : queryService.findGlobalDrivers() ) {
-                deployDriver( driverDefInfo );
-            }
+            deployDrivers( queryService.findGlobalDrivers() );
+            logger.debug( "End of global drivers deployment." );
         } catch ( Exception e ) {
-            logger.error( "An error was produced during global drivers deployment.", e );
+            logger.error( "Global drivers deployment failed.", e );
+        }
+    }
+
+    private void deployDrivers( Collection<DriverDefInfo> defs ) {
+        for ( DriverDefInfo driverDefInfo : defs ) {
+            deployDriver( driverDefInfo );
         }
     }
 
@@ -63,14 +70,20 @@ public class DriverDefDeployerImpl
         try {
             String source = ioService.readAllString( Paths.convert( driverDefInfo.getPath() ) );
             DriverDef driverDef = DriverDefSerializer.deserialize( source );
-            managementService.deploy( driverDef );
+            driverDefRegistry.register( driverDef );
         } catch ( Exception e ) {
             logger.error( "Driver deployment failed, driverDefInfo: " + driverDefInfo, e );
         }
     }
 
     @Override
-    public void deployProjectDrivers( Path path ) {
-
+    public void deployProjectDefs( Path path ) {
+        try {
+            logger.debug( "Starting project drivers deployment for path: " + path );
+            deployDrivers( queryService.findProjectDrivers( path ) );
+            logger.debug( "End of project drivers deployment for path: " + path );
+        } catch ( Exception e ) {
+            logger.error( "Project drivers deployment failed for paht: " + path, e );
+        }
     }
 }

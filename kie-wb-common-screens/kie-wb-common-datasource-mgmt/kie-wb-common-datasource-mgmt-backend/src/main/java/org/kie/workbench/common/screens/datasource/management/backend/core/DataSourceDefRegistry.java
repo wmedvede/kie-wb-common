@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.integration;
+package org.kie.workbench.common.screens.datasource.management.backend.core;
 
-import java.sql.Connection;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 
-public interface DataSource {
-
-    Connection getConnection() throws Exception;
+public interface DataSourceDefRegistry
+        extends Registry<DataSourceDef> {
 
 }

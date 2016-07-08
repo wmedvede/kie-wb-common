@@ -22,6 +22,8 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceDefDeployer;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefDeployer;
 import org.uberfire.commons.services.cdi.Startup;
 import org.uberfire.commons.services.cdi.StartupType;
 
@@ -41,8 +43,8 @@ public class Bootstrap {
         Timer timer = new Timer( "BootstrapTimer" );
         timer.schedule( new TimerTask() {
             @Override public void run() {
-                driverDefDeployer.deployGlobalDrivers();
-                dataSourceDefDeployer.deployGlobalDataSources();
+                driverDefDeployer.deployGlobalDefs();
+                dataSourceDefDeployer.deployGlobalDefs();
             }
         },  2 * 60 * 1000 );
 

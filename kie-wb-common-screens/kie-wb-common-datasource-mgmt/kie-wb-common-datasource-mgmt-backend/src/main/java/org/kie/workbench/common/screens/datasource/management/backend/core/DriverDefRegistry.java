@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend;
+package org.kie.workbench.common.screens.datasource.management.backend.core;
 
-public interface DataSourceDefDeployer {
+import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 
-    void deployGlobalDataSources();
+public interface DriverDefRegistry
+        extends Registry<DriverDef> {
 
 }

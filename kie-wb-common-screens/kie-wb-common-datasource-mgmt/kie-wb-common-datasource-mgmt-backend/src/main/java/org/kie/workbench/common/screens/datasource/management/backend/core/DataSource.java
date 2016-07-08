@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend;
+package org.kie.workbench.common.screens.datasource.management.backend.core;
 
-import org.uberfire.backend.vfs.Path;
+import java.sql.Connection;
 
-public interface DriverDefDeployer {
+public interface DataSource {
 
-    void deployGlobalDrivers( );
-
-    void deployProjectDrivers( Path path );
+    Connection getConnection() throws Exception;
 
 }

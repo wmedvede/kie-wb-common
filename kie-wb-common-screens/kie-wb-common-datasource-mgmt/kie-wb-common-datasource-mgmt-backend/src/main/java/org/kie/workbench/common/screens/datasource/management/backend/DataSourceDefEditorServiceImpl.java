@@ -28,7 +28,9 @@ import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSource;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceDefRegistry;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManager;
 import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceServicesProvider;
 import org.kie.workbench.common.screens.datasource.management.events.DeleteDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
@@ -108,6 +110,12 @@ public class DataSourceDefEditorServiceImpl
     @Inject
     private DataSourceServicesProvider servicesProvider;
 
+    private
+    @Inject DataSourceDefRegistry dataSourceDefRegistry;
+
+    private
+    @Inject DataSourceManager dataSourceManager;
+
     public DataSourceDefEditorServiceImpl() {
     }
 
@@ -160,6 +168,8 @@ public class DataSourceDefEditorServiceImpl
                     !originalDataSourceDef.getName().equals( editorContent.getDataSourceDef().getName() ) ) {
                 newPath = renameService.rename( path, editorContent.getDataSourceDef().getName(), comment );
             }
+
+            dataSourceDefRegistry.register( editorContent.getDataSourceDef() );
 
             updateDataSourceEvent.fire( new UpdateDataSourceEvent( editorContent.getDataSourceDef(),
                     editorContent.getProject(),
@@ -270,6 +280,8 @@ public class DataSourceDefEditorServiceImpl
                 //deploy the datasource
                 dataSourceManagementService.deploy( dataSourceDef );
             }
+
+            dataSourceDefRegistry.register( dataSourceDef );
 
         } catch ( Exception e1 ) {
             logger.error( "It was not possible to create data source: {}", dataSourceDef.getName(), e1 );
