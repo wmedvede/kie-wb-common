@@ -29,7 +29,7 @@ import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.OperationBuilder;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
-import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSource;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
 import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceService;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;

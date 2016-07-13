@@ -33,14 +33,14 @@ import org.guvnor.common.services.project.model.Project;
 import org.guvnor.common.services.shared.message.Level;
 import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManagerRegistry;
+import org.kie.workbench.common.screens.datasource.management.backend.core.RegistrationMode;
 import org.kie.workbench.common.screens.datasource.management.events.DeleteDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.events.UpdateDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.kie.workbench.common.screens.datasource.management.util.DriverDefSerializer;
 import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
 import org.kie.workbench.common.screens.datasource.management.util.UUIDGenerator;
@@ -70,7 +70,7 @@ public class DriverDefEditorServiceImpl
     private DataSourceServicesHelper serviceHelper;
 
     @Inject
-    private DriverManagementService driverManagementService;
+    private DataSourceManagerRegistry dataSourceManagerRegistry;
 
     @Inject
     private KieProjectService projectService;
@@ -112,14 +112,8 @@ public class DriverDefEditorServiceImpl
     @Override
     public Path save( final Path path,
             final DriverDefEditorContent editorContent,
-            final String comment ) {
-        return save( path, editorContent, comment, serviceHelper.autoDeploy() );
-    }
-
-    private Path save( final Path path,
-            final DriverDefEditorContent editorContent,
             final String comment,
-            final boolean updateDeployment ) {
+            final boolean forceSave ) {
 
         checkNotNull( "path", path );
         checkNotNull( "content", editorContent );
@@ -131,15 +125,9 @@ public class DriverDefEditorServiceImpl
                     ioService.readAllString( Paths.convert( path ) ) );
             final String content = DriverDefSerializer.serialize( editorContent.getDriverDef() );
 
-            if ( updateDeployment && driverManagementService.isEnabled() ) {
-                DriverDeploymentInfo deploymentInfo = driverManagementService.getDeploymentInfo(
-                        editorContent.getDriverDef().getUuid() );
-                if ( deploymentInfo != null ) {
-                    driverManagementService.undeploy( deploymentInfo );
-                }
-                driverManagementService.deploy( editorContent.getDriverDef() );
+            dataSourceManagerRegistry.registerDriverDef( editorContent.getDriverDef(),
+                    forceSave ? RegistrationMode.FORCED : RegistrationMode.SOFT );
 
-            }
             ioService.write( Paths.convert( path ), content, optionsFactory.makeCommentedOption( comment ) );
 
             if ( originalDriverDef.getName() != null &&
@@ -252,10 +240,8 @@ public class DriverDefEditorServiceImpl
             ioService.write( nioPath, content, new CommentedOption( optionsFactory.getSafeIdentityName() ) );
             fileCreated = true;
 
-            if ( updateDeployment && driverManagementService.isEnabled() ) {
-                //deploy the driver
-                driverManagementService.deploy( driverDef );
-            }
+            dataSourceManagerRegistry.registerDriverDef( driverDef );
+
         } catch ( Exception e1 ) {
             logger.error( "It was not possible to create driver: {}", driverDef.getName(), e1 );
             if ( fileCreated ) {
@@ -313,11 +299,7 @@ public class DriverDefEditorServiceImpl
     }
 
     @Override
-    public void delete( final Path path, final String comment ) {
-        delete( path, comment, serviceHelper.autoDeploy() );
-    }
-
-    private void delete( final Path path, final String comment, final boolean updateDeployment ) {
+    public void delete( final Path path, final String comment, final boolean forceDelete ) {
         checkNotNull( "path", path );
 
         final org.uberfire.java.nio.file.Path nioPath = Paths.convert( path );
@@ -327,13 +309,10 @@ public class DriverDefEditorServiceImpl
             Project project = projectService.resolveProject( path );
 
             try {
-                if ( updateDeployment && driverManagementService.isEnabled() ) {
-                    DriverDeploymentInfo deploymentInfo = driverManagementService.getDeploymentInfo(
-                            driverDef.getUuid() );
-                    if ( deploymentInfo != null ) {
-                        driverManagementService.undeploy( deploymentInfo );
-                    }
-                }
+
+                dataSourceManagerRegistry.deRegisterDriverDef( driverDef.getUuid(),
+                        forceDelete ? RegistrationMode.FORCED : RegistrationMode.SOFT );
+
                 ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
                 deleteDriverEvent.fire( new DeleteDriverEvent( driverDef,
                         project, optionsFactory.getSafeSessionId(), optionsFactory.getSafeIdentityName() ) );

@@ -40,6 +40,8 @@ public interface DataSourceDefEditorService
     Path createGlobal( final DataSourceDef dataSourceDef );
 
     //TODO experimental
+    String test( final String uuid );
+
     String test( final DataSourceDeploymentInfo deploymentInfo );
 
     TestConnectionResult testConnection( final DataSourceDef dataSourceDef, final Project project );

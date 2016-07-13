@@ -30,6 +30,7 @@ import org.kie.workbench.common.screens.datasource.management.client.util.Popups
 import org.kie.workbench.common.screens.datasource.management.client.validation.ClientValidationService;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.mockito.Mock;
@@ -76,6 +77,11 @@ public class DriverDefEditorTest
 
     private Caller<DriverManagementService> driverServiceCaller;
 
+    @Mock
+    private DataSourceManagementService managementService;
+
+    private Caller<DataSourceManagementService> managementServiceCaller;
+
     private DriverDefEditor editor;
 
     @Mock
@@ -100,9 +106,10 @@ public class DriverDefEditorTest
         editorHelper = new DriverDefEditorHelper( translationService, clientValidationService );
         editorServiceCaller = new CallerMock<>( editorService );
         driverServiceCaller = new CallerMock<>( driverService );
+        managementServiceCaller = new CallerMock<>( managementService );
 
         editor = new DriverDefEditor( view,
-                mainPanel, editorHelper, popupsUtil, type, editorServiceCaller, driverServiceCaller ) {
+                mainPanel, editorHelper, popupsUtil, type, editorServiceCaller, driverServiceCaller, managementServiceCaller ) {
             {
                 this.versionRecordManager = DriverDefEditorTest.this.versionRecordManager;
                 this.menuBuilder = mock( BasicFileMenuBuilder.class );

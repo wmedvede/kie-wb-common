@@ -22,12 +22,16 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import org.guvnor.common.services.shared.validation.model.ValidationMessage;
+import org.gwtbootstrap3.client.ui.constants.ButtonType;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.client.type.DriverDefType;
 import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverRuntimeInfo;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.uberfire.backend.vfs.ObservablePath;
@@ -37,10 +41,11 @@ import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartTitleDecoration;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.ext.editor.commons.client.BaseEditor;
+import org.uberfire.ext.editor.commons.client.file.DeletePopup;
 import org.uberfire.ext.editor.commons.client.file.SaveOperationService;
-import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 import org.uberfire.ext.widgets.common.client.callbacks.HasBusyIndicatorDefaultErrorCallback;
+import org.uberfire.ext.widgets.common.client.resources.i18n.CommonConstants;
 import org.uberfire.lifecycle.OnMayClose;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.Command;
@@ -73,6 +78,8 @@ public class DriverDefEditor
 
     private Caller<DriverManagementService> driverService;
 
+    private Caller<DataSourceManagementService> dataSourceManagement;
+
     private DriverDefEditorContent editorContent;
 
     @Inject
@@ -82,7 +89,8 @@ public class DriverDefEditor
             final PopupsUtil popupsUtil,
             final DriverDefType type,
             final Caller<DriverDefEditorService> editorService,
-            final Caller<DriverManagementService> driverService ) {
+            final Caller<DriverManagementService> driverService,
+            final Caller<DataSourceManagementService> dataSourceManagement ) {
         super( view );
         this.view = view;
         this.mainPanel = mainPanel;
@@ -91,6 +99,7 @@ public class DriverDefEditor
         this.type = type;
         this.editorService = editorService;
         this.driverService = driverService;
+        this.dataSourceManagement = dataSourceManagement;
         view.init( this );
         view.setMainPanel( mainPanel );
         editorHelper.init( mainPanel );
@@ -103,9 +112,7 @@ public class DriverDefEditor
                 type,
                 true,
                 false,
-                SAVE,
-                DELETE,
-                VALIDATE );
+                SAVE );
     }
 
     @WorkbenchPartTitleDecoration
@@ -152,6 +159,47 @@ public class DriverDefEditor
 
     @Override
     protected void save() {
+        executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasRunningDependantsForSave,
+                new Command() {
+                    @Override public void execute() {
+                        save( false );
+                    }
+                },
+                new Command() {
+                    @Override public void execute() {
+                        save( true );
+                    }
+                },
+                new Command() {
+                    @Override public void execute() {
+                        //do nothing;
+                    }
+                } );
+    }
+
+    protected void executeSafeUpdateCommand( String onDependantsMessageKey,
+            Command defaultCommand, Command yesCommand, Command noCommand ) {
+        dataSourceManagement.call( new RemoteCallback<DriverRuntimeInfo>() {
+            @Override
+            public void callback( DriverRuntimeInfo driverRuntimeInfo ) {
+
+                if ( driverRuntimeInfo.hasRunningDependants() ) {
+                    popupsUtil.showYesNoPopup( CommonConstants.INSTANCE.Warning(),
+                            editorHelper.getMessage( onDependantsMessageKey ),
+                            yesCommand,
+                            CommonConstants.INSTANCE.YES(),
+                            ButtonType.WARNING,
+                            noCommand,
+                            CommonConstants.INSTANCE.NO(),
+                            ButtonType.DEFAULT );
+                } else {
+                    defaultCommand.execute();
+                }
+            }
+        } ).getDriverRuntimeInfo( getContent().getDriverDef().getUuid() );
+    }
+
+    protected void save( boolean forceSave ) {
         new SaveOperationService().save( versionRecordManager.getCurrentPath(),
                 new ParameterizedCommand<String>() {
                     @Override
@@ -159,16 +207,12 @@ public class DriverDefEditor
                         editorService.call( getSaveSuccessCallback( getContent().hashCode() ),
                                 new HasBusyIndicatorDefaultErrorCallback( view ) ).save( versionRecordManager.getCurrentPath(),
                                 getContent(),
-                                commitMessage );
+                                commitMessage,
+                                forceSave );
                     }
                 }
         );
         concurrentUpdateSessionInfo = null;
-    }
-
-    @Override
-    protected Caller<? extends SupportsDelete> getDeleteServiceCaller() {
-        return editorService;
     }
 
     @Override
@@ -179,7 +223,51 @@ public class DriverDefEditor
     @Override
     protected void makeMenuBar() {
         super.makeMenuBar();
-        addDevelopMenu();
+        menuBuilder.addDelete( onDelete( versionRecordManager.getCurrentPath() ) );
+        menuBuilder.addValidate( onValidate() );
+    }
+
+    protected Command onDelete( ObservablePath currentPath ) {
+        return new Command() {
+            @Override
+            public void execute() {
+                executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasRunningDependantsForDelete,
+                        new Command() {
+                            @Override public void execute() {
+                                delete( currentPath, false );
+                            }
+                        },
+                        new Command() {
+                            @Override public void execute() {
+                                delete( currentPath, true );
+                            }
+                        },
+                        new Command() {
+                            @Override public void execute() {
+                                //do nothing.
+                            }
+                        }
+                );
+            }
+        };
+    }
+
+    private void delete( ObservablePath currentPath, boolean forceDelete ) {
+
+        final DeletePopup popup = new DeletePopup( new ParameterizedCommand<String>() {
+            @Override
+            public void execute( final String comment ) {
+                view.showBusyIndicator( org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants.INSTANCE.Deleting() );
+                editorService.call( new RemoteCallback<Void>() {
+                    @Override public void callback( Void aVoid ) {
+                        view.hideBusyIndicator();
+                        notification.fire( new NotificationEvent( org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants.INSTANCE.ItemDeletedSuccessfully(),
+                                NotificationEvent.NotificationType.SUCCESS ) );
+                    }
+                } , new HasBusyIndicatorDefaultErrorCallback( view ) ).delete( currentPath, comment, forceDelete );
+            }
+        } );
+        popup.show();
     }
 
     private RemoteCallback<DriverDefEditorContent> getLoadContentSuccessCallback() {

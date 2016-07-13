@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.integration;
+package org.kie.workbench.common.screens.datasource.management.backend.core;
 
-import java.sql.Connection;
-
-public interface DataSource {
-
-    Connection getConnection() throws Exception;
+/**
+ * Manages the automatic registration of data source definitions at server startup.
+ */
+public interface DataSourceDefDeployer extends DefDeployer {
 
 }

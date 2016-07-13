@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
@@ -39,8 +38,7 @@ public class MavenArtifactResolver {
 
     private static final Logger logger = LoggerFactory.getLogger( MavenArtifactResolver.class );
 
-    @Inject
-    private POMContentHandler pomContentHandler;
+    private POMContentHandler pomContentHandler = new POMContentHandler();
 
     public MavenArtifactResolver() {
     }

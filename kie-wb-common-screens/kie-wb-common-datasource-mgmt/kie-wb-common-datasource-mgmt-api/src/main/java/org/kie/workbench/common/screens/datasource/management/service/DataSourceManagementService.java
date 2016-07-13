@@ -21,6 +21,8 @@ import java.util.List;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceRuntimeInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverRuntimeInfo;
 
 @Remote
 public interface DataSourceManagementService {
@@ -36,5 +38,9 @@ public interface DataSourceManagementService {
     void update( final DataSourceDef dataSourceDef );
 
     void undeploy( final DataSourceDeploymentInfo deploymentInfo );
+
+    DataSourceRuntimeInfo getDataSourceRuntimeInfo( String uuid );
+
+    DriverRuntimeInfo getDriverRuntimeInfo( String uuid );
 
 }

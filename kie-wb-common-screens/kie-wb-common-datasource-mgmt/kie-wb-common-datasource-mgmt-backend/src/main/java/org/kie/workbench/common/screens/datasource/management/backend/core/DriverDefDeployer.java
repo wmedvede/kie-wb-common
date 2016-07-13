@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend;
+package org.kie.workbench.common.screens.datasource.management.backend.core;
 
-import org.uberfire.backend.vfs.Path;
-
-public interface DriverDefDeployer {
-
-    void deployGlobalDrivers( );
-
-    void deployProjectDrivers( Path path );
+/**
+ * Manages the automatic registration of data source definitions at server startup.
+ */
+public interface DriverDefDeployer extends DefDeployer {
 
 }
