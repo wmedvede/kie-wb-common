@@ -35,7 +35,8 @@ import org.apache.commons.dbcp2.PoolableConnectionFactory;
 import org.apache.commons.dbcp2.PoolingDataSource;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSource;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
+import org.kie.workbench.common.screens.datasource.management.backend.core.impl.AbstractDataSource;
 import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceService;
 import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceServicesProvider;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
@@ -219,7 +220,7 @@ public class DBCPDataSourceService
         }
     }
 
-    private class DBCPDataSource implements DataSource {
+    private class DBCPDataSource extends AbstractDataSource {
 
         javax.sql.DataSource dataSource;
 

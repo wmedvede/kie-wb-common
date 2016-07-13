@@ -17,14 +17,13 @@
 package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
 
 import java.sql.Connection;
-
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
 
-import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSource;
+import org.kie.workbench.common.screens.datasource.management.backend.core.impl.AbstractDataSource;
 
 public class WildlfyDataSource
-        implements DataSource {
+        extends AbstractDataSource {
 
     private String jndi;
 
@@ -42,4 +41,5 @@ public class WildlfyDataSource
             throw new Exception( "DataSource: " + jndi + " was not found in current server.");
         }
     }
+
 }

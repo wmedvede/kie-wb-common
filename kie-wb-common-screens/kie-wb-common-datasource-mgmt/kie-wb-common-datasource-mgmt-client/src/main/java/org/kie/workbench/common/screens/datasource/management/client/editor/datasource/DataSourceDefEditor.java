@@ -338,6 +338,16 @@ public class DataSourceDefEditor
 
     private void onTestDataSource() {
         //Experimental method for development purposes.
+
+
+        editorService.call( new RemoteCallback<String>() {
+            @Override
+            public void callback( String result ) {
+                popupsUtil.showInformationPopup( new SafeHtmlBuilder().appendEscapedLines( result ).toSafeHtml().asString() );
+            }
+        }, new DefaultErrorCallback() ).test( getContent().getDataSourceDef().getUuid() );
+
+        /*
         dataSourceService.call( new RemoteCallback<DataSourceDeploymentInfo>() {
             @Override
             public void callback( DataSourceDeploymentInfo deploymentInfo ) {
@@ -353,5 +363,6 @@ public class DataSourceDefEditor
                 }
             }
         }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDataSourceDef().getUuid() );
+        */
     }
 }

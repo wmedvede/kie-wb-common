@@ -24,8 +24,11 @@ import javax.inject.Inject;
 import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.guvnor.common.services.shared.exceptions.GenericPortableException;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManager;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceRuntimeInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverRuntimeInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceServicesProvider;
 import org.slf4j.Logger;
@@ -40,6 +43,9 @@ public class DataSourceManagementServiceImpl
 
     @Inject
     DataSourceServicesProvider servicesProvider;
+
+    @Inject
+    DataSourceManager dataSourceManager;
 
     public DataSourceManagementServiceImpl() {
     }
@@ -113,6 +119,16 @@ public class DataSourceManagementServiceImpl
             logger.error( "undeployment of dataSource: " + deploymentInfo + " failed: " + e.getMessage(), e );
             throw ExceptionUtilities.handleException( e );
         }
+    }
+
+    @Override
+    public DataSourceRuntimeInfo getDataSourceRuntimeInfo( String uuid ) {
+        return dataSourceManager.getDataSourceRuntimeInfo( uuid );
+    }
+
+    @Override
+    public DriverRuntimeInfo getDriverRuntimeInfo( String uuid ) {
+        return dataSourceManager.getDriverRuntimeInfo( uuid );
     }
 
     private void assertDataSourceSerives() {

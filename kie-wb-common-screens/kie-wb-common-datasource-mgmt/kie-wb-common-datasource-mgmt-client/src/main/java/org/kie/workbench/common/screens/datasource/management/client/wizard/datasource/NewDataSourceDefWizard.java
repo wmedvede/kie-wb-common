@@ -33,6 +33,7 @@ import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.callbacks.Callback;
@@ -136,6 +137,15 @@ public class NewDataSourceDefWizard
     }
 
     private void doComplete() {
+        //TODO REMOVE THIS type setting
+        if ( dataSourceDef.getName().toLowerCase().contains( DataSourceDefType.CONTAINER.name().toLowerCase() ) ) {
+            dataSourceDef.setType( DataSourceDefType.CONTAINER );
+        } else if ( dataSourceDef.getName().toLowerCase().contains( DataSourceDefType.REFERRED.name().toLowerCase() ) ) {
+            dataSourceDef.setType( DataSourceDefType.REFERRED );
+        } else {
+            dataSourceDef.setType( DataSourceDefType.CUSTOM );
+        }
+
         if ( isGlobal() ) {
             dataSourceDefService.call( getCreateSuccessCallback(), getCreateErrorCallback() ).createGlobal(
                     dataSourceDef );

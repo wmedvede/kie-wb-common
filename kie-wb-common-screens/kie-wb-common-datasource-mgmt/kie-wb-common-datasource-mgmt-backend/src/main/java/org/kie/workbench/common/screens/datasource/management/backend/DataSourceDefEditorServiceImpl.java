@@ -28,7 +28,9 @@ import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSource;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManager;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManagerRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceServicesProvider;
 import org.kie.workbench.common.screens.datasource.management.events.DeleteDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
@@ -42,7 +44,6 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDefInf
 import org.kie.workbench.common.screens.datasource.management.model.TestConnectionResult;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.util.DataSourceDefSerializer;
 import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
@@ -82,7 +83,10 @@ public class DataSourceDefEditorServiceImpl
     private DataSourceDefQueryService dataSourceDefQueryService;
 
     @Inject
-    private DataSourceManagementService dataSourceManagementService;
+    private DataSourceManagerRegistry dataSourceManagerRegistry;
+
+    @Inject
+    private DataSourceManager dataSourceManager;
 
     @Inject
     private DataSourceServicesHelper serviceHelper;
@@ -145,14 +149,7 @@ public class DataSourceDefEditorServiceImpl
                     ioService.readAllString( Paths.convert( path ) ) );
             final String content = DataSourceDefSerializer.serialize( editorContent.getDataSourceDef() );
 
-            if ( updateDeployment && dataSourceManagementService.isEnabled() ) {
-                DataSourceDeploymentInfo deploymentInfo = dataSourceManagementService.getDeploymentInfo(
-                        editorContent.getDataSourceDef().getUuid() );
-                if ( deploymentInfo != null ) {
-                    dataSourceManagementService.undeploy( deploymentInfo );
-                }
-                dataSourceManagementService.deploy( editorContent.getDataSourceDef() );
-            }
+            dataSourceManagerRegistry.registerDataSourceDef( editorContent.getDataSourceDef() );
 
             ioService.write( Paths.convert( path ), content, optionsFactory.makeCommentedOption( comment ) );
 
@@ -266,10 +263,7 @@ public class DataSourceDefEditorServiceImpl
             ioService.write( nioPath, content, new CommentedOption( optionsFactory.getSafeIdentityName() ) );
             fileCreated = true;
 
-            if ( updateDeployment && dataSourceManagementService.isEnabled() ) {
-                //deploy the datasource
-                dataSourceManagementService.deploy( dataSourceDef );
-            }
+            dataSourceManagerRegistry.registerDataSourceDef( dataSourceDef );
 
         } catch ( Exception e1 ) {
             logger.error( "It was not possible to create data source: {}", dataSourceDef.getName(), e1 );
@@ -289,41 +283,54 @@ public class DataSourceDefEditorServiceImpl
     }
 
     @Override
+    public String test( final String uuid ) {
+        StringBuilder stringBuilder = new StringBuilder(  );
+        try {
+            DataSource dataSource = dataSourceManager.lookup( uuid );
+            return test( dataSource );
+        } catch ( Exception e ) {
+            stringBuilder.append( "Reference to datasource ds: " + uuid + " couldn't be obtained " );
+            stringBuilder.append( "\n" );
+            stringBuilder.append( "Test Failed" );
+        }
+        return stringBuilder.toString();
+    }
+
+    @Override
     public String test( final DataSourceDeploymentInfo deploymentInfo ) {
+        return test( deploymentInfo.getUuid() );
+    }
+
+    private String test( final DataSource dataSource ) {
         StringBuilder stringBuilder = new StringBuilder();
         try {
 
-            DataSource ds = servicesProvider.getDataSourceService().lookupDataSource( deploymentInfo );
-            if ( ds == null ) {
-                stringBuilder.append( "Reference to datasource ds: " + deploymentInfo.getUuid() + " couldn't be obtained " );
+            checkNotNull( "dataSource", dataSource );
+
+            stringBuilder.append( "Reference to datasource was successfully obtained: " + dataSource );
+            stringBuilder.append( "\n" );
+
+            Connection conn = dataSource.getConnection();
+
+            if ( conn == null ) {
+                stringBuilder.append( "It was not possible to get connection from the datasoure." );
                 stringBuilder.append( "\n" );
                 stringBuilder.append( "Test Failed" );
             } else {
-                stringBuilder.append( "Reference to datasource ds: " + deploymentInfo.getUuid() + " was successfully obtained: " + ds );
+                stringBuilder.append( "Connection was successfully obtained: " + conn );
                 stringBuilder.append( "\n" );
-
-                Connection conn = ds.getConnection();
-
-                if ( conn == null ) {
-                    stringBuilder.append( "It was not possible to get connection from the datasoure." );
-                    stringBuilder.append( "\n" );
-                    stringBuilder.append( "Test Failed" );
-                } else {
-                    stringBuilder.append( "Connection was successfully obtained: " + conn );
-                    stringBuilder.append( "\n" );
-                    stringBuilder.append( "*** DatabaseProductName: " + conn.getMetaData().getDatabaseProductName() );
-                    stringBuilder.append( "\n" );
-                    stringBuilder.append( "*** DatabaseProductVersion: " + conn.getMetaData().getDatabaseProductVersion() );
-                    stringBuilder.append( "\n" );
-                    stringBuilder.append( "*** DriverName: " + conn.getMetaData().getDriverName() );
-                    stringBuilder.append( "\n" );
-                    stringBuilder.append( "*** DriverVersion: " + conn.getMetaData().getDriverVersion() );
-                    stringBuilder.append( "\n" );
-                    conn.close();
-                    stringBuilder.append( "Connection was successfully released." );
-                    stringBuilder.append( "\n" );
-                    stringBuilder.append( "Test Successful" );
-                }
+                stringBuilder.append( "*** DatabaseProductName: " + conn.getMetaData().getDatabaseProductName() );
+                stringBuilder.append( "\n" );
+                stringBuilder.append( "*** DatabaseProductVersion: " + conn.getMetaData().getDatabaseProductVersion() );
+                stringBuilder.append( "\n" );
+                stringBuilder.append( "*** DriverName: " + conn.getMetaData().getDriverName() );
+                stringBuilder.append( "\n" );
+                stringBuilder.append( "*** DriverVersion: " + conn.getMetaData().getDriverVersion() );
+                stringBuilder.append( "\n" );
+                conn.close();
+                stringBuilder.append( "Connection was successfully released." );
+                stringBuilder.append( "\n" );
+                stringBuilder.append( "Test Successful" );
             }
 
         } catch ( Exception e ) {
@@ -444,13 +451,7 @@ public class DataSourceDefEditorServiceImpl
             Project project = projectService.resolveProject( path );
             try {
 
-                if ( updateDeployment && dataSourceManagementService.isEnabled() ) {
-                    DataSourceDeploymentInfo deploymentInfo = dataSourceManagementService.getDeploymentInfo(
-                            dataSourceDef.getUuid() );
-                    if ( deploymentInfo != null ) {
-                        dataSourceManagementService.undeploy( deploymentInfo );
-                    }
-                }
+                dataSourceManagerRegistry.deRegisterDataSourceDef( dataSourceDef.getUuid() );
 
                 ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
                 deleteDataSourceEvent.fire( new DeleteDataSourceEvent( dataSourceDef,

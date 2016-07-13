@@ -20,6 +20,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.guvnor.common.services.shared.validation.model.ValidationMessage;
+import org.gwtbootstrap3.client.ui.constants.ButtonType;
 import org.kie.workbench.common.widgets.client.popups.validation.ValidationPopup;
 import org.uberfire.ext.widgets.common.client.common.popups.YesNoCancelPopup;
 import org.uberfire.ext.widgets.common.client.resources.i18n.CommonConstants;
@@ -34,6 +35,30 @@ public class PopupsUtil {
 
     public void showErrorPopup( final String message ) {
         showOkButtonPopup( CommonConstants.INSTANCE.Error(), message );
+    }
+
+    public void showYesNoPopup( final String title,
+            final String message,
+            final Command yesCommand,
+            final String yesButtonText,
+            final ButtonType yesButtonType,
+            final Command noCommand,
+            final String noButtonText,
+            final ButtonType noButtonType ) {
+
+        YesNoCancelPopup yesNoCancelPopup = YesNoCancelPopup.newYesNoCancelPopup( title,
+                message,
+                yesCommand,
+                yesButtonText,
+                yesButtonType,
+                noCommand,
+                noButtonText,
+                noButtonType,
+                null,
+                null,
+                null );
+        yesNoCancelPopup.setClosable( false );
+        yesNoCancelPopup.show();
     }
 
     private static void showOkButtonPopup( final String title, final String message ) {

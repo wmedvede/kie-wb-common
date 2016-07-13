@@ -24,21 +24,21 @@ import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
 import org.uberfire.backend.vfs.Path;
-import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 
 @Remote
-public interface DriverDefEditorService
-        extends SupportsDelete {
+public interface DriverDefEditorService {
 
     DriverDefEditorContent loadContent( final Path path );
 
-    Path save( final Path path, final DriverDefEditorContent editorContent, final String comment );
+    Path save( final Path path, final DriverDefEditorContent editorContent, final String comment, final boolean forceSave );
 
     Path create( final Path context, final String driverName, final String fileName );
 
     Path create( final DriverDef driverDef, final Project project );
 
     Path createGlobal( final DriverDef driverDef );
+
+    void delete( final Path path, final String comment, final boolean forceDelete );
 
     List<ValidationMessage> validate( final DriverDef driverDef );
 }

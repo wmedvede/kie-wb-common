@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend;
+package org.kie.workbench.common.screens.datasource.management.model;
 
-public interface DataSourceDefDeployer {
+public enum DataSourceStatus {
 
-    void deployGlobalDataSources();
+    NEW, RUNNING, STALE
 
 }

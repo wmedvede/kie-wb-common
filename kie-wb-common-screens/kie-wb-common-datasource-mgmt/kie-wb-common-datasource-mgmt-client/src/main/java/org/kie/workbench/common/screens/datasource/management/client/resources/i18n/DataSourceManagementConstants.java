@@ -84,6 +84,12 @@ public interface DataSourceManagementConstants {
     String DriverDefEditor_InvalidVersionMessage = "DriverDefEditor.InvalidVersionMessage";
 
     @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_DriverHasRunningDependantsForSave = "DriverDefEditor.DriverHasRunningDependantsForSave";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_DriverHasRunningDependantsForDelete = "DriverDefEditor.DriverHasRunningDependantsForDelete";
+
+    @TranslationKey( defaultValue = "" )
     String NewDriverDefWizard_title = "NewDriverDefWizard.title";
 
     @TranslationKey( defaultValue = "" )

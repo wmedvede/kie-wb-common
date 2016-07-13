@@ -19,6 +19,7 @@ package org.kie.workbench.common.screens.datasource.management.backend.integrati
 import java.util.List;
 import java.util.Properties;
 
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 
