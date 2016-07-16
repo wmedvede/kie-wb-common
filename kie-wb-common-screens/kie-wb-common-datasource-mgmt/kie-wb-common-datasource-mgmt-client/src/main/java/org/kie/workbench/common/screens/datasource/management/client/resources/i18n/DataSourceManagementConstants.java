@@ -51,6 +51,12 @@ public interface DataSourceManagementConstants {
     String DataSourceDefEditor_ConnectionTestFailedMessage = "DataSourceDefEditor.ConnectionTestFailedMessage";
 
     @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_DataSourceHasRunningDependantsForDelete = "DataSourceDefEditor.DataSourceHasRunningDependantsForDelete";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_DataSourceHasRunningDependantsForUpdate = "DataSourceDefEditor.DataSourceHasRunningDependantsForUpdate";
+
+    @TranslationKey( defaultValue = "" )
     String NewDataSourceDefWizard_title = "NewDataSourceDefWizard.title";
 
     @TranslationKey( defaultValue = "" )

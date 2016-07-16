@@ -29,7 +29,8 @@ import org.kie.workbench.common.screens.datasource.management.backend.core.DataS
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefType;
 
 @ApplicationScoped
-public class DataSourceProviderRegistryImpl implements DataSourceProviderRegistry {
+public class DataSourceProviderRegistryImpl
+        implements DataSourceProviderRegistry {
 
     @Inject
     private Instance<DataSourceProvider> providersInstance;
@@ -41,7 +42,6 @@ public class DataSourceProviderRegistryImpl implements DataSourceProviderRegistr
 
     @PostConstruct
     private void init() {
-        //TODO review the registration of the providers.
         Iterator<DataSourceProvider> providerIt = providersInstance.iterator();
         while ( providerIt.hasNext() ) {
             registerProvider( providerIt.next() );

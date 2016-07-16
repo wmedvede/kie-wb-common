@@ -24,7 +24,7 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 
 /**
- * Represents a registration record in the DriverDefRegistry.
+ * Represents a registration register in the DriverDefRegistry.
  */
 public class DriverDefRegistryEntry {
 

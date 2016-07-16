@@ -31,7 +31,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManager;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManagerRegistry;
-import org.kie.workbench.common.screens.datasource.management.backend.integration.DataSourceServicesProvider;
+import org.kie.workbench.common.screens.datasource.management.backend.core.RegistrationMode;
 import org.kie.workbench.common.screens.datasource.management.events.DeleteDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.UpdateDataSourceEvent;
@@ -109,9 +109,6 @@ public class DataSourceDefEditorServiceImpl
     @Inject
     private Event<UpdateDataSourceEvent> updateDataSourceEvent;
 
-    @Inject
-    private DataSourceServicesProvider servicesProvider;
-
     public DataSourceDefEditorServiceImpl() {
     }
 
@@ -131,14 +128,8 @@ public class DataSourceDefEditorServiceImpl
     @Override
     public Path save( final Path path,
             final DataSourceDefEditorContent editorContent,
-            final String comment ) {
-        return save( path, editorContent, comment, serviceHelper.autoDeploy() );
-    }
-
-    private Path save( final Path path,
-            final DataSourceDefEditorContent editorContent,
             final String comment,
-            final boolean updateDeployment) {
+            final boolean forceSave ) {
 
         checkNotNull( "path", path );
         checkNotNull( "content", editorContent );
@@ -149,7 +140,8 @@ public class DataSourceDefEditorServiceImpl
                     ioService.readAllString( Paths.convert( path ) ) );
             final String content = DataSourceDefSerializer.serialize( editorContent.getDataSourceDef() );
 
-            dataSourceManagerRegistry.registerDataSourceDef( editorContent.getDataSourceDef() );
+            dataSourceManagerRegistry.registerDataSourceDef( editorContent.getDataSourceDef(),
+                    forceSave ? RegistrationMode.FORCED : RegistrationMode.SOFT );
 
             ioService.write( Paths.convert( path ), content, optionsFactory.makeCommentedOption( comment ) );
 
@@ -171,47 +163,12 @@ public class DataSourceDefEditorServiceImpl
     }
 
     @Override
-    public Path create( final Path context,
-            final String dataSourceName,
-            final String fileName ) {
-
-        checkNotNull( "context", context );
-        checkNotNull( "dataSourceName", dataSourceName );
-        checkNotNull( "fileName", fileName );
-
-        DataSourceDef dataSourceDef = new DataSourceDef();
-        dataSourceDef.setUuid( UUIDGenerator.generateUUID() );
-        dataSourceDef.setName( dataSourceName );
-        String content = DataSourceDefSerializer.serialize( dataSourceDef );
-
-        final Project project = projectService.resolveProject( context );
-        final org.uberfire.java.nio.file.Path nioPath = Paths.convert( context ).resolve( fileName );
-        final Path newPath = Paths.convert( nioPath );
-
-        if ( ioService.exists( nioPath ) ) {
-            throw new FileAlreadyExistsException( nioPath.toString() );
-        }
-
-        ioService.write( nioPath,
-                content,
-                new CommentedOption( optionsFactory.getSafeIdentityName() ) );
-
-
-        newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef,
-                project,
-                optionsFactory.getSafeSessionId(),
-                optionsFactory.getSafeIdentityName() ) );
-
-        return newPath;
-    }
-
-    @Override
     public Path create( final DataSourceDef dataSourceDef, final Project project ) {
         checkNotNull( "dataSourceDef", dataSourceDef );
         checkNotNull( "project", project );
 
         Path context = serviceHelper.getProjectDataSourcesContext( project );
-        Path newPath = create( dataSourceDef, context, serviceHelper.autoDeploy() );
+        Path newPath = create( dataSourceDef, context );
 
         newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef,
                 project,
@@ -226,7 +183,7 @@ public class DataSourceDefEditorServiceImpl
         checkNotNull( "dataSourceDef", dataSourceDef );
 
         Path context = serviceHelper.getGlobalDataSourcesContext();
-        Path newPath = create( dataSourceDef, context, serviceHelper.autoDeploy() );
+        Path newPath = create( dataSourceDef, context );
 
         newDataSourceEvent.fire( new NewDataSourceEvent( dataSourceDef,
                 optionsFactory.getSafeSessionId(),
@@ -235,9 +192,7 @@ public class DataSourceDefEditorServiceImpl
         return newPath;
     }
 
-    private Path create( final DataSourceDef dataSourceDef,
-            final Path context,
-            boolean updateDeployment ) {
+    private Path create( final DataSourceDef dataSourceDef, final Path context ) {
         checkNotNull( "dataSourceDef", dataSourceDef );
         checkNotNull( "context", context );
 
@@ -437,11 +392,7 @@ public class DataSourceDefEditorServiceImpl
     }
 
     @Override
-    public void delete( final Path path, final String comment ) {
-        delete( path, comment, serviceHelper.autoDeploy() );
-    }
-
-    private void delete( final Path path, final String comment, final boolean updateDeployment ) {
+    public void delete( final Path path, final String comment, final boolean forceDelete ) {
         checkNotNull( "path", path );
 
         final org.uberfire.java.nio.file.Path nioPath = Paths.convert( path );
@@ -451,7 +402,8 @@ public class DataSourceDefEditorServiceImpl
             Project project = projectService.resolveProject( path );
             try {
 
-                dataSourceManagerRegistry.deRegisterDataSourceDef( dataSourceDef.getUuid() );
+                dataSourceManagerRegistry.deRegisterDataSourceDef( dataSourceDef.getUuid(),
+                        forceDelete ? RegistrationMode.FORCED : RegistrationMode.SOFT);
 
                 ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
                 deleteDataSourceEvent.fire( new DeleteDataSourceEvent( dataSourceDef,

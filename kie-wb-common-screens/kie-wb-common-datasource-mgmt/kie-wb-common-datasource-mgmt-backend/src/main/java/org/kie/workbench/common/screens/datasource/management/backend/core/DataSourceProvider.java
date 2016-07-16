@@ -26,14 +26,8 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceSt
 public interface DataSourceProvider {
 
     /**
-     * Sets the driver definitions registry to get the drivers from when a data source is about to be initialized.
-     */
-    void setDriverDefRegistry( DriverDefRegistry driverDefRegistry );
-
-    /**
      * Initializes a data source given a definition. It's up to the provider to decide if the data source is created
-     * at initialization time, or it's postponed until the first lookup. In the latter case a Proxy to the DataSource
-     * may be returned.
+     * at initialization time, or it's postponed until the first lookup.
      *
      * @param dataSourceDef The data source definition that it's about to be initialized.
      *
@@ -47,8 +41,7 @@ public interface DataSourceProvider {
      *
      * @param uuid The uuid for the data source.
      *
-     * @return The data source previously initialized for the given uuid, null if the data source wasn't previously
-     * initialized.
+     * @return The data source previously initialized for the given uuid, null if the data source wasn't initialized.
      *
      * @throws Exception is thrown in case of unexpected errors.
      */
@@ -65,7 +58,7 @@ public interface DataSourceProvider {
 
     /**
      * Releases a previously initialized data source. When a data source is released it's state is set to STALE,
-     * and latter invocations on the getConnection method may fail.
+     * and latter invocations to the getConnection method may fail.
      *
      * @param dataSourceDef The data source definition to be released.
      *
@@ -74,7 +67,7 @@ public interface DataSourceProvider {
     void release( DataSourceDef dataSourceDef ) throws Exception;
 
     /**
-     * @return true if current instance manages the given data source type.
+     * @return true if current provider manages the given data source type.
      */
     boolean accepts( DataSourceDefType type );
 

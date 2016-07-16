@@ -23,23 +23,22 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.TestConnectionResult;
 import org.uberfire.backend.vfs.Path;
-import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 
 @Remote
-public interface DataSourceDefEditorService
-        extends SupportsDelete {
+public interface DataSourceDefEditorService {
 
     DataSourceDefEditorContent loadContent( final Path path );
 
-    Path save( final Path path, final DataSourceDefEditorContent editorContent, final String comment );
-
-    Path create( final Path context, final String dataSourceName, final String fileName );
+    Path save( final Path path,
+            final DataSourceDefEditorContent editorContent, final String comment, final boolean forceSave );
 
     Path create( final DataSourceDef dataSourceDef, final Project project );
 
     Path createGlobal( final DataSourceDef dataSourceDef );
 
-    //TODO experimental
+    void delete( final Path path, final String comment, final boolean forceDelete );
+
+        //TODO experimental
     String test( final String uuid );
 
     String test( final DataSourceDeploymentInfo deploymentInfo );

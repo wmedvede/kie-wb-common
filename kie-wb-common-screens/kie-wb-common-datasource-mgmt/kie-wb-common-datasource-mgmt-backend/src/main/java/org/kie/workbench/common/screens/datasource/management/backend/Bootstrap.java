@@ -16,29 +16,47 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend;
 
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceDefDeployer;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProvider;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProviderRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefDeployer;
 import org.uberfire.commons.services.cdi.Startup;
 import org.uberfire.commons.services.cdi.StartupType;
 
+/**
+ * Initializations required by the data sources management system.
+ */
 @ApplicationScoped
 @Startup( StartupType.BOOTSTRAP)
 public class Bootstrap {
 
     @Inject
-    DataSourceDefDeployer dataSourceDefDeployer;
+    private DataSourceDefDeployer dataSourceDefDeployer;
 
     @Inject
-    DriverDefDeployer driverDefDeployer;
+    private DriverDefDeployer driverDefDeployer;
+
+    @Inject
+    private Instance<DataSourceProvider> providers;
+
+    @Inject
+    private DataSourceProviderRegistry dataSourceProviderRegistry;
 
     @PostConstruct
     public void init() {
+
+        Iterator<DataSourceProvider> it = providers.iterator();
+        while( it.hasNext() ) {
+            dataSourceProviderRegistry.registerProvider( it.next() );
+        }
 
         Timer timer = new Timer( "BootstrapTimer" );
         timer.schedule( new TimerTask() {

@@ -26,7 +26,8 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceSt
 /**
  * Base class for implementing data sources
  */
-public abstract class AbstractDataSource implements DataSource {
+public abstract class AbstractDataSource
+        implements DataSource {
 
     protected DataSourceStatus status = DataSourceStatus.NEW;
 

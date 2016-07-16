@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
+/**
+ * Helper class for keeping the registration for the different data source definitions. DataSourceDef registrations
+ * should always be realised by using the DataSourceManagerRegistry.
+ */
 package org.kie.workbench.common.screens.datasource.management.backend.core;
 
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
+
 /**
- * Defines the available registration modes for registering data sources and drivers.
+ * Helper class for keeping the registration for the different data source definitions. DataSourceDef registrations
+ * should always be realised by using the DataSourceManagerRegistry.
  */
-public enum RegistrationMode {
+public interface DataSourceDefRegistry {
 
-    /**
-     * A soft registration analyzes if the component to be registered may affect other components. If this is the case
-     * an exception is thrown.
-     */
-    SOFT,
+    void registerDataSourceDef( DataSourceDef dataSourceDef );
 
-    /**
-     * A forced registration proceeds independently if the registration may affect other components. A forced registration
-     * may leave other components in a stale status.
-     */
-    FORCED
+    void deRegisterDataSourceDef( String uuid );
+
+    DataSourceDef getDataSourceDef( String uuid );
 }

@@ -22,15 +22,16 @@ import javax.inject.Inject;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
+import org.gwtbootstrap3.client.ui.constants.ButtonType;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.client.type.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceRuntimeInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceService;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.annotations.WorkbenchEditor;
 import org.uberfire.client.annotations.WorkbenchMenu;
@@ -38,15 +39,17 @@ import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartTitleDecoration;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.ext.editor.commons.client.BaseEditor;
+import org.uberfire.ext.editor.commons.client.file.DeletePopup;
 import org.uberfire.ext.editor.commons.client.file.SaveOperationService;
-import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 import org.uberfire.ext.widgets.common.client.callbacks.HasBusyIndicatorDefaultErrorCallback;
+import org.uberfire.ext.widgets.common.client.resources.i18n.CommonConstants;
 import org.uberfire.lifecycle.OnMayClose;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.ParameterizedCommand;
 import org.uberfire.mvp.PlaceRequest;
+import org.uberfire.workbench.events.NotificationEvent;
 import org.uberfire.workbench.model.menu.MenuFactory;
 import org.uberfire.workbench.model.menu.Menus;
 
@@ -71,7 +74,7 @@ public class DataSourceDefEditor
 
     private Caller<DataSourceDefEditorService> editorService;
 
-    private Caller<DataSourceManagementService> dataSourceService;
+    private Caller<DataSourceService> dataSourceService;
 
     private DataSourceDefEditorContent editorContent;
 
@@ -82,7 +85,7 @@ public class DataSourceDefEditor
             final PopupsUtil popupsUtil,
             final DataSourceDefType type,
             final Caller<DataSourceDefEditorService> editorService,
-            final Caller<DataSourceManagementService> dataSourceService ) {
+            final Caller<DataSourceService> dataSourceService ) {
         super( view );
         this.view = view;
         this.mainPanel = mainPanel;
@@ -103,9 +106,7 @@ public class DataSourceDefEditor
                 type,
                 true,
                 false,
-                SAVE,
-                DELETE,
-                VALIDATE );
+                SAVE );
     }
 
     @WorkbenchPartTitleDecoration
@@ -138,51 +139,6 @@ public class DataSourceDefEditor
         editorService.call( getLoadContentSuccessCallback(),
                 new HasBusyIndicatorDefaultErrorCallback( view ) ).loadContent(
                 versionRecordManager.getCurrentPath() );
-
-    }
-
-    @Override
-    protected Command onValidate() {
-        return new Command() {
-            @Override
-            public void execute() {
-                Window.alert( "Validate DataSource, not yet implemented.");
-            }
-        };
-    }
-
-    @Override
-    protected void save() {
-        if ( !editorHelper.isNameValid() ||
-                !editorHelper.isJndiValid() ||
-                !editorHelper.isConnectionURLValid() ||
-                !editorHelper.isUserValid() ||
-                !editorHelper.isPasswordValid() ||
-                !editorHelper.isDriverValid() ) {
-            popupsUtil.showInformationPopup( editorHelper.getMessage(
-                    DataSourceManagementConstants.DataSourceDefEditor_AllFieldsRequiresValidation ) );
-
-        } else {
-
-            new SaveOperationService().save( versionRecordManager.getCurrentPath(),
-                    new ParameterizedCommand<String>() {
-                        @Override
-                        public void execute( final String commitMessage ) {
-                            editorService.call( getSaveSuccessCallback( getContent().hashCode() ),
-                                    new HasBusyIndicatorDefaultErrorCallback( view )
-                            ).save( versionRecordManager.getCurrentPath(),
-                                    getContent(),
-                                    commitMessage );
-                        }
-                    }
-            );
-            concurrentUpdateSessionInfo = null;
-        }
-    }
-
-    @Override
-    protected Caller<? extends SupportsDelete> getDeleteServiceCaller() {
-        return editorService;
     }
 
     @Override
@@ -193,7 +149,163 @@ public class DataSourceDefEditor
     @Override
     protected void makeMenuBar() {
         super.makeMenuBar();
+        menuBuilder.addDelete( onDelete( versionRecordManager.getCurrentPath() ) );
+        menuBuilder.addValidate( onValidate() );
         addDevelopMenu();
+    }
+
+    /**
+     * Save method initially executed by the save menu entry.
+     */
+    @Override
+    protected void save() {
+        if ( !editorHelper.isNameValid() ||
+                !editorHelper.isJndiValid() ||
+                !editorHelper.isConnectionURLValid() ||
+                !editorHelper.isUserValid() ||
+                !editorHelper.isPasswordValid() ||
+                !editorHelper.isDriverValid() ) {
+            popupsUtil.showInformationPopup( editorHelper.getMessage(
+                    DataSourceManagementConstants.DataSourceDefEditor_AllFieldsRequiresValidation ) );
+        } else {
+           safeSave();
+        }
+    }
+
+    /**
+     * Executes a safe saving of the data source by checking it's status and asking user confirmation if needed.
+     */
+    protected void safeSave() {
+        executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasRunningDependantsForSave,
+                new Command() {
+                    @Override public void execute() {
+                        save( false );
+                    }
+                },
+                new Command() {
+                    @Override public void execute() {
+                        save( true );
+                    }
+                },
+                new Command() {
+                    @Override public void execute() {
+                        //do nothing;
+                    }
+                } );
+    }
+
+    /**
+     * Performs the formal save of the data source.
+     */
+    protected void save( boolean forceSave ) {
+        new SaveOperationService().save( versionRecordManager.getCurrentPath(),
+                new ParameterizedCommand<String>() {
+                    @Override
+                    public void execute( final String commitMessage ) {
+                        editorService.call( getSaveSuccessCallback( getContent().hashCode() ),
+                                new HasBusyIndicatorDefaultErrorCallback( view )
+                        ).save( versionRecordManager.getCurrentPath(),
+                                getContent(),
+                                commitMessage,
+                                forceSave );
+                    }
+                }
+        );
+        concurrentUpdateSessionInfo = null;
+    }
+
+    /**
+     * Creates the deletion command to be invoked by the delete menu entry.
+     */
+    protected Command onDelete( ObservablePath currentPath ) {
+        return new Command() {
+            @Override
+            public void execute() {
+                safeDelete( currentPath );
+            }
+        };
+    }
+
+    /**
+     * Executes a safe deletion of the data source by checking it's status and asking user confirmation if needed.
+     */
+    protected void safeDelete( ObservablePath currentPath ) {
+        executeSafeUpdateCommand( DataSourceManagementConstants.DataSourceDefEditor_DataSourceHasRunningDependantsForDelete,
+                new Command() {
+                    @Override public void execute() {
+                        delete( currentPath, false );
+                    }
+                },
+                new Command() {
+                    @Override public void execute() {
+                        delete( currentPath, true );
+                    }
+                },
+                new Command() {
+                    @Override public void execute() {
+                        //do nothing.
+                    }
+                }
+        );
+    }
+
+    /**
+     * Performs the formal deletion of the data source.
+     */
+    protected void delete( ObservablePath currentPath, boolean forceDelete ) {
+
+        final DeletePopup popup = new DeletePopup( new ParameterizedCommand<String>() {
+            @Override
+            public void execute( final String comment ) {
+                view.showBusyIndicator( org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants.INSTANCE.Deleting() );
+                editorService.call( new RemoteCallback<Void>() {
+                    @Override public void callback( Void aVoid ) {
+                        view.hideBusyIndicator();
+                        notification.fire( new NotificationEvent( org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants.INSTANCE.ItemDeletedSuccessfully(),
+                                NotificationEvent.NotificationType.SUCCESS ) );
+                    }
+                } , new HasBusyIndicatorDefaultErrorCallback( view ) ).delete( currentPath, comment, forceDelete );
+            }
+        } );
+        popup.show();
+    }
+
+    /**
+     * Checks current data source status prior to execute an update operation.
+     */
+    protected void executeSafeUpdateCommand( String onDependantsMessageKey,
+            Command defaultCommand, Command yesCommand, Command noCommand ) {
+        dataSourceService.call( new RemoteCallback<DataSourceRuntimeInfo>() {
+            @Override
+            public void callback( DataSourceRuntimeInfo dataSourceRuntimeInfo ) {
+
+                if ( dataSourceRuntimeInfo != null && dataSourceRuntimeInfo.isRunning() ) {
+                    popupsUtil.showYesNoPopup( CommonConstants.INSTANCE.Warning(),
+                            editorHelper.getMessage( onDependantsMessageKey ),
+                            yesCommand,
+                            CommonConstants.INSTANCE.YES(),
+                            ButtonType.WARNING,
+                            noCommand,
+                            CommonConstants.INSTANCE.NO(),
+                            ButtonType.DEFAULT );
+                } else {
+                    defaultCommand.execute();
+                }
+            }
+        } ).getDataSourceRuntimeInfo( getContent().getDataSourceDef().getUuid() );
+    }
+
+    /**
+     * Creates the validation command executed by the validation menu entry.
+     */
+    @Override
+    protected Command onValidate() {
+        return new Command() {
+            @Override
+            public void execute() {
+                Window.alert( "Validate DataSource, not yet implemented." );
+            }
+        };
     }
 
     private RemoteCallback<DataSourceDefEditorContent> getLoadContentSuccessCallback() {
@@ -252,7 +364,7 @@ public class DataSourceDefEditor
                 .respondsWith( new Command() {
                     @Override
                     public void execute() {
-                        onCheckDeploymentStatus();
+                        //onCheckDeploymentStatus();
                     }
                 } )
                 .endMenu()
@@ -262,7 +374,7 @@ public class DataSourceDefEditor
                 .respondsWith( new Command() {
                     @Override
                     public void execute() {
-                        onDeployDataSource();
+                        //onDeployDataSource();
                     }
                 } )
                 .endMenu()
@@ -272,7 +384,7 @@ public class DataSourceDefEditor
                 .respondsWith( new Command() {
                     @Override
                     public void execute() {
-                        onUnDeployDataSource();
+                        //onUnDeployDataSource();
                     }
                 } )
                 .endMenu()
@@ -289,6 +401,7 @@ public class DataSourceDefEditor
                 .build().getItems().get( 0 ) );
     }
 
+    /*
     private void onCheckDeploymentStatus() {
         //Experimental method for development purposes.
         dataSourceService.call(
@@ -315,6 +428,7 @@ public class DataSourceDefEditor
                 }, new DefaultErrorCallback() ).deploy( getContent().getDataSourceDef() );
     }
 
+
     private void onUnDeployDataSource() {
         //Experimental method for development purposes.
         dataSourceService.call( new RemoteCallback<DataSourceDeploymentInfo>() {
@@ -335,6 +449,7 @@ public class DataSourceDefEditor
         }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDataSourceDef().getUuid() );
 
     }
+    */
 
     private void onTestDataSource() {
         //Experimental method for development purposes.

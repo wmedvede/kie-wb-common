@@ -32,8 +32,6 @@ public interface DriverDefEditorService {
 
     Path save( final Path path, final DriverDefEditorContent editorContent, final String comment, final boolean forceSave );
 
-    Path create( final Path context, final String driverName, final String fileName );
-
     Path create( final DriverDef driverDef, final Project project );
 
     Path createGlobal( final DriverDef driverDef );

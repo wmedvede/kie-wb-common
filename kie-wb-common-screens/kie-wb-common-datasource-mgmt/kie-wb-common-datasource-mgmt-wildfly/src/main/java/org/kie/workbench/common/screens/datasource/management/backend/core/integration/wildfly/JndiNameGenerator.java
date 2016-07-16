@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.core;
+package org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly;
 
-/**
- * Defines the available registration modes for registering data sources and drivers.
- */
-public enum RegistrationMode {
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 
-    /**
-     * A soft registration analyzes if the component to be registered may affect other components. If this is the case
-     * an exception is thrown.
-     */
-    SOFT,
+public class JndiNameGenerator {
 
-    /**
-     * A forced registration proceeds independently if the registration may affect other components. A forced registration
-     * may leave other components in a stale status.
-     */
-    FORCED
+    public static String generateJNDIName( final DataSourceDef dataSourceDef ) {
+        return "java:jboss/kie/datasources/" + dataSourceDef.getUuid();
+    }
+
 }

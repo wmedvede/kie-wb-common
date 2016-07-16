@@ -22,7 +22,9 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 public class DataSourceDeploymentInfo
         extends DeploymentInfo {
 
-    String uuid;
+    private String uuid;
+
+    private String jndi;
 
     public DataSourceDeploymentInfo() {
     }
@@ -36,12 +38,17 @@ public class DataSourceDeploymentInfo
         return uuid;
     }
 
+    public String getJndi() {
+        return jndi;
+    }
+
     @Override
     public String toString() {
         return "DataSourceDeploymentInfo{" +
                 "deploymentId='" + deploymentId + '\'' +
                 ", managed=" + managed +
-                "uuid='" + uuid + '\'' +
+                ", uuid='" + uuid + '\'' +
+                ", jndi='" + jndi + '\'' +
                 "} ";
     }
 }
