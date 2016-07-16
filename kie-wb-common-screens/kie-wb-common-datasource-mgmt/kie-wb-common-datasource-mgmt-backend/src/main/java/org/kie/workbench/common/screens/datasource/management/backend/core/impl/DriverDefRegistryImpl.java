@@ -30,30 +30,27 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 public class DriverDefRegistryImpl
         implements DriverDefRegistry {
 
-    private Map<String, DriverDefRegistryEntry> driverDefEntriesMap = new HashMap<>();
-
-    public DriverDefRegistryImpl() {
-    }
+    private Map<String, DriverDefRegistryEntry> entries = new HashMap<>();
 
     @Override
     public DriverDefRegistryEntry registerDriverDef( DriverDef driverDef ) {
-        driverDefEntriesMap.put( driverDef.getUuid(), new DriverDefRegistryEntry( driverDef ) );
-        return driverDefEntriesMap.get( driverDef.getUuid() );
+        entries.put( driverDef.getUuid(), new DriverDefRegistryEntry( driverDef ) );
+        return entries.get( driverDef.getUuid() );
     }
 
     @Override
     public void deRegisterDriverDef( String uuid ) throws Exception {
-        driverDefEntriesMap.remove( uuid );
+        entries.remove( uuid );
     }
 
     @Override
     public DriverDefRegistryEntry getDriverDefEntry( String uuid ) {
-        return driverDefEntriesMap.get( uuid );
+        return entries.get( uuid );
     }
 
     @Override
     public DriverDef getDriverDef( String uuid ) {
-        DriverDefRegistryEntry entry = driverDefEntriesMap.get( uuid );
+        DriverDefRegistryEntry entry = entries.get( uuid );
         return entry != null ? entry.getDriverDef() : null;
     }
 
@@ -62,7 +59,7 @@ public class DriverDefRegistryImpl
      */
     public List<DriverDefRegistryEntry> findReferencedEntries( String dataSourceUuid ) {
         List<DriverDefRegistryEntry> result = new ArrayList<>(  );
-        for ( DriverDefRegistryEntry entry : driverDefEntriesMap.values() ) {
+        for ( DriverDefRegistryEntry entry : entries.values() ) {
             if ( entry.hasDependant( dataSourceUuid ) ) {
                 result.add( entry );
             }

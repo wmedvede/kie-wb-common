@@ -18,12 +18,11 @@ package org.kie.workbench.common.screens.datasource.management.backend.core.impl
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceDefRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManagerRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProvider;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProviderRegistry;
@@ -46,15 +45,17 @@ public class DataSourceManagerRegistryImpl
 
     private DriverDefRegistry driverDefRegistry;
 
-    private Map<String, DataSourceDef> dataSourceDefRegistry = new HashMap<>(  );
+    private DataSourceDefRegistry dataSourceDefRegistry;
 
     public DataSourceManagerRegistryImpl() {
     }
 
     @Inject
     public DataSourceManagerRegistryImpl( DriverDefRegistry driverDefRegistry,
+            DataSourceDefRegistry dataSourceDefRegistry,
             DataSourceProviderRegistry dataSourceProviderRegistry ) {
         this.driverDefRegistry = driverDefRegistry;
+        this.dataSourceDefRegistry = dataSourceDefRegistry;
         this.dataSourceProviderRegistry = dataSourceProviderRegistry;
     }
 
@@ -86,7 +87,7 @@ public class DataSourceManagerRegistryImpl
         for ( DataSourceDef dependant : dependants ) {
             provider = findProvider( dependant );
             provider.release( dependant );
-            dataSourceDefRegistry.remove( dependant.getUuid() );
+            dataSourceDefRegistry.deRegisterDataSourceDef( dependant.getUuid() );
         }
 
         driverDefRegistry.deRegisterDriverDef( driverDef.getUuid() );
@@ -95,7 +96,7 @@ public class DataSourceManagerRegistryImpl
         for ( DataSourceDef dependant : dependants ) {
             provider = findProvider( dependant );
             provider.initialize( dependant );
-            dataSourceDefRegistry.put( dependant.getUuid(), dependant );
+            dataSourceDefRegistry.registerDataSourceDef( dependant );
             newEntry.addDependant( dependant );
         }
     }
@@ -130,7 +131,7 @@ public class DataSourceManagerRegistryImpl
             provider = findProvider( dependant );
             provider.release( dependant );
         }
-        dataSourceDefRegistry.remove( uuid );
+        dataSourceDefRegistry.deRegisterDataSourceDef( uuid );
         driverDefRegistry.deRegisterDriverDef( uuid );
     }
 
@@ -156,7 +157,7 @@ public class DataSourceManagerRegistryImpl
 
     @Override
     public synchronized void registerDataSourceDef( DataSourceDef dataSourceDef, RegistrationMode registrationMode ) throws Exception {
-        DataSourceDef currentDef = dataSourceDefRegistry.get( dataSourceDef.getUuid() );
+        DataSourceDef currentDef = dataSourceDefRegistry.getDataSourceDef( dataSourceDef.getUuid() );
         if ( currentDef != null && currentDef.equals( dataSourceDef ) ) {
             return;
         }
@@ -173,7 +174,7 @@ public class DataSourceManagerRegistryImpl
 
         if ( currentDef == null ) {
             provider.initialize( dataSourceDef );
-            dataSourceDefRegistry.put( dataSourceDef.getUuid(), dataSourceDef );
+            dataSourceDefRegistry.registerDataSourceDef( dataSourceDef );
             deReferFromDrivers( dataSourceDef.getUuid() );
             driverDefEntry.addDependant( dataSourceDef );
         } else {
@@ -183,7 +184,7 @@ public class DataSourceManagerRegistryImpl
             } else {
                 provider.release( dataSourceDef );
                 provider.initialize( dataSourceDef );
-                dataSourceDefRegistry.put( dataSourceDef.getUuid(), dataSourceDef );
+                dataSourceDefRegistry.registerDataSourceDef( dataSourceDef );
                 deReferFromDrivers( dataSourceDef.getUuid() );
                 driverDefEntry.addDependant( dataSourceDef );
             }
@@ -197,7 +198,7 @@ public class DataSourceManagerRegistryImpl
 
     @Override
     public void deRegisterDataSourceDef( String uuid, RegistrationMode registrationMode ) throws Exception {
-        DataSourceDef dataSourceDef = dataSourceDefRegistry.get( uuid );
+        DataSourceDef dataSourceDef = dataSourceDefRegistry.getDataSourceDef( uuid );
         if ( dataSourceDef ==  null ) {
             throw new Exception( "No data source has been registered with uuid: " + uuid );
         }
@@ -213,13 +214,13 @@ public class DataSourceManagerRegistryImpl
         }
 
         provider.release( dataSourceDef );
-        dataSourceDefRegistry.remove( dataSourceDef.getUuid() );
+        dataSourceDefRegistry.deRegisterDataSourceDef( dataSourceDef.getUuid() );
         deReferFromDrivers( dataSourceDef.getUuid() );
     }
 
     @Override
     public synchronized DataSourceDef getDataSourceDef( String uuid ) {
-        return dataSourceDefRegistry.get( uuid );
+        return dataSourceDefRegistry.getDataSourceDef( uuid );
     }
 
     private DataSourceProvider findProvider( DataSourceDef dataSourceDef ) {

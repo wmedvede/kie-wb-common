@@ -19,14 +19,14 @@ package org.kie.workbench.common.screens.datasource.management.util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
-import org.uberfire.backend.vfs.Path;
 
+/**
+ * Helper class for the serialization/deserialization of driver into json format.
+ */
 public class DriverDefSerializer {
 
     public static DriverDef deserialize( final String driverDefString ) {
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter( Path.class, new PathDeserializer() )
-                .create();
+        Gson gson = new GsonBuilder().create();
         return gson.fromJson( driverDefString, DriverDef.class );
     }
 

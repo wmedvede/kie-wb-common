@@ -18,6 +18,9 @@ package org.kie.workbench.common.screens.datasource.management.util;
 
 import java.util.UUID;
 
+/**
+ * Utility class for generating universal identifiers.
+ */
 public class UUIDGenerator {
 
     public static String generateUUID() {

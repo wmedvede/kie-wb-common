@@ -38,7 +38,6 @@
     <module>kie-wb-common-datasource-mgmt-client</module>
     <module>kie-wb-common-datasource-mgmt-wildfly</module>
     <module>kie-wb-common-datasource-mgmt-dbcp</module>
-    <module>kie-wb-common-datasource-mgmt-application-initializer</module>
   </modules>
 
 </project>

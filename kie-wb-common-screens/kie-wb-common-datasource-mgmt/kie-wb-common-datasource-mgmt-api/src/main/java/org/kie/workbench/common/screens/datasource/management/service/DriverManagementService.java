@@ -16,23 +16,11 @@
 
 package org.kie.workbench.common.screens.datasource.management.service;
 
-import java.util.List;
-
 import org.jboss.errai.bus.server.annotations.Remote;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 
 @Remote
 public interface DriverManagementService {
 
-    boolean isEnabled();
 
-    List<DriverDef> getDeployments();
-
-    DriverDeploymentInfo getDeploymentInfo( final String uuid );
-
-    DriverDeploymentInfo deploy( final DriverDef driverDef );
-
-    void undeploy( final DriverDeploymentInfo deploymentInfo );
 
 }

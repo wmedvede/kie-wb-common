@@ -21,7 +21,8 @@ import java.util.List;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 
 /**
- * keeps the registration for the different driver definitions.
+ * Helper class for keeping the registration for the different driver definitions. DriverDef registrations
+ * should always be realised by using the DataSourceManagerRegistry.
  */
 public interface DriverDefRegistry {
 

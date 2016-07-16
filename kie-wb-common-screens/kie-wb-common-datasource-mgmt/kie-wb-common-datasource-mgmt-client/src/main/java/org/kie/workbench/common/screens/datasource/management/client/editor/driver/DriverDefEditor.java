@@ -29,9 +29,8 @@ import org.kie.workbench.common.screens.datasource.management.client.resources.i
 import org.kie.workbench.common.screens.datasource.management.client.type.DriverDefType;
 import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
-import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverRuntimeInfo;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.uberfire.backend.vfs.ObservablePath;
@@ -78,7 +77,7 @@ public class DriverDefEditor
 
     private Caller<DriverManagementService> driverService;
 
-    private Caller<DataSourceManagementService> dataSourceManagement;
+    private Caller<DataSourceService> dataSourceManagement;
 
     private DriverDefEditorContent editorContent;
 
@@ -90,7 +89,7 @@ public class DriverDefEditor
             final DriverDefType type,
             final Caller<DriverDefEditorService> editorService,
             final Caller<DriverManagementService> driverService,
-            final Caller<DataSourceManagementService> dataSourceManagement ) {
+            final Caller<DataSourceService> dataSourceManagement ) {
         super( view );
         this.view = view;
         this.mainPanel = mainPanel;
@@ -148,17 +147,30 @@ public class DriverDefEditor
     }
 
     @Override
-    protected Command onValidate() {
-        return new Command() {
-            @Override
-            public void execute() {
-                validate();
-            }
-        };
+    public boolean mayClose( Integer currentHash ) {
+        return super.mayClose( currentHash );
     }
 
     @Override
+    protected void makeMenuBar() {
+        super.makeMenuBar();
+        menuBuilder.addDelete( onDelete( versionRecordManager.getCurrentPath() ) );
+        menuBuilder.addValidate( onValidate() );
+    }
+
+    /**
+     * Save method initially executed by the save menu entry.
+     */
+    @Override
     protected void save() {
+        safeSave();
+    }
+
+    /**
+     * Executes a safe saving of the driver by checking if there are dependant data sources that may be affected by
+     * the change.
+     */
+    protected void safeSave() {
         executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasRunningDependantsForSave,
                 new Command() {
                     @Override public void execute() {
@@ -177,28 +189,9 @@ public class DriverDefEditor
                 } );
     }
 
-    protected void executeSafeUpdateCommand( String onDependantsMessageKey,
-            Command defaultCommand, Command yesCommand, Command noCommand ) {
-        dataSourceManagement.call( new RemoteCallback<DriverRuntimeInfo>() {
-            @Override
-            public void callback( DriverRuntimeInfo driverRuntimeInfo ) {
-
-                if ( driverRuntimeInfo.hasRunningDependants() ) {
-                    popupsUtil.showYesNoPopup( CommonConstants.INSTANCE.Warning(),
-                            editorHelper.getMessage( onDependantsMessageKey ),
-                            yesCommand,
-                            CommonConstants.INSTANCE.YES(),
-                            ButtonType.WARNING,
-                            noCommand,
-                            CommonConstants.INSTANCE.NO(),
-                            ButtonType.DEFAULT );
-                } else {
-                    defaultCommand.execute();
-                }
-            }
-        } ).getDriverRuntimeInfo( getContent().getDriverDef().getUuid() );
-    }
-
+    /**
+     * Performs the formal save of the driver.
+     */
     protected void save( boolean forceSave ) {
         new SaveOperationService().save( versionRecordManager.getCurrentPath(),
                 new ParameterizedCommand<String>() {
@@ -215,44 +208,71 @@ public class DriverDefEditor
         concurrentUpdateSessionInfo = null;
     }
 
-    @Override
-    public boolean mayClose( Integer currentHash ) {
-        return super.mayClose( currentHash );
+    /**
+     * Checks if current driver has dependant data sources prior to execute an update operation.
+     */
+    protected void executeSafeUpdateCommand( String onDependantsMessageKey,
+            Command defaultCommand, Command yesCommand, Command noCommand ) {
+        dataSourceManagement.call( new RemoteCallback<DriverRuntimeInfo>() {
+            @Override
+            public void callback( DriverRuntimeInfo driverRuntimeInfo ) {
+
+                if ( driverRuntimeInfo != null && driverRuntimeInfo.hasRunningDependants() ) {
+                    popupsUtil.showYesNoPopup( CommonConstants.INSTANCE.Warning(),
+                            editorHelper.getMessage( onDependantsMessageKey ),
+                            yesCommand,
+                            CommonConstants.INSTANCE.YES(),
+                            ButtonType.WARNING,
+                            noCommand,
+                            CommonConstants.INSTANCE.NO(),
+                            ButtonType.DEFAULT );
+                } else {
+                    defaultCommand.execute();
+                }
+            }
+        } ).getDriverRuntimeInfo( getContent().getDriverDef().getUuid() );
     }
 
-    @Override
-    protected void makeMenuBar() {
-        super.makeMenuBar();
-        menuBuilder.addDelete( onDelete( versionRecordManager.getCurrentPath() ) );
-        menuBuilder.addValidate( onValidate() );
-    }
-
+    /**
+     * Creates the deletion command to be invoked by the delete menu entry.
+     */
     protected Command onDelete( ObservablePath currentPath ) {
         return new Command() {
             @Override
             public void execute() {
-                executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasRunningDependantsForDelete,
-                        new Command() {
-                            @Override public void execute() {
-                                delete( currentPath, false );
-                            }
-                        },
-                        new Command() {
-                            @Override public void execute() {
-                                delete( currentPath, true );
-                            }
-                        },
-                        new Command() {
-                            @Override public void execute() {
-                                //do nothing.
-                            }
-                        }
-                );
+                safeDelete( currentPath );
             }
         };
     }
 
-    private void delete( ObservablePath currentPath, boolean forceDelete ) {
+    /**
+     * Executes a safe deletion of the driver by checking if there are dependant data sources that may be affected by
+     * the change.
+     */
+    protected void safeDelete( ObservablePath currentPath ) {
+        executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasRunningDependantsForDelete,
+                new Command() {
+                    @Override public void execute() {
+                        delete( currentPath, false );
+                    }
+                },
+                new Command() {
+                    @Override public void execute() {
+                        delete( currentPath, true );
+                    }
+                },
+                new Command() {
+                    @Override public void execute() {
+                        //do nothing.
+                    }
+                }
+        );
+    }
+
+    /**
+     * Performs the formal delete of the driver.
+     */
+    protected void delete( ObservablePath currentPath, boolean forceDelete ) {
 
         final DeletePopup popup = new DeletePopup( new ParameterizedCommand<String>() {
             @Override
@@ -270,6 +290,24 @@ public class DriverDefEditor
         popup.show();
     }
 
+    /**
+     * Validate command executed by the validate menu entry.
+     */
+    @Override
+    protected Command onValidate() {
+        return new Command() {
+            @Override
+            public void execute() {
+                validate();
+            }
+        };
+    }
+
+    private void validate() {
+        editorService.call(
+                getValidationSuccessCallback(), new DefaultErrorCallback() ).validate( getContent().getDriverDef() );
+    }
+
     private RemoteCallback<DriverDefEditorContent> getLoadContentSuccessCallback() {
         return new RemoteCallback<DriverDefEditorContent>() {
             @Override
@@ -279,6 +317,7 @@ public class DriverDefEditor
             }
         };
     }
+
 
     protected void onContentLoaded( final DriverDefEditorContent editorContent ) {
         //Path is set to null when the Editor is closed (which can happen before async calls complete).
@@ -297,11 +336,6 @@ public class DriverDefEditor
         this.editorContent = editorContent;
         this.editorHelper.setDriverDef( editorContent.getDriverDef() );
         editorHelper.setValid( true );
-    }
-
-    private void validate() {
-        editorService.call(
-                getValidationSuccessCallback(), new DefaultErrorCallback() ).validate( getContent().getDriverDef() );
     }
 
     private RemoteCallback<List<ValidationMessage>> getValidationSuccessCallback() {
@@ -326,7 +360,7 @@ public class DriverDefEditor
                 .respondsWith( new Command() {
                     @Override
                     public void execute() {
-                        onCheckDeploymentStatus();
+                        //onCheckDeploymentStatus();
                     }
                 } )
                 .endMenu()
@@ -336,7 +370,7 @@ public class DriverDefEditor
                 .respondsWith( new Command() {
                     @Override
                     public void execute() {
-                        onDeployDriver();
+                        //onDeployDriver();
                     }
                 } )
                 .endMenu()
@@ -346,13 +380,14 @@ public class DriverDefEditor
                 .respondsWith( new Command() {
                     @Override
                     public void execute() {
-                        onUnDeployDriver();
+                        //onUnDeployDriver();
                     }
                 } )
                 .endMenu()
                 .build().getItems().get( 0 ) );
     }
 
+    /*
     private void onCheckDeploymentStatus() {
         //Experimental method for development purposes.
         driverService.call(
@@ -399,4 +434,5 @@ public class DriverDefEditor
                     }
                 }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDriverDef().getUuid() );
     }
+    */
 }

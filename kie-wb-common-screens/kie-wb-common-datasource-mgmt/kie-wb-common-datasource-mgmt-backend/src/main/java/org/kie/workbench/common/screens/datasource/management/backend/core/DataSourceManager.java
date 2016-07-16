@@ -20,7 +20,7 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceRu
 import org.kie.workbench.common.screens.datasource.management.model.DriverRuntimeInfo;
 
 /**
- * Base access point for client classes of the data sources management system.
+ * Main entry point for server side client components of the data sources management system.
  */
 public interface DataSourceManager {
 
@@ -35,8 +35,6 @@ public interface DataSourceManager {
      * is installed for the given data source type, or the data source couldn't be initialized.
      */
     DataSource lookup( String uuid ) throws Exception;
-
-    //DataSourceMetadata getMetadata( String uuid ); ?
 
     /**
      * Gets the available runtime information for a given data source.

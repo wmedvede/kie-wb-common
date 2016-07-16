@@ -36,7 +36,7 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagementService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceService;
 import org.mockito.Mock;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.commons.data.Pair;
@@ -76,9 +76,9 @@ public class DataSourceDefEditorTest
     private Caller<DataSourceDefEditorService> editorServiceCaller;
 
     @Mock
-    private DataSourceManagementService dataSourceService;
+    private DataSourceService dataSourceService;
 
-    private Caller<DataSourceManagementService> dataSourceServiceCaller;
+    private Caller<DataSourceService> dataSourceServiceCaller;
 
     @Mock
     private DataSourceDefQueryService queryService;

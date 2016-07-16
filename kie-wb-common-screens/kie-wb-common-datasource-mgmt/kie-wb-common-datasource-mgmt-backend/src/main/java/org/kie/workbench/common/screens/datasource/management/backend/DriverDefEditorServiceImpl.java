@@ -147,45 +147,13 @@ public class DriverDefEditorServiceImpl
     }
 
     @Override
-    public Path create( final Path context, final String driverName, final String fileName ) {
-
-        checkNotNull( "context", context );
-        checkNotNull( "driverName", driverName );
-        checkNotNull( "fileName", fileName );
-
-        final DriverDef driverDef = new DriverDef();
-        driverDef.setUuid( UUIDGenerator.generateUUID() );
-        driverDef.setName( driverName );
-        final String content = DriverDefSerializer.serialize( driverDef );
-
-        final Project project = projectService.resolveProject( context );
-        final org.uberfire.java.nio.file.Path nioPath = Paths.convert( context ).resolve( fileName );
-        final Path newPath = Paths.convert( nioPath );
-
-        if ( ioService.exists( nioPath ) ) {
-            throw new FileAlreadyExistsException( nioPath.toString() );
-        }
-
-        ioService.write( nioPath,
-                content,
-                new CommentedOption( optionsFactory.getSafeIdentityName() ) );
-
-        newDriverEvent.fire( new NewDriverEvent( driverDef,
-                project,
-                optionsFactory.getSafeSessionId(),
-                optionsFactory.getSafeIdentityName() ) );
-
-        return newPath;
-    }
-
-    @Override
     public Path create( final DriverDef driverDef, final Project project ) {
 
         checkNotNull( "driverDef", driverDef );
         checkNotNull( "project", project );
 
         Path context = serviceHelper.getProjectDataSourcesContext( project );
-        Path newPath = create( driverDef, context, serviceHelper.autoDeploy() );
+        Path newPath = create( driverDef, context );
 
         newDriverEvent.fire( new NewDriverEvent( driverDef,
                 project,
@@ -201,7 +169,7 @@ public class DriverDefEditorServiceImpl
         checkNotNull( "driverDef", driverDef );
 
         Path context = serviceHelper.getGlobalDataSourcesContext();
-        Path newPath = create( driverDef, context, serviceHelper.autoDeploy() );
+        Path newPath = create( driverDef, context );
 
         newDriverEvent.fire( new NewDriverEvent( driverDef,
                 optionsFactory.getSafeSessionId(),
@@ -210,9 +178,7 @@ public class DriverDefEditorServiceImpl
         return newPath;
     }
 
-    private Path create( final DriverDef driverDef,
-            final Path context,
-            final boolean updateDeployment ) {
+    private Path create( final DriverDef driverDef, final Path context ) {
 
         try {
             validateDriver( driverDef );

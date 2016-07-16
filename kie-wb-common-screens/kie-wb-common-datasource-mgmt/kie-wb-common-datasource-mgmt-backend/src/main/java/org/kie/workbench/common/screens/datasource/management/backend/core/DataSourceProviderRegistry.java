@@ -20,6 +20,9 @@ import java.util.List;
 
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefType;
 
+/**
+ * Helper class for keeping the registration of the available data source providers in the platform.
+ */
 public interface DataSourceProviderRegistry {
 
     /**
@@ -34,6 +37,9 @@ public interface DataSourceProviderRegistry {
      */
     DataSourceProvider getProvider( DataSourceDefType type );
 
+    /**
+     * Gets the list of the registered data source providers.
+     */
     List<DataSourceProvider> getProviders();
 
 }
