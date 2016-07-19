@@ -36,7 +36,7 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagerClientService;
 import org.mockito.Mock;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.commons.data.Pair;
@@ -76,9 +76,9 @@ public class DataSourceDefEditorTest
     private Caller<DataSourceDefEditorService> editorServiceCaller;
 
     @Mock
-    private DataSourceService dataSourceService;
+    private DataSourceManagerClientService dataSourceManagerClient;
 
-    private Caller<DataSourceService> dataSourceServiceCaller;
+    private Caller<DataSourceManagerClientService> dataSourceManagerClientCaller;
 
     @Mock
     private DataSourceDefQueryService queryService;
@@ -136,7 +136,7 @@ public class DataSourceDefEditorTest
                 editorServiceCaller, queryServiceCaller, clientValidationService, popupsUtil );
 
         editor = new DataSourceDefEditor( view,
-                mainPanel, editorHelper, popupsUtil, type, editorServiceCaller, dataSourceServiceCaller ) {
+                mainPanel, editorHelper, popupsUtil, type, editorServiceCaller, dataSourceManagerClientCaller ) {
             {
                 this.versionRecordManager = DataSourceDefEditorTest.this.versionRecordManager;
                 this.menuBuilder = mock( BasicFileMenuBuilder.class );

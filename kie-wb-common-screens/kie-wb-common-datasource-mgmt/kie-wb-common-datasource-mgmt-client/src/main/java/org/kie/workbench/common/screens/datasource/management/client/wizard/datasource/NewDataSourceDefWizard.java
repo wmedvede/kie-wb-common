@@ -88,6 +88,7 @@ public class NewDataSourceDefWizard
         dataSourceDefPage.clear();
         dataSourceDefPage.setComplete( false );
         dataSourceDef = new DataSourceDef();
+        dataSourceDef.setType( DataSourceDefType.CONTAINER );
         dataSourceDefPage.setDataSourceDef( dataSourceDef );
         dataSourceDefPage.setProject( project );
         dataSourceDefPage.loadDrivers( getLoadDriversSuccessCommand(), getLoadDriversFailureCommand() );

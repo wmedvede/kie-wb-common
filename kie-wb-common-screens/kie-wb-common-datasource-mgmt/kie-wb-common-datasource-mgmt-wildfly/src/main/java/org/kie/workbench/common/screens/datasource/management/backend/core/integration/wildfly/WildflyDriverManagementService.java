@@ -30,8 +30,11 @@ import org.kie.workbench.common.screens.datasource.management.util.MavenArtifact
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
+/**
+ * Helper service for deploying/un-deploying drivers on a Wildfly server.
+ */
 @ApplicationScoped
-public class WildflyDriverService
+public class WildflyDriverManagementService
         extends WildflyBaseService {
 
     @Inject
@@ -40,6 +43,20 @@ public class WildflyDriverService
     @Inject
     private WildflyDeploymentService deploymentService;
 
+    /**
+     * Creates a driver by deploying the content for the jar file.
+     *
+     * @param deploymentId Deployment id to be assigned for the deployed driver. The deploymentId must be a unique
+     * identifier, and may be used later for the un-deployment operation.
+     *
+     * @param groupId Group id of the .jar maven artifact
+     *
+     * @param artifactId Artifact id of the .jar maven artifact.
+     *
+     * @param versionId Version number of the .jar maven artifact.
+     *
+     * @throws Exception If the deployment operation fails an exception is thrown.
+     */
     public void deploy( final String deploymentId,
             final String groupId, final String artifactId, final String versionId ) throws Exception {
 
@@ -54,10 +71,20 @@ public class WildflyDriverService
         deploymentService.deployContent( deploymentId, deploymentId, libContent, true );
     }
 
+    /**
+     * Un deploys a previously deployed driver.
+     *
+     * @param deploymentId Deployment id for the driver to be un-deployed.
+     *
+     * @throws Exception If the un-deployment operation fails an exception is thrown.
+     */
     public void undeploy( final String deploymentId ) throws Exception {
         deploymentService.removeDeployment( deploymentId );
     }
 
+    /**
+     * Gets the definitions of the currently available drivers.
+     */
     public List<WildflyDriverDef> getDeployedDrivers() throws Exception {
 
         ModelNode operation = new ModelNode();
@@ -114,7 +141,6 @@ public class WildflyDriverService
                         }
                         drivers.add( driver );
                     }
-
                 }
             } else {
                 checkResponse( response );

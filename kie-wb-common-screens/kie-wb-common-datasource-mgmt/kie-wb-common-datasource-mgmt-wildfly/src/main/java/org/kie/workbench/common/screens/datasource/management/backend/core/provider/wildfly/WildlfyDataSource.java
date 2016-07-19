@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly;
+package org.kie.workbench.common.screens.datasource.management.backend.core.provider.wildfly;
 
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -27,8 +27,6 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceSt
 public class WildlfyDataSource
         extends AbstractDataSource
         implements javax.sql.DataSource {
-
-    private String jndi;
 
     public WildlfyDataSource( javax.sql.DataSource dataSource ) {
         this.dataSource = dataSource;

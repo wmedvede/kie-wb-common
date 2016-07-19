@@ -26,11 +26,8 @@ import javax.naming.InitialContext;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProvider;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefRegistry;
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.DeploymentIdGenerator;
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.JndiNameGenerator;
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDataSourceService;
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDriverService;
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildlfyDataSource;
+import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDataSourceManagementService;
+import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDriverManagementService;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
@@ -41,19 +38,24 @@ import org.kie.workbench.common.screens.datasource.management.util.MavenArtifact
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class implements the DataSourceProvider contract the CONTAINER type data sources that will be created in a
+ * Wildfly server.
+ */
 @ApplicationScoped
 public class WildflyDataSourceProvider
         implements DataSourceProvider {
 
     private static final Logger logger = LoggerFactory.getLogger( WildflyDataSourceProvider.class );
+
     @Inject
     private DriverDefRegistry driverDefRegistry;
 
     @Inject
-    private WildflyDataSourceService dataSourceService;
+    private WildflyDataSourceManagementService dataSourceService;
 
     @Inject
-    private WildflyDriverService driverService;
+    private WildflyDriverManagementService driverService;
 
     @Inject
     private DataSourceProviderHelper helper;
@@ -67,7 +69,8 @@ public class WildflyDataSourceProvider
     public void initialize( DataSourceDef dataSourceDef ) throws Exception {
         DriverDef driverDef = driverDefRegistry.getDriverDef( dataSourceDef.getDriverUuid() );
         if ( driverDef == null ) {
-            throw new Exception( "No driver definition has been registered for driver uuid: " + dataSourceDef.getDriverUuid() );
+            throw new Exception( "No driver definition has been registered for driver uuid: " +
+                    dataSourceDef.getDriverUuid() + " data source: " + dataSourceDef.getName() + " can not be initialized." );
         }
 
         DriverDeploymentInfo driverDeploymentInfo = helper.getDriverDeploymentInfo( dataSourceDef.getDriverUuid() );
@@ -77,14 +80,13 @@ public class WildflyDataSourceProvider
 
         unDeployExistingDataSources( dataSourceDef.getUuid() );
 
-        //This this random identifiers calculation should be removed when WF supports deletion
+        //This random identifiers calculation should be removed when WF supports deletion
         //of data sources without letting them published on server until next restart.
         String random = "-" + System.currentTimeMillis();
         String deploymentId = DeploymentIdGenerator.generateDeploymentId( dataSourceDef ) + random;
         String deploymentJndi = JndiNameGenerator.generateJNDIName( dataSourceDef ) + random;
-        String driverDeploymentId = DeploymentIdGenerator.generateDeploymentId( driverDef );
 
-        DataSourceDeploymentInfo dataSourceDeploymentInfo = helper.deploy( dataSourceDef, deploymentJndi, deploymentId );
+        helper.deployDataSource( dataSourceDef, deploymentJndi, deploymentId );
 
         javax.sql.DataSource dataSource = (javax.sql.DataSource) lookupObject( deploymentJndi );
         WildlfyDataSource wfDataSource = new WildlfyDataSource( dataSource );
@@ -99,7 +101,7 @@ public class WildflyDataSourceProvider
                 //first access to the data source
                 dataSource.setStatus( DataSourceStatus.RUNNING );
             }
-            return  dataSource;
+            return dataSource;
         } else {
             throw new Exception( "Data source uuid: " + uuid + " was not initialized." );
         }

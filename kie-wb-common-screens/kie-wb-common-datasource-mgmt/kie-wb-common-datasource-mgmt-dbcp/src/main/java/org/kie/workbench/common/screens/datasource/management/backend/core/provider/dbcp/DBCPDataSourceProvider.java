@@ -43,7 +43,7 @@ import org.kie.workbench.common.screens.datasource.management.util.MavenArtifact
 import org.kie.workbench.common.screens.datasource.management.util.URLConnectionFactory;
 
 /**
- * This class implements a DataSourceProvider for the CUSTOM type data sources.
+ * This class implements a DataSourceProvider contract for the CUSTOM type data sources.
  */
 @ApplicationScoped
 public class DBCPDataSourceProvider implements DataSourceProvider {

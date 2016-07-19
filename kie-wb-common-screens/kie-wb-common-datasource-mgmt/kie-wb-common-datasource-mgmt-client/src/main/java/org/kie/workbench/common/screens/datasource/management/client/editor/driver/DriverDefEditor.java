@@ -30,9 +30,8 @@ import org.kie.workbench.common.screens.datasource.management.client.type.Driver
 import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DriverRuntimeInfo;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagerClientService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.annotations.WorkbenchEditor;
 import org.uberfire.client.annotations.WorkbenchMenu;
@@ -75,9 +74,7 @@ public class DriverDefEditor
 
     private Caller<DriverDefEditorService> editorService;
 
-    private Caller<DriverManagementService> driverService;
-
-    private Caller<DataSourceService> dataSourceManagement;
+    private Caller<DataSourceManagerClientService> dataSourceManagerClient;
 
     private DriverDefEditorContent editorContent;
 
@@ -88,8 +85,7 @@ public class DriverDefEditor
             final PopupsUtil popupsUtil,
             final DriverDefType type,
             final Caller<DriverDefEditorService> editorService,
-            final Caller<DriverManagementService> driverService,
-            final Caller<DataSourceService> dataSourceManagement ) {
+            final Caller<DataSourceManagerClientService> dataSourceManagerClient ) {
         super( view );
         this.view = view;
         this.mainPanel = mainPanel;
@@ -97,8 +93,7 @@ public class DriverDefEditor
         this.popupsUtil = popupsUtil;
         this.type = type;
         this.editorService = editorService;
-        this.driverService = driverService;
-        this.dataSourceManagement = dataSourceManagement;
+        this.dataSourceManagerClient = dataSourceManagerClient;
         view.init( this );
         view.setMainPanel( mainPanel );
         editorHelper.init( mainPanel );
@@ -156,6 +151,7 @@ public class DriverDefEditor
         super.makeMenuBar();
         menuBuilder.addDelete( onDelete( versionRecordManager.getCurrentPath() ) );
         menuBuilder.addValidate( onValidate() );
+        addTestStatusMenu();
     }
 
     /**
@@ -213,7 +209,7 @@ public class DriverDefEditor
      */
     protected void executeSafeUpdateCommand( String onDependantsMessageKey,
             Command defaultCommand, Command yesCommand, Command noCommand ) {
-        dataSourceManagement.call( new RemoteCallback<DriverRuntimeInfo>() {
+        dataSourceManagerClient.call( new RemoteCallback<DriverRuntimeInfo>() {
             @Override
             public void callback( DriverRuntimeInfo driverRuntimeInfo ) {
 
@@ -303,7 +299,7 @@ public class DriverDefEditor
         };
     }
 
-    private void validate() {
+    protected void validate() {
         editorService.call(
                 getValidationSuccessCallback(), new DefaultErrorCallback() ).validate( getContent().getDriverDef() );
     }
@@ -317,7 +313,6 @@ public class DriverDefEditor
             }
         };
     }
-
 
     protected void onContentLoaded( final DriverDefEditorContent editorContent ) {
         //Path is set to null when the Editor is closed (which can happen before async calls complete).
@@ -354,85 +349,47 @@ public class DriverDefEditor
         };
     }
 
-    private void addDevelopMenu() {
-        //for development purposes menu entries, will be removed.
-        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Check-Status" )
+    //Check if we want to keep this check status option in the future.
+    private void addTestStatusMenu() {
+        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu(
+                editorHelper.getMessage( DataSourceManagementConstants.DriverDefEditor_CheckStatusMenu ) )
                 .respondsWith( new Command() {
                     @Override
                     public void execute() {
-                        //onCheckDeploymentStatus();
-                    }
-                } )
-                .endMenu()
-                .build().getItems().get( 0 ) );
-
-        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-Deploy" )
-                .respondsWith( new Command() {
-                    @Override
-                    public void execute() {
-                        //onDeployDriver();
-                    }
-                } )
-                .endMenu()
-                .build().getItems().get( 0 ) );
-
-        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-UnDeploy" )
-                .respondsWith( new Command() {
-                    @Override
-                    public void execute() {
-                        //onUnDeployDriver();
+                        onCheckStatus();
                     }
                 } )
                 .endMenu()
                 .build().getItems().get( 0 ) );
     }
 
-    /*
-    private void onCheckDeploymentStatus() {
-        //Experimental method for development purposes.
-        driverService.call(
-                new RemoteCallback<DriverDeploymentInfo>() {
-                    @Override
-                    public void callback( DriverDeploymentInfo deploymentInfo ) {
-                        if ( deploymentInfo != null ) {
-                            popupsUtil.showInformationPopup( "driver is deployed as: " + deploymentInfo.getDeploymentId() );
-                        } else {
-                            popupsUtil.showInformationPopup( "driver is not deployed" );
-                        }
+    private void onCheckStatus() {
+        dataSourceManagerClient.call( new RemoteCallback<DriverRuntimeInfo>() {
+            @Override
+            public void callback( DriverRuntimeInfo driverRuntimeInfo ) {
+                StringBuilder builder = new StringBuilder();
+                if ( driverRuntimeInfo == null ) {
+                    builder.append( editorHelper.getMessage(
+                            DataSourceManagementConstants.DriverDefEditor_DriverNotRegisteredMessage,
+                            getContent().getDriverDef().getUuid() ) );
+                } else if ( !driverRuntimeInfo.hasDependants() ) {
+                    builder.append( editorHelper.getMessage(
+                            DataSourceManagementConstants.DriverDefEditor_DriverHasNoDependantsMessage ) );
+                } else {
+                    builder.append( editorHelper.getMessage(
+                            DataSourceManagementConstants.DriverDefEditor_DriverHasDependantsMessage,
+                            driverRuntimeInfo.dependantsCount() ) );
+                    if ( driverRuntimeInfo.hasRunningDependants() ) {
+                        builder.append( editorHelper.getMessage(
+                                DataSourceManagementConstants.DriverDefEditor_DriverHasRunningDependantsMessage,
+                                driverRuntimeInfo.runningDependantsCount() ) );
+                    } else {
+                        builder.append( editorHelper.getMessage(
+                                DataSourceManagementConstants.DriverDefEditor_DriverHasNoRunningDependantsMessage ) );
                     }
-                }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDriverDef().getUuid() );
+                }
+                popupsUtil.showInformationPopup( builder.toString() );
+            }
+        } ).getDriverRuntimeInfo( getContent().getDriverDef().getUuid() );
     }
-
-    private void onDeployDriver() {
-        //Experimental method for development purposes.
-        driverService.call(
-                new RemoteCallback<DriverDeploymentInfo>() {
-                    @Override
-                    public void callback( DriverDeploymentInfo deploymentInfo ) {
-                        popupsUtil.showInformationPopup( "driver successfully deployed: " + deploymentInfo.getDeploymentId() );
-                    }
-                }, new DefaultErrorCallback() ).deploy( getContent().getDriverDef() );
-    }
-
-    private void onUnDeployDriver() {
-        //Experimental method for development purposes.
-        driverService.call(
-                new RemoteCallback<DriverDeploymentInfo>() {
-                    @Override
-                    public void callback( DriverDeploymentInfo deploymentInfo ) {
-
-                        if ( deploymentInfo == null ) {
-                            popupsUtil.showInformationPopup( "driver is not deployed in current server" );
-                        } else {
-                            driverService.call( new RemoteCallback<Void>() {
-                                @Override
-                                public void callback( Void aVoid ) {
-                                    popupsUtil.showInformationPopup( "driver was successfully un-deployed" );
-                                }
-                            }, new DefaultErrorCallback() ).undeploy( deploymentInfo );
-                        }
-                    }
-                }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDriverDef().getUuid() );
-    }
-    */
 }

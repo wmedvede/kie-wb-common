@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly;
+package org.kie.workbench.common.screens.datasource.management.backend.core.provider.wildfly;
 
 import java.util.UUID;
 
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 
+/**
+ * Helper class for properly generate deployment identifiers for the data sources and drivers to be deployed on the
+ * Wildfly server.
+ */
 public class DeploymentIdGenerator {
 
     public static String extractUuid( final String deploymentId ) throws Exception {
@@ -52,6 +56,4 @@ public class DeploymentIdGenerator {
     public static String generateDeploymentId( final String uuid ) {
         return "kie-"+ uuid;
     }
-
-
 }

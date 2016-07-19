@@ -16,6 +16,9 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly;
 
+/**
+ * Definition the data source attribute names used internally by the Wildfly server.
+ */
 public class WildflyDataSourceAttributes {
 
     /**

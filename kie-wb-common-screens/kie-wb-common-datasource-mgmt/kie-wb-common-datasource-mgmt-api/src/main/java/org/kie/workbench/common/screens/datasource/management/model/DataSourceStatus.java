@@ -18,6 +18,23 @@ package org.kie.workbench.common.screens.datasource.management.model;
 
 public enum DataSourceStatus {
 
-    NEW, RUNNING, STALE
+    /**
+     * A data source that was just created but never looked up but the DataSourceManger.lookup operation.
+     */
+    NEW,
+
+    /**
+     * A data source that was looked up by at least one client.
+     */
+    RUNNING,
+
+    /**
+     * A data source in stale mode may continue serving connections but it's not safe to do it. Components that uses
+     * a data source may register them self as listeners to be notified about data source status changes, and in this
+     * way may know when a data source enters in STALE mode. If this is the case, it recommended to do a new lookup
+     * of the data source to get a safe reference.
+     *
+     */
+    STALE
 
 }

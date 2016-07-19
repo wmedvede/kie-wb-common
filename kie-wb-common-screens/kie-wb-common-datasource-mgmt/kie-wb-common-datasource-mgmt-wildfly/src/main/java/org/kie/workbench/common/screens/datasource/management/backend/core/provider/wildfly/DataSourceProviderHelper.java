@@ -21,25 +21,36 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.DeploymentIdGenerator;
 import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDataSourceService;
+import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDriverDef;
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDriverService;
+import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDriverManagementService;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 
+/**
+ * Helper class used by the WildflyDataSourceProvider to interact with the Wildfly server.
+ */
 @ApplicationScoped
 public class DataSourceProviderHelper {
 
     @Inject
-    private WildflyDataSourceService dataSourceService;
+    private WildflyDataSourceManagementService dataSourceMgmtService;
 
     @Inject
-    private WildflyDriverService driverService;
+    private WildflyDriverManagementService driverMgmtService;
 
+    /**
+     * Gets the deployment information about a driver definition.
+     *
+     * @param uuid the driver definition identifier.
+     *
+     * @return the deployment information for the driver definition of null if the driver wasn't deployed.
+     *
+     * @throws Exception exceptions may be thrown if e.g. communication with the Wildfly server fails, etc.
+     */
     public DriverDeploymentInfo getDriverDeploymentInfo( final String uuid ) throws Exception {
         for ( DriverDeploymentInfo deploymentInfo : getDriversDeploymentInfo() ) {
             if ( uuid.equals( deploymentInfo.getUuid() ) ) {
@@ -49,6 +60,13 @@ public class DataSourceProviderHelper {
         return null;
     }
 
+    /**
+     * Gets the deployment information for all the drivers currently deployed on the Wildfly server.
+     *
+     * @return a list with the deployment information for all the drivers.
+     *
+     * @throws Exception exceptions may be thrown if e.g. communication with the Wildfly server fails, etc.
+     */
     public List<DriverDeploymentInfo> getDriversDeploymentInfo() throws Exception {
 
         List<DriverDeploymentInfo> deploymentsInfo = new ArrayList<>(  );
@@ -56,7 +74,7 @@ public class DataSourceProviderHelper {
         String uuid;
         boolean managed;
 
-        for ( WildflyDriverDef internalDef : driverService.getDeployedDrivers() ) {
+        for ( WildflyDriverDef internalDef : driverMgmtService.getDeployedDrivers() ) {
             try {
                 uuid = DeploymentIdGenerator.extractUuid( internalDef.getDriverName() );
                 managed = true;
@@ -74,27 +92,49 @@ public class DataSourceProviderHelper {
         return deploymentsInfo;
     }
 
+    /**
+     * Deploys a driver definition on the Wildfly server.
+     *
+     * @param driverDef A driver definition to be deployed.
+     *
+     * @return The deployment information for the just deployed driver.
+     *
+     * @throws Exception exceptions may be thrown if was not possible to deployDataSource the driver.
+     */
     public DriverDeploymentInfo deployDriver( final DriverDef driverDef ) throws Exception {
-
         String deploymentId = DeploymentIdGenerator.generateDeploymentId( driverDef );
-        driverService.deploy( deploymentId, driverDef.getGroupId(), driverDef.getArtifactId(), driverDef.getVersion() );
+        driverMgmtService.deploy( deploymentId, driverDef.getGroupId(), driverDef.getArtifactId(), driverDef.getVersion() );
         return new DriverDeploymentInfo( deploymentId, true, driverDef.getUuid(), driverDef.getDriverClass() );
     }
 
+    /**
+     * Un-deploys a previously deployed driver definition.
+     *
+     * @param uuid identifier of the driver definition to be deployed.
+     *
+     * @throws Exception exceptions may be thrown if was not possible to deployDataSource the driver.
+     */
     public void undeployDriver( final String uuid ) throws Exception {
         DriverDeploymentInfo deploymentInfo = getDriverDeploymentInfo( uuid );
         if ( deploymentInfo != null ) {
-            driverService.undeploy( deploymentInfo.getDeploymentId() );
+            driverMgmtService.undeploy( deploymentInfo.getDeploymentId() );
         }
     }
 
+    /**
+     * Gets the list of driver definitions for the currently deployed drivers.
+     *
+     * @return list with the definitions for the deployed drivers.
+     *
+     * @throws Exception exceptions may be thrown if e.g. communication with the Wildfly server fails, etc.
+     */
     public List<DriverDef> getDeployedDrivers() throws Exception {
 
         List<DriverDef> driverDefs = new ArrayList<>(  );
         DriverDef driverDef;
         String uuid;
 
-        for ( WildflyDriverDef internalDef : driverService.getDeployedDrivers() ) {
+        for ( WildflyDriverDef internalDef : driverMgmtService.getDeployedDrivers() ) {
             driverDef = new DriverDef();
             try {
                 uuid = DeploymentIdGenerator.extractUuid( internalDef.getDriverName() );
@@ -110,6 +150,16 @@ public class DataSourceProviderHelper {
         return driverDefs;
     }
 
+    /**
+     * Gets the deployment information about a data source definition.
+     *
+     * @param uuid the data source definition identifier.
+     *
+     * @return the deployment information for the data source definition of null if no data source has been created
+     * with the given uuid.
+     *
+     * @throws Exception exceptions may be thrown if e.g. communication with the Wildfly server fails, etc.
+     */
     public DataSourceDeploymentInfo getDataSourceDeploymentInfo( final String uuid ) throws Exception {
         for ( DataSourceDeploymentInfo deploymentInfo : getDataSourcesDeploymentInfo() ) {
             if ( uuid.equals( deploymentInfo.getUuid() ) ) {
@@ -119,8 +169,15 @@ public class DataSourceProviderHelper {
         return null;
     }
 
+    /**
+     * Gets the deployment information for all the data sources currently defined on the Wildfly server.
+     *
+     * @return a list with the deployment information for all the data sources.
+     *
+     * @throws Exception exceptions may be thrown if e.g. communication with the Wildfly server fails, etc.
+     */
     public List<DataSourceDeploymentInfo> getDataSourcesDeploymentInfo() throws Exception {
-        List<WildflyDataSourceDef> dataSources = dataSourceService.getDeployedDataSources();
+        List<WildflyDataSourceDef> dataSources = dataSourceMgmtService.getDataSources();
         List<DataSourceDeploymentInfo> result = new ArrayList<>( );
         DataSourceDeploymentInfo deploymentInfo;
         String uuid;
@@ -141,7 +198,14 @@ public class DataSourceProviderHelper {
         return result;
     }
 
-    public List<DataSourceDef> getDeployments() throws Exception {
+    /**
+     * Gets the list of data source definitions for the currently defined data sources in the Wildfly server.
+     *
+     * @return list with the definitions for the defined data sources.
+     *
+     * @throws Exception exceptions may be thrown if e.g. communication with the Wildfly server fails, etc.
+     */
+    public List<DataSourceDef> getDefinedDataSources() throws Exception {
 
         List<WildflyDataSourceDef> dataSources;
         List<DataSourceDef> dataSourceDefs = new ArrayList<>( );
@@ -149,7 +213,7 @@ public class DataSourceProviderHelper {
         String dataSourceUuid;
         String driverUuid;
 
-        dataSources = dataSourceService.getDeployedDataSources();
+        dataSources = dataSourceMgmtService.getDataSources();
         for ( WildflyDataSourceDef internalDef : dataSources ) {
             dataSourceDef = new DataSourceDef();
             try {
@@ -180,13 +244,35 @@ public class DataSourceProviderHelper {
         return dataSourceDefs;
     }
 
-    public DataSourceDeploymentInfo deploy( final DataSourceDef dataSourceDef, final String jndi ) throws Exception {
+    /**
+     * Creates a data source in the Wildfly server.
+     *
+     * @param dataSourceDef Data source definition to be created.
+     *
+     * @param jndi jndi name to be use the Wildly server to bound the data source in the jndi context.
+     *
+     * @return returns the deployment information for the created data source.
+     *
+     * @throws Exception exceptions may be thrown if the data source couldn't be created.
+     */
+    public DataSourceDeploymentInfo deployDataSource( final DataSourceDef dataSourceDef, final String jndi ) throws Exception {
         String deploymentId = DeploymentIdGenerator.generateDeploymentId( dataSourceDef );
-        deploy( dataSourceDef, jndi, deploymentId );
-        return deploy( dataSourceDef, jndi, deploymentId );
+        deployDataSource( dataSourceDef, jndi, deploymentId );
+        return deployDataSource( dataSourceDef, jndi, deploymentId );
     }
 
-    public DataSourceDeploymentInfo deploy( final DataSourceDef dataSourceDef, final String jndi, String deploymentId ) throws Exception {
+    /**
+     * Creates a data source in the Wildfly server.
+     *
+     * @param dataSourceDef Data source definition to be created.
+     *
+     * @param jndi jndi name to be use the Wildly server to bound the data source in the jndi context.
+     *
+     * @return returns the deployment information for the created data source.
+     *
+     * @throws Exception exceptions may be thrown if the data source couldn't be created.
+     */
+    public DataSourceDeploymentInfo deployDataSource( final DataSourceDef dataSourceDef, final String jndi, String deploymentId ) throws Exception {
         DriverDeploymentInfo driverDeploymentInfo = getDriverDeploymentInfo( dataSourceDef.getDriverUuid() );
         if ( driverDeploymentInfo == null ) {
             throw new Exception( "Required driver: " + dataSourceDef.getDriverUuid() + " has not been deployed." );
@@ -195,18 +281,25 @@ public class DataSourceProviderHelper {
         WildflyDataSourceDef wfDataSourceDef = buildWFDataSource( deploymentId,
                 jndi, dataSourceDef, driverDeploymentInfo.getDeploymentId() );
 
-        dataSourceService.deploy( wfDataSourceDef );
+        dataSourceMgmtService.createDataSource( wfDataSourceDef );
         return new DataSourceDeploymentInfo( dataSourceDef.getName(), true, dataSourceDef.getUuid() );
     }
 
+    /**
+     * Deletes a data source in the Widlfy server.
+     *
+     * @param uuid Identifier of the data source definiton to be deleted.
+     *
+     * @throws Exception exceptions may be thrown if the data source couldn't be deleted.
+     */
     public void undeployDataSource( final String uuid ) throws Exception {
         DataSourceDeploymentInfo deploymentInfo = getDataSourceDeploymentInfo( uuid );
         if ( deploymentInfo != null ) {
-            dataSourceService.deleteDatasource( deploymentInfo.getDeploymentId() );
+            dataSourceMgmtService.deleteDataSource( deploymentInfo.getDeploymentId() );
         }
     }
 
-    public WildflyDataSourceDef buildWFDataSource( String deploymentId,
+    private WildflyDataSourceDef buildWFDataSource( String deploymentId,
             String jndi, DataSourceDef dataSourceDef, String driverDeploymentId ) {
         WildflyDataSourceDef wfDataSourceDef = new WildflyDataSourceDef();
         wfDataSourceDef.setName( deploymentId );
@@ -221,6 +314,5 @@ public class DataSourceProviderHelper {
         wfDataSourceDef.setUseJTA( true );
 
         return wfDataSourceDef;
-    };
-
+    }
 }

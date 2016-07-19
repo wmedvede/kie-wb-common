@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.core.impl;
+package org.kie.workbench.common.screens.datasource.management.backend;
 
 import java.util.Collection;
 import javax.enterprise.context.ApplicationScoped;

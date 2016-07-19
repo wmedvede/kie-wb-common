@@ -30,9 +30,8 @@ import org.kie.workbench.common.screens.datasource.management.client.util.Popups
 import org.kie.workbench.common.screens.datasource.management.client.validation.ClientValidationService;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagerClientService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DriverManagementService;
 import org.mockito.Mock;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.ext.editor.commons.client.history.VersionRecordManager;
@@ -73,14 +72,9 @@ public class DriverDefEditorTest
     private Caller<DriverDefEditorService> editorServiceCaller;
 
     @Mock
-    private DriverManagementService driverService;
+    private DataSourceManagerClientService dataSourceManagerClient;
 
-    private Caller<DriverManagementService> driverServiceCaller;
-
-    @Mock
-    private DataSourceService managementService;
-
-    private Caller<DataSourceService> managementServiceCaller;
+    private Caller<DataSourceManagerClientService> dataSourceManagerClientCaller;
 
     private DriverDefEditor editor;
 
@@ -105,11 +99,10 @@ public class DriverDefEditorTest
         clientValidationService = new ClientValidationServiceMock( );
         editorHelper = new DriverDefEditorHelper( translationService, clientValidationService );
         editorServiceCaller = new CallerMock<>( editorService );
-        driverServiceCaller = new CallerMock<>( driverService );
-        managementServiceCaller = new CallerMock<>( managementService );
+        dataSourceManagerClientCaller = new CallerMock<>( dataSourceManagerClient );
 
         editor = new DriverDefEditor( view,
-                mainPanel, editorHelper, popupsUtil, type, editorServiceCaller, driverServiceCaller, managementServiceCaller ) {
+                mainPanel, editorHelper, popupsUtil, type, editorServiceCaller, dataSourceManagerClientCaller ) {
             {
                 this.versionRecordManager = DriverDefEditorTest.this.versionRecordManager;
                 this.menuBuilder = mock( BasicFileMenuBuilder.class );
