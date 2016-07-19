@@ -17,12 +17,8 @@
 package org.kie.workbench.common.screens.datasource.management.backend.core.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
 
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProvider;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProviderRegistry;
@@ -32,20 +28,9 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 public class DataSourceProviderRegistryImpl
         implements DataSourceProviderRegistry {
 
-    @Inject
-    private Instance<DataSourceProvider> providersInstance;
-
     private List<DataSourceProvider> providers = new ArrayList<>(  );
 
     public DataSourceProviderRegistryImpl() {
-    }
-
-    @PostConstruct
-    private void init() {
-        Iterator<DataSourceProvider> providerIt = providersInstance.iterator();
-        while ( providerIt.hasNext() ) {
-            registerProvider( providerIt.next() );
-        }
     }
 
     @Override

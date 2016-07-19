@@ -32,14 +32,10 @@ import org.kie.workbench.common.screens.datasource.management.backend.core.Regis
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceStatus;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class DataSourceManagerRegistryImpl
         implements DataSourceManagerRegistry {
-
-    private static final Logger logger = LoggerFactory.getLogger( DataSourceManagerRegistryImpl.class );
 
     private DataSourceProviderRegistry dataSourceProviderRegistry;
 
@@ -78,7 +74,7 @@ public class DataSourceManagerRegistryImpl
             Collection<DataSourceDef> runningDependants = filterDependants( entry, DataSourceStatus.RUNNING );
             if ( !runningDependants.isEmpty() ) {
                 throw new Exception( "Dependent data sources on driver: " + driverDef + " are running. " +
-                        "Driver can not be registered with SOFT registration" );
+                        "Driver can not be registered/re-registered with SOFT registration" );
             }
         }
 
@@ -197,7 +193,7 @@ public class DataSourceManagerRegistryImpl
     }
 
     @Override
-    public void deRegisterDataSourceDef( String uuid, RegistrationMode registrationMode ) throws Exception {
+    public synchronized void deRegisterDataSourceDef( String uuid, RegistrationMode registrationMode ) throws Exception {
         DataSourceDef dataSourceDef = dataSourceDefRegistry.getDataSourceDef( uuid );
         if ( dataSourceDef ==  null ) {
             throw new Exception( "No data source has been registered with uuid: " + uuid );
@@ -247,5 +243,4 @@ public class DataSourceManagerRegistryImpl
             entry.removeDependant( dataSourceUuid );
         }
     }
-
 }

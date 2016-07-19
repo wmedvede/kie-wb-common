@@ -21,6 +21,9 @@ import org.jboss.errai.ui.shared.api.annotations.TranslationKey;
 public interface DataSourceManagementConstants {
 
     @TranslationKey( defaultValue = "" )
+    String DataSourceDefEditor_TestDataSourceMenu = "DataSourceDefEditor.TestDataSourceMenu";
+
+    @TranslationKey( defaultValue = "" )
     String DataSourceDefEditor_InvalidNameMessage = "DataSourceDefEditor.InvalidNameMessage";
 
     @TranslationKey( defaultValue = "" )
@@ -54,7 +57,7 @@ public interface DataSourceManagementConstants {
     String DataSourceDefEditor_DataSourceHasRunningDependantsForDelete = "DataSourceDefEditor.DataSourceHasRunningDependantsForDelete";
 
     @TranslationKey( defaultValue = "" )
-    String DataSourceDefEditor_DataSourceHasRunningDependantsForUpdate = "DataSourceDefEditor.DataSourceHasRunningDependantsForUpdate";
+    String DataSourceDefEditor_DataSourceHasRunningDependantsForSave = "DataSourceDefEditor.DataSourceHasRunningDependantsForSave";
 
     @TranslationKey( defaultValue = "" )
     String NewDataSourceDefWizard_title = "NewDataSourceDefWizard.title";
@@ -73,6 +76,9 @@ public interface DataSourceManagementConstants {
 
     @TranslationKey( defaultValue = "" )
     String DataSourceDefPage_pagetTitle = "DataSourceDefPageViewImpl.pageTitle";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_CheckStatusMenu = "DriverDefEditor.CheckStatusMenu";
 
     @TranslationKey( defaultValue = "" )
     String DriverDefEditor_InvalidNameMessage = "DriverDefEditor.InvalidNameMessage";
@@ -94,6 +100,21 @@ public interface DataSourceManagementConstants {
 
     @TranslationKey( defaultValue = "" )
     String DriverDefEditor_DriverHasRunningDependantsForDelete = "DriverDefEditor.DriverHasRunningDependantsForDelete";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_DriverNotRegisteredMessage = "DriverDefEditor.DriverNotRegisteredMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_DriverHasNoDependantsMessage="DriverDefEditor.DriverHasNoDependantsMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_DriverHasDependantsMessage="DriverDefEditor.DriverHasDependantsMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_DriverHasRunningDependantsMessage="DriverDefEditor.DriverHasRunningDependantsMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DriverDefEditor_DriverHasNoRunningDependantsMessage="DriverDefEditor.DriverHasNoRunningDependantsMessage";
 
     @TranslationKey( defaultValue = "" )
     String NewDriverDefWizard_title = "NewDriverDefWizard.title";

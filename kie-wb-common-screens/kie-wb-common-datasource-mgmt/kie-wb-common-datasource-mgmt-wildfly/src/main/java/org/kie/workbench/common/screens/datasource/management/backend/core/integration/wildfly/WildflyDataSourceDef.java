@@ -21,6 +21,9 @@ package org.kie.workbench.common.screens.datasource.management.backend.core.inte
  */
 public class WildflyDataSourceDef {
 
+    /*
+     * "name": (required) The data source name must be unique.
+     */
     String name;
 
     /**

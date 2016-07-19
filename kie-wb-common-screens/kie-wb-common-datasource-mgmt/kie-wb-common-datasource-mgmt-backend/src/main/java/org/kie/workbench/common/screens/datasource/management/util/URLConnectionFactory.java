@@ -24,7 +24,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
- * Utility class for opening jdbc connections.
+ * Utility class for opening jdbc connections by using a jdbc driver form a url.
  */
 public class URLConnectionFactory {
 
@@ -87,5 +87,4 @@ public class URLConnectionFactory {
     public Connection createConnection() throws SQLException {
         return driver.connect( connectionURL, properties );
     }
-
 }

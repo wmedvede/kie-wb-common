@@ -46,4 +46,24 @@ public class DriverRuntimeInfo {
         }
         return false;
     }
+
+    public int runningDependantsCount() {
+        int i = 0;
+        if ( hasDependants() ) {
+            for ( DataSourceRuntimeInfo dependantInfo : dependantsInfo ) {
+                if ( dependantInfo.isRunning() ) {
+                    i++;
+                }
+            }
+        }
+        return i;
+    }
+
+    public int dependantsCount() {
+        return hasDependants() ? dependantsInfo.size() : 0;
+    }
+
+    public List<DataSourceRuntimeInfo> getDependants() {
+        return dependantsInfo;
+    }
 }

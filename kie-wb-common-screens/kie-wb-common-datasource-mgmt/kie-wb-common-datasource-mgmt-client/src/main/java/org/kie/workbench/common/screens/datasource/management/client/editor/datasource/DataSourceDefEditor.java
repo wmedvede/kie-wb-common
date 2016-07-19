@@ -31,7 +31,7 @@ import org.kie.workbench.common.screens.datasource.management.client.util.Popups
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceRuntimeInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagerClientService;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.annotations.WorkbenchEditor;
 import org.uberfire.client.annotations.WorkbenchMenu;
@@ -74,7 +74,7 @@ public class DataSourceDefEditor
 
     private Caller<DataSourceDefEditorService> editorService;
 
-    private Caller<DataSourceService> dataSourceService;
+    private Caller<DataSourceManagerClientService> dataSourceManagerClient;
 
     private DataSourceDefEditorContent editorContent;
 
@@ -85,7 +85,7 @@ public class DataSourceDefEditor
             final PopupsUtil popupsUtil,
             final DataSourceDefType type,
             final Caller<DataSourceDefEditorService> editorService,
-            final Caller<DataSourceService> dataSourceService ) {
+            final Caller<DataSourceManagerClientService> dataSourceManagerClient ) {
         super( view );
         this.view = view;
         this.mainPanel = mainPanel;
@@ -93,7 +93,7 @@ public class DataSourceDefEditor
         this.popupsUtil = popupsUtil;
         this.type = type;
         this.editorService = editorService;
-        this.dataSourceService = dataSourceService;
+        this.dataSourceManagerClient = dataSourceManagerClient;
         view.init( this );
         view.setMainPanel( mainPanel );
         editorHelper.init( mainPanel );
@@ -151,7 +151,7 @@ public class DataSourceDefEditor
         super.makeMenuBar();
         menuBuilder.addDelete( onDelete( versionRecordManager.getCurrentPath() ) );
         menuBuilder.addValidate( onValidate() );
-        addDevelopMenu();
+        addTestMenu();
     }
 
     /**
@@ -176,7 +176,7 @@ public class DataSourceDefEditor
      * Executes a safe saving of the data source by checking it's status and asking user confirmation if needed.
      */
     protected void safeSave() {
-        executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasRunningDependantsForSave,
+        executeSafeUpdateCommand( DataSourceManagementConstants.DataSourceDefEditor_DataSourceHasRunningDependantsForSave,
                 new Command() {
                     @Override public void execute() {
                         save( false );
@@ -275,7 +275,7 @@ public class DataSourceDefEditor
      */
     protected void executeSafeUpdateCommand( String onDependantsMessageKey,
             Command defaultCommand, Command yesCommand, Command noCommand ) {
-        dataSourceService.call( new RemoteCallback<DataSourceRuntimeInfo>() {
+        dataSourceManagerClient.call( new RemoteCallback<DataSourceRuntimeInfo>() {
             @Override
             public void callback( DataSourceRuntimeInfo dataSourceRuntimeInfo ) {
 
@@ -358,39 +358,11 @@ public class DataSourceDefEditor
         };
     }
 
-    private void addDevelopMenu() {
-        //for development purposes menu entries, will be removed.
-        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Check-Status" )
-                .respondsWith( new Command() {
-                    @Override
-                    public void execute() {
-                        //onCheckDeploymentStatus();
-                    }
-                } )
-                .endMenu()
-                .build().getItems().get( 0 ) );
-
-        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-Deploy" )
-                .respondsWith( new Command() {
-                    @Override
-                    public void execute() {
-                        //onDeployDataSource();
-                    }
-                } )
-                .endMenu()
-                .build().getItems().get( 0 ) );
-
-        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-UnDeploy" )
-                .respondsWith( new Command() {
-                    @Override
-                    public void execute() {
-                        //onUnDeployDataSource();
-                    }
-                } )
-                .endMenu()
-                .build().getItems().get( 0 ) );
-
-        menuBuilder.addNewTopLevelMenu( MenuFactory.newTopLevelMenu( "Test-DS" )
+    //Check if we want to keep this test option in the future.
+    private void addTestMenu() {
+        menuBuilder.addNewTopLevelMenu(
+                MenuFactory.newTopLevelMenu(
+                        editorHelper.getMessage( DataSourceManagementConstants.DataSourceDefEditor_TestDataSourceMenu ) )
                 .respondsWith( new Command() {
                     @Override
                     public void execute() {
@@ -401,83 +373,12 @@ public class DataSourceDefEditor
                 .build().getItems().get( 0 ) );
     }
 
-    /*
-    private void onCheckDeploymentStatus() {
-        //Experimental method for development purposes.
-        dataSourceService.call(
-                new RemoteCallback<DataSourceDeploymentInfo>() {
-                    @Override
-                    public void callback( DataSourceDeploymentInfo deploymentInfo ) {
-                        if ( deploymentInfo != null ) {
-                            popupsUtil.showInformationPopup( "datasource is deployed as: " + deploymentInfo.getDeploymentId() );
-                        } else {
-                            popupsUtil.showInformationPopup( "datasource is not deployed" );
-                        }
-                    }
-                }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDataSourceDef().getUuid() );
-    }
-
-    private void onDeployDataSource() {
-        //Experimental method for development purposes.
-        dataSourceService.call(
-                new RemoteCallback<DataSourceDeploymentInfo>() {
-                    @Override
-                    public void callback( DataSourceDeploymentInfo deploymentInfo ) {
-                        popupsUtil.showInformationPopup( "datasource successfully deployed: " + deploymentInfo.getDeploymentId() );
-                    }
-                }, new DefaultErrorCallback() ).deploy( getContent().getDataSourceDef() );
-    }
-
-
-    private void onUnDeployDataSource() {
-        //Experimental method for development purposes.
-        dataSourceService.call( new RemoteCallback<DataSourceDeploymentInfo>() {
-            @Override
-            public void callback( DataSourceDeploymentInfo deploymentInfo ) {
-                if ( deploymentInfo == null ) {
-                    popupsUtil.showInformationPopup( "datasource is not deployed in current server" );
-                } else {
-                    dataSourceService.call( new RemoteCallback<Void>() {
-                        @Override
-                        public void callback( Void aVoid ) {
-                            popupsUtil.showInformationPopup( "datasource was successfully un-deployed" );
-                        }
-                    } ).undeploy( deploymentInfo );
-                }
-
-            }
-        }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDataSourceDef().getUuid() );
-
-    }
-    */
-
     private void onTestDataSource() {
-        //Experimental method for development purposes.
-
-
-        editorService.call( new RemoteCallback<String>() {
+        dataSourceManagerClient.call( new RemoteCallback<String>() {
             @Override
             public void callback( String result ) {
                 popupsUtil.showInformationPopup( new SafeHtmlBuilder().appendEscapedLines( result ).toSafeHtml().asString() );
             }
         }, new DefaultErrorCallback() ).test( getContent().getDataSourceDef().getUuid() );
-
-        /*
-        dataSourceService.call( new RemoteCallback<DataSourceDeploymentInfo>() {
-            @Override
-            public void callback( DataSourceDeploymentInfo deploymentInfo ) {
-                if ( deploymentInfo == null ) {
-                    popupsUtil.showInformationPopup( "Data source is not deployed in current server" );
-                } else {
-                    editorService.call( new RemoteCallback<String>() {
-                        @Override
-                        public void callback( String result ) {
-                            popupsUtil.showInformationPopup( new SafeHtmlBuilder().appendEscapedLines( result ).toSafeHtml().asString() );
-                        }
-                    }, new DefaultErrorCallback() ).test( deploymentInfo );
-                }
-            }
-        }, new DefaultErrorCallback() ).getDeploymentInfo( getContent().getDataSourceDef().getUuid() );
-        */
     }
 }

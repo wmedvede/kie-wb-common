@@ -20,7 +20,6 @@ import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.TestConnectionResult;
 import org.uberfire.backend.vfs.Path;
 
@@ -37,11 +36,6 @@ public interface DataSourceDefEditorService {
     Path createGlobal( final DataSourceDef dataSourceDef );
 
     void delete( final Path path, final String comment, final boolean forceDelete );
-
-        //TODO experimental
-    String test( final String uuid );
-
-    String test( final DataSourceDeploymentInfo deploymentInfo );
 
     TestConnectionResult testConnection( final DataSourceDef dataSourceDef, final Project project );
 

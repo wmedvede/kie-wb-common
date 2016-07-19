@@ -19,6 +19,7 @@ package org.kie.workbench.common.screens.datasource.management.backend.core;
 import java.sql.Connection;
 
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceStatus;
+
 /**
  * Defines a data source managed by the data sources management system.
  */
@@ -34,6 +35,10 @@ public interface DataSource {
 
     boolean isNew();
 
+    /**
+     * Clients of a data source may be interested in listening data source events to be aware of data source
+     * changes.
+     */
     void addDataSourceListener( DataSourceListener listener );
 
     void removeDataSourceListener( DataSourceListener listener );

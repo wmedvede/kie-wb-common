@@ -20,11 +20,37 @@ import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceRuntimeInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverRuntimeInfo;
 
+/**
+ * Convenient client side methods to interact with the DataSourceManager.
+ */
 @Remote
-public interface DataSourceService {
+public interface DataSourceManagerClientService {
 
+    /**
+     * Gets the runtime information about a data source.
+     *
+     * @param uuid data source identifier.
+     *
+     * @return the runtime information about the data source or null if no data source was registered with the given uuid.
+     */
     DataSourceRuntimeInfo getDataSourceRuntimeInfo( String uuid );
 
+    /**
+     * Gets the runtime information about a driver.
+     *
+     * @param uuid driver identifier.
+     *
+     * @return the runtime information about the driver or null if not driver was registered with the given uuid.
+     */
     DriverRuntimeInfo getDriverRuntimeInfo( String uuid );
+
+    /**
+     * Tests a data source in the data source management system.
+     *
+     * @param uuid data source identifier to test.
+     *
+     * @return a String with information about the test.
+     */
+    String test( final String uuid );
 
 }

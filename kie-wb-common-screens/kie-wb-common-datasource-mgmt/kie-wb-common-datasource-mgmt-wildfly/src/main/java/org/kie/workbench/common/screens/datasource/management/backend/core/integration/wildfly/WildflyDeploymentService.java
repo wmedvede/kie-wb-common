@@ -26,7 +26,7 @@ import org.jboss.dmr.ModelNode;
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
 /**
- * This Class enables the deployment of contents into a Wildfy/EAP server.
+ * Helper service that enables the generic deployment of contents on a Wildfy/EAP server.
  */
 @ApplicationScoped
 public class WildflyDeploymentService

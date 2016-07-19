@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly;
+package org.kie.workbench.common.screens.datasource.management.backend.core.provider.wildfly;
 
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 
