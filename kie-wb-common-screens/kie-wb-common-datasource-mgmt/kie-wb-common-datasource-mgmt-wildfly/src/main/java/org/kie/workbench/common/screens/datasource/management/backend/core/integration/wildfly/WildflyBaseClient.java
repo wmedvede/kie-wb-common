@@ -38,11 +38,11 @@ import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 import static org.kie.workbench.common.screens.datasource.management.util.ServiceUtil.*;
 
 /**
- * Base class for Wildfly/EAP based services.
+ * Base class for Wildfly/EAP based clients.
  */
-public abstract class WildflyBaseService {
+public abstract class WildflyBaseClient {
 
-    private static final Logger logger = LoggerFactory.getLogger( WildflyBaseService.class );
+    private static final Logger logger = LoggerFactory.getLogger( WildflyBaseClient.class );
 
     private static final String PREFIX = "datasource.management.wildfly";
 

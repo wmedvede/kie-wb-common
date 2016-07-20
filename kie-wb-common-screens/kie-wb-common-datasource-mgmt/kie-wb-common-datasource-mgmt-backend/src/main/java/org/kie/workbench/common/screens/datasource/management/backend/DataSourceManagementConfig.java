@@ -80,7 +80,7 @@ public class DataSourceManagementConfig {
 
         //get the reference to the configured provider
         String providerName = ServiceUtil.getManagedProperty( properties, DATASOURCE_PROVIDER );
-        if ( ServiceUtil.isEmpty( providerName ) ) {
+        if ( !ServiceUtil.isEmpty( providerName ) ) {
             try {
                 dataSourceProvider = ( DataSourceProvider ) getManagedBean( providerName );
                 if ( dataSourceProvider == null ) {

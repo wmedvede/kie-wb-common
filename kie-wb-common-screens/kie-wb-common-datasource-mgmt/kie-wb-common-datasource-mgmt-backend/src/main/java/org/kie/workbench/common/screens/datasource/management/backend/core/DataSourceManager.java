@@ -32,7 +32,7 @@ public interface DataSourceManager {
      * @return a reference to the data source previously registered with uuid.
      *
      * @throws Exception if no data source definition was registered with the given uuid, no data source provider
-     * is installed for the given data source type, or the data source couldn't be initialized.
+     * is configured, or the data source couldn't be initialized.
      */
     DataSource lookup( String uuid ) throws Exception;
 

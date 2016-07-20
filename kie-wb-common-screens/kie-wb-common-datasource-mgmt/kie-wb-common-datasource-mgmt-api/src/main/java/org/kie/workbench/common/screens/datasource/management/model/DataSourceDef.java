@@ -21,8 +21,6 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 @Portable
 public class DataSourceDef {
 
-    DataSourceDefType type;
-
     String uuid;
 
     String name;
@@ -46,14 +44,6 @@ public class DataSourceDef {
     boolean useCCM;
 
     public DataSourceDef() {
-    }
-
-    public DataSourceDefType getType() {
-        return type;
-    }
-
-    public void setType( DataSourceDefType type ) {
-        this.type = type;
     }
 
     public String getUuid() {

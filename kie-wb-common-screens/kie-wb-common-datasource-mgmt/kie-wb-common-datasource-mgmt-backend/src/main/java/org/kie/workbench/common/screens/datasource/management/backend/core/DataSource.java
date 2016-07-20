@@ -36,8 +36,9 @@ public interface DataSource {
     boolean isNew();
 
     /**
-     * Clients of a data source may be interested in listening data source events to be aware of data source
-     * changes.
+     * Clients of a data source may be interested in listening data source events to be aware of changes
+     * in the data source configuration. When a data source becomes STALE clients should re-invoke the lookup
+     * operation in order to get a safe reference to the data source.
      */
     void addDataSourceListener( DataSourceListener listener );
 

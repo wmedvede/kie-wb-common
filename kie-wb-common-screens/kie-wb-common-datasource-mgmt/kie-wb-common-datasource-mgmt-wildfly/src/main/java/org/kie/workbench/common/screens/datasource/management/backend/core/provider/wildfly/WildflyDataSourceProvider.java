@@ -28,20 +28,16 @@ import javax.naming.InitialContext;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProvider;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefRegistry;
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDataSourceManagementService;
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDriverManagementService;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceStatus;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
-import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements the DataSourceProvider contract the CONTAINER type data sources that will be created in a
- * Wildfly server.
+ * This class implements the DataSourceProvider contract for managing data sources in a Wildfly server.
  */
 @ApplicationScoped
 @Named( value = "WildflyDataSourceProvider" )
@@ -54,23 +50,13 @@ public class WildflyDataSourceProvider
     private DriverDefRegistry driverDefRegistry;
 
     @Inject
-    private WildflyDataSourceManagementService dataSourceService;
-
-    @Inject
-    private WildflyDriverManagementService driverService;
-
-    @Inject
     private DataSourceProviderHelper helper;
 
     private Map<String, WildlfyDataSource> initializedDataSources = new HashMap<>( );
 
-    @Inject
-    private MavenArtifactResolver artifactResolver;
-
     @Override
     public void loadConfig( Properties properties ) {
-        dataSourceService.loadConfig( properties );
-        driverService.loadConfig( properties );
+        helper.loadConfig( properties );
     }
 
     @Override
@@ -92,12 +78,14 @@ public class WildflyDataSourceProvider
         //of data sources without letting them published on server until next restart.
         String random = "-" + System.currentTimeMillis();
         String deploymentId = DeploymentIdGenerator.generateDeploymentId( dataSourceDef ) + random;
-        String deploymentJndi = JndiNameGenerator.generateJNDIName( dataSourceDef ) + random;
+        String kieJndi = JndiNameGenerator.generateJNDIName( dataSourceDef );
+        String deploymentJndi = kieJndi + random;
 
         helper.deployDataSource( dataSourceDef, deploymentJndi, deploymentId );
 
         javax.sql.DataSource dataSource = (javax.sql.DataSource) lookupObject( deploymentJndi );
         WildlfyDataSource wfDataSource = new WildlfyDataSource( dataSource );
+        bindObject( kieJndi, dataSource );
         initializedDataSources.put( dataSourceDef.getUuid(), wfDataSource );
     }
 
