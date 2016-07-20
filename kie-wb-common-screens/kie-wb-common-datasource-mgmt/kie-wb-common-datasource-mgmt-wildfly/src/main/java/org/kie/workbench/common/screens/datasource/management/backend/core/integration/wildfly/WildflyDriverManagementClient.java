@@ -21,27 +21,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import java.util.Properties;
 
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
-import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
 /**
- * Helper service for deploying/un-deploying drivers on a Wildfly server.
+ * Helper client for deploying/un-deploying drivers on a Wildfly server.
  */
-@ApplicationScoped
-public class WildflyDriverManagementService
-        extends WildflyBaseService {
+public class WildflyDriverManagementClient
+        extends WildflyBaseClient {
 
-    @Inject
-    private MavenArtifactResolver artifactResolver;
+    private WildflyDeploymentClient deploymentService = new WildflyDeploymentClient();
 
-    @Inject
-    private WildflyDeploymentService deploymentService;
+    @Override
+    public void loadConfig( Properties properties ) {
+        deploymentService.loadConfig( properties );
+        super.loadConfig( properties );
+    }
 
     /**
      * Creates a driver by deploying the content for the jar file.
@@ -49,23 +48,11 @@ public class WildflyDriverManagementService
      * @param deploymentId Deployment id to be assigned for the deployed driver. The deploymentId must be a unique
      * identifier, and may be used later for the un-deployment operation.
      *
-     * @param groupId Group id of the .jar maven artifact
-     *
-     * @param artifactId Artifact id of the .jar maven artifact.
-     *
-     * @param versionId Version number of the .jar maven artifact.
+     * @param uri Uri for the .jar file containing the driver implementation.
      *
      * @throws Exception If the deployment operation fails an exception is thrown.
      */
-    public void deploy( final String deploymentId,
-            final String groupId, final String artifactId, final String versionId ) throws Exception {
-
-        final URI uri = artifactResolver.resolve( groupId, artifactId, versionId );
-
-        if ( uri == null ) {
-            throw new Exception( "Unable to get driver library artifact for gav: " + groupId + ":" + artifactId + ":" + versionId );
-        }
-
+    public void deploy( final String deploymentId, URI uri ) throws Exception {
         final Path path = java.nio.file.Paths.get( uri );
         byte[] libContent = Files.readAllBytes( path );
         deploymentService.deployContent( deploymentId, deploymentId, libContent, true );

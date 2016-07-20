@@ -17,7 +17,7 @@
 package org.kie.workbench.common.screens.datasource.management.backend.core;
 
 /**
- * Manages the automatic registration of data source definitions at server startup.
+ * Manages the automatic registration of data source definitions at server startup, or for a given project.
  */
 public interface DataSourceDefDeployer extends DefDeployer {
 

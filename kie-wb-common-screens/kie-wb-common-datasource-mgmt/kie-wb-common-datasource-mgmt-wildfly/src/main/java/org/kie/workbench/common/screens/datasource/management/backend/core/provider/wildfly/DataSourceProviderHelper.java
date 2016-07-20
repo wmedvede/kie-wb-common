@@ -16,19 +16,22 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend.core.provider.wildfly;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDataSourceManagementService;
+import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDataSourceManagementClient;
 import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDriverDef;
-import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDriverManagementService;
+import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDriverManagementClient;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
 
 /**
  * Helper class used by the WildflyDataSourceProvider to interact with the Wildfly server.
@@ -36,11 +39,17 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDeploy
 @ApplicationScoped
 public class DataSourceProviderHelper {
 
-    @Inject
-    private WildflyDataSourceManagementService dataSourceMgmtService;
+    private WildflyDataSourceManagementClient dataSourceMgmtService = new WildflyDataSourceManagementClient();
+
+    private WildflyDriverManagementClient driverMgmtService = new WildflyDriverManagementClient();
 
     @Inject
-    private WildflyDriverManagementService driverMgmtService;
+    private MavenArtifactResolver artifactResolver;
+
+    public void loadConfig( Properties properties ) {
+        dataSourceMgmtService.loadConfig( properties );
+        driverMgmtService.loadConfig( properties );
+    }
 
     /**
      * Gets the deployment information about a driver definition.
@@ -102,8 +111,17 @@ public class DataSourceProviderHelper {
      * @throws Exception exceptions may be thrown if was not possible to deployDataSource the driver.
      */
     public DriverDeploymentInfo deployDriver( final DriverDef driverDef ) throws Exception {
+
+        final URI uri = artifactResolver.resolve( driverDef.getGroupId(),
+                driverDef.getArtifactId(), driverDef.getVersion() );
+        if ( uri == null ) {
+            throw new Exception( "Unable to get driver library artifact for gav: " + driverDef.getGroupId() +
+                    ":" + driverDef.getArtifactId() +
+                    ":" + driverDef.getVersion() );
+        }
+
         String deploymentId = DeploymentIdGenerator.generateDeploymentId( driverDef );
-        driverMgmtService.deploy( deploymentId, driverDef.getGroupId(), driverDef.getArtifactId(), driverDef.getVersion() );
+        driverMgmtService.deploy( deploymentId, uri );
         return new DriverDeploymentInfo( deploymentId, true, driverDef.getUuid(), driverDef.getDriverClass() );
     }
 
@@ -315,4 +333,5 @@ public class DataSourceProviderHelper {
 
         return wfDataSourceDef;
     }
+
 }

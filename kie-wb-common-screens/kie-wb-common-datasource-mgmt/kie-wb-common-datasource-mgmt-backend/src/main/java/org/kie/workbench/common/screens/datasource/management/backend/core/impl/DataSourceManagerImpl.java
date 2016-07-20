@@ -63,7 +63,7 @@ public class DataSourceManagerImpl
         }
         DataSourceProvider dataSourceProvider = dataSourceManagementConfig.getDataSourceProvider();
         if ( dataSourceProvider == null ) {
-            throw new Exception( "No data source provider has been registered for data source type: " + dataSourceDef.getType() );
+            throw new Exception( "No data source provider has been registered for data source: " + dataSourceDef );
         }
 
         return dataSourceProvider.lookup( uuid );

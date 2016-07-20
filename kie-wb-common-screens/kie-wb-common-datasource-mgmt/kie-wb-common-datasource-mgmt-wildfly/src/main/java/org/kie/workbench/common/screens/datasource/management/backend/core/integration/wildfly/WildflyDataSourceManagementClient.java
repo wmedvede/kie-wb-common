@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.OperationBuilder;
@@ -30,11 +29,10 @@ import org.jboss.dmr.Property;
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
 /**
- * Helper service for creating/modifying/deletion of data sources on a Wildfly server.
+ * Helper client for creating/modifying/deletion of data sources on a Wildfly server.
  */
-@ApplicationScoped
-public class WildflyDataSourceManagementService
-        extends WildflyBaseService {
+public class WildflyDataSourceManagementClient
+        extends WildflyBaseClient {
 
     /**
      * Creates a data source.
@@ -241,5 +239,4 @@ public class WildflyDataSourceManagementService
         safeClose( client );
         checkResponse( result );
     }
-
 }

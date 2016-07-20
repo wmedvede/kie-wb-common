@@ -18,7 +18,6 @@ package org.kie.workbench.common.screens.datasource.management.backend.core.inte
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
@@ -26,11 +25,10 @@ import org.jboss.dmr.ModelNode;
 import static org.jboss.as.controller.client.helpers.ClientConstants.*;
 
 /**
- * Helper service that enables the generic deployment of contents on a Wildfy/EAP server.
+ * Helper client that enables the generic deployment of contents on a Wildfy/EAP server.
  */
-@ApplicationScoped
-public class WildflyDeploymentService
-        extends WildflyBaseService {
+public class WildflyDeploymentClient
+        extends WildflyBaseClient {
 
     /**
      *

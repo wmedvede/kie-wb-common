@@ -22,12 +22,12 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceStatus;
 
 /**
- * Manages the instantiation and life cycle of a DataSource for a given DataSourceType.
+ * Manages the instantiation and life cycle of a DataSource.
  */
 public interface DataSourceProvider {
 
     /**
-     * Lets the provider to read configurations from the data sources management properties.
+     * Used by the data source management system to pass configurations to the provider.
      */
     void loadConfig( Properties properties );
 
