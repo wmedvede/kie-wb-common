@@ -16,14 +16,20 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend.core;
 
+import java.util.Properties;
+
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceStatus;
 
 /**
  * Manages the instantiation and life cycle of a DataSource for a given DataSourceType.
  */
 public interface DataSourceProvider {
+
+    /**
+     * Lets the provider to read configurations from the data sources management properties.
+     */
+    void loadConfig( Properties properties );
 
     /**
      * Initializes a data source given a definition. It's up to the provider to decide if the data source is created
@@ -65,10 +71,5 @@ public interface DataSourceProvider {
      * @throws Exception is thrown in case of unexpected errors.
      */
     void release( DataSourceDef dataSourceDef ) throws Exception;
-
-    /**
-     * @return true if current provider manages the given data source type.
-     */
-    boolean accepts( DataSourceDefType type );
 
 }

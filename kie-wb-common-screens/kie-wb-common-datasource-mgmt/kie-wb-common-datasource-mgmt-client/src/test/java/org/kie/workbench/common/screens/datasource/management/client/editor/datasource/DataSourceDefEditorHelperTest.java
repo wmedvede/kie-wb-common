@@ -115,7 +115,6 @@ public class DataSourceDefEditorHelperTest
 
         verify( mainPanel, times( 1 ) ).clear();
         verify( mainPanel, times( 1 ) ).setName( dataSourceDef.getName() );
-        verify( mainPanel, times( 1 ) ).setJndi( dataSourceDef.getJndi() );
         verify( mainPanel, times( 1 ) ).setConnectionURL( dataSourceDef.getConnectionURL() );
         verify( mainPanel, times( 1 ) ).setUser( dataSourceDef.getUser() );
         verify( mainPanel, times( 1 ) ).setPassword( dataSourceDef.getPassword() );
@@ -154,40 +153,6 @@ public class DataSourceDefEditorHelperTest
             verify( mainPanel, times( 1 ) ).setNameErrorMessage( ERROR );
         }
         verify( handler, times( 1 ) ).onNameChange();
-    }
-
-    @Test
-    public void testValidJndiChange() {
-        testJndiChange( true );
-    }
-
-    @Test
-    public void testInvalidJndiChange() {
-        testJndiChange( false );
-    }
-
-    private void testJndiChange( boolean isValid ) {
-        if ( isValid ) {
-            when( mainPanel.getJndi() ).thenReturn( JNDI );
-        } else {
-            when( mainPanel.getJndi() ).thenReturn( INVALID_JNDI );
-        }
-        when( translationService.getTranslation(
-                DataSourceManagementConstants.DataSourceDefEditor_InvalidJndiMessage ) ).thenReturn( ERROR );
-
-        //emulates the helper receiving the change event
-        editorHelper.onJndiChange();
-
-        if ( isValid ) {
-            assertTrue( editorHelper.isJndiValid() );
-            assertEquals( JNDI, dataSourceDef.getJndi() );
-            verify( mainPanel, times( 1 ) ).clearJndiErrorMessage();
-        } else {
-            assertFalse( editorHelper.isJndiValid() );
-            assertEquals( INVALID_JNDI, dataSourceDef.getJndi() );
-            verify( mainPanel, times( 1 ) ).setJndiErrorMessage( ERROR );
-        }
-        verify( handler, times( 1 ) ).onJndiChange();
     }
 
     @Test

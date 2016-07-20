@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.commons.dbcp2.ConnectionFactory;
 import org.apache.commons.dbcp2.PoolableConnection;
@@ -31,12 +32,11 @@ import org.apache.commons.dbcp2.PoolableConnectionFactory;
 import org.apache.commons.dbcp2.PoolingDataSource;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProvider;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.impl.AbstractDataSource;
-import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceStatus;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
@@ -46,6 +46,7 @@ import org.kie.workbench.common.screens.datasource.management.util.URLConnection
  * This class implements a DataSourceProvider contract for the CUSTOM type data sources.
  */
 @ApplicationScoped
+@Named( value = "DBCPDataSourceProvider" )
 public class DBCPDataSourceProvider implements DataSourceProvider {
 
     private MavenArtifactResolver artifactResolver = new MavenArtifactResolver();
@@ -56,6 +57,11 @@ public class DBCPDataSourceProvider implements DataSourceProvider {
     private DriverDefRegistry driverDefRegistry;
 
     public DBCPDataSourceProvider() {
+    }
+
+    @Override
+    public void loadConfig( Properties properties ) {
+
     }
 
     @Override
@@ -124,11 +130,6 @@ public class DBCPDataSourceProvider implements DataSourceProvider {
         if ( dataSource != null ) {
             dataSource.setStatus( DataSourceStatus.STALE );
         }
-    }
-
-    @Override
-    public boolean accepts( DataSourceDefType type ) {
-        return DataSourceDefType.CUSTOM.equals( type );
     }
 
     private class DBCPConnectionFactory

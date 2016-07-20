@@ -41,8 +41,6 @@ public class DataSourceDefMainPanelTest
 
     private String name;
 
-    private String jndi;
-
     private String connectionURL;
 
     private String user;
@@ -55,7 +53,6 @@ public class DataSourceDefMainPanelTest
     public void setup() {
         mainPanel = new DataSourceDefMainPanel( view );
         name = null;
-        jndi = null;
         connectionURL = null;
         user = null;
         password = null;
@@ -64,11 +61,6 @@ public class DataSourceDefMainPanelTest
             @Override
             public void onNameChange() {
                 name = view.getName();
-            }
-
-            @Override
-            public void onJndiChange() {
-                jndi = view.getJndi();
             }
 
             @Override
@@ -130,40 +122,6 @@ public class DataSourceDefMainPanelTest
         verify( view, times( 1 ) ).getName();
         //the handler should have been invoked and collected the expected value.
         assertEquals( NAME, name );
-    }
-
-    @Test
-    public void testSetJndi() {
-        mainPanel.setJndi( JNDI );
-        verify( view, times( 1 ) ).setJndi( JNDI );
-    }
-
-    @Test
-    public void testGetJndi() {
-        when ( view.getJndi() ).thenReturn( JNDI );
-        assertEquals( JNDI, mainPanel.getJndi() );
-    }
-
-    @Test
-    public void testSetJndiError() {
-        mainPanel.setJndiErrorMessage( ERROR );
-        verify( view, times( 1 ) ).setJndiErrorMessage( ERROR );
-    }
-
-    @Test
-    public void clearJndiError() {
-        mainPanel.clearJndiErrorMessage();
-        verify( view, times( 1 ) ).clearJndiErrorMessage();
-    }
-
-    @Test
-    public void testJndiChange() {
-        when ( view.getJndi() ).thenReturn( JNDI );
-        //emulates the presenter method executed from the UI.
-        mainPanel.onJndiChange();
-        verify( view, times( 1 ) ).getJndi();
-        //the handler should have been invoked and collected the expected value.
-        assertEquals( JNDI, jndi );
     }
 
     @Test

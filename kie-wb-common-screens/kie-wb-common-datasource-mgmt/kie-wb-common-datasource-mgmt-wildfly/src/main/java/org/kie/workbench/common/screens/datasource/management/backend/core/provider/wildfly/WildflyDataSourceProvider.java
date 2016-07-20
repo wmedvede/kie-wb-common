@@ -19,8 +19,10 @@ package org.kie.workbench.common.screens.datasource.management.backend.core.prov
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.naming.InitialContext;
 
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
@@ -29,7 +31,6 @@ import org.kie.workbench.common.screens.datasource.management.backend.core.Drive
 import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDataSourceManagementService;
 import org.kie.workbench.common.screens.datasource.management.backend.core.integration.wildfly.WildflyDriverManagementService;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceStatus;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
@@ -43,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * Wildfly server.
  */
 @ApplicationScoped
+@Named( value = "WildflyDataSourceProvider" )
 public class WildflyDataSourceProvider
         implements DataSourceProvider {
 
@@ -64,6 +66,12 @@ public class WildflyDataSourceProvider
 
     @Inject
     private MavenArtifactResolver artifactResolver;
+
+    @Override
+    public void loadConfig( Properties properties ) {
+        dataSourceService.loadConfig( properties );
+        driverService.loadConfig( properties );
+    }
 
     @Override
     public void initialize( DataSourceDef dataSourceDef ) throws Exception {
@@ -142,11 +150,6 @@ public class WildflyDataSourceProvider
                 }
             }
         }
-    }
-
-    @Override
-    public boolean accepts( DataSourceDefType type ) {
-        return DataSourceDefType.CONTAINER.equals( type );
     }
 
     private Object lookupObject( String jndi ) {

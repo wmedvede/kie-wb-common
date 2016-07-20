@@ -170,7 +170,6 @@ public class DataSourceDefEditorTest
 
         verify( mainPanelView, times( 1 ) ).loadDriverOptions( eq( options ), eq( true ) );
         verify( mainPanelView, times( 1 ) ).setName( content.getDataSourceDef().getName() );
-        verify( mainPanelView, times( 1 ) ).setJndi( content.getDataSourceDef().getJndi() );
         verify( mainPanelView, times( 1 ) ).setConnectionURL( content.getDataSourceDef().getConnectionURL() );
         verify( mainPanelView, times( 1 ) ).setUser( content.getDataSourceDef().getUser() );
         verify( mainPanelView, times( 1 ) ).setPassword( content.getDataSourceDef().getPassword() );
@@ -185,14 +184,12 @@ public class DataSourceDefEditorTest
 
         //emulates some valid changes in the editor.
         when( mainPanelView.getName() ).thenReturn( NAME_2 );
-        when( mainPanelView.getJndi() ).thenReturn( JNDI_2 );
         when( mainPanelView.getConnectionURL() ).thenReturn( CONNECTION_URL_2 );
         when( mainPanelView.getUser() ).thenReturn( USER_2 );
         when( mainPanelView.getPassword() ).thenReturn( PASSWORD_2 );
         when( mainPanelView.getDriver() ).thenReturn( DRIVER_UUID_2 );
 
         mainPanel.onNameChange();
-        mainPanel.onJndiChange();
         mainPanel.onConnectionURLChange();
         mainPanel.onUserChange();
         mainPanel.onPasswordChange();

@@ -65,11 +65,6 @@ public class DataSourceDefPage
             }
 
             @Override
-            public void onJndiChange() {
-                DataSourceDefPage.this.notifyChange();
-            }
-
-            @Override
             public void onConnectionURLChange() {
                 DataSourceDefPage.this.notifyChange();
             }
@@ -117,7 +112,6 @@ public class DataSourceDefPage
     @Override
     public void isComplete( Callback<Boolean> callback ) {
         boolean complete = editorHelper.isNameValid() &&
-                editorHelper.isJndiValid() &&
                 editorHelper.isConnectionURLValid() &&
                 editorHelper.isUserValid() &&
                 editorHelper.isPasswordValid() &&

@@ -21,13 +21,13 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.kie.workbench.common.screens.datasource.management.backend.DataSourceManagementConfig;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManager;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManagerRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProvider;
-import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProviderRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefRegistryEntry;
-import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceRuntimeInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverRuntimeInfo;
@@ -40,7 +40,7 @@ public class DataSourceManagerImpl
 
     private DriverDefRegistry driverDefRegistry;
 
-    private DataSourceProviderRegistry dataSourceProviderRegistry;
+    private DataSourceManagementConfig dataSourceManagementConfig;
 
     public DataSourceManagerImpl() {
     }
@@ -48,10 +48,10 @@ public class DataSourceManagerImpl
     @Inject
     public DataSourceManagerImpl( DataSourceManagerRegistry dataSourceManagerRegistry,
             DriverDefRegistry driverDefRegistry,
-            DataSourceProviderRegistry dataSourceProviderRegistry ) {
+            DataSourceManagementConfig dataSourceManagementConfig ) {
         this.dataSourceManagerRegistry = dataSourceManagerRegistry;
         this.driverDefRegistry = driverDefRegistry;
-        this.dataSourceProviderRegistry = dataSourceProviderRegistry;
+        this.dataSourceManagementConfig = dataSourceManagementConfig;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class DataSourceManagerImpl
         if ( dataSourceDef == null ) {
             throw new Exception( "No data source definition has been registered for uuid : " + uuid );
         }
-        DataSourceProvider dataSourceProvider = dataSourceProviderRegistry.getProvider( dataSourceDef.getType() );
+        DataSourceProvider dataSourceProvider = dataSourceManagementConfig.getDataSourceProvider();
         if ( dataSourceProvider == null ) {
             throw new Exception( "No data source provider has been registered for data source type: " + dataSourceDef.getType() );
         }
@@ -76,7 +76,7 @@ public class DataSourceManagerImpl
             return null;
         }
 
-        DataSourceProvider provider = dataSourceProviderRegistry.getProvider( dataSourceDef.getType() );
+        DataSourceProvider provider = dataSourceManagementConfig.getDataSourceProvider();
         if ( provider == null ) {
             return null;
         }
