@@ -22,10 +22,10 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.kie.workbench.common.screens.datasource.management.backend.DataSourceManagementConfig;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceDefRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManagerRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProvider;
-import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProviderRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefRegistry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefRegistryEntry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.RegistrationMode;
@@ -37,7 +37,7 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 public class DataSourceManagerRegistryImpl
         implements DataSourceManagerRegistry {
 
-    private DataSourceProviderRegistry dataSourceProviderRegistry;
+    private DataSourceManagementConfig dataSourceManagementConfig;
 
     private DriverDefRegistry driverDefRegistry;
 
@@ -49,10 +49,10 @@ public class DataSourceManagerRegistryImpl
     @Inject
     public DataSourceManagerRegistryImpl( DriverDefRegistry driverDefRegistry,
             DataSourceDefRegistry dataSourceDefRegistry,
-            DataSourceProviderRegistry dataSourceProviderRegistry ) {
+            DataSourceManagementConfig dataSourceManagementConfig ) {
         this.driverDefRegistry = driverDefRegistry;
         this.dataSourceDefRegistry = dataSourceDefRegistry;
-        this.dataSourceProviderRegistry = dataSourceProviderRegistry;
+        this.dataSourceManagementConfig = dataSourceManagementConfig;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class DataSourceManagerRegistryImpl
         DataSourceProvider provider;
         Collection<DataSourceDef> dependants = entry.getDependants();
         for ( DataSourceDef dependant : dependants ) {
-            provider = findProvider( dependant );
+            provider = getProvider();
             provider.release( dependant );
             dataSourceDefRegistry.deRegisterDataSourceDef( dependant.getUuid() );
         }
@@ -90,7 +90,7 @@ public class DataSourceManagerRegistryImpl
         DriverDefRegistryEntry newEntry = driverDefRegistry.registerDriverDef( driverDef );
 
         for ( DataSourceDef dependant : dependants ) {
-            provider = findProvider( dependant );
+            provider = getProvider();
             provider.initialize( dependant );
             dataSourceDefRegistry.registerDataSourceDef( dependant );
             newEntry.addDependant( dependant );
@@ -124,7 +124,7 @@ public class DataSourceManagerRegistryImpl
 
         DataSourceProvider provider;
         for ( DataSourceDef dependant : entry.getDependants() ) {
-            provider = findProvider( dependant );
+            provider = getProvider( );
             provider.release( dependant );
         }
         dataSourceDefRegistry.deRegisterDataSourceDef( uuid );
@@ -163,7 +163,7 @@ public class DataSourceManagerRegistryImpl
             throw new Exception( "Required driver: " + dataSourceDef.getDriverUuid() + " is not registered" );
         }
 
-        DataSourceProvider provider = findProvider( dataSourceDef );
+        DataSourceProvider provider = getProvider();
         if ( provider == null ) {
             throw new Exception( "DataSourceProvider was not found for data source: " + dataSourceDef );
         }
@@ -199,7 +199,7 @@ public class DataSourceManagerRegistryImpl
             throw new Exception( "No data source has been registered with uuid: " + uuid );
         }
 
-        DataSourceProvider provider = findProvider( dataSourceDef );
+        DataSourceProvider provider = getProvider();
         if ( provider == null ) {
             throw new Exception( "DataSourceProvider was not found for data source: " + dataSourceDef );
         }
@@ -219,8 +219,8 @@ public class DataSourceManagerRegistryImpl
         return dataSourceDefRegistry.getDataSourceDef( uuid );
     }
 
-    private DataSourceProvider findProvider( DataSourceDef dataSourceDef ) {
-        return dataSourceProviderRegistry.getProvider( dataSourceDef.getType() );
+    private DataSourceProvider getProvider( ) {
+        return dataSourceManagementConfig.getDataSourceProvider();
     }
 
     private Collection<DataSourceDef> filterDependants( DriverDefRegistryEntry entry, DataSourceStatus status ) {
@@ -228,11 +228,12 @@ public class DataSourceManagerRegistryImpl
         DataSourceProvider provider;
         DataSourceStatus currentStatus;
 
-        for ( DataSourceDef dependant : entry.getDependants() ) {
-            provider = findProvider( dependant );
-            currentStatus = provider.getStatus( dependant.getUuid() );
-            if ( status.equals( currentStatus ) ) {
-                result.add( dependant );
+        if ( ( provider = getProvider() ) != null ) {
+            for ( DataSourceDef dependant : entry.getDependants() ) {
+                currentStatus = provider.getStatus( dependant.getUuid() );
+                if ( status.equals( currentStatus ) ) {
+                    result.add( dependant );
+                }
             }
         }
         return result;

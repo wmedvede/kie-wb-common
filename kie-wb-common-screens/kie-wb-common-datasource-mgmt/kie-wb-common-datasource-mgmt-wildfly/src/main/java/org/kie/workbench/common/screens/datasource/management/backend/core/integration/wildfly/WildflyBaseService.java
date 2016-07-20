@@ -18,7 +18,6 @@ package org.kie.workbench.common.screens.datasource.management.backend.core.inte
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.Properties;
 import javax.security.auth.callback.Callback;
@@ -45,8 +44,6 @@ public abstract class WildflyBaseService {
 
     private static final Logger logger = LoggerFactory.getLogger( WildflyBaseService.class );
 
-    private static final String DATASOURCE_MANAGEMENT_PROPERTIES = "datasource-management.properties";
-
     private static final String PREFIX = "datasource.management.wildfly";
 
     private static final String HOST = PREFIX + ".host";
@@ -67,22 +64,8 @@ public abstract class WildflyBaseService {
     protected String password;
     protected String realm;
 
-    protected WildflyBaseService() {
-        loadConfig();
-    }
-
-    protected void loadConfig() {
-        InputStream inputStream = WildflyBaseService.class.getResourceAsStream( "/" + DATASOURCE_MANAGEMENT_PROPERTIES );
-
-        Properties properties = new Properties( );
-        if ( inputStream == null ) {
-            logger.warn( "Data source management configuration file: " + DATASOURCE_MANAGEMENT_PROPERTIES +
-                    " was not found. Some features may be disabled in current installation.");
-            return;
-        }
-
+    public void loadConfig( Properties properties ) {
         try {
-            properties.load( inputStream );
 
             host = getManagedProperty( properties, HOST, DEFAULT_HOST );
             String currentPort = null;
@@ -99,8 +82,7 @@ public abstract class WildflyBaseService {
             realm = getManagedProperty( properties, REALM, DEFAULT_REALM );
 
         } catch ( Exception e ) {
-            logger.error( "An error was produced during data source configuration file reading: " +
-                    DATASOURCE_MANAGEMENT_PROPERTIES, e );
+            logger.error( "An error was produced during data source configuration file reading" );
         }
     }
 

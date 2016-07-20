@@ -106,10 +106,6 @@ public class ClientValidationService {
         isNotEmpty( dataSourceName, callback );
     }
 
-    public void isValidJndiName( String jndiName, ValidatorCallback callback ) {
-        isNotEmpty( jndiName, callback );
-    }
-
     public void isValidConnectionURL( String connectionURL, ValidatorCallback callback ) {
         isNotEmpty( connectionURL, callback );
     }

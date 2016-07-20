@@ -53,16 +53,6 @@ public class DataSourceDefMainPanelViewImpl
     @DataField("name-help")
     Element nameHelp = DOM.createSpan();
 
-    @DataField ( "jndi-form-group" )
-    Element jndiFormGroup =  DOM.createDiv();
-
-    @Inject
-    @DataField ( "jndi" )
-    TextBox jndiTextBox;
-
-    @DataField( "jndi-help" )
-    Element jndiHelp = DOM.createSpan();
-
     @DataField ( "connection-url-form-group" )
     Element connectionURLFormGroup =  DOM.createDiv();
 
@@ -135,28 +125,6 @@ public class DataSourceDefMainPanelViewImpl
     public void clearNameErrorMessage() {
         setGroupOnError( nameFormGroup, false );
         clearSpanMessage( nameHelp );
-    }
-
-    @Override
-    public void setJndi( final String jndi ) {
-        this.jndiTextBox.setText( jndi );
-    }
-
-    @Override
-    public String getJndi() {
-        return jndiTextBox.getText();
-    }
-
-    @Override
-    public void setJndiErrorMessage( final String message ) {
-        setGroupOnError( jndiFormGroup, true );
-        setSpanMessage( jndiHelp, message );
-    }
-
-    @Override
-    public void clearJndiErrorMessage() {
-        setGroupOnError( jndiFormGroup, false );
-        clearSpanMessage( jndiHelp );
     }
 
     @Override
@@ -263,11 +231,6 @@ public class DataSourceDefMainPanelViewImpl
     @EventHandler( "name" )
     public void onNameChange( final ChangeEvent event ) {
         presenter.onNameChange();
-    }
-
-    @EventHandler( "jndi" )
-    public void onJndiChange( final ChangeEvent event ) {
-        presenter.onJndiChange();
     }
 
     @EventHandler( "connection-url")

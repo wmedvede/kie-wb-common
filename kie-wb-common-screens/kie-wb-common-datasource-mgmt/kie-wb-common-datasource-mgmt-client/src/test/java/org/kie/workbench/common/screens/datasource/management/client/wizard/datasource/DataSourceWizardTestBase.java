@@ -134,14 +134,12 @@ public abstract class DataSourceWizardTestBase
      */
     protected void completeValidDefPage() {
         when( mainPanelView.getName() ).thenReturn( NAME );
-        when( mainPanelView.getJndi() ).thenReturn( JNDI );
         when( mainPanelView.getConnectionURL() ).thenReturn( CONNECTION_URL );
         when( mainPanelView.getUser() ).thenReturn( USER );
         when( mainPanelView.getPassword() ).thenReturn( PASSWORD );
         when( mainPanelView.getDriver() ).thenReturn( DRIVER_UUID );
 
         mainPanel.onNameChange();
-        mainPanel.onJndiChange();
         mainPanel.onConnectionURLChange();
         mainPanel.onUserChange();
         mainPanel.onPasswordChange();

@@ -50,13 +50,6 @@ public class DataSourceDefMainPanel
     }
 
     @Override
-    public void onJndiChange() {
-        if ( handler != null ) {
-            handler.onJndiChange();
-        }
-    }
-
-    @Override
     public void onConnectionURLChange() {
         if ( handler != null ) {
             handler.onConnectionURLChange();
@@ -110,22 +103,6 @@ public class DataSourceDefMainPanel
 
     public void clearNameErrorMessage() {
         view.clearNameErrorMessage();
-    }
-
-    public void setJndi( final String jndi ) {
-        view.setJndi( jndi );
-    }
-
-    public String getJndi() {
-        return view.getJndi();
-    }
-
-    public void setJndiErrorMessage( final String message ) {
-        view.setJndiErrorMessage( message );
-    }
-
-    public void clearJndiErrorMessage() {
-        view.clearJndiErrorMessage();
     }
 
     public String getConnectionURL() {
@@ -199,9 +176,6 @@ public class DataSourceDefMainPanel
     public void clear() {
         view.setName( null );
         view.clearNameErrorMessage();
-
-        view.setJndi( null );
-        view.clearJndiErrorMessage();
 
         view.setConnectionURL( null );
         view.clearConnectionURLErrorMessage();

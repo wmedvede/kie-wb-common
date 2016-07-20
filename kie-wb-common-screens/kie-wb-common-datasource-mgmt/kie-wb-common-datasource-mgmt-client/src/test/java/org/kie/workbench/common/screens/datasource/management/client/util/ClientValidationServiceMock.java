@@ -82,15 +82,6 @@ public class ClientValidationServiceMock
     }
 
     @Override
-    public void isValidJndiName( String jndiName, ValidatorCallback callback ) {
-        if ( JNDI.equals( jndiName ) ) {
-            callback.onSuccess();
-        } else {
-            callback.onFailure();
-        }
-    }
-
-    @Override
     public void isValidConnectionURL( String connectionURL, ValidatorCallback callback ) {
         if ( CONNECTION_URL.equals( connectionURL ) ) {
             callback.onSuccess();
@@ -98,6 +89,5 @@ public class ClientValidationServiceMock
             callback.onFailure();
         }
     }
-
 
 }

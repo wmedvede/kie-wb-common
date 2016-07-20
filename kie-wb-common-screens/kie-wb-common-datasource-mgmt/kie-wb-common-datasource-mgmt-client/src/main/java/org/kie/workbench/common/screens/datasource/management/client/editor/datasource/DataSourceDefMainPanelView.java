@@ -31,8 +31,6 @@ public interface DataSourceDefMainPanelView extends UberView<DataSourceDefMainPa
 
         void onNameChange();
 
-        void onJndiChange();
-
         void onConnectionURLChange();
 
         void onUserChange();
@@ -51,14 +49,6 @@ public interface DataSourceDefMainPanelView extends UberView<DataSourceDefMainPa
     void setNameErrorMessage( final String message );
 
     void clearNameErrorMessage();
-
-    void setJndi( final String jndi );
-
-    String getJndi();
-
-    void setJndiErrorMessage( final String message );
-
-    void clearJndiErrorMessage();
 
     String getConnectionURL();
 

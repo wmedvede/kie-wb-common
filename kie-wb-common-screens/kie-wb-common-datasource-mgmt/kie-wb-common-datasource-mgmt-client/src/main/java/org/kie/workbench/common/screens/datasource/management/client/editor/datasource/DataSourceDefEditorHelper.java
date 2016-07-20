@@ -66,7 +66,6 @@ public class DataSourceDefEditorHelper {
     private Project project;
 
     private boolean nameValid = false;
-    private boolean jndiValid = false;
     private boolean connectionURLValid = false;
     private boolean userValid = false;
     private boolean passwordValid = false;
@@ -92,11 +91,6 @@ public class DataSourceDefEditorHelper {
             @Override
             public void onNameChange() {
                 DataSourceDefEditorHelper.this.onNameChange();
-            }
-
-            @Override
-            public void onJndiChange() {
-                DataSourceDefEditorHelper.this.onJndiChange();
             }
 
             @Override
@@ -130,7 +124,6 @@ public class DataSourceDefEditorHelper {
         this.dataSourceDef = dataSourceDef;
         mainPanel.clear();
         mainPanel.setName( dataSourceDef.getName() );
-        mainPanel.setJndi( dataSourceDef.getJndi() );
         mainPanel.setConnectionURL( dataSourceDef.getConnectionURL() );
         mainPanel.setUser( dataSourceDef.getUser() );
         mainPanel.setPassword( dataSourceDef.getPassword() );
@@ -214,35 +207,6 @@ public class DataSourceDefEditorHelper {
         }
         if ( handler != null ) {
             handler.onNameChange();
-        }
-    }
-
-    public void onJndiChange() {
-        final String newValue = mainPanel.getJndi().trim();
-        validationService.isValidJndiName( newValue, new ValidatorCallback() {
-            @Override
-            public void onSuccess() {
-                onJndiChange( newValue, true );
-            }
-
-            @Override
-            public void onFailure() {
-                onJndiChange( newValue, false );
-            }
-        } );
-    }
-
-    private void onJndiChange( String newValue, boolean isValid ) {
-        dataSourceDef.setJndi( newValue );
-        jndiValid = isValid;
-        if ( !jndiValid ) {
-            mainPanel.setJndiErrorMessage(
-                    getMessage( DataSourceManagementConstants.DataSourceDefEditor_InvalidJndiMessage ) );
-        } else {
-            mainPanel.clearJndiErrorMessage();
-        }
-        if ( handler != null ) {
-            handler.onJndiChange();
         }
     }
 
@@ -403,7 +367,6 @@ public class DataSourceDefEditorHelper {
 
     public void setValid( boolean valid ) {
         this.nameValid = valid;
-        this.jndiValid = valid;
         this.connectionURLValid = valid;
         this.userValid = valid;
         this.passwordValid = valid;
@@ -416,10 +379,6 @@ public class DataSourceDefEditorHelper {
 
     public boolean isNameValid() {
         return nameValid;
-    }
-
-    public boolean isJndiValid() {
-        return jndiValid;
     }
 
     public boolean isConnectionURLValid() {

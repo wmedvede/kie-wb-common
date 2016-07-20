@@ -160,7 +160,6 @@ public class DataSourceDefEditor
     @Override
     protected void save() {
         if ( !editorHelper.isNameValid() ||
-                !editorHelper.isJndiValid() ||
                 !editorHelper.isConnectionURLValid() ||
                 !editorHelper.isUserValid() ||
                 !editorHelper.isPasswordValid() ||
