@@ -29,9 +29,9 @@ import org.kie.workbench.common.screens.datasource.management.client.resources.i
 import org.kie.workbench.common.screens.datasource.management.client.type.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefEditorContent;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceRuntimeInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefEditorService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagerClientService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceRuntimeManagerClientService;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.annotations.WorkbenchEditor;
 import org.uberfire.client.annotations.WorkbenchMenu;
@@ -74,7 +74,7 @@ public class DataSourceDefEditor
 
     private Caller<DataSourceDefEditorService> editorService;
 
-    private Caller<DataSourceManagerClientService> dataSourceManagerClient;
+    private Caller<DataSourceRuntimeManagerClientService> dataSourceManagerClient;
 
     private DataSourceDefEditorContent editorContent;
 
@@ -85,7 +85,7 @@ public class DataSourceDefEditor
             final PopupsUtil popupsUtil,
             final DataSourceDefType type,
             final Caller<DataSourceDefEditorService> editorService,
-            final Caller<DataSourceManagerClientService> dataSourceManagerClient ) {
+            final Caller<DataSourceRuntimeManagerClientService> dataSourceManagerClient ) {
         super( view );
         this.view = view;
         this.mainPanel = mainPanel;
@@ -175,7 +175,7 @@ public class DataSourceDefEditor
      * Executes a safe saving of the data source by checking it's status and asking user confirmation if needed.
      */
     protected void safeSave() {
-        executeSafeUpdateCommand( DataSourceManagementConstants.DataSourceDefEditor_DataSourceHasRunningDependantsForSave,
+        executeSafeUpdateCommand( DataSourceManagementConstants.DataSourceDefEditor_DataSourceHasBeenReferencedForSaveMessage,
                 new Command() {
                     @Override public void execute() {
                         save( false );
@@ -229,7 +229,7 @@ public class DataSourceDefEditor
      * Executes a safe deletion of the data source by checking it's status and asking user confirmation if needed.
      */
     protected void safeDelete( ObservablePath currentPath ) {
-        executeSafeUpdateCommand( DataSourceManagementConstants.DataSourceDefEditor_DataSourceHasRunningDependantsForDelete,
+        executeSafeUpdateCommand( DataSourceManagementConstants.DataSourceDefEditor_DataSourceHasBeenReferencedForDeleteMessage,
                 new Command() {
                     @Override public void execute() {
                         delete( currentPath, false );
@@ -274,11 +274,11 @@ public class DataSourceDefEditor
      */
     protected void executeSafeUpdateCommand( String onDependantsMessageKey,
             Command defaultCommand, Command yesCommand, Command noCommand ) {
-        dataSourceManagerClient.call( new RemoteCallback<DataSourceRuntimeInfo>() {
+        dataSourceManagerClient.call( new RemoteCallback<DataSourceDeploymentInfo>() {
             @Override
-            public void callback( DataSourceRuntimeInfo dataSourceRuntimeInfo ) {
+            public void callback( DataSourceDeploymentInfo deploymentInfo ) {
 
-                if ( dataSourceRuntimeInfo != null && dataSourceRuntimeInfo.isRunning() ) {
+                if ( deploymentInfo != null && deploymentInfo.wasReferenced() ) {
                     popupsUtil.showYesNoPopup( CommonConstants.INSTANCE.Warning(),
                             editorHelper.getMessage( onDependantsMessageKey ),
                             yesCommand,
@@ -291,7 +291,7 @@ public class DataSourceDefEditor
                     defaultCommand.execute();
                 }
             }
-        } ).getDataSourceRuntimeInfo( getContent().getDataSourceDef().getUuid() );
+        } ).getDataSourceDeploymentInfo( getContent().getDataSourceDef().getUuid() );
     }
 
     /**

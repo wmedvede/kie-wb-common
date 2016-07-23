@@ -39,8 +39,8 @@ public abstract class AbstractDataSource
     }
 
     @Override
-    public boolean isRunning() {
-        return DataSourceStatus.RUNNING.equals( status );
+    public boolean isReferenced() {
+        return DataSourceStatus.REFERENCED.equals( status );
     }
 
     @Override

@@ -30,7 +30,7 @@ import org.kie.workbench.common.screens.datasource.management.client.util.Popups
 import org.kie.workbench.common.screens.datasource.management.client.validation.ClientValidationService;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagerClientService;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceRuntimeManagerClientService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.mockito.Mock;
 import org.uberfire.backend.vfs.ObservablePath;
@@ -72,9 +72,9 @@ public class DriverDefEditorTest
     private Caller<DriverDefEditorService> editorServiceCaller;
 
     @Mock
-    private DataSourceManagerClientService dataSourceManagerClient;
+    private DataSourceRuntimeManagerClientService dataSourceManagerClient;
 
-    private Caller<DataSourceManagerClientService> dataSourceManagerClientCaller;
+    private Caller<DataSourceRuntimeManagerClientService> dataSourceManagerClientCaller;
 
     private DriverDefEditor editor;
 

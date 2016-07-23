@@ -37,4 +37,25 @@ public abstract class DeploymentInfo {
     public boolean isManaged() {
         return managed;
     }
+
+    @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) {
+            return true;
+        }
+        if ( o == null || getClass() != o.getClass() ) {
+            return false;
+        }
+
+        DeploymentInfo that = ( DeploymentInfo ) o;
+
+        return !( deploymentId != null ? !deploymentId.equals( that.deploymentId ) : that.deploymentId != null );
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = deploymentId != null ? deploymentId.hashCode() : 0;
+        return ~~result;
+    }
 }

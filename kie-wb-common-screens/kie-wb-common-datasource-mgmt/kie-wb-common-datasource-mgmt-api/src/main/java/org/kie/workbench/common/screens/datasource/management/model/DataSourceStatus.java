@@ -26,7 +26,7 @@ public enum DataSourceStatus {
     /**
      * A data source that was looked up by at least one client.
      */
-    RUNNING,
+    REFERENCED,
 
     /**
      * A data source in stale mode may continue serving connections but it's not safe to do it. Components that uses

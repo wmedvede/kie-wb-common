@@ -29,8 +29,8 @@ import org.kie.workbench.common.screens.datasource.management.client.resources.i
 import org.kie.workbench.common.screens.datasource.management.client.type.DriverDefType;
 import org.kie.workbench.common.screens.datasource.management.client.util.PopupsUtil;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefEditorContent;
-import org.kie.workbench.common.screens.datasource.management.model.DriverRuntimeInfo;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceManagerClientService;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.service.DataSourceRuntimeManagerClientService;
 import org.kie.workbench.common.screens.datasource.management.service.DriverDefEditorService;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.annotations.WorkbenchEditor;
@@ -74,7 +74,7 @@ public class DriverDefEditor
 
     private Caller<DriverDefEditorService> editorService;
 
-    private Caller<DataSourceManagerClientService> dataSourceManagerClient;
+    private Caller<DataSourceRuntimeManagerClientService> dataSourceManagerClient;
 
     private DriverDefEditorContent editorContent;
 
@@ -85,7 +85,7 @@ public class DriverDefEditor
             final PopupsUtil popupsUtil,
             final DriverDefType type,
             final Caller<DriverDefEditorService> editorService,
-            final Caller<DataSourceManagerClientService> dataSourceManagerClient ) {
+            final Caller<DataSourceRuntimeManagerClientService> dataSourceManagerClient ) {
         super( view );
         this.view = view;
         this.mainPanel = mainPanel;
@@ -167,7 +167,7 @@ public class DriverDefEditor
      * the change.
      */
     protected void safeSave() {
-        executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasRunningDependantsForSave,
+        executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasDependantsForSaveMessage,
                 new Command() {
                     @Override public void execute() {
                         save( false );
@@ -209,11 +209,11 @@ public class DriverDefEditor
      */
     protected void executeSafeUpdateCommand( String onDependantsMessageKey,
             Command defaultCommand, Command yesCommand, Command noCommand ) {
-        dataSourceManagerClient.call( new RemoteCallback<DriverRuntimeInfo>() {
+        dataSourceManagerClient.call( new RemoteCallback<DriverDeploymentInfo>() {
             @Override
-            public void callback( DriverRuntimeInfo driverRuntimeInfo ) {
+            public void callback( DriverDeploymentInfo deploymentInfo ) {
 
-                if ( driverRuntimeInfo != null && driverRuntimeInfo.hasRunningDependants() ) {
+                if ( deploymentInfo != null && deploymentInfo.hasDependants() ) {
                     popupsUtil.showYesNoPopup( CommonConstants.INSTANCE.Warning(),
                             editorHelper.getMessage( onDependantsMessageKey ),
                             yesCommand,
@@ -226,7 +226,7 @@ public class DriverDefEditor
                     defaultCommand.execute();
                 }
             }
-        } ).getDriverRuntimeInfo( getContent().getDriverDef().getUuid() );
+        } ).getDriverDeploymentInfo( getContent().getDriverDef().getUuid() );
     }
 
     /**
@@ -246,7 +246,7 @@ public class DriverDefEditor
      * the change.
      */
     protected void safeDelete( ObservablePath currentPath ) {
-        executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasRunningDependantsForDelete,
+        executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasDependantsForDeleteMessage,
                 new Command() {
                     @Override public void execute() {
                         delete( currentPath, false );
@@ -364,32 +364,24 @@ public class DriverDefEditor
     }
 
     private void onCheckStatus() {
-        dataSourceManagerClient.call( new RemoteCallback<DriverRuntimeInfo>() {
+        dataSourceManagerClient.call( new RemoteCallback<DriverDeploymentInfo>() {
             @Override
-            public void callback( DriverRuntimeInfo driverRuntimeInfo ) {
+            public void callback( DriverDeploymentInfo deploymentInfo ) {
                 StringBuilder builder = new StringBuilder();
-                if ( driverRuntimeInfo == null ) {
+                if ( deploymentInfo == null ) {
                     builder.append( editorHelper.getMessage(
                             DataSourceManagementConstants.DriverDefEditor_DriverNotRegisteredMessage,
                             getContent().getDriverDef().getUuid() ) );
-                } else if ( !driverRuntimeInfo.hasDependants() ) {
+                } else if ( !deploymentInfo.hasDependants() ) {
                     builder.append( editorHelper.getMessage(
                             DataSourceManagementConstants.DriverDefEditor_DriverHasNoDependantsMessage ) );
                 } else {
                     builder.append( editorHelper.getMessage(
                             DataSourceManagementConstants.DriverDefEditor_DriverHasDependantsMessage,
-                            driverRuntimeInfo.dependantsCount() ) );
-                    if ( driverRuntimeInfo.hasRunningDependants() ) {
-                        builder.append( editorHelper.getMessage(
-                                DataSourceManagementConstants.DriverDefEditor_DriverHasRunningDependantsMessage,
-                                driverRuntimeInfo.runningDependantsCount() ) );
-                    } else {
-                        builder.append( editorHelper.getMessage(
-                                DataSourceManagementConstants.DriverDefEditor_DriverHasNoRunningDependantsMessage ) );
-                    }
+                            deploymentInfo.getDependants().size() ) );
                 }
                 popupsUtil.showInformationPopup( builder.toString() );
             }
-        } ).getDriverRuntimeInfo( getContent().getDriverDef().getUuid() );
+        } ).getDriverDeploymentInfo( getContent().getDriverDef().getUuid() );
     }
 }

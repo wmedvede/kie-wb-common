@@ -27,10 +27,15 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
  */
 public interface DataSourceManagerRegistry {
 
+    //validate( XXX );
+
+    //checkStatus();
+
+
     /**
      * Registers the driver definition with a SOFT registration.
      *
-     * @throws If there are RUNNING data sources that depends on this driver definition an exception is thrown.
+     * @throws If there are REFERENCED data sources that depends on this driver definition an exception is thrown.
      */
     void registerDriverDef( DriverDef driverDef ) throws Exception;
 
@@ -39,7 +44,7 @@ public interface DataSourceManagerRegistry {
     /**
      * De-registers the driver definition with a SOFT registration.
      *
-     * @throws If there are RUNNING data sources that depends on this driver an exception is thrown.
+     * @throws If there are REFERENCED data sources that depends on this driver an exception is thrown.
      */
     void deRegisterDriverDef( String driverDefUuid ) throws Exception;
 

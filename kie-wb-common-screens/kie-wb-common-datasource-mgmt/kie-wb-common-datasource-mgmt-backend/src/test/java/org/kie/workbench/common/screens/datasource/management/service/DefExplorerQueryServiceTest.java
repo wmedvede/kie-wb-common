@@ -33,7 +33,7 @@ import org.jboss.errai.security.shared.api.identity.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kie.workbench.common.screens.datasource.management.backend.DefExplorerQueryServiceImpl;
+import org.kie.workbench.common.screens.datasource.management.backend.service.DefExplorerQueryServiceImpl;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.kie.workbench.common.services.shared.project.KieProjectService;

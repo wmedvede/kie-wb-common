@@ -21,13 +21,13 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.kie.workbench.common.screens.datasource.management.backend.DataSourceManagementConfig;
+import org.kie.workbench.common.screens.datasource.management.backend.DataSourceManagementBootstrap;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSource;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManager;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceManagerRegistry;
-import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProvider;
-import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefRegistry;
-import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefRegistryEntry;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProviderOLD;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefCache;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefCacheEntry;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceRuntimeInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverRuntimeInfo;
@@ -38,19 +38,19 @@ public class DataSourceManagerImpl
 
     private DataSourceManagerRegistry dataSourceManagerRegistry;
 
-    private DriverDefRegistry driverDefRegistry;
+    private DriverDefCache driverDefCache;
 
-    private DataSourceManagementConfig dataSourceManagementConfig;
+    private DataSourceManagementBootstrap dataSourceManagementConfig;
 
     public DataSourceManagerImpl() {
     }
 
     @Inject
     public DataSourceManagerImpl( DataSourceManagerRegistry dataSourceManagerRegistry,
-            DriverDefRegistry driverDefRegistry,
-            DataSourceManagementConfig dataSourceManagementConfig ) {
+            DriverDefCache driverDefCache,
+            DataSourceManagementBootstrap dataSourceManagementConfig ) {
         this.dataSourceManagerRegistry = dataSourceManagerRegistry;
-        this.driverDefRegistry = driverDefRegistry;
+        this.driverDefCache = driverDefCache;
         this.dataSourceManagementConfig = dataSourceManagementConfig;
     }
 
@@ -61,12 +61,12 @@ public class DataSourceManagerImpl
         if ( dataSourceDef == null ) {
             throw new Exception( "No data source definition has been registered for uuid : " + uuid );
         }
-        DataSourceProvider dataSourceProvider = dataSourceManagementConfig.getDataSourceProvider();
-        if ( dataSourceProvider == null ) {
+        DataSourceProviderOLD dataSourceProviderOLD = dataSourceManagementConfig.getDataSourceProviderOLD();
+        if ( dataSourceProviderOLD == null ) {
             throw new Exception( "No data source provider has been registered for data source: " + dataSourceDef );
         }
 
-        return dataSourceProvider.lookup( uuid );
+        return dataSourceProviderOLD.lookup( uuid );
     }
 
     @Override
@@ -76,7 +76,7 @@ public class DataSourceManagerImpl
             return null;
         }
 
-        DataSourceProvider provider = dataSourceManagementConfig.getDataSourceProvider();
+        DataSourceProviderOLD provider = dataSourceManagementConfig.getDataSourceProviderOLD();
         if ( provider == null ) {
             return null;
         }
@@ -86,7 +86,7 @@ public class DataSourceManagerImpl
 
     @Override
     public DriverRuntimeInfo getDriverRuntimeInfo( String uuid ) {
-        DriverDefRegistryEntry entry = driverDefRegistry.getDriverDefEntry( uuid );
+        DriverDefCacheEntry entry = driverDefCache.get( uuid );
         if ( entry == null ) {
             return null;
         }
