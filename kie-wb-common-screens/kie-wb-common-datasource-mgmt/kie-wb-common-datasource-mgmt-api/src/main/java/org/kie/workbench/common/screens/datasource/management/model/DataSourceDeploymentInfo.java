@@ -26,12 +26,15 @@ public class DataSourceDeploymentInfo
 
     private String jndi;
 
+    private boolean referenced;
+
     public DataSourceDeploymentInfo() {
     }
 
-    public DataSourceDeploymentInfo( String deploymentId, boolean managed, String uuid ) {
+    public DataSourceDeploymentInfo( String deploymentId, boolean managed, String uuid, boolean referenced ) {
         super( deploymentId, managed );
         this.uuid = uuid;
+        this.referenced = referenced;
     }
 
     public String getUuid() {
@@ -42,6 +45,10 @@ public class DataSourceDeploymentInfo
         return jndi;
     }
 
+    public boolean wasReferenced() {
+        return referenced;
+    }
+
     @Override
     public String toString() {
         return "DataSourceDeploymentInfo{" +
@@ -50,5 +57,31 @@ public class DataSourceDeploymentInfo
                 ", uuid='" + uuid + '\'' +
                 ", jndi='" + jndi + '\'' +
                 "} ";
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) {
+            return true;
+        }
+        if ( o == null || getClass() != o.getClass() ) {
+            return false;
+        }
+        if ( !super.equals( o ) ) {
+            return false;
+        }
+
+        DataSourceDeploymentInfo that = ( DataSourceDeploymentInfo ) o;
+
+        return !( uuid != null ? !uuid.equals( that.uuid ) : that.uuid != null );
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = ~~result;
+        result = 31 * result + ( uuid != null ? uuid.hashCode() : 0 );
+        result = ~~result;
+        return result;
     }
 }

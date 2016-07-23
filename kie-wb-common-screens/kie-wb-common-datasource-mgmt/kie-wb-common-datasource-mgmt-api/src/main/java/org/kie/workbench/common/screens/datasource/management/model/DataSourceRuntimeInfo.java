@@ -30,8 +30,8 @@ public class DataSourceRuntimeInfo {
         this.status = status;
     }
 
-    public boolean isRunning() {
-        return DataSourceStatus.RUNNING.equals( status );
+    public boolean isReferenced() {
+        return DataSourceStatus.REFERENCED.equals( status );
     }
 
     public boolean isStale() {

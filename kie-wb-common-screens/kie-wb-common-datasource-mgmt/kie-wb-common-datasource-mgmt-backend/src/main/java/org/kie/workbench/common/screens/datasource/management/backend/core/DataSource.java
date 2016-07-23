@@ -29,7 +29,7 @@ public interface DataSource {
 
     DataSourceStatus getStatus();
 
-    boolean isRunning();
+    boolean isReferenced();
 
     boolean isStale();
 

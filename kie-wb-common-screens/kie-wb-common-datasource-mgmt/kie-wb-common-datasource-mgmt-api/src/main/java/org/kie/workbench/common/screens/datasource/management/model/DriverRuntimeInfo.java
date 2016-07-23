@@ -39,7 +39,7 @@ public class DriverRuntimeInfo {
     public boolean hasRunningDependants() {
         if ( hasDependants() ) {
             for ( DataSourceRuntimeInfo dependantInfo : dependantsInfo ) {
-                if ( dependantInfo.isRunning() ) {
+                if ( dependantInfo.isReferenced() ) {
                     return true;
                 }
             }
@@ -51,7 +51,7 @@ public class DriverRuntimeInfo {
         int i = 0;
         if ( hasDependants() ) {
             for ( DataSourceRuntimeInfo dependantInfo : dependantsInfo ) {
-                if ( dependantInfo.isRunning() ) {
+                if ( dependantInfo.isReferenced() ) {
                     i++;
                 }
             }
