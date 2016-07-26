@@ -37,6 +37,9 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDeploy
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Widlfy based implementation of a DataSourceProvider.
+ */
 @Dependent
 @Named(value = "WildflyDataSourceProvider" )
 public class WildflyDataSourceProvider
@@ -192,12 +195,6 @@ public class WildflyDataSourceProvider
         return null;
     }
 
-    @Override
-    public void update( DataSourceDef dataSourceDef ) throws Exception {
-
-
-    }
-
     /**
      * Gets the deployment information for all the data sources currently defined on the Wildfly server.
      *
@@ -250,8 +247,10 @@ public class WildflyDataSourceProvider
                 //first access to the data source
                 dataSource.setStatus( DataSourceStatus.REFERENCED );
             }
+            return dataSource;
+        } else {
+            throw new Exception( "Data source: " + dataSource + " is not deployed in current system." );
         }
-        return dataSource;
     }
 
     @Override

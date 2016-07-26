@@ -31,6 +31,10 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
 
+
+/**
+ * Widlfy based implementation of a DriverProvider.
+ */
 @Dependent
 @Named(value = "WildflyDriverProvider" )
 public class WildflyDriverProvider
@@ -55,9 +59,7 @@ public class WildflyDriverProvider
         final URI uri = artifactResolver.resolve( driverDef.getGroupId(),
                 driverDef.getArtifactId(), driverDef.getVersion() );
         if ( uri == null ) {
-            throw new Exception( "Unable to remove driver library artifact for gav: " + driverDef.getGroupId() +
-                    ":" + driverDef.getArtifactId() +
-                    ":" + driverDef.getVersion() );
+            throw new Exception( "Unable to get driver library artifact for driver: " + driverDef );
         }
 
         String deploymentId = DeploymentIdGenerator.generateDeploymentId( driverDef );

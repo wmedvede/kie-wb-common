@@ -39,8 +39,8 @@ import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartTitleDecoration;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.ext.editor.commons.client.BaseEditor;
-import org.uberfire.ext.editor.commons.client.file.DeletePopup;
-import org.uberfire.ext.editor.commons.client.file.SaveOperationService;
+import org.uberfire.ext.editor.commons.client.file.popups.DeletePopUpPresenter;
+import org.uberfire.ext.editor.commons.client.file.popups.SavePopUpPresenter;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 import org.uberfire.ext.widgets.common.client.callbacks.HasBusyIndicatorDefaultErrorCallback;
 import org.uberfire.ext.widgets.common.client.resources.i18n.CommonConstants;
@@ -77,6 +77,12 @@ public class DataSourceDefEditor
     private Caller<DataSourceRuntimeManagerClientService> dataSourceManagerClient;
 
     private DataSourceDefEditorContent editorContent;
+
+    @Inject
+    protected SavePopUpPresenter savePopUpPresenter;
+
+    @Inject
+    protected DeletePopUpPresenter deletePopUpPresenter;
 
     @Inject
     public DataSourceDefEditor( final DataSourceDefEditorView view,
@@ -197,7 +203,7 @@ public class DataSourceDefEditor
      * Performs the formal save of the data source.
      */
     protected void save( boolean forceSave ) {
-        new SaveOperationService().save( versionRecordManager.getCurrentPath(),
+        savePopUpPresenter.show( versionRecordManager.getCurrentPath(),
                 new ParameterizedCommand<String>() {
                     @Override
                     public void execute( final String commitMessage ) {
@@ -253,7 +259,7 @@ public class DataSourceDefEditor
      */
     protected void delete( ObservablePath currentPath, boolean forceDelete ) {
 
-        final DeletePopup popup = new DeletePopup( new ParameterizedCommand<String>() {
+        deletePopUpPresenter.show( new ParameterizedCommand<String>() {
             @Override
             public void execute( final String comment ) {
                 view.showBusyIndicator( org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants.INSTANCE.Deleting() );
@@ -266,7 +272,6 @@ public class DataSourceDefEditor
                 } , new HasBusyIndicatorDefaultErrorCallback( view ) ).delete( currentPath, comment, forceDelete );
             }
         } );
-        popup.show();
     }
 
     /**

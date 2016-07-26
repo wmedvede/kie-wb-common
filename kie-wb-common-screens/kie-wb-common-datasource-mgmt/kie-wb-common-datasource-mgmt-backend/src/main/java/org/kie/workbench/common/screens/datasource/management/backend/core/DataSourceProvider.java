@@ -22,23 +22,69 @@ import java.util.Properties;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 
+/**
+ * Class for managing the deployment of data sources in a given system e.g. the Wildlfy server.
+ */
 public interface DataSourceProvider {
 
-    DataSourceDeploymentInfo deploy( final DataSourceDef dataSourceDef ) throws Exception;
-
-    DataSourceDeploymentInfo resync( final DataSourceDef dataSourceDef, final DataSourceDeploymentInfo deploymentInfo ) throws Exception;
-
-    void undeploy( final DataSourceDeploymentInfo deploymentInfo ) throws Exception;
-
-    DataSourceDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception;
-
-    List<DataSourceDeploymentInfo> getDeploymentsInfo() throws Exception;
-
-    List<DataSourceDef> getDeployments() throws Exception;
-
+    /**
+     * Used to pass initial configurations to the provider.
+     */
     void loadConfig( Properties properties );
 
-    void update( DataSourceDef dataSourceDef ) throws Exception;
+    /**
+     * Deploys a data source in the target system.
+     */
+    DataSourceDeploymentInfo deploy( final DataSourceDef dataSourceDef ) throws Exception;
 
+    /**
+     * Resyncs an already deployed data source.
+     */
+    DataSourceDeploymentInfo resync( final DataSourceDef dataSourceDef, final DataSourceDeploymentInfo deploymentInfo ) throws Exception;
+
+    /**
+     * Un-deploys a data source from the target system.
+     */
+    void undeploy( final DataSourceDeploymentInfo deploymentInfo ) throws Exception;
+
+    /**
+     * Gets the deployment information form an already deployed data source.
+     *
+     * @param uuid the data source identifier.
+     *
+     * @return The deployment information or null if the data source wasn't deployed.
+     *
+     * @throws Exception in cases e.g. when communication with the target system e.g. the Wildlfy server fails.
+     */
+    DataSourceDeploymentInfo getDeploymentInfo( final String uuid ) throws Exception;
+
+    /**
+     * Gets the deployment information for all the deployed data sources in the target system.
+     *
+     * @return a list with current deployments.
+     *
+     * @throws Exception in cases e.g. when communication with the target system e.g. the Wildlfy server fails.
+     */
+    List<DataSourceDeploymentInfo> getDeploymentsInfo() throws Exception;
+
+    /**
+     * Gets the definitions for all the deployed data sources in the target system.
+     *
+     * @return a list with the definitions.
+     *
+     * @throws Exception in cases e.g. when communication with the target system e.g. the Wildlfy server fails.
+     */
+    List<DataSourceDef> getDeployments() throws Exception;
+
+    /**
+     * Gets a reference to a data source previously deployed in the system.
+     *
+     * @param deploymentInfo Deployment information for the data source.
+     *
+     * @return The data given data source instance.
+     *
+     * @throws Exception if the data source is not deployed or e.g. when communication with the
+     * target system e.g. the Wildlfy server fails.
+     */
     DataSource lookupDataSource( DataSourceDeploymentInfo deploymentInfo ) throws Exception;
 }

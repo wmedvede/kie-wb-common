@@ -28,6 +28,7 @@ import org.kie.workbench.common.screens.datasource.management.backend.core.Deplo
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDeploymentCache;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDeploymentCacheEntry;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverProvider;
+import org.kie.workbench.common.screens.datasource.management.backend.core.UnDeploymentOptions;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
@@ -96,7 +97,8 @@ public class DataSourceRuntimeManagerImpl
     }
 
     @Override
-    public synchronized void unDeployDataSource( DataSourceDeploymentInfo deploymentInfo, DeploymentOptions options ) throws Exception {
+    public synchronized void unDeployDataSource( DataSourceDeploymentInfo deploymentInfo, UnDeploymentOptions options )
+            throws Exception {
         try {
             dataSourceProvider.undeploy( deploymentInfo );
             deReferFromDrivers( deploymentInfo );
@@ -142,9 +144,10 @@ public class DataSourceRuntimeManagerImpl
     }
 
     @Override
-    public synchronized void unDeployDriver( DriverDeploymentInfo deploymentInfo, DeploymentOptions options ) throws Exception {
+    public synchronized void unDeployDriver( DriverDeploymentInfo deploymentInfo, UnDeploymentOptions options ) throws Exception {
         try {
-            //TODO agregar lo de la registry y procesar las options.
+            //TODO process the deployment options.
+            driverDeploymentCache.remove( deploymentInfo );
             driverProvider.undeploy( deploymentInfo );
         } catch ( Exception e ) {
             logger.error( "Driver un-deployment failed for deploymentInfo: " + deploymentInfo, e );

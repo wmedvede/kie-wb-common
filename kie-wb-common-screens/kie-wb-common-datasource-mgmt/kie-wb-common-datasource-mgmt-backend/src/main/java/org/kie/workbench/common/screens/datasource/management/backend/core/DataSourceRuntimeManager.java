@@ -23,42 +23,41 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDeploy
 
 /**
  * Runtime system for the data sources management.
- *
  */
 public interface DataSourceRuntimeManager {
 
     /**
      * Deploys a data source definition in the data sources runtime system.
      *
-     * @param dataSourceDef
+     * @param dataSourceDef Data source definition to be deployed.
      *
-     * @param options
+     * @param options deployment options to apply.
      *
-     * @return
+     * @return the deployment information if the deployment was successful, an exception is thrown in any other case.
      */
     DataSourceDeploymentInfo deployDataSource( DataSourceDef dataSourceDef, DeploymentOptions options ) throws Exception;
 
     /**
      * Gets the deployment information for given data source.
      *
-     * @param uuid
+     * @param uuid the data source identifier.
      *
-     * @return
+     * @return The deployment information or null if the data source wasn't deployed.
      *
-     * @throws Exception
+     * @throws Exception if the deployment information couldn't be retrieved.
      */
     DataSourceDeploymentInfo getDataSourceDeploymentInfo( String uuid ) throws Exception;
 
     /**
      * Un-deploys a data source from the data sources runtime system.
      *
-     * @param deploymentInfo
+     * @param deploymentInfo the deployment information for a previously deployed data source.
      *
-     * @param options
+     * @param options un-deployment options to apply.
      *
-     * @throws Exception
+     * @throws Exception if the un-deployment failed.
      */
-    void unDeployDataSource( DataSourceDeploymentInfo deploymentInfo, DeploymentOptions options ) throws Exception;
+    void unDeployDataSource( DataSourceDeploymentInfo deploymentInfo, UnDeploymentOptions options ) throws Exception;
 
     /**
      * Deploys a driver in the data sources runtime system.
@@ -74,7 +73,7 @@ public interface DataSourceRuntimeManager {
      *
      * @param options
      */
-    void unDeployDriver( DriverDeploymentInfo deploymentInfo, DeploymentOptions options ) throws Exception;
+    void unDeployDriver( DriverDeploymentInfo deploymentInfo, UnDeploymentOptions options ) throws Exception;
 
     DataSource lookupDataSource( String uuid ) throws Exception;
 

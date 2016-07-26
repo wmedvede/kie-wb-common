@@ -23,7 +23,7 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 
 /**
- * Specialized cache for the storage of the driver definitions.
+ * Specialized cache for the storage of the driver deployments.
  */
 public interface DriverDeploymentCache {
 

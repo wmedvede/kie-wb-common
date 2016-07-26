@@ -23,7 +23,7 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 
 /**
- * Represents a registration record in the DriverDeploymentCach
+ * Represents a registration record in the DriverDeploymentCache
  */
 public class DriverDeploymentCacheEntry {
 

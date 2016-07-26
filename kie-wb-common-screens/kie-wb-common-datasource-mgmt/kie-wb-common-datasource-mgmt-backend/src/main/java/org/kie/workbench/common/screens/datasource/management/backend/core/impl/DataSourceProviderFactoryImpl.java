@@ -62,7 +62,6 @@ public class DataSourceProviderFactoryImpl
     public void init() {
         loadConfig();
 
-        //get the references to the services
         String serviceName = getManagedProperty( properties, DATASOURCE_SERVICE );
         if ( !isEmpty( serviceName ) ) {
             try {

@@ -32,13 +32,17 @@ import org.kie.workbench.common.screens.datasource.management.model.DriverDeploy
 import org.kie.workbench.common.screens.datasource.management.util.MavenArtifactResolver;
 import org.uberfire.io.IOService;
 
+/**
+ * Multi-platform implementation of a DriverProvider that will be used in conjunction with the
+ * DBCPDataSourceProvider.
+ */
 @Dependent
 @Named(value = "DBCPDriverService" )
 public class DBCPDriverProvider
     implements DriverProvider {
 
     @Inject
-    MavenArtifactResolver artifactResolver;
+    private MavenArtifactResolver artifactResolver;
 
     @Inject
     @Named("ioStrategy")

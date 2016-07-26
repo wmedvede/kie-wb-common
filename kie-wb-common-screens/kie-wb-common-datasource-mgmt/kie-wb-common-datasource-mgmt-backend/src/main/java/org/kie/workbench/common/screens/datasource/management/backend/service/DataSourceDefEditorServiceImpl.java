@@ -30,6 +30,7 @@ import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceRuntimeManager;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DeploymentOptions;
+import org.kie.workbench.common.screens.datasource.management.backend.core.UnDeploymentOptions;
 import org.kie.workbench.common.screens.datasource.management.events.DeleteDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDataSourceEvent;
 import org.kie.workbench.common.screens.datasource.management.events.UpdateDataSourceEvent;
@@ -138,7 +139,7 @@ public class DataSourceDefEditorServiceImpl
             DataSourceDeploymentInfo deploymentInfo = runtimeManager.getDataSourceDeploymentInfo(
                     editorContent.getDataSourceDef().getUuid() );
             if ( deploymentInfo != null ) {
-                runtimeManager.unDeployDataSource( deploymentInfo, new DeploymentOptions() );
+                runtimeManager.unDeployDataSource( deploymentInfo, UnDeploymentOptions.forcedUnDeployment() );
             }
             runtimeManager.deployDataSource( editorContent.getDataSourceDef(), DeploymentOptions.create() );
 
@@ -343,7 +344,7 @@ public class DataSourceDefEditorServiceImpl
 
                 DataSourceDeploymentInfo deploymentInfo = runtimeManager.getDataSourceDeploymentInfo( dataSourceDef.getUuid() );
                 if ( deploymentInfo != null ) {
-                    runtimeManager.unDeployDataSource( deploymentInfo, new DeploymentOptions() );
+                    runtimeManager.unDeployDataSource( deploymentInfo, UnDeploymentOptions.forcedUnDeployment() );
                 }
 
                 ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );

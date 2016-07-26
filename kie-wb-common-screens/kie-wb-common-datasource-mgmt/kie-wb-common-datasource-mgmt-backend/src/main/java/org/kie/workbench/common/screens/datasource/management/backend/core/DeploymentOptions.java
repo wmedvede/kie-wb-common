@@ -22,9 +22,6 @@ public class DeploymentOptions {
 
     private DeploymentMode deploymentMode;
 
-    public DeploymentOptions() {
-    }
-
     public DeploymentOptions( DeploymentMode deploymentMode ) {
         this.deploymentMode = deploymentMode;
     }
