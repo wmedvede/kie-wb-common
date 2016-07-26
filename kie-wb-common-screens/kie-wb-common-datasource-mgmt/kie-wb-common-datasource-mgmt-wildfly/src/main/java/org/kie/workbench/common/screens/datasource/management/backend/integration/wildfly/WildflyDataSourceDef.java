@@ -17,7 +17,7 @@
 package org.kie.workbench.common.screens.datasource.management.backend.integration.wildfly;
 
 /**
- * This class defines the information that us used by the Wildfly/EAP server to define a data source.
+ * This class defines the information used by the Wildfly/EAP server to define a data source.
  */
 public class WildflyDataSourceDef {
 

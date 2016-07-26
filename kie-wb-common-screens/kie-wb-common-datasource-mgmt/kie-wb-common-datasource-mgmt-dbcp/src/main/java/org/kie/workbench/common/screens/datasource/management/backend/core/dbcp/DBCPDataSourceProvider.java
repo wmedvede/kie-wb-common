@@ -47,6 +47,9 @@ import org.kie.workbench.common.screens.datasource.management.util.URLConnection
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Multi-platform implementation of a DataSourceProvider.
+ */
 @Dependent
 @Named(value = "DBCPDataSourceService" )
 public class DBCPDataSourceProvider
@@ -148,11 +151,6 @@ public class DBCPDataSourceProvider
     }
 
     @Override
-    public void update( DataSourceDef dataSourceDef ) throws Exception {
-        throw new Exception( "not yet implemented." );
-    }
-
-    @Override
     public DataSourceDeploymentInfo getDeploymentInfo( String uuid ) throws Exception {
         return deploymentInfos.get( uuid );
     }
@@ -189,9 +187,9 @@ public class DBCPDataSourceProvider
                         deploymentInfo.getDeploymentId(), true, deploymentInfo.getUuid(), true );
                 deploymentInfos.put( deploymentInfo.getDeploymentId(), updatedDeploymentInfo );
             }
-            return  dataSource;
+            return dataSource;
         } else {
-            throw new Exception( "Data source uuid: " + deploymentInfo.getUuid() + " was not initialized." );
+            throw new Exception( "Data source: " + dataSource + " is not deployed in current system." );
         }
     }
 

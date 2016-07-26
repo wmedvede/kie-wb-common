@@ -23,7 +23,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceDefDeployer;
-import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProviderOLD;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefDeployer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,15 +44,9 @@ public class DataSourceManagementBootstrap {
     @Inject
     private DriverDefDeployer driverDefDeployer;
 
-    private DataSourceProviderOLD dataSourceProviderOLD;
-
     @PostConstruct
     public void init() {
         initializeDeployments();
-    }
-
-    public DataSourceProviderOLD getDataSourceProviderOLD() {
-        return dataSourceProviderOLD;
     }
 
     private void initializeDeployments() {

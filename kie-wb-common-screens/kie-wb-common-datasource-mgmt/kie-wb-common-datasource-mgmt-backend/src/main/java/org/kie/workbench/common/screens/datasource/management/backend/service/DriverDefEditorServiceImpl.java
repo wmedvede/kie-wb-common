@@ -35,6 +35,7 @@ import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceRuntimeManager;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DeploymentOptions;
+import org.kie.workbench.common.screens.datasource.management.backend.core.UnDeploymentOptions;
 import org.kie.workbench.common.screens.datasource.management.events.DeleteDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.events.NewDriverEvent;
 import org.kie.workbench.common.screens.datasource.management.events.UpdateDriverEvent;
@@ -129,7 +130,7 @@ public class DriverDefEditorServiceImpl
             DriverDeploymentInfo deploymentInfo = runtimeManager.getDriverDeploymentInfo(
                     editorContent.getDriverDef().getUuid() );
             if ( deploymentInfo != null ) {
-                runtimeManager.unDeployDriver( deploymentInfo, new DeploymentOptions() );
+                runtimeManager.unDeployDriver( deploymentInfo, UnDeploymentOptions.forcedUnDeployment() );
             }
             runtimeManager.deployDriver( editorContent.getDriverDef(), DeploymentOptions.create() );
 
@@ -283,7 +284,7 @@ public class DriverDefEditorServiceImpl
 
                 DriverDeploymentInfo deploymentInfo = runtimeManager.getDriverDeploymentInfo( driverDef.getUuid() );
                 if ( deploymentInfo != null ) {
-                    runtimeManager.unDeployDriver( deploymentInfo, new DeploymentOptions() );
+                    runtimeManager.unDeployDriver( deploymentInfo, UnDeploymentOptions.forcedUnDeployment( ) );
                 }
 
                 ioService.delete( Paths.convert( path ), optionsFactory.makeCommentedOption( comment ) );
