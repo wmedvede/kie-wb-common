@@ -57,7 +57,7 @@ public class DataSourceDefDeployerImpl
     public void deployGlobalDefs() {
         try {
             logger.debug( "Starting global data sources deployment" );
-            deployDefs( queryService.findGlobalDataSources() );
+            deployDefs( queryService.findGlobalDataSources( false ) );
             logger.debug( "End of global data sources deployment" );
         } catch ( Exception e ) {
             logger.error( "Global data sources deployment failed.", e );

@@ -63,7 +63,7 @@ public class DefExplorerQueryServiceImpl
         checkNotNull( "query", query );
         if ( query.isGlobalQuery() ) {
             DefExplorerQueryResult result = new DefExplorerQueryResult();
-            result.setDataSourceDefs( queryService.findGlobalDataSources() );
+            result.setDataSourceDefs( queryService.findGlobalDataSources( true ) );
             result.setDriverDefs( queryService.findGlobalDrivers() );
             return result;
         } else {

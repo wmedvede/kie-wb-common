@@ -34,11 +34,12 @@ import org.kie.workbench.common.screens.datasource.management.model.DataSourceDe
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceStatus;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
+import org.kie.workbench.common.screens.datasource.management.util.UUIDGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Widlfy based implementation of a DataSourceProvider.
+ * Widlfly based implementation of a DataSourceProvider.
  */
 @Dependent
 @Named(value = "WildflyDataSourceProvider" )
@@ -94,12 +95,8 @@ public class WildflyDataSourceProvider
             dataSourceDef.setJndi( internalDef.getJndi() );
             dataSourceDef.setConnectionURL( internalDef.getConnectionURL() );
             dataSourceDef.setDriverUuid( driverUuid );
-            dataSourceDef.setDriverClass( internalDef.getDriverClass() );
-            dataSourceDef.setDataSourceClass( internalDef.getDataSourceClass() );
             dataSourceDef.setUser( internalDef.getUser() );
             dataSourceDef.setPassword( internalDef.getPassword() );
-            dataSourceDef.setUseJTA( internalDef.isUseJTA() );
-            dataSourceDef.setUseCCM( internalDef.isUseCCM() );
             dataSourceDefs.add( dataSourceDef );
         }
 
@@ -111,16 +108,16 @@ public class WildflyDataSourceProvider
 
         //This random identifiers calculation should be removed when WF supports deletion
         //of data sources without letting them published on server until next restart.
-        String random = "-" + System.currentTimeMillis();
+        String random = "_" + UUIDGenerator.generateUUID();
         String deploymentId = DeploymentIdGenerator.generateDeploymentId( dataSourceDef ) + random;
         String kieJndi = JndiNameGenerator.generateJNDIName( dataSourceDef );
         String deploymentJndi = kieJndi + random;
 
         DataSourceDeploymentInfo deploymentInfo = deploy( dataSourceDef, deploymentJndi, deploymentId );
 
-        javax.sql.DataSource dataSource = (javax.sql.DataSource) lookupObject( deploymentJndi );
+        javax.sql.DataSource dataSource = (javax.sql.DataSource) lookupDataSource( deploymentJndi );
         WildlfyDataSource wfDataSource = new WildlfyDataSource( dataSource );
-        bindObject( kieJndi, dataSource );
+        bindDataSource( kieJndi, dataSource );
         managedDataSources.put( deploymentId, wfDataSource );
         return deploymentInfo;
     }
@@ -150,7 +147,7 @@ public class WildflyDataSourceProvider
     }
 
     public DataSourceDeploymentInfo resync( DataSourceDef dataSourceDef, DataSourceDeploymentInfo deploymentInfo ) throws Exception {
-        javax.sql.DataSource dataSource = (javax.sql.DataSource) lookupObject( deploymentInfo.getJndi() );
+        javax.sql.DataSource dataSource = (javax.sql.DataSource) lookupDataSource( deploymentInfo.getJndi() );
         WildlfyDataSource wfDataSource = new WildlfyDataSource( dataSource );
         managedDataSources.put( deploymentInfo.getDeploymentId(), wfDataSource );
         return deploymentInfo;
@@ -208,15 +205,13 @@ public class WildflyDataSourceProvider
         DataSourceDeploymentInfo deploymentInfo;
         String uuid;
         boolean managed;
-
         for ( WildflyDataSourceDef internalDef : dataSources ) {
             try {
                 uuid = DeploymentIdGenerator.extractUuid( internalDef.getName() );
-                managed = true;
             } catch ( Exception e ) {
                 uuid = internalDef.getName();
-                managed = false;
             }
+            managed = managedDataSources.containsKey( internalDef.getName() );
             deploymentInfo = new DataSourceDeploymentInfo( internalDef.getName(),
                     managed, uuid, wasReferenced( internalDef.getName() ) );
             result.add( deploymentInfo );
@@ -233,7 +228,7 @@ public class WildflyDataSourceProvider
         if ( dataSource == null ) {
             DataSourceDeploymentInfo refreshedDeploymentInfo = getDeploymentInfo( deploymentInfo.getUuid() );
             if ( refreshedDeploymentInfo != null && refreshedDeploymentInfo.getJndi() != null ) {
-                javax.sql.DataSource sqlDataSource = (javax.sql.DataSource) lookupObject( refreshedDeploymentInfo.getJndi() );
+                javax.sql.DataSource sqlDataSource = (javax.sql.DataSource) lookupDataSource( refreshedDeploymentInfo.getJndi() );
                 if ( sqlDataSource != null) {
                     dataSource = new WildlfyDataSource( sqlDataSource );
                     unManagedDataSources.put( deploymentInfo.getDeploymentId(), dataSource );
@@ -259,19 +254,21 @@ public class WildflyDataSourceProvider
         driverProvider.loadConfig( properties );
     }
 
-    private Object lookupObject( String jndi ) {
+    private Object lookupDataSource( String jndi ) {
         try {
             InitialContext context = new InitialContext();
             return context.lookup( jndi );
         } catch ( Exception e ) {
-            logger.error( "an error was produced during object lookp jndi: " + jndi, e );
             return null;
         }
     }
 
-    private void bindObject( String jndi, Object object ) {
+    private void bindDataSource( String jndi, Object object ) {
         try {
             InitialContext context = new InitialContext();
+            if ( lookupDataSource( jndi ) != null ) {
+                context.unbind( jndi );
+            }
             context.bind( jndi, object );
         } catch ( Exception e ) {
             logger.error( "an error was produced during object binding, jndi: " + jndi, e );
@@ -284,10 +281,7 @@ public class WildflyDataSourceProvider
         wfDataSourceDef.setName( deploymentId );
         wfDataSourceDef.setDriverName( driverDeploymentId );
         wfDataSourceDef.setJndi( jndi );
-
         wfDataSourceDef.setConnectionURL( dataSourceDef.getConnectionURL() );
-        wfDataSourceDef.setDriverClass( dataSourceDef.getDriverClass() );
-        wfDataSourceDef.setDataSourceClass( dataSourceDef.getDataSourceClass() );
         wfDataSourceDef.setUser( dataSourceDef.getUser() );
         wfDataSourceDef.setPassword( dataSourceDef.getPassword() );
         wfDataSourceDef.setUseJTA( true );

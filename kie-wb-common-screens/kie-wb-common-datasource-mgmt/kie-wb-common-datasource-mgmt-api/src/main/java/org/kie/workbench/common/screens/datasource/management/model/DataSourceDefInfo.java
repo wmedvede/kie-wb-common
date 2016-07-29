@@ -20,41 +20,35 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.uberfire.backend.vfs.Path;
 
 @Portable
-public class DataSourceDefInfo {
+public class DataSourceDefInfo extends DefInfo {
 
-    private String name;
-
-    private Path path;
+    private DataSourceDeploymentInfo deploymentInfo;
 
     public DataSourceDefInfo() {
     }
 
-    public DataSourceDefInfo( String name, Path path ) {
-        this.name = name;
-        this.path = path;
+    public DataSourceDefInfo( String uuid , String name, Path path, DataSourceDeploymentInfo deploymentInfo  ) {
+        super( uuid, name, path );
+        this.deploymentInfo = deploymentInfo;
     }
 
-    public String getName() {
-        return name;
+    public DataSourceDefInfo( String uuid , String name, DataSourceDeploymentInfo deploymentInfo ) {
+        super( uuid, name );
+        this.deploymentInfo = deploymentInfo;
     }
 
-    public void setName( String name ) {
-        this.name = name;
+    public boolean isDeployed() {
+        return deploymentInfo != null;
     }
 
-    public Path getPath() {
-        return path;
-    }
-
-    public void setPath( Path path ) {
-        this.path = path;
+    public DataSourceDeploymentInfo getDeploymentInfo() {
+        return deploymentInfo;
     }
 
     @Override
     public String toString() {
         return "DataSourceDefInfo{" +
-                "name='" + name + '\'' +
-                ", path=" + path +
-                '}';
+                "deploymentInfo=" + deploymentInfo +
+                "} " + super.toString();
     }
 }

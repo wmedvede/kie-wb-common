@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2016 JBoss Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,32 @@
 
 package org.kie.workbench.common.screens.datasource.management.model;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
 import org.uberfire.backend.vfs.Path;
 
-@Portable
-public class DriverDefInfo extends DefInfo {
+public abstract class DefInfo {
 
-    private DriverDeploymentInfo deploymentInfo;
+    protected String uuid;
 
-    public DriverDefInfo() {
+    protected String name;
+
+    protected Path path;
+
+    public DefInfo() {
     }
 
-    public DriverDefInfo( String uuid, String name, Path path, DriverDeploymentInfo deploymentInfo ) {
-        super( uuid, name, path );
-        this.deploymentInfo = deploymentInfo;
+    public DefInfo( String uuid, String name, Path path ) {
+        this.uuid = uuid;
+        this.name = name;
+        this.path = path;
     }
 
-    public DriverDefInfo( String uuid, String name, DriverDeploymentInfo deploymentInfo ) {
-        super( uuid, name );
-        this.deploymentInfo = deploymentInfo;
+    public DefInfo( String uuid, String name ) {
+        this.uuid = uuid;
+        this.name = name;
+    }
+
+    public boolean isManaged() {
+        return path != null;
     }
 
     public String getUuid() {
@@ -49,15 +56,14 @@ public class DriverDefInfo extends DefInfo {
         return path;
     }
 
-    @Override
-    boolean isDeployed() {
-        return deploymentInfo != null;
-    }
+    abstract boolean isDeployed();
 
     @Override
     public String toString() {
-        return "DriverDefInfo{" +
-                "deploymentInfo=" + deploymentInfo +
-                "} " + super.toString();
+        return "DefInfo{" +
+                "uuid='" + uuid + '\'' +
+                ", name='" + name + '\'' +
+                ", path=" + path +
+                '}';
     }
 }

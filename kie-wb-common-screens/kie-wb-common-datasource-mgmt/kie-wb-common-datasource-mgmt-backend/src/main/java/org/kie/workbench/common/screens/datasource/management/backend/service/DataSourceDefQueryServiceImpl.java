@@ -18,7 +18,9 @@ package org.kie.workbench.common.screens.datasource.management.backend.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -26,10 +28,16 @@ import javax.inject.Named;
 import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProviderFactory;
+import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceRuntimeManager;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDef;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDef;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DriverDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
+import org.kie.workbench.common.screens.datasource.management.util.DataSourceDefSerializer;
 import org.kie.workbench.common.screens.datasource.management.util.DriverDefSerializer;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.slf4j.Logger;
@@ -63,12 +71,37 @@ public class DataSourceDefQueryServiceImpl
     @Inject
     private DataSourceServicesHelper serviceHelper;
 
+    @Inject
+    private DataSourceProviderFactory providerFactory;
+
+    @Inject
+    private DataSourceRuntimeManager runtimeManager;
+
     public DataSourceDefQueryServiceImpl() {
     }
 
     @Override
-    public Collection<DataSourceDefInfo> findGlobalDataSources() {
-        return resolveDataSources( serviceHelper.getGlobalDataSourcesContext() );
+    public Collection<DataSourceDefInfo> findGlobalDataSources( boolean includeUnManaged ) {
+        Collection<DataSourceDefInfo> result = resolveDataSources( serviceHelper.getGlobalDataSourcesContext() );
+        if ( includeUnManaged ) {
+            Map<String, DataSourceDefInfo> managedDataSources = new HashMap<>();
+            for ( DataSourceDefInfo dataSourceDefInfo : result ) {
+                managedDataSources.put( dataSourceDefInfo.getUuid(), dataSourceDefInfo );
+            }
+            try {
+                List<DataSourceDef> allDeployments = providerFactory.getDataSourceProvider().getDeployments();
+                for ( DataSourceDef dataSourceDef : allDeployments ) {
+                    if ( !managedDataSources.containsKey( dataSourceDef.getUuid() ) ) {
+                        result.add( new DataSourceDefInfo( dataSourceDef.getUuid(),
+                                dataSourceDef.getName(),
+                                runtimeManager.getDataSourceDeploymentInfo( dataSourceDef.getUuid() ) ) );
+                    }
+                }
+            } catch ( Exception e ) {
+                logger.warn( "It was not possible to read all deployed data sources. ", e );
+            }
+        }
+        return result;
     }
 
     @Override
@@ -176,7 +209,7 @@ public class DataSourceDefQueryServiceImpl
                             entry.getFileName().toString().endsWith( DS_FILE_TYPE ) );
 
             stream.forEach( file -> {
-                result.add( createDataSourceInfo( file ) );
+                result.add( createDataSourceDefInfo( file ) );
             } );
             stream.close();
 
@@ -187,15 +220,32 @@ public class DataSourceDefQueryServiceImpl
         }
     }
 
-    private DataSourceDefInfo createDataSourceInfo( final org.uberfire.java.nio.file.Path path ) {
-        String name = path.getName( path.getNameCount() -1 ).toString();
-        name = name.substring( 0, name.lastIndexOf( DS_FILE_TYPE ) );
-        return new DataSourceDefInfo( name, Paths.convert( path ) );
+    private DataSourceDefInfo createDataSourceDefInfo( final org.uberfire.java.nio.file.Path path ) {
+        String content = ioService.readAllString( path );
+        DataSourceDef dataSourceDef = DataSourceDefSerializer.deserialize( content );
+        DataSourceDeploymentInfo deploymentInfo = null;
+        try {
+            deploymentInfo = runtimeManager.getDataSourceDeploymentInfo( dataSourceDef.getUuid() );
+        } catch ( Exception e ) {
+            logger.warn( "It was not possible to read deployment info when building DataSourceDefInfo for data source: "
+                    + dataSourceDef.getUuid(), e );
+        }
+        return new DataSourceDefInfo( dataSourceDef.getUuid(),
+                dataSourceDef.getName(),
+                Paths.convert( path ),
+                deploymentInfo );
     }
 
     private DriverDefInfo createDriverInfo( final org.uberfire.java.nio.file.Path path ) {
         String content = ioService.readAllString( path );
         DriverDef driverDef = DriverDefSerializer.deserialize( content );
-        return new DriverDefInfo( driverDef.getUuid(), driverDef.getName(), Paths.convert( path ) );
+        DriverDeploymentInfo deploymentInfo = null;
+        try {
+            deploymentInfo = runtimeManager.getDriverDeploymentInfo( driverDef.getUuid() );
+        } catch ( Exception e ) {
+            logger.warn( "It was not possible to read deployment info when building DriverDefInfo for driver: "
+                    + driverDef.getUuid(), e );
+        }
+        return new DriverDefInfo( driverDef.getUuid(), driverDef.getName(), Paths.convert( path ), deploymentInfo );
     }
 }

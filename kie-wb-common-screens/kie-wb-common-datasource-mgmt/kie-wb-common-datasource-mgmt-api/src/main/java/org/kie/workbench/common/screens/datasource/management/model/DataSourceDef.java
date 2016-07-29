@@ -29,19 +29,11 @@ public class DataSourceDef {
 
     String connectionURL;
 
-    String driverClass;
-
-    String dataSourceClass;
-
     String driverUuid;
 
     String user;
 
     String password;
-
-    boolean useJTA;
-
-    boolean useCCM;
 
     public DataSourceDef() {
     }
@@ -78,22 +70,6 @@ public class DataSourceDef {
         this.connectionURL = connectionURL;
     }
 
-    public String getDriverClass() {
-        return driverClass;
-    }
-
-    public void setDriverClass( String driverClass ) {
-        this.driverClass = driverClass;
-    }
-
-    public String getDataSourceClass() {
-        return dataSourceClass;
-    }
-
-    public void setDataSourceClass( String dataSourceClass ) {
-        this.dataSourceClass = dataSourceClass;
-    }
-
     public String getDriverUuid() {
         return driverUuid;
     }
@@ -118,22 +94,6 @@ public class DataSourceDef {
         this.password = password;
     }
 
-    public boolean isUseJTA() {
-        return useJTA;
-    }
-
-    public void setUseJTA( boolean useJTA ) {
-        this.useJTA = useJTA;
-    }
-
-    public boolean isUseCCM() {
-        return useCCM;
-    }
-
-    public void setUseCCM( boolean useCCM ) {
-        this.useCCM = useCCM;
-    }
-
     @Override
     public String toString() {
         return "DataSourceDef{" +
@@ -141,13 +101,9 @@ public class DataSourceDef {
                 ", name='" + name + '\'' +
                 ", jndi='" + jndi + '\'' +
                 ", connectionURL='" + connectionURL + '\'' +
-                ", driverClass='" + driverClass + '\'' +
-                ", dataSourceClass='" + dataSourceClass + '\'' +
                 ", driverUuid='" + driverUuid + '\'' +
-                ", user='" + user + '\'' +
-                ", password='" + password + '\'' +
-                ", useJTA=" + useJTA +
-                ", useCCM=" + useCCM +
+                ", user='******'" +
+                ", password='******'" +
                 '}';
     }
 
@@ -162,12 +118,6 @@ public class DataSourceDef {
 
         DataSourceDef that = ( DataSourceDef ) o;
 
-        if ( useJTA != that.useJTA ) {
-            return false;
-        }
-        if ( useCCM != that.useCCM ) {
-            return false;
-        }
         if ( uuid != null ? !uuid.equals( that.uuid ) : that.uuid != null ) {
             return false;
         }
@@ -178,12 +128,6 @@ public class DataSourceDef {
             return false;
         }
         if ( connectionURL != null ? !connectionURL.equals( that.connectionURL ) : that.connectionURL != null ) {
-            return false;
-        }
-        if ( driverClass != null ? !driverClass.equals( that.driverClass ) : that.driverClass != null ) {
-            return false;
-        }
-        if ( dataSourceClass != null ? !dataSourceClass.equals( that.dataSourceClass ) : that.dataSourceClass != null ) {
             return false;
         }
         if ( driverUuid != null ? !driverUuid.equals( that.driverUuid ) : that.driverUuid != null ) {
@@ -206,19 +150,11 @@ public class DataSourceDef {
         result = ~~result;
         result = 31 * result + ( connectionURL != null ? connectionURL.hashCode() : 0 );
         result = ~~result;
-        result = 31 * result + ( driverClass != null ? driverClass.hashCode() : 0 );
-        result = ~~result;
-        result = 31 * result + ( dataSourceClass != null ? dataSourceClass.hashCode() : 0 );
-        result = ~~result;
         result = 31 * result + ( driverUuid != null ? driverUuid.hashCode() : 0 );
         result = ~~result;
         result = 31 * result + ( user != null ? user.hashCode() : 0 );
         result = ~~result;
         result = 31 * result + ( password != null ? password.hashCode() : 0 );
-        result = ~~result;
-        result = 31 * result + ( useJTA ? 1 : 0 );
-        result = ~~result;
-        result = 31 * result + ( useCCM ? 1 : 0 );
         result = ~~result;
         return result;
     }

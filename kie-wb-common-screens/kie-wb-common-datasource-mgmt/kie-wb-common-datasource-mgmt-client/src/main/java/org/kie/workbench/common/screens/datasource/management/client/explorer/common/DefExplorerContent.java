@@ -66,9 +66,11 @@ public class DefExplorerContent
         clearDataSources();
         if ( dataSourceDefInfos != null ) {
             DefItem item;
+            String itemName;
             for ( DataSourceDefInfo dataSourceDefInfo : dataSourceDefInfos ) {
+                itemName = dataSourceDefInfo.getName() + ( dataSourceDefInfo.isManaged() ? "" : " (external)" );
                 item = createItem();
-                item.setName( dataSourceDefInfo.getName() );
+                item.setName( itemName );
                 item.addItemHandler( new DefItemView.ItemHandler() {
                     @Override
                     public void onClick( String itemId ) {

@@ -33,9 +33,12 @@ public interface DataSourceDefQueryService {
     /**
      * Finds the DataSourceDefInfos for the platform global data sources.
      *
+     * @param includeUnManaged if true, server side un-managed data sources information will be included. Un-managed
+     * data sources are those not created by the data sources management system.
+     *
      * @return a collection containing the data sources information.
      */
-    Collection<DataSourceDefInfo> findGlobalDataSources();
+    Collection<DataSourceDefInfo> findGlobalDataSources( boolean includeUnManaged );
 
     /**
      * Finds the DataSourceDefInfos for the data sources defined for a given project.
