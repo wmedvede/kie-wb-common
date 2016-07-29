@@ -114,8 +114,7 @@ public class DriverDefEditorServiceImpl
     @Override
     public Path save( final Path path,
             final DriverDefEditorContent editorContent,
-            final String comment,
-            final boolean forceSave ) {
+            final String comment ) {
 
         checkNotNull( "path", path );
         checkNotNull( "content", editorContent );
@@ -271,7 +270,7 @@ public class DriverDefEditorServiceImpl
     }
 
     @Override
-    public void delete( final Path path, final String comment, final boolean forceDelete ) {
+    public void delete( final Path path, final String comment ) {
         checkNotNull( "path", path );
 
         final org.uberfire.java.nio.file.Path nioPath = Paths.convert( path );

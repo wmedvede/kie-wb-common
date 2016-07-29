@@ -75,6 +75,8 @@ public interface DataSourceRuntimeManager {
      */
     void unDeployDriver( DriverDeploymentInfo deploymentInfo, UnDeploymentOptions options ) throws Exception;
 
+    //Aca podria tener un getRuntimeInfo( que me dice si está deployado o no, pero ademas si funciona)
+
     DataSource lookupDataSource( String uuid ) throws Exception;
 
 }

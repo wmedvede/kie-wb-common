@@ -184,12 +184,12 @@ public class DataSourceDefEditor
         executeSafeUpdateCommand( DataSourceManagementConstants.DataSourceDefEditor_DataSourceHasBeenReferencedForSaveMessage,
                 new Command() {
                     @Override public void execute() {
-                        save( false );
+                        _save( );
                     }
                 },
                 new Command() {
                     @Override public void execute() {
-                        save( true );
+                        _save( );
                     }
                 },
                 new Command() {
@@ -202,7 +202,7 @@ public class DataSourceDefEditor
     /**
      * Performs the formal save of the data source.
      */
-    protected void save( boolean forceSave ) {
+    protected void _save( ) {
         savePopUpPresenter.show( versionRecordManager.getCurrentPath(),
                 new ParameterizedCommand<String>() {
                     @Override
@@ -211,8 +211,7 @@ public class DataSourceDefEditor
                                 new HasBusyIndicatorDefaultErrorCallback( view )
                         ).save( versionRecordManager.getCurrentPath(),
                                 getContent(),
-                                commitMessage,
-                                forceSave );
+                                commitMessage );
                     }
                 }
         );
@@ -238,12 +237,12 @@ public class DataSourceDefEditor
         executeSafeUpdateCommand( DataSourceManagementConstants.DataSourceDefEditor_DataSourceHasBeenReferencedForDeleteMessage,
                 new Command() {
                     @Override public void execute() {
-                        delete( currentPath, false );
+                        delete( currentPath );
                     }
                 },
                 new Command() {
                     @Override public void execute() {
-                        delete( currentPath, true );
+                        delete( currentPath );
                     }
                 },
                 new Command() {
@@ -257,7 +256,7 @@ public class DataSourceDefEditor
     /**
      * Performs the formal deletion of the data source.
      */
-    protected void delete( ObservablePath currentPath, boolean forceDelete ) {
+    protected void delete( ObservablePath currentPath ) {
 
         deletePopUpPresenter.show( new ParameterizedCommand<String>() {
             @Override
@@ -269,7 +268,7 @@ public class DataSourceDefEditor
                         notification.fire( new NotificationEvent( org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants.INSTANCE.ItemDeletedSuccessfully(),
                                 NotificationEvent.NotificationType.SUCCESS ) );
                     }
-                } , new HasBusyIndicatorDefaultErrorCallback( view ) ).delete( currentPath, comment, forceDelete );
+                } , new HasBusyIndicatorDefaultErrorCallback( view ) ).delete( currentPath, comment );
             }
         } );
     }
