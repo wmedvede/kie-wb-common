@@ -28,14 +28,13 @@ public interface DataSourceDefEditorService {
 
     DataSourceDefEditorContent loadContent( final Path path );
 
-    Path save( final Path path,
-            final DataSourceDefEditorContent editorContent, final String comment, final boolean forceSave );
+    Path save( final Path path, final DataSourceDefEditorContent editorContent, final String comment );
 
     Path create( final DataSourceDef dataSourceDef, final Project project );
 
     Path createGlobal( final DataSourceDef dataSourceDef );
 
-    void delete( final Path path, final String comment, final boolean forceDelete );
+    void delete( final Path path, final String comment );
 
     TestConnectionResult testConnection( final DataSourceDef dataSourceDef, final Project project );
 

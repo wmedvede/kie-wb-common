@@ -30,13 +30,13 @@ public interface DriverDefEditorService {
 
     DriverDefEditorContent loadContent( final Path path );
 
-    Path save( final Path path, final DriverDefEditorContent editorContent, final String comment, final boolean forceSave );
+    Path save( final Path path, final DriverDefEditorContent editorContent, final String comment );
 
     Path create( final DriverDef driverDef, final Project project );
 
     Path createGlobal( final DriverDef driverDef );
 
-    void delete( final Path path, final String comment, final boolean forceDelete );
+    void delete( final Path path, final String comment );
 
     List<ValidationMessage> validate( final DriverDef driverDef );
 }

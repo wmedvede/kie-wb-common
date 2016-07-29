@@ -176,12 +176,12 @@ public class DriverDefEditor
         executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasDependantsForSaveMessage,
                 new Command() {
                     @Override public void execute() {
-                        save( false );
+                        _save( );
                     }
                 },
                 new Command() {
                     @Override public void execute() {
-                        save( true );
+                        _save( );
                     }
                 },
                 new Command() {
@@ -194,7 +194,7 @@ public class DriverDefEditor
     /**
      * Performs the formal save of the driver.
      */
-    protected void save( boolean forceSave ) {
+    protected void _save( ) {
         savePopUpPresenter.show( versionRecordManager.getCurrentPath(),
                 new ParameterizedCommand<String>() {
                     @Override
@@ -202,8 +202,7 @@ public class DriverDefEditor
                         editorService.call( getSaveSuccessCallback( getContent().hashCode() ),
                                 new HasBusyIndicatorDefaultErrorCallback( view ) ).save( versionRecordManager.getCurrentPath(),
                                 getContent(),
-                                commitMessage,
-                                forceSave );
+                                commitMessage );
                     }
                 }
         );
@@ -255,12 +254,12 @@ public class DriverDefEditor
         executeSafeUpdateCommand( DataSourceManagementConstants.DriverDefEditor_DriverHasDependantsForDeleteMessage,
                 new Command() {
                     @Override public void execute() {
-                        delete( currentPath, false );
+                        delete( currentPath );
                     }
                 },
                 new Command() {
                     @Override public void execute() {
-                        delete( currentPath, true );
+                        delete( currentPath );
                     }
                 },
                 new Command() {
@@ -274,7 +273,7 @@ public class DriverDefEditor
     /**
      * Performs the formal delete of the driver.
      */
-    protected void delete( ObservablePath currentPath, boolean forceDelete ) {
+    protected void delete( ObservablePath currentPath ) {
 
         deletePopUpPresenter.show( new ParameterizedCommand<String>() {
             @Override
@@ -286,7 +285,7 @@ public class DriverDefEditor
                         notification.fire( new NotificationEvent( org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants.INSTANCE.ItemDeletedSuccessfully(),
                                 NotificationEvent.NotificationType.SUCCESS ) );
                     }
-                } , new HasBusyIndicatorDefaultErrorCallback( view ) ).delete( currentPath, comment, forceDelete );
+                } , new HasBusyIndicatorDefaultErrorCallback( view ) ).delete( currentPath, comment );
             }
         } );
     }

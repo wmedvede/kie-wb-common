@@ -146,7 +146,11 @@ public class DataSourceRuntimeManagerImpl
     @Override
     public synchronized void unDeployDriver( DriverDeploymentInfo deploymentInfo, UnDeploymentOptions options ) throws Exception {
         try {
-            //TODO process the deployment options.
+            DriverDeploymentCacheEntry cacheEntry = driverDeploymentCache.get( deploymentInfo );
+            if ( cacheEntry != null && cacheEntry.hasDependants() && options.isSoftUnDeployment() ) {
+                throw new Exception( "Driver: " + deploymentInfo + " can't be un-deployed. " +
+                        "It's currently referenced by : " +  cacheEntry.getDependants().size() + " data sources" );
+            }
             driverDeploymentCache.remove( deploymentInfo );
             driverProvider.undeploy( deploymentInfo );
         } catch ( Exception e ) {
