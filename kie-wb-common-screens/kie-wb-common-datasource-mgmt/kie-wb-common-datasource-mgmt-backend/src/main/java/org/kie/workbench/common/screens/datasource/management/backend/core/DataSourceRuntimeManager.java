@@ -69,14 +69,23 @@ public interface DataSourceRuntimeManager {
     /**
      * Un-deploys a driver from data sources runtime system.
      *
-     * @param deploymentInfo
+     * @param deploymentInfo deployment information about the driver to un-deploy
      *
-     * @param options
+     * @param options un-deployment options to apply.
      */
     void unDeployDriver( DriverDeploymentInfo deploymentInfo, UnDeploymentOptions options ) throws Exception;
 
-    //Aca podria tener un getRuntimeInfo( que me dice si está deployado o no, pero ademas si funciona)
-
+    /**
+     * Gets a reference to a previously deployed data source.
+     *
+     * @param uuid a data source identifier.
+     *
+     * @return if the data source is properly deployed a reference to the data source is returned, in any other case
+     * an exception is thrown.
+     *
+     * @throws Exception if the data source is not deployed or in cases when there are a communitation error with the
+     * server, etc.
+     */
     DataSource lookupDataSource( String uuid ) throws Exception;
 
 }

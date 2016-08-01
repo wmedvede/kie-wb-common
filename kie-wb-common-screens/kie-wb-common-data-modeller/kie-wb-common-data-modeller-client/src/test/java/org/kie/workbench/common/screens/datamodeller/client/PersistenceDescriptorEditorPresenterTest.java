@@ -45,6 +45,7 @@ import org.kie.workbench.common.screens.datamodeller.model.persistence.Persisten
 import org.kie.workbench.common.screens.datamodeller.model.persistence.TransactionType;
 import org.kie.workbench.common.screens.datamodeller.service.DataModelerService;
 import org.kie.workbench.common.screens.datamodeller.service.PersistenceDescriptorEditorService;
+import org.kie.workbench.common.screens.datasource.management.client.editor.datasource.selector.DataSourceSelector;
 import org.kie.workbench.common.services.datamodeller.core.AnnotationDefinition;
 import org.kie.workbench.common.services.datamodeller.core.DataModel;
 import org.kie.workbench.common.services.datamodeller.core.DataObject;
@@ -80,6 +81,9 @@ public class PersistenceDescriptorEditorPresenterTest {
     PersistenceUnitPropertyGrid propertyGrid;
 
     @GwtMock
+    DataSourceSelector dataSourceSelector;
+
+    @GwtMock
     ProjectClassList projectClassList;
 
     @GwtMock
@@ -94,6 +98,7 @@ public class PersistenceDescriptorEditorPresenterTest {
     public void setup() {
         presenter = new PersistenceDescriptorEditorPresenter( view,
                                                               persistenceDescriptorType,
+                                                              dataSourceSelector,
                                                               new PersistenceDescriptorEditorServiceCallerMock(),
                                                               null,
                                                               new DataModelerServiceCallerMock()

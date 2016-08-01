@@ -37,6 +37,13 @@ public class DataSourceDeploymentInfo
         this.referenced = referenced;
     }
 
+    public DataSourceDeploymentInfo( String deploymentId, boolean managed, String uuid, String jndi, boolean referenced ) {
+        super( deploymentId, managed );
+        this.uuid = uuid;
+        this.jndi = jndi;
+        this.referenced = referenced;
+    }
+
     public String getUuid() {
         return uuid;
     }

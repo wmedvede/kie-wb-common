@@ -23,6 +23,7 @@ import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.client.type.DriverDefType;
 import org.kie.workbench.common.screens.datasource.management.client.util.ClientValidationServiceMock;
 import org.kie.workbench.common.screens.datasource.management.client.util.DataSourceManagementTestConstants;
@@ -108,6 +109,10 @@ public class DriverDefEditorTest
                 this.menuBuilder = mock( BasicFileMenuBuilder.class );
             }
         };
+
+        //auxiliary for the test menu caption.
+        when( editorHelper.getMessage( DataSourceManagementConstants.DriverDefEditor_CheckStatusMenu ) )
+                .thenReturn( "TestMenuCaption" );
 
         verify( view, times( 1 ) ).init( editor );
         verify( view, times( 1 ) ).setMainPanel( mainPanel );

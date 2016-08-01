@@ -24,8 +24,6 @@ import javax.inject.Inject;
 
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceDefDeployer;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DriverDefDeployer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.uberfire.commons.services.cdi.Startup;
 import org.uberfire.commons.services.cdi.StartupType;
 
@@ -35,8 +33,6 @@ import org.uberfire.commons.services.cdi.StartupType;
 @ApplicationScoped
 @Startup( StartupType.BOOTSTRAP)
 public class DataSourceManagementBootstrap {
-
-    private static final Logger logger = LoggerFactory.getLogger( DataSourceManagementBootstrap.class );
 
     @Inject
     private DataSourceDefDeployer dataSourceDefDeployer;
@@ -50,7 +46,9 @@ public class DataSourceManagementBootstrap {
     }
 
     private void initializeDeployments() {
-        Timer timer = new Timer( "BootstrapTimer" );
+        //we need to investigate how to launch this initialization when the application was started but also when
+        //the wildfly server initialization was finished.
+        Timer timer = new Timer( "DataSourceManagementBootstrapTimer" );
         timer.schedule( new TimerTask() {
             @Override public void run() {
                 driverDefDeployer.deployGlobalDefs();

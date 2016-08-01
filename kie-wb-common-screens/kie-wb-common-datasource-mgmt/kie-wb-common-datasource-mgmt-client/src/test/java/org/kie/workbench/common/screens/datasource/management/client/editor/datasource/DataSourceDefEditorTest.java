@@ -26,6 +26,7 @@ import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.client.type.DataSourceDefType;
 import org.kie.workbench.common.screens.datasource.management.client.util.ClientValidationServiceMock;
 import org.kie.workbench.common.screens.datasource.management.client.util.DataSourceManagementTestConstants;
@@ -143,7 +144,11 @@ public class DataSourceDefEditorTest
             }
         };
 
-        verify( view, times( 1 ) ).init( editor );
+        //auxiliary for the test menu caption.
+        when( editorHelper.getMessage( DataSourceManagementConstants.DataSourceDefEditor_TestDataSourceMenu ) )
+                .thenReturn( "TestMenuCaption" );
+
+                        verify( view, times( 1 ) ).init( editor );
         verify( view, times( 1 ) ).setMainPanel( mainPanel );
     }
 
@@ -197,7 +202,6 @@ public class DataSourceDefEditorTest
 
         //the content of the editor should have been properly modified.
         assertEquals( NAME_2, content.getDataSourceDef().getName() );
-        assertEquals( JNDI_2, content.getDataSourceDef().getJndi() );
         assertEquals( CONNECTION_URL_2, content.getDataSourceDef().getConnectionURL() );
         assertEquals( USER_2, content.getDataSourceDef().getUser() );
         assertEquals( PASSWORD_2, content.getDataSourceDef().getPassword() );
@@ -209,7 +213,6 @@ public class DataSourceDefEditorTest
         content.setDataSourceDef( new DataSourceDef() );
         content.getDataSourceDef().setName( NAME );
         content.getDataSourceDef().setDriverUuid( DRIVER_UUID );
-        content.getDataSourceDef().setJndi( JNDI );
         content.getDataSourceDef().setConnectionURL( CONNECTION_URL );
         content.getDataSourceDef().setUser( USER );
         content.getDataSourceDef().setPassword( PASSWORD );

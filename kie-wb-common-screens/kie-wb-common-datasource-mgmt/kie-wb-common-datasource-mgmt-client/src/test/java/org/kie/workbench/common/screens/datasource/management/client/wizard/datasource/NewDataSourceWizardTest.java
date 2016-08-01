@@ -107,7 +107,6 @@ public class NewDataSourceWizardTest
 
         DataSourceDef expectedDataSourceDef = new DataSourceDef();
         expectedDataSourceDef.setName( NAME );
-        expectedDataSourceDef.setJndi( JNDI );
         expectedDataSourceDef.setConnectionURL( CONNECTION_URL );
         expectedDataSourceDef.setUser( USER );
         expectedDataSourceDef.setPassword( PASSWORD );

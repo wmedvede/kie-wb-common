@@ -38,6 +38,11 @@ public interface DriverProvider {
     DriverDeploymentInfo deploy( final DriverDef driverDef ) throws Exception;
 
     /**
+     * Resyncs an already deployed data source.
+     */
+    DriverDeploymentInfo resync( DriverDef driverDef, DriverDeploymentInfo deploymentInfo ) throws Exception;
+
+    /**
      * Un-deploys a driver from the target system.
      */
     void undeploy( final DriverDeploymentInfo deploymentInfo ) throws Exception;
@@ -70,5 +75,4 @@ public interface DriverProvider {
      * @throws Exception in cases e.g. when communication with the target system e.g. the Wildlfy server fails..
      */
     List<DriverDef> getDeployments() throws Exception;
-
 }

@@ -479,6 +479,8 @@ public interface Constants extends Messages {
 
     String persistence_descriptor_editor_data_source_field();
 
+    String persistence_descriptor_editor_select_data_source_button();
+
     String persistence_descriptor_editor_transactions_type_field();
 
     String persistence_descriptor_editor_advanced_properties_table();

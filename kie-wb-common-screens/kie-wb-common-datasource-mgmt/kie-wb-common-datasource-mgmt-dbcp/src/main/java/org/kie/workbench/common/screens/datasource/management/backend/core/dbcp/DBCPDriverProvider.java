@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -36,8 +36,8 @@ import org.uberfire.io.IOService;
  * Multi-platform implementation of a DriverProvider that will be used in conjunction with the
  * DBCPDataSourceProvider.
  */
-@Dependent
-@Named(value = "DBCPDriverService" )
+@ApplicationScoped
+@Named(value = "DBCPDriverProvider" )
 public class DBCPDriverProvider
     implements DriverProvider {
 
@@ -71,6 +71,12 @@ public class DBCPDriverProvider
     }
 
     @Override
+    public DriverDeploymentInfo resync( DriverDef driverDef, DriverDeploymentInfo deploymentInfo ) throws Exception {
+        //no more processing required for this driver.
+        return deploymentInfo;
+    }
+
+    @Override
     public void undeploy( DriverDeploymentInfo deploymentInfo ) throws Exception {
         deployedUris.remove( deploymentInfo.getDeploymentId() );
         deploymentInfos.remove( deploymentInfo.getDeploymentId() );
@@ -98,6 +104,6 @@ public class DBCPDriverProvider
 
     @Override
     public void loadConfig( Properties properties ) {
-
+        //no additional configurations for this provider.
     }
 }

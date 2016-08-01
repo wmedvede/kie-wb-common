@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2016 JBoss Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.backend.core;
+package org.kie.workbench.common.screens.datasource.management.client.editor.datasource.selector;
 
-/**
- * Factory class for getting a reference to the installed DataSourceProvider or DriverProvider.
- */
-public interface DataSourceProviderFactory {
+import com.google.gwt.view.client.HasData;
+import org.uberfire.client.mvp.UberView;
 
-    DataSourceProvider getDataSourceProvider();
+public interface DataSourceSelectorView
+        extends UberView<DataSourceSelectorView.Presenter> {
 
-    DriverProvider getDriverProvider();
+    interface Presenter {
+
+        void onClose();
+
+        void onSelect();
+    }
+
+    HasData<DataSourceSelectorPageRow> getDisplay();
+
+    DataSourceSelectorPageRow getSelectedRow();
+
+    void show();
 
 }

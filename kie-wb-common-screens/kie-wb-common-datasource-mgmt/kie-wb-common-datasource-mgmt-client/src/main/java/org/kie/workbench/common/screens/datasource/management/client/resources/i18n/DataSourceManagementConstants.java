@@ -122,5 +122,18 @@ public interface DataSourceManagementConstants {
     @TranslationKey( defaultValue = "" )
     String DriverDefDefPageViewImpl_pageTitle = "DriverDefDefPageViewImpl.pageTitle";
 
+    @TranslationKey( defaultValue = "" )
+    String DataSourceSelector_Title = "DataSourceSelector.Title";
 
+    @TranslationKey( defaultValue = "" )
+    String DataSourceSelector_NoAvailableDataSourcesMessage = "DataSourceSelector.NoAvailableDataSourcesMessage";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceSelector_DataSourceColumn = "DataSourceSelector.DataSourceColumn";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceSelector_SelectButton = "DataSourceSelector.SelectButton";
+
+    @TranslationKey( defaultValue = "" )
+    String DataSourceSelector_DataSourcesLoadError = "DataSourceSelector.DataSourcesLoadError";
 }

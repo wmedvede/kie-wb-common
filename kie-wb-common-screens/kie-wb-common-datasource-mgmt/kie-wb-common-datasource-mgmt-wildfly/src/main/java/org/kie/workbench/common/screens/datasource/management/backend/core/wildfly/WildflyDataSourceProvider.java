@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.naming.InitialContext;
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Widlfly based implementation of a DataSourceProvider.
  */
-@Dependent
+@ApplicationScoped
 @Named(value = "WildflyDataSourceProvider" )
 public class WildflyDataSourceProvider
         implements DataSourceProvider {
@@ -143,7 +143,7 @@ public class WildflyDataSourceProvider
                 jndi, dataSourceDef, driverDeploymentInfo.getDeploymentId() );
 
         dataSourceMgmtClient.createDataSource( wfDataSourceDef );
-        return new DataSourceDeploymentInfo( deploymentId, true, dataSourceDef.getUuid(), false );
+        return new DataSourceDeploymentInfo( deploymentId, true, dataSourceDef.getUuid(), jndi, false );
     }
 
     public DataSourceDeploymentInfo resync( DataSourceDef dataSourceDef, DataSourceDeploymentInfo deploymentInfo ) throws Exception {
@@ -213,7 +213,7 @@ public class WildflyDataSourceProvider
             }
             managed = managedDataSources.containsKey( internalDef.getName() );
             deploymentInfo = new DataSourceDeploymentInfo( internalDef.getName(),
-                    managed, uuid, wasReferenced( internalDef.getName() ) );
+                    managed, uuid, internalDef.getJndi(), wasReferenced( internalDef.getName() ) );
             result.add( deploymentInfo );
         }
         return result;

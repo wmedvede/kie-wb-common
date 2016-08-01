@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -50,8 +50,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Multi-platform implementation of a DataSourceProvider.
  */
-@Dependent
-@Named(value = "DBCPDataSourceService" )
+@ApplicationScoped
+@Named(value = "DBCPDataSourceProvider" )
 public class DBCPDataSourceProvider
     implements DataSourceProvider {
 
@@ -125,7 +125,7 @@ public class DBCPDataSourceProvider
     @Override
     public DataSourceDeploymentInfo resync( final DataSourceDef dataSourceDef,
             final DataSourceDeploymentInfo deploymentInfo ) throws Exception {
-        //do not apply for this provider.
+        //no more processing required for this driver.
         return deploymentInfo;
     }
 

@@ -34,6 +34,9 @@ import org.slf4j.LoggerFactory;
 
 import static org.kie.workbench.common.screens.datasource.management.util.ServiceUtil.*;
 
+/**
+ * CDI based implementation of a DataSourceProviderFactory.
+ */
 @ApplicationScoped
 public class DataSourceProviderFactoryImpl
         implements DataSourceProviderFactory

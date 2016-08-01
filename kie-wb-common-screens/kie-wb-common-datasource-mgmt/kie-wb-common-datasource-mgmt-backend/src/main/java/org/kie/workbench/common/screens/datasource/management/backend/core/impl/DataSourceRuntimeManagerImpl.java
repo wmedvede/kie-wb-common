@@ -112,13 +112,17 @@ public class DataSourceRuntimeManagerImpl
     public synchronized DriverDeploymentInfo deployDriver( DriverDef driverDef, DeploymentOptions options ) throws Exception {
         try {
             DriverDeploymentInfo deploymentInfo = driverProvider.getDeploymentInfo( driverDef.getUuid() );
-            if ( deploymentInfo != null && options.isCreateDeployment() ) {
-                throw new Exception( "Driver: " + driverDef + " is already deployed." );
-            }
-            if ( deploymentInfo == null ) {
+            if ( deploymentInfo != null ) {
+                if ( options.isCreateOrResyncDeployment() ) {
+                    deploymentInfo = driverProvider.resync( driverDef, deploymentInfo );
+                } else {
+                    throw new Exception( "Driver: " + driverDef + " is already deployed." );
+                }
+            } else {
                 deploymentInfo = driverProvider.deploy( driverDef );
-                driverDeploymentCache.put( deploymentInfo, driverDef );
             }
+
+            driverDeploymentCache.put( deploymentInfo, driverDef );
             return deploymentInfo;
         } catch ( Exception e ) {
             logger.error( "Driver deployment failed for driverDef: " + driverDef, e );
@@ -164,8 +168,9 @@ public class DataSourceRuntimeManagerImpl
         DataSourceDeploymentInfo deploymentInfo = dataSourceProvider.getDeploymentInfo( uuid );
         if ( deploymentInfo != null ) {
             return dataSourceProvider.lookupDataSource( deploymentInfo );
+        } else {
+            throw new Exception( "Data source: " + uuid + " is not deployed in current system." );
         }
-        return null;
     }
 
     private void deReferFromDrivers( DataSourceDeploymentInfo deploymentInfo  ) {

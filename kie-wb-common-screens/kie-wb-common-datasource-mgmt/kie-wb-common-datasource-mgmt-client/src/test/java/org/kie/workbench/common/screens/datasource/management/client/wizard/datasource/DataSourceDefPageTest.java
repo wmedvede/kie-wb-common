@@ -74,11 +74,10 @@ public class DataSourceDefPageTest
         completeValidDefPage();
 
         //status change event should have been fired for all the modified fields.
-        verify( statusChangeEvent, times( 6 ) ).fire( any( WizardPageStatusChangeEvent.class ) );
+        verify( statusChangeEvent, times( 5 ) ).fire( any( WizardPageStatusChangeEvent.class ) );
 
         //the DataSourceDef should have been properly populated.
         assertEquals( NAME, dataSourceDef.getName() );
-        assertEquals( JNDI, dataSourceDef.getJndi() );
         assertEquals( CONNECTION_URL, dataSourceDef.getConnectionURL() );
         assertEquals( USER, dataSourceDef.getUser() );
         assertEquals( PASSWORD, dataSourceDef.getPassword() );
