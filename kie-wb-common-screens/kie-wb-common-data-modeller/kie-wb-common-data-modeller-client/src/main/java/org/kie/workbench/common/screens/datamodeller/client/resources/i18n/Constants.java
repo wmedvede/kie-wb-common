@@ -373,9 +373,27 @@ public interface Constants extends Messages {
 
     //persistence domain editor
 
+    String persistence_domain_new_resource_option_persistable();
+
+    String persistence_domain_new_resource_option_persistable_help();
+
+    String persistence_domain_new_resource_option_persistable_help_heading();
+
+    String persistence_domain_new_resource_option_audited();
+
+    String persistence_domain_new_resource_option_audited_help();
+
+    String persistence_domain_new_resource_option_audited_help_heading();
+
     String persistence_domain_objectEditor_entity_category();
 
     String persistence_domain_objectEditor_entity_field_label();
+
+    String persistence_domain_objectEditor_audited_field_label();
+
+    String persistence_domain_objectEditor_audited_field_help_heading();
+
+    String persistence_domain_objectEditor_audited_field_help();
 
     String persistence_domain_objectEditor_entity_field_help_heading();
 

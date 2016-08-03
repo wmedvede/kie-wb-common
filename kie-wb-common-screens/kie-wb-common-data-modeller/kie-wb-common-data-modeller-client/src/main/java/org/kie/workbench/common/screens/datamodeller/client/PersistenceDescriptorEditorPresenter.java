@@ -312,7 +312,7 @@ public class PersistenceDescriptorEditorPresenter
     }
 
     private boolean dataSourceIntegrationEnabled() {
-        return ApplicationPreferences.getBooleanPref( "persistenceDescriptor.integrate-datasources" );
+        return ApplicationPreferences.getBooleanPref( "persistence-descriptor-editor-options.integrate-datasources" );
     }
 
     @Override
