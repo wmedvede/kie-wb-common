@@ -233,7 +233,7 @@ public class DriverDefEditor
                     defaultCommand.execute();
                 }
             }
-        } ).getDriverDeploymentInfo( getContent().getDriverDef().getUuid() );
+        } ).getDriverDeploymentInfo( getContent().getDef().getUuid() );
     }
 
     /**
@@ -307,7 +307,7 @@ public class DriverDefEditor
 
     protected void validate() {
         editorService.call(
-                getValidationSuccessCallback(), new DefaultErrorCallback() ).validate( getContent().getDriverDef() );
+                getValidationSuccessCallback(), new DefaultErrorCallback() ).validate( getContent().getDef() );
     }
 
     private RemoteCallback<DriverDefEditorContent> getLoadContentSuccessCallback() {
@@ -335,7 +335,7 @@ public class DriverDefEditor
 
     protected void setContent( final DriverDefEditorContent editorContent ) {
         this.editorContent = editorContent;
-        this.editorHelper.setDriverDef( editorContent.getDriverDef() );
+        this.editorHelper.setDriverDef( editorContent.getDef() );
         editorHelper.setValid( true );
     }
 
@@ -377,7 +377,7 @@ public class DriverDefEditor
                 if ( deploymentInfo == null ) {
                     builder.append( editorHelper.getMessage(
                             DataSourceManagementConstants.DriverDefEditor_DriverNotRegisteredMessage,
-                            getContent().getDriverDef().getUuid() ) );
+                            getContent().getDef().getUuid() ) );
                 } else if ( !deploymentInfo.hasDependants() ) {
                     builder.append( editorHelper.getMessage(
                             DataSourceManagementConstants.DriverDefEditor_DriverHasNoDependantsMessage ) );
@@ -388,6 +388,6 @@ public class DriverDefEditor
                 }
                 popupsUtil.showInformationPopup( builder.toString() );
             }
-        } ).getDriverDeploymentInfo( getContent().getDriverDef().getUuid() );
+        } ).getDriverDeploymentInfo( getContent().getDef().getUuid() );
     }
 }

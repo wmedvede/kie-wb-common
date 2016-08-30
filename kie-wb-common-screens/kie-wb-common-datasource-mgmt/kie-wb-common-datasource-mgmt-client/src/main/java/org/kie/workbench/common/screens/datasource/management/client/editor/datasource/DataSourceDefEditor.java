@@ -298,7 +298,7 @@ public class DataSourceDefEditor
                     defaultCommand.execute();
                 }
             }
-        } ).getDataSourceDeploymentInfo( getContent().getDataSourceDef().getUuid() );
+        } ).getDataSourceDeploymentInfo( getContent().getDef().getUuid() );
     }
 
     /**
@@ -340,7 +340,7 @@ public class DataSourceDefEditor
 
     protected void setContent( final DataSourceDefEditorContent editorContent ) {
         this.editorContent = editorContent;
-        editorHelper.setDataSourceDef( editorContent.getDataSourceDef() );
+        editorHelper.setDataSourceDef( editorContent.getDef() );
         editorHelper.setProject( editorContent.getProject() );
         editorHelper.setValid( true );
     }
@@ -348,7 +348,7 @@ public class DataSourceDefEditor
     public Command getLoadDriversSuccessCommand() {
         return new Command() {
             @Override public void execute() {
-                mainPanel.setDriver( getContent().getDataSourceDef().getDriverUuid() );
+                mainPanel.setDriver( getContent().getDef().getDriverUuid() );
             }
         };
     }
@@ -386,6 +386,6 @@ public class DataSourceDefEditor
                 popupsUtil.showInformationPopup( new SafeHtmlBuilder().appendEscapedLines(
                         testResult.getMessage() ).toSafeHtml().asString() );
             }
-        }, new DefaultErrorCallback() ).testDataSource( getContent().getDataSourceDef().getUuid() );
+        }, new DefaultErrorCallback() ).testDataSource( getContent().getDef().getUuid() );
     }
 }
