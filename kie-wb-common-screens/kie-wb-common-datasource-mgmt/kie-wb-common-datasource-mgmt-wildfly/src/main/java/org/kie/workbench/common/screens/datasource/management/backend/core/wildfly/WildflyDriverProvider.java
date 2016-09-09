@@ -67,8 +67,13 @@ public class WildflyDriverProvider
 
         String deploymentId = DeploymentIdGenerator.generateDeploymentId( driverDef );
         driverMgmtClient.deploy( deploymentId, uri );
+
+        //DriverDeploymentInfo generatedDeploymentInfo = getDeploymentInfo( driverDef.getUuid() );
+//        DriverDeploymentInfo deploymentInfo = new DriverDeploymentInfo( generatedDeploymentInfo.getDeploymentId(),
+//                true, driverDef.getUuid(), driverDef.getDriverClass() );
         DriverDeploymentInfo deploymentInfo = new DriverDeploymentInfo( deploymentId,
                 true, driverDef.getUuid(), driverDef.getDriverClass() );
+
         managedDrivers.put( deploymentInfo.getDeploymentId(), deploymentInfo );
         return deploymentInfo;
     }
