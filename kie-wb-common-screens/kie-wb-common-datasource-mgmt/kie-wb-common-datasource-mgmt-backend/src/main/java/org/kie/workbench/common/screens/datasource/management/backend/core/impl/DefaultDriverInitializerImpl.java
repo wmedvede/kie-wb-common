@@ -78,11 +78,11 @@ public class DefaultDriverInitializerImpl
         initializeFromConfigFile();
     }
 
-    private void initializeFromSystemProperties() {
+    protected void initializeFromSystemProperties() {
         initializeFromProperties( System.getProperties() );
     }
 
-    private void initializeFromConfigFile() {
+    protected void initializeFromConfigFile() {
         InputStream inputStream = DefaultDriverInitializerImpl.class.getResourceAsStream( "/datasource-management.properties" );
         if ( inputStream != null ) {
             try {

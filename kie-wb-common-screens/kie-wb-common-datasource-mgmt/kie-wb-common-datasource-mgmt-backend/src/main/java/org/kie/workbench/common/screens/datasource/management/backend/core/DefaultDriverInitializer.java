@@ -17,7 +17,7 @@
 package org.kie.workbench.common.screens.datasource.management.backend.core;
 
 /**
- * Initializes platform provided driver definitions.
+ * Initializes the platform provided driver definitions.
  */
 public interface DefaultDriverInitializer {
 
