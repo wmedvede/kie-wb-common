@@ -22,13 +22,13 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sun.org.apache.bcel.internal.generic.DMUL;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kie.internal.SystemEventListener;
 import org.kie.workbench.common.screens.datasource.management.metadata.CatalogMetadata;
 import org.kie.workbench.common.screens.datasource.management.metadata.DatabaseMetadata;
-import org.kie.workbench.common.screens.datasource.management.util.DatabaseMetadataBuilder;
+import org.kie.workbench.common.screens.datasource.management.util.DatabaseMetadataUtil;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 @RunWith( MockitoJUnitRunner.class )
-public class DatabaseMetadataBuilderTest {
+public class DatabaseMetadataUtilTest {
 
     private static final String DATA_BASE_PRODUCT_NAME = "DATA_BASE_PRODUCT_NAME";
 
@@ -46,7 +46,7 @@ public class DatabaseMetadataBuilderTest {
     @Mock
     private java.sql.DatabaseMetaData sqlDatabaseMetaData;
 
-    DatabaseMetadataBuilder builder;
+    DatabaseMetadataUtil builder;
 
     @Mock
     ResultSet rs;
@@ -54,9 +54,7 @@ public class DatabaseMetadataBuilderTest {
     List<CatalogMetadata> catalogs = new ArrayList<>(  );
 
     @Before
-    public void setup() {
-        builder = new DatabaseMetadataBuilder( conn, DatabaseMetadata.TableType.ALL );
-
+    public void setup( ) {
         catalogs.add( new CatalogMetadata( "catalog1" ) );
         catalogs.add( new CatalogMetadata( "catalog2" ) );
     }
@@ -68,10 +66,7 @@ public class DatabaseMetadataBuilderTest {
             //Connection conn = DriverManager.getConnection( "jdbc:postgresql://localhost:5432/livespark", "livespark", "livespark" );
             Connection conn = DriverManager.getConnection( "jdbc:postgresql://localhost:5432/livespark", "user1", "user1" );
 
-            DatabaseMetadataBuilder builder = new DatabaseMetadataBuilder( conn, DatabaseMetadata.TableType.TABLE );
-            DatabaseMetadata databaseMetadata = builder.build( );
-
-
+            DatabaseMetadataUtil.getMetadata( conn, true, true );
             int i = 0;
         } catch ( Exception e ) {
             fail( e.getMessage() );
@@ -86,11 +81,6 @@ public class DatabaseMetadataBuilderTest {
         when ( sqlDatabaseMetaData.getCatalogs() ).thenReturn( rs );
         when( rs.next() ).thenReturn( true );
 
-        DatabaseMetadata databaseMetadata = builder.build();
-
-
+        DatabaseMetadata databaseMetadata = DatabaseMetadataUtil.getMetadata( null, false, false );
     }
-
-
-
 }

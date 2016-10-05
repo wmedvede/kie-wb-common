@@ -17,6 +17,7 @@
 package org.kie.workbench.common.screens.datasource.management.util;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,26 +28,18 @@ import org.kie.workbench.common.screens.datasource.management.metadata.DatabaseM
 import org.kie.workbench.common.screens.datasource.management.metadata.SchemaMetadata;
 import org.kie.workbench.common.screens.datasource.management.metadata.TableMetadata;
 
-public class DatabaseMetadataBuilder {
+/**
+ * Utility class for retrieving metadata from a database.
+ */
+public class DatabaseMetadataUtil {
 
-    private Connection conn;
-
-    private DatabaseMetadata.TableType types[];
-
-    public DatabaseMetadataBuilder( Connection conn, DatabaseMetadata.TableType... types ) {
-        this.conn = conn;
-        this.types = types;
-    }
-
-    public DatabaseMetadata build( ) throws Exception {
-
-        List< CatalogMetadata > catalogs = new ArrayList<>( );
-        List< SchemaMetadata > schemas = new ArrayList<>( );
-        List< TableMetadata > tables = new ArrayList<>( );
-        DatabaseMetadata result = new DatabaseMetadata( );
-
+    public static DatabaseMetadata getMetadata( Connection conn,
+                                                boolean includeCatalogs,
+                                                boolean includeSchemas ) throws Exception {
         try {
-            java.sql.DatabaseMetaData sqlMetadata = conn.getMetaData( );
+            DatabaseMetadata result = new DatabaseMetadata( );
+            ResultSet rs;
+            DatabaseMetaData sqlMetadata = conn.getMetaData( );
 
             result.setDatabaseProductName( sqlMetadata.getDatabaseProductName( ) );
             result.setDatabaseProductVersion( sqlMetadata.getDatabaseProductVersion( ) );
@@ -54,33 +47,55 @@ public class DatabaseMetadataBuilder {
             result.setDriverVersion( sqlMetadata.getDriverVersion( ) );
             result.setDriverMinorVersion( sqlMetadata.getDriverMinorVersion( ) );
 
-            ResultSet rs = sqlMetadata.getCatalogs( );
-            while ( rs.next( ) ) {
-                catalogs.add( new CatalogMetadata( rs.getString( "TABLE_CAT" ) ) );
+            if ( includeCatalogs ) {
+                List< CatalogMetadata > catalogs = new ArrayList<>( );
+                rs = sqlMetadata.getCatalogs( );
+                while ( rs.next( ) ) {
+                    catalogs.add( new CatalogMetadata( rs.getString( "TABLE_CAT" ) ) );
+                }
+                rs.close( );
+                result.setCatalogs( catalogs );
             }
-            rs.close( );
-            result.setCatalogs( catalogs );
 
-            rs = sqlMetadata.getSchemas( );
-            while ( rs.next( ) ) {
-                schemas.add( new SchemaMetadata( rs.getString( "TABLE_CATALOG" ), rs.getString( "TABLE_SCHEM" ) ) );
+            if ( includeSchemas ) {
+                List< SchemaMetadata > schemas = new ArrayList<>( );
+                rs = sqlMetadata.getSchemas( );
+                while ( rs.next( ) ) {
+                    schemas.add( new SchemaMetadata( rs.getString( "TABLE_CATALOG" ), rs.getString( "TABLE_SCHEM" ) ) );
+                }
+                rs.close( );
+                result.setSchemas( schemas );
             }
-            rs.close( );
-            result.setSchemas( schemas );
+            return result;
+        } catch ( Exception e ) {
+            throw new Exception( "It was not possible to read connection metadata due to the following error: " + e.getMessage( ) );
+        } finally {
+            try {
+                conn.close( );
+            } catch ( Exception e ) {
+                //we are not interested in raising this error case.
+            }
+        }
+    }
 
-            rs = sqlMetadata.getTables( null, null, "%", toSqlTypes( types ) );
+    public static List< TableMetadata > findTables( Connection conn,
+                                                    String schema,
+                                                    String tableNamePattern,
+                                                    DatabaseMetadata.TableType... types ) throws Exception {
+        try {
+            List< TableMetadata > result = new ArrayList<>( );
+            DatabaseMetaData sqlMetadata = conn.getMetaData( );
+            ResultSet rs = sqlMetadata.getTables( null, schema, tableNamePattern, toSqlTypes( types ) );
             TableMetadata tableMetadata;
             while ( rs.next( ) ) {
                 tableMetadata = new TableMetadata( rs.getString( "TABLE_CAT" ),
                         rs.getString( "TABLE_SCHEM" ), rs.getString( "TABLE_NAME" ), rs.getString( "TABLE_TYPE" ) );
-                tables.add( tableMetadata );
+                result.add( tableMetadata );
             }
             rs.close( );
-            result.setTables( tables );
-
             return result;
         } catch ( Exception e ) {
-            throw new Exception( "It was not possible to read connection metadata due to the following error: " + e.getMessage( ) );
+            throw new Exception( "It was not possible to read schema tables due to the following error: " + e.getMessage( ) );
         } finally {
             try {
                 conn.close( );

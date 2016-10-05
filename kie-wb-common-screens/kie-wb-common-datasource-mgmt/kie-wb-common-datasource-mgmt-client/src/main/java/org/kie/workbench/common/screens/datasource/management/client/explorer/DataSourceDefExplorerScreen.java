@@ -29,9 +29,11 @@ import org.uberfire.client.annotations.WorkbenchMenu;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
+import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.PlaceRequest;
+import org.uberfire.mvp.impl.DefaultPlaceRequest;
 import org.uberfire.workbench.model.menu.MenuFactory;
 import org.uberfire.workbench.model.menu.Menus;
 
@@ -50,6 +52,8 @@ public class DataSourceDefExplorerScreen
 
     private PlaceRequest placeRequest;
 
+    private PlaceManager placeManager;
+
     private Menus menu;
 
     private boolean projectExplorerSelected = true;
@@ -59,14 +63,16 @@ public class DataSourceDefExplorerScreen
 
     @Inject
     public DataSourceDefExplorerScreen( DataSourceDefExplorerScreenView view,
-            ProjectDataSourceExplorer projectDataSourceExplorer,
-            GlobalDataSourceExplorer globalDataSourceExplorer,
-            TranslationService translationService ) {
+                                        ProjectDataSourceExplorer projectDataSourceExplorer,
+                                        GlobalDataSourceExplorer globalDataSourceExplorer,
+                                        TranslationService translationService,
+                                        PlaceManager placeManager ) {
 
         this.view = view;
         this.projectDataSourceExplorer = projectDataSourceExplorer;
         this.globalDataSourceExplorer = globalDataSourceExplorer;
         this.translationService = translationService;
+        this.placeManager = placeManager;
         view.init( this );
     }
 
@@ -110,6 +116,9 @@ public class DataSourceDefExplorerScreen
                                 DataSourceManagementConstants.DataSourceDefExplorerScreen_Refresh ) )
                 .respondsWith( getRefreshCommand() )
                 .endMenu()
+                .newTopLevelMenu( "Database browser" )
+                .respondsWith( getDatabaseStructureBrowserCommand() )
+                .endMenu()
                 .build();
     }
 
@@ -122,6 +131,15 @@ public class DataSourceDefExplorerScreen
                 } else {
                     onGlobalExplorerSelected();
                 }
+            }
+        };
+    }
+
+    private Command getDatabaseStructureBrowserCommand() {
+        return new Command() {
+            @Override
+            public void execute() {
+                placeManager.goTo( new DefaultPlaceRequest( "DatabaseStructureExplorerScreen" ) );
             }
         };
     }
