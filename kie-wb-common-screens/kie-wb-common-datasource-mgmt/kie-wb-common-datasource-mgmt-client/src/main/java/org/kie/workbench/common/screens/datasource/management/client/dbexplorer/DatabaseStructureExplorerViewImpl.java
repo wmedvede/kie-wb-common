@@ -37,10 +37,13 @@ import org.gwtbootstrap3.client.ui.constants.ButtonType;
 import org.gwtbootstrap3.client.ui.gwt.ButtonCell;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.client.local.api.IsElement;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.uberfire.commons.data.Pair;
+import org.uberfire.ext.widgets.common.client.common.BusyPopup;
 import org.uberfire.ext.widgets.common.client.tables.PagedTable;
 
 @Dependent
@@ -76,7 +79,16 @@ public class DatabaseStructureExplorerViewImpl
 
     private PagedTable< DatabaseObjectRow > dataGrid;
 
+    @Inject
+    private TranslationService translationService;
+
     public DatabaseStructureExplorerViewImpl( ) {
+    }
+
+    @PostConstruct
+    private void init( ) {
+        searchTermTextBox.setPlaceholder( translationService.getTranslation(
+                DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_namePatternHelp ) );
         dataGrid = new PagedTable<>( 20, new ProvidesKey< DatabaseObjectRow >( ) {
             @Override
             public Object getKey( DatabaseObjectRow item ) {
@@ -84,10 +96,6 @@ public class DatabaseStructureExplorerViewImpl
             }
         } );
         initializeResultsTable( );
-    }
-
-    @PostConstruct
-    private void init( ) {
         resultsPanel.add( dataGrid );
     }
 
@@ -138,7 +146,17 @@ public class DatabaseStructureExplorerViewImpl
 
     @Override
     public void redraw( ) {
-        dataGrid.redraw();
+        dataGrid.redraw( );
+    }
+
+    @Override
+    public void showBusyIndicator( String message ) {
+        BusyPopup.showMessage( message );
+    }
+
+    @Override
+    public void hideBusyIndicator( ) {
+        BusyPopup.close();
     }
 
     @EventHandler( "datasource-selector" )
@@ -162,9 +180,11 @@ public class DatabaseStructureExplorerViewImpl
     }
 
     private void initializeResultsTable( ) {
-        dataGrid.setEmptyTableCaption( "NO Database Objects" );
+        dataGrid.setEmptyTableCaption( translationService.getTranslation(
+                DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_dbObjectsListEmpty ) );
         dataGrid.setToolBarVisible( false );
         addNameColumn( );
+        addTypeColumn( );
         addOpenColumn( );
     }
 
@@ -172,22 +192,32 @@ public class DatabaseStructureExplorerViewImpl
         Column< DatabaseObjectRow, String > column = new Column< DatabaseObjectRow, String >( new TextCell( ) ) {
             @Override
             public String getValue( DatabaseObjectRow row ) {
-                if ( row.getName( ) != null ) {
-                    return row.getName( );
-                } else {
-                    return "";
-                }
+                return row.getName( );
             }
         };
-        dataGrid.addColumn( column, "Name" );
-        dataGrid.setColumnWidth( column, 90, Style.Unit.PCT );
+        dataGrid.addColumn( column, translationService.getTranslation(
+                DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_dbObjectNameColumn ) );
+        dataGrid.setColumnWidth( column, 80, Style.Unit.PCT );
+    }
+
+    private void addTypeColumn( ) {
+        Column< DatabaseObjectRow, String > column = new Column< DatabaseObjectRow, String >( new TextCell( ) ) {
+            @Override
+            public String getValue( DatabaseObjectRow row ) {
+                return row.getType( );
+            }
+        };
+        dataGrid.addColumn( column, translationService.getTranslation(
+                DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_dbObjectTypeColumn ) );
+        dataGrid.setColumnWidth( column, 10, Style.Unit.PCT );
     }
 
     private void addOpenColumn( ) {
         Column< DatabaseObjectRow, String > column = new Column< DatabaseObjectRow, String >( new ButtonCell( ButtonType.DEFAULT, ButtonSize.SMALL ) ) {
             @Override
             public String getValue( DatabaseObjectRow row ) {
-                return "Open";
+                return translationService.getTranslation(
+                        DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_dbObjectOpen );
             }
         };
         column.setFieldUpdater( new FieldUpdater< DatabaseObjectRow, String >( ) {
@@ -198,7 +228,8 @@ public class DatabaseStructureExplorerViewImpl
                 onOpen( row );
             }
         } );
-        dataGrid.addColumn( column, "Action" );
+        dataGrid.addColumn( column, translationService.getTranslation(
+                DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_dbObjectActionColumn ) );
         dataGrid.setColumnWidth( column, 10, Style.Unit.PCT );
     }
 

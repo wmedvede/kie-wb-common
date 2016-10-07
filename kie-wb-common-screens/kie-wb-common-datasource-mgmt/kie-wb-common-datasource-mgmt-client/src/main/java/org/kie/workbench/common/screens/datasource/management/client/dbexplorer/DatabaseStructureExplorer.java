@@ -31,6 +31,8 @@ import org.dashbuilder.displayer.DisplayerSettings;
 import org.dashbuilder.displayer.json.DisplayerSettingsJSONMarshaller;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.metadata.DatabaseMetadata;
 import org.kie.workbench.common.screens.datasource.management.metadata.SchemaMetadata;
 import org.kie.workbench.common.screens.datasource.management.metadata.TableMetadata;
@@ -41,6 +43,7 @@ import org.kie.workbench.common.screens.datasource.management.service.DatabaseMe
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.commons.data.Pair;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
+import org.uberfire.ext.widgets.common.client.callbacks.HasBusyIndicatorDefaultErrorCallback;
 import org.uberfire.mvp.PlaceRequest;
 import org.uberfire.mvp.impl.DefaultPlaceRequest;
 
@@ -60,6 +63,8 @@ public class DatabaseStructureExplorer
 
     private PlaceManager placeManager;
 
+    private TranslationService translationService;
+
     private DisplayerSettingsJSONMarshaller jsonMarshaller = DisplayerSettingsJSONMarshaller.get();
 
     private List<DatabaseObjectRow> rows = new ArrayList<>(  );
@@ -69,13 +74,15 @@ public class DatabaseStructureExplorer
                                       Caller< DataSourceDefQueryService > queryService,
                                       Caller< DatabaseMetadataService > metadataService,
                                       Caller< DataManagementService > managementService,
-                                      PlaceManager placeManager ) {
+                                      PlaceManager placeManager,
+                                      TranslationService translationService ) {
         this.view = view;
         view.init( this );
         this.queryService = queryService;
         this.metadataService = metadataService;
         this.managementService = managementService;
         this.placeManager = placeManager;
+        this.translationService = translationService;
     }
 
     @PostConstruct
@@ -95,7 +102,7 @@ public class DatabaseStructureExplorer
 
     private void initializeDummyRows( ) {
         for ( int i = 0; i < 50 ; i++ ) {
-            rows.add( new DatabaseObjectRow( "TABLE_" + i ) );
+            rows.add( new DatabaseObjectRow( "TABLE_" + i , "TABLE" ) );
         }
     }
 
@@ -105,17 +112,19 @@ public class DatabaseStructureExplorer
 
     @Override
     public void onDataSourceChange( ) {
+        rows.clear();
+        dataProvider.updateRowCount( rows.size(), true );
+        dataProvider.updateRowData( 0, rows );
+        view.redraw();
         loadSchemas( view.getDataSource( ) );
     }
 
     @Override
     public void onSchemaChange( ) {
-        //Window.alert( "onSchemaChange: " + view.getSchema( ) );
     }
 
     @Override
     public void onDatabaseObjectTypeChange( ) {
-        //Window.alert( "onDatabaseObjectTypeChange: " + view.getDatabaseObjectType( ) );
     }
 
     @Override
@@ -124,12 +133,15 @@ public class DatabaseStructureExplorer
     }
 
     private void search( String dataSource, String schema, String databaseObjectType, String searchTerm ) {
+        view.showBusyIndicator( translationService.getTranslation(
+                DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_loadingDbObjects) );
         metadataService.call( new RemoteCallback< List<TableMetadata> >( ) {
             @Override
             public void callback( List< TableMetadata > response ) {
+                view.hideBusyIndicator();
                 loadTables( response );
             }
-        }, new DefaultErrorCallback() ).findTables( dataSource,
+        }, new HasBusyIndicatorDefaultErrorCallback( view ) ).findTables( dataSource,
                 schema, buildSearchTerm( searchTerm ), DatabaseMetadata.TableType.valueOf( databaseObjectType ) );
     }
 
@@ -139,7 +151,6 @@ public class DatabaseStructureExplorer
     }
 
     private void openTable( String dataSourceUuid, String schema, String tableName ) {
-        tableName = "\"" + tableName + "\"";
         managementService.call( new RemoteCallback< DisplayerSettings >( ) {
             @Override
             public void callback( DisplayerSettings displayerSettings ) {
@@ -182,12 +193,15 @@ public class DatabaseStructureExplorer
     }
 
     private void loadSchemas( String dataSourceUuid ) {
+        view.showBusyIndicator( translationService.getTranslation(
+                DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_loadingDbSchemas ) );
         metadataService.call( new RemoteCallback< DatabaseMetadata >( ) {
             @Override
             public void callback( DatabaseMetadata metadata ) {
+                view.hideBusyIndicator();
                 loadSchemas( metadata );
             }
-        }, new DefaultErrorCallback() ).getMetadata( dataSourceUuid, false, true );
+        }, new HasBusyIndicatorDefaultErrorCallback( view ) ).getMetadata( dataSourceUuid, false, true );
     }
 
     private void loadSchemas( DatabaseMetadata metadata ) {
@@ -201,7 +215,7 @@ public class DatabaseStructureExplorer
     private void loadTables( List< TableMetadata > response ) {
         rows.clear();
         for ( TableMetadata metadata : response ) {
-            rows.add( new DatabaseObjectRow( metadata.getTableName() ) );
+            rows.add( new DatabaseObjectRow( metadata.getTableName(), metadata.getTableType() ) );
         }
         dataProvider.updateRowCount( rows.size(), true );
         dataProvider.updateRowData( 0, rows );

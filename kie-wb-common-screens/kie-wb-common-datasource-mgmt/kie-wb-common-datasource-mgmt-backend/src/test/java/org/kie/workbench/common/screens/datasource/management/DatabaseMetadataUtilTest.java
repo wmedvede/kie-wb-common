@@ -59,12 +59,18 @@ public class DatabaseMetadataUtilTest {
         catalogs.add( new CatalogMetadata( "catalog2" ) );
     }
 
-    //@Test
+    @Test
     public void testBuild() {
         try {
             Class.forName( "org.postgresql.Driver" );
-            //Connection conn = DriverManager.getConnection( "jdbc:postgresql://localhost:5432/livespark", "livespark", "livespark" );
-            Connection conn = DriverManager.getConnection( "jdbc:postgresql://localhost:5432/livespark", "user1", "user1" );
+            Class.forName( "org.h2.Driver" );
+            Class.forName( "com.mysql.jdbc.Driver" );
+
+            //Connection conn = DriverManager.getConnection( "jdbc:postgresql://localhost:5432/livespark", "user1", "user1" );
+
+            Connection conn = DriverManager.getConnection( "jdbc:postgresql://localhost:5432/livespark", "livespark", "livespark" );
+            //Connection conn = DriverManager.getConnection( "jdbc:mysql://localhost:3306/livespark", "livespark", "livespark" );
+            //Connection conn = DriverManager.getConnection( "jdbc:h2:~/livespark-h2", "sa", "sa" );
 
             DatabaseMetadataUtil.getMetadata( conn, true, true );
             int i = 0;
@@ -73,7 +79,7 @@ public class DatabaseMetadataUtilTest {
         }
     }
 
-    @Test
+    //@Test
     public void test() throws Exception {
         when ( conn.getMetaData() ).thenReturn( sqlDatabaseMetaData );
         when ( sqlDatabaseMetaData.getDatabaseProductName() ).thenReturn( DATA_BASE_PRODUCT_NAME );

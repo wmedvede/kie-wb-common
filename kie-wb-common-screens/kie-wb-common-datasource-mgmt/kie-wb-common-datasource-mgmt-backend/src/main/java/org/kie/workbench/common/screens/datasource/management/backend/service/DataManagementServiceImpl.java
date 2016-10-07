@@ -33,9 +33,10 @@ import org.dashbuilder.renderer.client.DefaultRenderer;
 import org.guvnor.common.services.shared.exceptions.GenericPortableException;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceRuntimeManager;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
+import org.kie.workbench.common.screens.datasource.management.metadata.DatabaseMetadata;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDeploymentInfo;
 import org.kie.workbench.common.screens.datasource.management.service.DataManagementService;
+import org.kie.workbench.common.screens.datasource.management.service.DatabaseMetadataService;
 import org.kie.workbench.common.screens.datasource.management.util.DataSetDefBuilder;
 
 import static org.uberfire.commons.validation.PortablePreconditions.*;
@@ -47,6 +48,8 @@ public class DataManagementServiceImpl
 
     private DataSourceRuntimeManager dataSourceRuntimeManager;
 
+    private DatabaseMetadataService databaseMetadataService;
+
     private DataSetDefRegistry dataSetDefRegistry;
 
     private DataSetManager dataSetManager;
@@ -55,9 +58,11 @@ public class DataManagementServiceImpl
 
     @Inject
     public DataManagementServiceImpl( DataSourceRuntimeManager dataSourceRuntimeManager,
+                                      DatabaseMetadataService databaseMetadataService,
                                       DataSetDefRegistry dataSetDefRegistry,
                                       DataSetManager dataSetManager ) {
         this.dataSourceRuntimeManager = dataSourceRuntimeManager;
+        this.databaseMetadataService = databaseMetadataService;
         this.dataSetDefRegistry = dataSetDefRegistry;
         this.dataSetManager = dataSetManager;
     }
@@ -65,7 +70,6 @@ public class DataManagementServiceImpl
     @Override
     public DisplayerSettings getDisplayerSettings( String dataSourceUuid, String schema, String table ) {
         checkNotNull( "dataSourceUuid", dataSourceUuid );
-        checkNotNull( "schema", schema );
         checkNotNull( "table", table );
         try {
             DataSourceDeploymentInfo deploymentInfo = dataSourceRuntimeManager.getDataSourceDeploymentInfo( dataSourceUuid );
@@ -74,7 +78,10 @@ public class DataManagementServiceImpl
                     .dataSetName( buildDataSetName( schema, table ) )
                     .dataSourceUuid( deploymentInfo.getJndi( ) )
                     .schema( schema )
-                    .table( table )
+                    .table( buildDataSetTableName( dataSourceUuid, table ) )
+                    // set the isPubilc property to false to avoid the created data sets to be listed in the
+                    // data set perspective.
+                    //.isPublic( false )
                     .build( );
 
             dataSetDefRegistry.registerDataSetDef( dataSetDef );
@@ -86,7 +93,7 @@ public class DataManagementServiceImpl
                     .dataset( dataSetDef.getUUID( ) )
                     .title( "Table editor -> " + table.toUpperCase() )
                     .titleVisible( true )
-                    .tablePageSize( 8 )
+                    .tablePageSize( 20 )
                     .tableOrderEnabled( true );
 
             List< DataColumn > columns = dataSet.getColumns( );
@@ -109,5 +116,25 @@ public class DataManagementServiceImpl
 
     private String buildDataSetName( String schema, String table ) {
         return schema + "." + table;
+    }
+
+    private String buildDataSetTableName( String dataSourceUuid, String table ) throws Exception {
+        String result = table;
+        DatabaseMetadata metadata = databaseMetadataService.getMetadata( dataSourceUuid, false, false );
+        if ( metadata.getDatabaseType() != null ) {
+            switch ( metadata.getDatabaseType( ) ) {
+                case POSTGRESQL:
+                    result = "\"" + table + "\"";
+                    break;
+                case H2:
+                case MYSQL:
+                case MARIADB:
+                case ORACLE:
+                case SQLSERVER:
+                case DB2:
+                    result = table;
+            }
+        }
+        return result;
     }
 }

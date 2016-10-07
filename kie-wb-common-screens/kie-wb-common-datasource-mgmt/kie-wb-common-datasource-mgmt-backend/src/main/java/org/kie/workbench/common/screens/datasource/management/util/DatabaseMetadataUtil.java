@@ -28,11 +28,21 @@ import org.kie.workbench.common.screens.datasource.management.metadata.DatabaseM
 import org.kie.workbench.common.screens.datasource.management.metadata.SchemaMetadata;
 import org.kie.workbench.common.screens.datasource.management.metadata.TableMetadata;
 
+import static org.kie.workbench.common.screens.datasource.management.metadata.DatabaseMetadata.DatabaseType.*;
+
 /**
  * Utility class for retrieving metadata from a database.
  */
 public class DatabaseMetadataUtil {
 
+    /**
+     * Gets the metadata for a given database.
+     * @param conn A valid connection to the target database.
+     * @param includeCatalogs If true the database catalogs metadata will be included in the results.
+     * @param includeSchemas If true the database schemas metadata will be included in the results.
+     * @return The metadata for the given database.
+     * @throws Exception if a database error is produced.
+     */
     public static DatabaseMetadata getMetadata( Connection conn,
                                                 boolean includeCatalogs,
                                                 boolean includeSchemas ) throws Exception {
@@ -41,6 +51,7 @@ public class DatabaseMetadataUtil {
             ResultSet rs;
             DatabaseMetaData sqlMetadata = conn.getMetaData( );
 
+            result.setDatabaseType( DatabaseMetadataUtil.getDatabaseType( sqlMetadata.getDatabaseProductName() ) );
             result.setDatabaseProductName( sqlMetadata.getDatabaseProductName( ) );
             result.setDatabaseProductVersion( sqlMetadata.getDatabaseProductVersion( ) );
             result.setDriverName( sqlMetadata.getDriverName( ) );
@@ -68,7 +79,8 @@ public class DatabaseMetadataUtil {
             }
             return result;
         } catch ( Exception e ) {
-            throw new Exception( "It was not possible to read connection metadata due to the following error: " + e.getMessage( ) );
+            throw new Exception( "It was not possible to read database metadata due to the following error: "
+                    + e.getMessage( ) );
         } finally {
             try {
                 conn.close( );
@@ -78,6 +90,14 @@ public class DatabaseMetadataUtil {
         }
     }
 
+    /**
+     * Gets a list of database objects metadata for a given database.
+     * @param conn A valid connection to the target database.
+     * @param schema A schema name for filtering. A null value will query all the available schemas.
+     * @param tableNamePattern A table name pattern for filtering the database objects by name, e.g. %INVOICE_%.
+     * @param types A list of database object types for filtering.
+     * @return A list of database objects fulfilling the filtering criteria.
+     */
     public static List< TableMetadata > findTables( Connection conn,
                                                     String schema,
                                                     String tableNamePattern,
@@ -103,6 +123,27 @@ public class DatabaseMetadataUtil {
                 //we are not interested in raising this error case.
             }
         }
+    }
+
+    public static DatabaseMetadata.DatabaseType getDatabaseType( String dbProductName ) {
+        String lowerCasedName = dbProductName.toLowerCase();
+
+        if ( lowerCasedName.contains( "h2" ) ) {
+            return H2;
+        } else if ( lowerCasedName.contains( "mysql" ) ) {
+            return MYSQL;
+        } else if ( lowerCasedName.contains( "mariadb" ) ) {
+            return MARIADB;
+        } else if ( lowerCasedName.contains( "postgresql" ) ) {
+            return POSTGRESQL;
+        } else if ( lowerCasedName.contains( "oracle" ) ) {
+            return ORACLE;
+        } else if ( lowerCasedName.contains( "microsoft" ) && lowerCasedName.contains( "sql" ) && lowerCasedName.contains( "server" ) ) {
+            return SQLSERVER;
+        } else if ( lowerCasedName.contains( "db2" ) ) {
+            return DB2;
+        }
+        return null;
     }
 
     private static String[] toSqlTypes( DatabaseMetadata.TableType types[] ) {

@@ -21,9 +21,10 @@ import java.util.List;
 import com.google.gwt.view.client.AsyncDataProvider;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.commons.data.Pair;
+import org.uberfire.ext.widgets.common.client.common.HasBusyIndicator;
 
 public interface DatabaseStructureExplorerView
-        extends UberElement< DatabaseStructureExplorerView.Presenter > {
+        extends UberElement< DatabaseStructureExplorerView.Presenter >, HasBusyIndicator {
 
     interface Presenter {
 

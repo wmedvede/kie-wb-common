@@ -142,4 +142,28 @@ public interface DataSourceManagementConstants {
 
     @TranslationKey( defaultValue = "" )
     String DataSourceDefExplorerScreen_Refresh = "DataSourceDefExplorerScreen.Refresh";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseStructureExplorerViewImpl_namePatternHelp = "DatabaseStructureExplorerViewImpl.namePatternHelp";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseStructureExplorerViewImpl_dbObjectNameColumn = "DatabaseStructureExplorerViewImpl.dbObjectNameColumn";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseStructureExplorerViewImpl_dbObjectTypeColumn = "DatabaseStructureExplorerViewImpl.dbObjectTypeColumn";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseStructureExplorerViewImpl_dbObjectActionColumn = "DatabaseStructureExplorerViewImpl.dbObjectActionColumn";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseStructureExplorerViewImpl_dbObjectOpen = "DatabaseStructureExplorerViewImpl.dbObjectOpen";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseStructureExplorerViewImpl_dbObjectsListEmpty = "DatabaseStructureExplorerViewImpl.dbObjectsListEmpty";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseStructureExplorerViewImpl_loadingDbObjects = "DatabaseStructureExplorerViewImpl.loadingDbObjects";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseStructureExplorerViewImpl_loadingDbSchemas = "DatabaseStructureExplorerViewImpl.loadingDbSchemas";
 }

@@ -24,7 +24,11 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 @Portable
 public class DatabaseMetadata {
 
+    public enum DatabaseType { H2, MYSQL, MARIADB, POSTGRESQL, ORACLE, SQLSERVER, DB2 }
+
     public enum TableType { ALL, TABLE, SYSTEM_TABLE,  VIEW, SYSTEM_VIEW, SEQUENCE }
+
+    private DatabaseType databaseType;
 
     private String databaseProductName;
 
@@ -42,9 +46,15 @@ public class DatabaseMetadata {
 
     private List<CatalogMetadata> catalogs = new ArrayList<>( );
 
-    private List<TableMetadata> tables = new ArrayList<>( );
-
     public DatabaseMetadata( ) {
+    }
+
+    public DatabaseType getDatabaseType( ) {
+        return databaseType;
+    }
+
+    public void setDatabaseType( DatabaseType databaseType ) {
+        this.databaseType = databaseType;
     }
 
     public String getDatabaseProductName( ) {
@@ -109,13 +119,5 @@ public class DatabaseMetadata {
 
     public void setCatalogs( List< CatalogMetadata > catalogs ) {
         this.catalogs = catalogs;
-    }
-
-    public List< TableMetadata > getTables( ) {
-        return tables;
-    }
-
-    public void setTables( List< TableMetadata > tables ) {
-        this.tables = tables;
     }
 }

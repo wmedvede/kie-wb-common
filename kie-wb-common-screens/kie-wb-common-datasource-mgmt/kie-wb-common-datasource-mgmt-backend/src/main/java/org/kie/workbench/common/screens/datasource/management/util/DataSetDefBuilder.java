@@ -22,11 +22,13 @@ import org.dashbuilder.dataset.def.DataSetDefFactory;
 import org.dashbuilder.dataset.def.SQLDataSetDefBuilder;
 
 /**
- * Builds a by default sql DataSet for a given table.
+ * Builds a by sql data set definition for a given table.
  */
 public class DataSetDefBuilder {
 
     private SQLDataSetDefBuilder defBuilder;
+
+    private boolean _public = true;
 
     private DataSetDefBuilder () {
         defBuilder = DataSetDefFactory.newSQLDataSetDef( );
@@ -57,8 +59,15 @@ public class DataSetDefBuilder {
         return this;
     }
 
+    public DataSetDefBuilder isPublic( boolean isPublic ) {
+        this._public = isPublic;
+        return this;
+    }
+
     public DataSetDef build( ) {
-        return defBuilder.buildDef();
+        DataSetDef def = defBuilder.buildDef();
+        def.setPublic( _public );
+        return def;
     }
 
     public static DataSetDefBuilder newBuilder( ) {

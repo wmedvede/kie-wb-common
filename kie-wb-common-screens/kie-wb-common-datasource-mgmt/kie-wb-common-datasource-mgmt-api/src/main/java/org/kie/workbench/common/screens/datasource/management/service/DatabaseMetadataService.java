@@ -35,8 +35,23 @@ public interface DatabaseMetadataService {
      */
     DatabaseMetadata getMetadata( String dataSourceUuid, boolean includeCatalogs, boolean includeSchemas );
 
+    /**
+     * Gets a list of database objects metadata for a given database.
+     * @param dataSourceUuid A data source uuid.
+     * @param schema A schema name for filtering. A null value will query all the available schemas.
+     * @param types A list of database object types for filtering.
+     * @return A list of database objects fulfilling the filtering criteria.
+     */
     List< TableMetadata > findTables( String dataSourceUuid, String schema, DatabaseMetadata.TableType... types );
 
+    /**
+     * Gets a list of database objects metadata for a given database.
+     * @param dataSourceUuid A data source uuid.
+     * @param schema A schema name for filtering. A null value will query all the available schemas.
+     * @param tableNamePattern A table name pattern for filtering the database objects by name, e.g. %INVOICE_%.
+     * @param types A list of database object types for filtering.
+     * @return A list of database objects fulfilling the filtering criteria.
+     */
     List< TableMetadata > findTables( String dataSourceUuid,
                                       String schema,
                                       String tableNamePattern,
