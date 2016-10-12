@@ -52,4 +52,25 @@ public class SchemaMetadata {
     public void setSchemaName( String schemaName ) {
         this.schemaName = schemaName;
     }
+
+    @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) return true;
+        if ( o == null || getClass( ) != o.getClass( ) ) return false;
+
+        SchemaMetadata that = ( SchemaMetadata ) o;
+
+        if ( catalogName != null ? !catalogName.equals( that.catalogName ) : that.catalogName != null ) return false;
+        return schemaName != null ? schemaName.equals( that.schemaName ) : that.schemaName == null;
+
+    }
+
+    @Override
+    public int hashCode( ) {
+        int result = catalogName != null ? catalogName.hashCode( ) : 0;
+        result  = ~~result;
+        result = 31 * result + ( schemaName != null ? schemaName.hashCode( ) : 0 );
+        result  = ~~result;
+        return result;
+    }
 }

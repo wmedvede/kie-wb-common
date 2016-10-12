@@ -69,6 +69,8 @@ public class DatabaseStructureExplorer
 
     private List<DatabaseObjectRow> rows = new ArrayList<>(  );
 
+    private DatabaseStructureExplorerSettings settings;
+
     @Inject
     public DatabaseStructureExplorer( DatabaseStructureExplorerView view,
                                       Caller< DataSourceDefQueryService > queryService,
@@ -88,8 +90,6 @@ public class DatabaseStructureExplorer
     @PostConstruct
     private void init( ) {
         initializeDatabaseObjectOptions( );
-        loadDataSources( );
-        initializeDummyRows();
         dataProvider = new AsyncDataProvider<DatabaseObjectRow>() {
             @Override
             protected void onRangeChanged( HasData<DatabaseObjectRow> display ) {
@@ -100,10 +100,13 @@ public class DatabaseStructureExplorer
         view.setDataProvider( dataProvider );
     }
 
-    private void initializeDummyRows( ) {
-        for ( int i = 0; i < 50 ; i++ ) {
-            rows.add( new DatabaseObjectRow( "TABLE_" + i , "TABLE" ) );
-        }
+    public void initialize( ) {
+        initialize( new DatabaseStructureExplorerSettings( true ) );
+    }
+
+    public void initialize( DatabaseStructureExplorerSettings settings ) {
+        this.settings = settings;
+        loadDataSources( );
     }
 
     public DatabaseStructureExplorerView getView( ) {
@@ -169,7 +172,7 @@ public class DatabaseStructureExplorer
         return new DefaultPlaceRequest( "DisplayerScreen", params );
     }
 
-    private void loadDataSources( ) {
+    private void loadDataSources(  ) {
         queryService.call( new RemoteCallback< Collection< DataSourceDefInfo > >( ) {
             @Override
             public void callback( Collection< DataSourceDefInfo > result ) {
@@ -181,15 +184,29 @@ public class DatabaseStructureExplorer
 
     private void loadDataSources( Collection< DataSourceDefInfo > dataSourceInfos ) {
         List< Pair< String, String > > options = new ArrayList<>( );
+        boolean selectedOptionDeployed = false;
         for ( DataSourceDefInfo defInfo : dataSourceInfos ) {
             if ( defInfo.isDeployed( ) ) {
-                options.add( new Pair<>( defInfo.getName( ), defInfo.getUuid( ) ) );
+                if ( !selectedOptionDeployed ) {
+                    selectedOptionDeployed = defInfo.getUuid().equals( settings.getSelectedDataSourceUuid() );
+                }
+                if ( settings.isEnableDataSourceSelection() ) {
+                    options.add( new Pair<>( defInfo.getName( ), defInfo.getUuid( ) ) );
+                } else if ( defInfo.getUuid().equals( settings.getSelectedDataSourceUuid() ) ){
+                    options.add( new Pair< >( defInfo.getName(), defInfo.getUuid()  ) );
+                }
             }
         }
-        view.loadDataSourceOptions( options );
-        if ( options.size( ) > 0 ) {
-            loadSchemas( options.get( 0 ).getK2( ) );
+        if ( settings.getSelectedDataSourceUuid() != null && selectedOptionDeployed ) {
+            view.loadDataSourceOptions( options, settings.getSelectedDataSourceUuid() );
+        } else {
+            view.loadDataSourceOptions( options );
         }
+
+        if ( options.size( ) > 0 ) {
+            loadSchemas( view.getDataSource() );
+        }
+        view.enableDataSourceSelector( settings.isEnableDataSourceSelection() );
     }
 
     private void loadSchemas( String dataSourceUuid ) {
@@ -235,6 +252,30 @@ public class DatabaseStructureExplorer
             return "%";
         } else {
             return "%" + searchTerm.trim() + "%";
+        }
+    }
+
+    public static class DatabaseStructureExplorerSettings {
+
+        private String selectedDataSourceUuid;
+
+        private boolean enableDataSourceSelection;
+
+        public DatabaseStructureExplorerSettings( boolean enableDataSourceSelection ) {
+            this.enableDataSourceSelection = enableDataSourceSelection;
+        }
+
+        public DatabaseStructureExplorerSettings( boolean enableDataSourceSelection, String selectedDataSourceUuid ) {
+            this.enableDataSourceSelection = enableDataSourceSelection;
+            this.selectedDataSourceUuid = selectedDataSourceUuid;
+        }
+
+        public String getSelectedDataSourceUuid( ) {
+            return selectedDataSourceUuid;
+        }
+
+        public boolean isEnableDataSourceSelection( ) {
+            return enableDataSourceSelection;
         }
     }
 }

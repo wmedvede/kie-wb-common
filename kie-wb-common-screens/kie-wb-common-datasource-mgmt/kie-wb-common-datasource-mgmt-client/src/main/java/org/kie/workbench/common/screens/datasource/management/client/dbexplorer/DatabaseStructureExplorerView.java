@@ -47,6 +47,8 @@ public interface DatabaseStructureExplorerView
 
     String getSearchTerm( );
 
+    void loadDataSourceOptions( final List< Pair< String, String > > options, String selectedOption );
+
     void loadDataSourceOptions( final List< Pair< String, String > > options );
 
     void loadSchemaOptions( final List< Pair< String, String > > options );
@@ -54,6 +56,8 @@ public interface DatabaseStructureExplorerView
     void loadDatabaseObjectTypeOptions( final List< Pair< String, String > > options );
 
     void setDataProvider( AsyncDataProvider< DatabaseObjectRow > dataProvider );
+
+    void enableDataSourceSelector( boolean enabled );
 
     void redraw( );
 }

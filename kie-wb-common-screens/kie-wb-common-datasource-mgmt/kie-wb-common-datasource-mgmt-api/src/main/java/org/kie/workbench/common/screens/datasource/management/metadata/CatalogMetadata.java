@@ -37,4 +37,21 @@ public class CatalogMetadata {
     public void setCatalogName( String catalogName ) {
         this.catalogName = catalogName;
     }
+
+    @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) return true;
+        if ( o == null || getClass( ) != o.getClass( ) ) return false;
+
+        CatalogMetadata that = ( CatalogMetadata ) o;
+
+        return catalogName != null ? catalogName.equals( that.catalogName ) : that.catalogName == null;
+    }
+
+    @Override
+    public int hashCode( ) {
+        int result = catalogName != null ? catalogName.hashCode( ) : 0;
+        result  = ~~result;
+        return result;
+    }
 }

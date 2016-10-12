@@ -56,6 +56,7 @@ public class DatabaseMetadataUtil {
             result.setDatabaseProductVersion( sqlMetadata.getDatabaseProductVersion( ) );
             result.setDriverName( sqlMetadata.getDriverName( ) );
             result.setDriverVersion( sqlMetadata.getDriverVersion( ) );
+            result.setDriverMajorVersion( sqlMetadata.getDriverMajorVersion() );
             result.setDriverMinorVersion( sqlMetadata.getDriverMinorVersion( ) );
 
             if ( includeCatalogs ) {
@@ -94,8 +95,9 @@ public class DatabaseMetadataUtil {
      * Gets a list of database objects metadata for a given database.
      * @param conn A valid connection to the target database.
      * @param schema A schema name for filtering. A null value will query all the available schemas.
-     * @param tableNamePattern A table name pattern for filtering the database objects by name, e.g. %INVOICE_%.
-     * @param types A list of database object types for filtering.
+     * @param tableNamePattern A table name pattern for filtering the database objects by name, e.g. %INVOICE_%. A null
+     * value will include all tables.
+     * @param types A list of database object types for filtering. A null value will include all types.
      * @return A list of database objects fulfilling the filtering criteria.
      */
     public static List< TableMetadata > findTables( Connection conn,

@@ -25,6 +25,8 @@ import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
+import org.uberfire.lifecycle.OnStartup;
+import org.uberfire.mvp.PlaceRequest;
 
 @Dependent
 @WorkbenchScreen( identifier = "DatabaseStructureExplorerScreen" )
@@ -33,11 +35,24 @@ public class DatabaseStructureExplorerScreen {
     @Inject
     private DatabaseStructureExplorer browser;
 
+    private PlaceRequest placeRequest;
+
     public DatabaseStructureExplorerScreen( ) {
     }
 
-    @PostConstruct
+    @OnStartup
+    public void onStartup( final PlaceRequest placeRequest ) {
+        this.placeRequest = placeRequest;
+        boolean enableDataSourceSelection = Boolean.valueOf(
+                placeRequest.getParameter( "enableDataSourceSelection", "true" ) );
+        String selectedDataSourceUuid = placeRequest.getParameter( "selectedDataSourceUuid", null );
+        browser.initialize( new DatabaseStructureExplorer.DatabaseStructureExplorerSettings(
+                enableDataSourceSelection, selectedDataSourceUuid ) );
+    }
+
+        @PostConstruct
     public void init( ) {
+        browser.initialize( new DatabaseStructureExplorer.DatabaseStructureExplorerSettings( true ) );
     }
 
     @WorkbenchPartView

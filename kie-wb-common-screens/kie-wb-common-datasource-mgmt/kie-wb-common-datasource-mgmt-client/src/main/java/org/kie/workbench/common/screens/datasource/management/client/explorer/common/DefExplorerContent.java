@@ -25,8 +25,11 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
+import org.kie.workbench.common.screens.datasource.management.model.DefInfo;
 import org.kie.workbench.common.screens.datasource.management.model.DriverDefInfo;
 import org.uberfire.client.mvp.PlaceManager;
+import org.uberfire.mvp.PlaceRequest;
+import org.uberfire.mvp.impl.DefaultPlaceRequest;
 
 @Dependent
 public class DefExplorerContent
@@ -68,13 +71,25 @@ public class DefExplorerContent
             DefItem item;
             String itemName;
             for ( DataSourceDefInfo dataSourceDefInfo : dataSourceDefInfos ) {
-                itemName = dataSourceDefInfo.getName() + ( dataSourceDefInfo.isManaged() ? "" : " (external)" );
-                item = createItem();
+                if ( dataSourceDefInfo.isManaged() ) {
+                    itemName = dataSourceDefInfo.getName( );
+                    item = createItem( true, true );
+                } else {
+                    itemName = dataSourceDefInfo.getName( ) + " (external)";
+                    item = createItem( true, true );
+                    item.enableEditAction( false );
+                }
+
                 item.setName( itemName );
                 item.addItemHandler( new DefItemView.ItemHandler() {
                     @Override
                     public void onClick( String itemId ) {
                         onDataSourceItemClick( dataSourceItemsMap.get( itemId ) );
+                    }
+
+                    @Override
+                    public void onBrowse( String itemId ) {
+                        onDataSourceItemBrowse( dataSourceItemsMap.get( itemId ) );
                     }
                 } );
                 dataSourceItemsMap.put( item.getId(), dataSourceDefInfo );
@@ -88,12 +103,17 @@ public class DefExplorerContent
         if ( driverDefInfos != null ) {
             DefItem item;
             for ( DriverDefInfo driverDefInfo : driverDefInfos ) {
-                item = createItem();
+                item = createItem( true, false );
                 item.setName( driverDefInfo.getName() );
                 item.addItemHandler( new DefItemView.ItemHandler() {
                     @Override
                     public void onClick( String itemId ) {
                         onDriverItemClick( driverItemsMap.get( itemId ) );
+                    }
+
+                    @Override
+                    public void onBrowse( String itemId ) {
+                        //browse action not apply for drivers.
                     }
                 } );
                 driverItemsMap.put( item.getId(), driverDefInfo );
@@ -141,11 +161,21 @@ public class DefExplorerContent
         }
     }
 
+    private void onDataSourceItemBrowse( DataSourceDefInfo dataSourceDefInfo ) {
+        PlaceRequest placeRequest = new DefaultPlaceRequest( "DatabaseStructureExplorerScreen" );
+        placeRequest.addParameter( "enableDataSourceSelection", "false" );
+        placeRequest.addParameter( "selectedDataSourceUuid", dataSourceDefInfo.getUuid() );
+        placeManager.goTo( placeRequest );
+    }
+
     protected void onDriverItemClick( DriverDefInfo driverDefInfo ) {
         placeManager.goTo( view.createPlaceRequest( driverDefInfo.getPath() ) );
     }
 
-    protected DefItem createItem() {
-        return itemInstance.get();
+    protected DefItem createItem( boolean showEditAction, boolean showBrowseAction ) {
+        DefItem item = itemInstance.get();
+        item.showEditAction( showEditAction );
+        item.showBrowseAction( showBrowseAction );
+        return item;
     }
 }

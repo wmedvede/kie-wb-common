@@ -72,6 +72,33 @@ public class TableMetadata {
     }
 
     @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) return true;
+        if ( o == null || getClass( ) != o.getClass( ) ) return false;
+
+        TableMetadata that = ( TableMetadata ) o;
+
+        if ( catalogName != null ? !catalogName.equals( that.catalogName ) : that.catalogName != null ) return false;
+        if ( schemaName != null ? !schemaName.equals( that.schemaName ) : that.schemaName != null ) return false;
+        if ( tableName != null ? !tableName.equals( that.tableName ) : that.tableName != null ) return false;
+        return tableType != null ? tableType.equals( that.tableType ) : that.tableType == null;
+
+    }
+
+    @Override
+    public int hashCode( ) {
+        int result = catalogName != null ? catalogName.hashCode( ) : 0;
+        result  = ~~result;
+        result = 31 * result + ( schemaName != null ? schemaName.hashCode( ) : 0 );
+        result  = ~~result;
+        result = 31 * result + ( tableName != null ? tableName.hashCode( ) : 0 );
+        result  = ~~result;
+        result = 31 * result + ( tableType != null ? tableType.hashCode( ) : 0 );
+        result  = ~~result;
+        return result;
+    }
+
+    @Override
     public String toString( ) {
         return "TableMetadata{" +
                 "catalogName='" + catalogName + '\'' +
@@ -80,4 +107,6 @@ public class TableMetadata {
                 ", tableType='" + tableType + '\'' +
                 '}';
     }
+
+
 }

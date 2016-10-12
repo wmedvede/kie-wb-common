@@ -125,7 +125,12 @@ public class DatabaseStructureExplorerViewImpl
     }
 
     @Override
-    public void loadDataSourceOptions( List< Pair< String, String > > options ) {
+    public void loadDataSourceOptions( List< Pair< String, String > > options, String selectedOption ) {
+        loadOptions( dataSourceSelector, options, selectedOption );
+    }
+
+    @Override
+    public void loadDataSourceOptions( final List< Pair< String, String > > options ) {
         loadOptions( dataSourceSelector, options );
     }
 
@@ -147,6 +152,11 @@ public class DatabaseStructureExplorerViewImpl
     @Override
     public void redraw( ) {
         dataGrid.redraw( );
+    }
+
+    @Override
+    public void enableDataSourceSelector( boolean enabled ) {
+        dataSourceSelector.setEnabled( enabled );
     }
 
     @Override

@@ -25,17 +25,24 @@ public interface DefItemView
 
         void onClick();
 
-        void addItemHandler( ItemHandler itemHandler );
+        void onBrowse();
 
+        void addItemHandler( ItemHandler itemHandler );
     }
 
     interface ItemHandler {
         void onClick( String itemId );
+
+        void onBrowse( String itemId );
     }
 
     void setName( String name );
 
     String getName();
 
+    void showEditAction( boolean showEditAction );
 
+    void enableEditAction( boolean enabled );
+
+    void showBrowseAction( boolean showBrowseAction );
 }
