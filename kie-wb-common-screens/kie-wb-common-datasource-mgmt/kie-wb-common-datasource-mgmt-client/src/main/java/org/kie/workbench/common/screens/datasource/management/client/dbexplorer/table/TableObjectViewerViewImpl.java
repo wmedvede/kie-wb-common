@@ -14,35 +14,29 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.dbexplorer;
+package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.table;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import org.jboss.errai.common.client.dom.DOMUtil;
-import org.jboss.errai.common.client.dom.Div;
-import org.jboss.errai.common.client.dom.OrderedList;
+import com.google.gwt.user.client.ui.IsWidget;
+import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.BreadcrumbItem;
 
 @Dependent
 @Templated
-public class DatabaseStructureExplorerViewImpl
-        implements DatabaseStructureExplorerView, IsElement {
+public class TableObjectViewerViewImpl
+        implements TableObjectViewerView, IsElement {
 
     private Presenter presenter;
 
     @Inject
-    @DataField( "menu-breadcrumb" )
-    private OrderedList breadcrumb;
-
-    @Inject
     @DataField( "content-panel" )
-    private Div contentPanel;
+    private FlowPanel contentPanel;
 
-    public DatabaseStructureExplorerViewImpl( ) {
+    public TableObjectViewerViewImpl( ) {
     }
 
     @Override
@@ -51,22 +45,7 @@ public class DatabaseStructureExplorerViewImpl
     }
 
     @Override
-    public void clearBreadcrumbs() {
-        DOMUtil.removeAllChildren( breadcrumb );
-    }
-
-    @Override
-    public void addBreadcrumbItem( BreadcrumbItem item ) {
-        breadcrumb.appendChild( item.getElement() );
-    }
-
-    @Override
-    public void clearContent( ) {
-        DOMUtil.removeAllChildren( contentPanel );
-    }
-
-    @Override
-    public void setContent( org.jboss.errai.common.client.api.IsElement conent ) {
-        contentPanel.appendChild( conent.getElement() );
+    public void setContent( IsWidget content ) {
+        contentPanel.add( content );
     }
 }

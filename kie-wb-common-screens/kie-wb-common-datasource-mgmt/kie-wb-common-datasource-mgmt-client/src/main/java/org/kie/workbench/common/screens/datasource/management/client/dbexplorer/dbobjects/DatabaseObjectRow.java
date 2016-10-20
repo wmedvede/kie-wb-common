@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.dbexplorer;
+package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.dbobjects;
 
-import org.jboss.errai.common.client.api.IsElement;
-import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.BreadcrumbItem;
-import org.uberfire.client.mvp.UberElement;
+public class DatabaseObjectRow {
 
-public interface DatabaseStructureExplorerView
-        extends UberElement< DatabaseStructureExplorerView.Presenter > {
+    private String name;
 
-    interface Presenter {
+    private String type;
 
+    public DatabaseObjectRow( String name, String type ) {
+        this.name = name;
+        this.type = type;
     }
 
-    interface Handler {
-
-        void onDataSourceSelected();
-
+    public String getName( ) {
+        return name;
     }
 
-    void clearBreadcrumbs();
+    public void setName( String name ) {
+        this.name = name;
+    }
 
-    void addBreadcrumbItem( BreadcrumbItem item );
+    public String getType( ) {
+        return type;
+    }
 
-    void clearContent();
-
-    void setContent( IsElement content );
+    public void setType( String type ) {
+        this.type = type;
+    }
 }

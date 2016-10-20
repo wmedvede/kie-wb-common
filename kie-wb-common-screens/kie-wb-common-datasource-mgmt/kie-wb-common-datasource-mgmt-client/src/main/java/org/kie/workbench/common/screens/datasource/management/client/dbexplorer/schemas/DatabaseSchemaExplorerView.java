@@ -14,30 +14,27 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.dbexplorer;
+package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.schemas;
 
-import org.jboss.errai.common.client.api.IsElement;
-import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.BreadcrumbItem;
+import com.google.gwt.view.client.AsyncDataProvider;
+import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.InitializeCallback;
 import org.uberfire.client.mvp.UberElement;
+import org.uberfire.ext.widgets.common.client.common.HasBusyIndicator;
 
-public interface DatabaseStructureExplorerView
-        extends UberElement< DatabaseStructureExplorerView.Presenter > {
+public interface DatabaseSchemaExplorerView
+        extends UberElement< DatabaseSchemaExplorerView.Presenter >, HasBusyIndicator {
 
     interface Presenter {
 
+        void onOpen( DatabaseSchemaRow row );
     }
 
     interface Handler {
 
-        void onDataSourceSelected();
-
+        void onOpen( String schemaName );
     }
 
-    void clearBreadcrumbs();
+    void setDataProvider( AsyncDataProvider< DatabaseSchemaRow > dataProvider );
 
-    void addBreadcrumbItem( BreadcrumbItem item );
-
-    void clearContent();
-
-    void setContent( IsElement content );
+    void redraw( );
 }

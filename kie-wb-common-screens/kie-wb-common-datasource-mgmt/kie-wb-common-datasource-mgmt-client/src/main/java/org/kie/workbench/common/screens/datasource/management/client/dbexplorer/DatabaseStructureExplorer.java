@@ -17,265 +17,299 @@
 package org.kie.workbench.common.screens.datasource.management.client.dbexplorer;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import org.dashbuilder.displayer.DisplayerSettings;
-import org.dashbuilder.displayer.json.DisplayerSettingsJSONMarshaller;
-import org.jboss.errai.common.client.api.Caller;
-import org.jboss.errai.common.client.api.RemoteCallback;
+import com.google.gwt.user.client.Window;
+import org.jboss.errai.common.client.api.IsElement;
+import org.jboss.errai.common.client.dom.HTMLElement;
+import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.BreadcrumbItem;
+import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.InitializeCallback;
+import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.dbobjects.DatabaseObjectExplorer;
+import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.dbobjects.DatabaseObjectExplorerView;
+import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.table.TableObjectViewer;
+import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.schemas.DatabaseSchemaExplorer;
+import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.schemas.DatabaseSchemaExplorerView;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
-import org.kie.workbench.common.screens.datasource.management.metadata.DatabaseMetadata;
-import org.kie.workbench.common.screens.datasource.management.metadata.SchemaMetadata;
-import org.kie.workbench.common.screens.datasource.management.metadata.TableMetadata;
-import org.kie.workbench.common.screens.datasource.management.model.DataSourceDefInfo;
-import org.kie.workbench.common.screens.datasource.management.service.DataManagementService;
-import org.kie.workbench.common.screens.datasource.management.service.DataSourceDefQueryService;
-import org.kie.workbench.common.screens.datasource.management.service.DatabaseMetadataService;
-import org.uberfire.client.mvp.PlaceManager;
-import org.uberfire.commons.data.Pair;
-import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
-import org.uberfire.ext.widgets.common.client.callbacks.HasBusyIndicatorDefaultErrorCallback;
-import org.uberfire.mvp.PlaceRequest;
-import org.uberfire.mvp.impl.DefaultPlaceRequest;
+import org.uberfire.mvp.Command;
 
 @Dependent
 public class DatabaseStructureExplorer
-        implements DatabaseStructureExplorerView.Presenter {
+        implements DatabaseStructureExplorerView.Presenter, IsElement {
 
     private DatabaseStructureExplorerView view;
 
-    private Caller< DataSourceDefQueryService > queryService;
+    private DatabaseSchemaExplorer schemaExplorer;
 
-    private Caller< DatabaseMetadataService > metadataService;
+    private DatabaseObjectExplorer objectExplorer;
 
-    private Caller< DataManagementService > managementService;
+    private TableObjectViewer objectViewer;
 
-    private AsyncDataProvider<DatabaseObjectRow> dataProvider;
+    private ManagedInstance<BreadcrumbItem> itemInstance;
 
-    private PlaceManager placeManager;
+    private BreadcrumbItem dataSourceBreadcrumbItem;
+
+    private BreadcrumbItem schemasBreadcrumbItem;
+
+    private BreadcrumbItem objectsBreadcrumbItem;
+
+    private BreadcrumbItem objectViewerBreadcrumbItem;
+
+    private List<BreadcrumbItem> currentBreadcrumbs = new ArrayList<>(  );
 
     private TranslationService translationService;
 
-    private DisplayerSettingsJSONMarshaller jsonMarshaller = DisplayerSettingsJSONMarshaller.get();
+    private Settings settings;
 
-    private List<DatabaseObjectRow> rows = new ArrayList<>(  );
-
-    private DatabaseStructureExplorerSettings settings;
+    private DatabaseStructureExplorerView.Handler handler;
 
     @Inject
     public DatabaseStructureExplorer( DatabaseStructureExplorerView view,
-                                      Caller< DataSourceDefQueryService > queryService,
-                                      Caller< DatabaseMetadataService > metadataService,
-                                      Caller< DataManagementService > managementService,
-                                      PlaceManager placeManager,
+                                      DatabaseSchemaExplorer schemaExplorer,
+                                      DatabaseObjectExplorer objectExplorer,
+                                      TableObjectViewer objectViewer,
+                                      ManagedInstance<BreadcrumbItem> itemInstance,
                                       TranslationService translationService ) {
         this.view = view;
         view.init( this );
-        this.queryService = queryService;
-        this.metadataService = metadataService;
-        this.managementService = managementService;
-        this.placeManager = placeManager;
+        this.schemaExplorer = schemaExplorer;
+        this.objectExplorer = objectExplorer;
+        this.objectViewer = objectViewer;
+        this.itemInstance = itemInstance;
         this.translationService = translationService;
+    }
+
+    @Override
+    public HTMLElement getElement( ) {
+        return view.getElement();
     }
 
     @PostConstruct
     private void init( ) {
-        initializeDatabaseObjectOptions( );
-        dataProvider = new AsyncDataProvider<DatabaseObjectRow>() {
+
+        dataSourceBreadcrumbItem = createItem(
+                buildDisplayableName( DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_dataSourceTitle ),
+                new Command( ) {
+                    @Override
+                    public void execute( ) {
+                        onDataSourceBreacrumbItemSelected( );
+                    }
+                } );
+
+        schemasBreadcrumbItem = createItem(
+                translationService.getTranslation( DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_schemasTitle ),
+                new Command( ) {
+                    @Override
+                    public void execute( ) {
+                        onShemasBreadcrumbItemSelected( );
+                    }
+                } );
+
+        objectsBreadcrumbItem = createItem( "", new Command( ) {
             @Override
-            protected void onRangeChanged( HasData<DatabaseObjectRow> display ) {
-                updateRowCount( rows.size(), true );
-                updateRowData( 0, rows );
+            public void execute( ) {
+                onObjectsBreadcrumbItemSelected();
             }
-        };
-        view.setDataProvider( dataProvider );
+        } );
+
+        objectViewerBreadcrumbItem = createItem( "", new Command( ) {
+            @Override
+            public void execute( ) {
+                objectViewerBreadcrumbItemSelected();
+            }
+        } );
+
+        schemaExplorer.addHandler( new DatabaseSchemaExplorerView.Handler( ) {
+            @Override
+            public void onOpen( String schemaName ) {
+                onSchemaSelected( schemaName );
+            }
+        } );
+
+        objectExplorer.addHandler( new DatabaseObjectExplorerView.Handler( ) {
+            @Override
+            public void onOpen( String schemaName, String objectName ) {
+                onDataBaseObjectSelected( schemaName, objectName );
+            }
+        } );
     }
 
-    public void initialize( ) {
-        initialize( new DatabaseStructureExplorerSettings( true ) );
-    }
-
-    public void initialize( DatabaseStructureExplorerSettings settings ) {
+    public void initialize( Settings settings, InitializeCallback callback ) {
+        dataSourceBreadcrumbItem.setName( settings.dataSourceName( ) );
         this.settings = settings;
-        loadDataSources( );
+        schemaExplorer.initialize( new DatabaseSchemaExplorer.Settings( )
+                        .dataSourceUuid( settings.dataSourceUuid( ) ),
+                new InitializeCallback( ) {
+                    @Override
+                    public void onInitializeError( Throwable throwable ) {
+                        if ( callback != null ) {
+                            callback.onInitializeError( throwable );
+                        }
+                    }
+
+                    @Override
+                    public void onInitializeSuccess( ) {
+                        showSchemas( );
+                        if ( callback != null ) {
+                            callback.onInitializeSuccess();
+                        }
+                    }
+                } );
     }
 
-    public DatabaseStructureExplorerView getView( ) {
-        return view;
+    public void addHandler( DatabaseStructureExplorerView.Handler handler ) {
+        this.handler = handler;
     }
 
-    @Override
-    public void onDataSourceChange( ) {
-        rows.clear();
-        dataProvider.updateRowCount( rows.size(), true );
-        dataProvider.updateRowData( 0, rows );
-        view.redraw();
-        loadSchemas( view.getDataSource( ) );
-    }
-
-    @Override
-    public void onSchemaChange( ) {
-    }
-
-    @Override
-    public void onDatabaseObjectTypeChange( ) {
-    }
-
-    @Override
-    public void onSearch( ) {
-        search( view.getDataSource(), view.getSchema(), view.getDatabaseObjectType(), view.getSearchTerm() );
-    }
-
-    private void search( String dataSource, String schema, String databaseObjectType, String searchTerm ) {
-        view.showBusyIndicator( translationService.getTranslation(
-                DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_loadingDbObjects) );
-        metadataService.call( new RemoteCallback< List<TableMetadata> >( ) {
-            @Override
-            public void callback( List< TableMetadata > response ) {
-                view.hideBusyIndicator();
-                loadTables( response );
-            }
-        }, new HasBusyIndicatorDefaultErrorCallback( view ) ).findTables( dataSource,
-                schema, buildSearchTerm( searchTerm ), DatabaseMetadata.TableType.valueOf( databaseObjectType ) );
-    }
-
-    @Override
-    public void onOpen( DatabaseObjectRow row ) {
-        openTable( view.getDataSource(), view.getSchema(), row.getName() );
-    }
-
-    private void openTable( String dataSourceUuid, String schema, String tableName ) {
-        managementService.call( new RemoteCallback< DisplayerSettings >( ) {
-            @Override
-            public void callback( DisplayerSettings displayerSettings ) {
-                PlaceRequest placeRequest = createPlaceRequest( displayerSettings );
-                placeManager.goTo( placeRequest );
-            }
-        }, new DefaultErrorCallback( ) ).getDisplayerSettings( dataSourceUuid, schema, tableName );
-    }
-
-    private PlaceRequest createPlaceRequest( DisplayerSettings displayerSettings ) {
-        String json = jsonMarshaller.toJsonString( displayerSettings );
-        Map< String, String > params = new HashMap<>( );
-        params.put( "json", json );
-        params.put( "edit", "false" );
-        params.put( "clone", "false" );
-        return new DefaultPlaceRequest( "DisplayerScreen", params );
-    }
-
-    private void loadDataSources(  ) {
-        queryService.call( new RemoteCallback< Collection< DataSourceDefInfo > >( ) {
-            @Override
-            public void callback( Collection< DataSourceDefInfo > result ) {
-                loadDataSources( result );
-            }
-
-        }, new DefaultErrorCallback( ) ).findGlobalDataSources( true );
-    }
-
-    private void loadDataSources( Collection< DataSourceDefInfo > dataSourceInfos ) {
-        List< Pair< String, String > > options = new ArrayList<>( );
-        boolean selectedOptionDeployed = false;
-        for ( DataSourceDefInfo defInfo : dataSourceInfos ) {
-            if ( defInfo.isDeployed( ) ) {
-                if ( !selectedOptionDeployed ) {
-                    selectedOptionDeployed = defInfo.getUuid().equals( settings.getSelectedDataSourceUuid() );
-                }
-                if ( settings.isEnableDataSourceSelection() ) {
-                    options.add( new Pair<>( defInfo.getName( ), defInfo.getUuid( ) ) );
-                } else if ( defInfo.getUuid().equals( settings.getSelectedDataSourceUuid() ) ){
-                    options.add( new Pair< >( defInfo.getName(), defInfo.getUuid()  ) );
-                }
-            }
-        }
-        if ( settings.getSelectedDataSourceUuid() != null && selectedOptionDeployed ) {
-            view.loadDataSourceOptions( options, settings.getSelectedDataSourceUuid() );
+    private void showSchemas() {
+        if ( schemaExplorer.hasItems( ) ) {
+            clearBreadcrumbs( );
+            addBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem );
+            activateLastBreadcrum( true );
+            view.clearContent( );
+            view.setContent( schemaExplorer );
         } else {
-            view.loadDataSourceOptions( options );
+            onSchemaSelected( null );
         }
-
-        if ( options.size( ) > 0 ) {
-            loadSchemas( view.getDataSource() );
-        }
-        view.enableDataSourceSelector( settings.isEnableDataSourceSelection() );
     }
 
-    private void loadSchemas( String dataSourceUuid ) {
-        view.showBusyIndicator( translationService.getTranslation(
-                DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_loadingDbSchemas ) );
-        metadataService.call( new RemoteCallback< DatabaseMetadata >( ) {
-            @Override
-            public void callback( DatabaseMetadata metadata ) {
-                view.hideBusyIndicator();
-                loadSchemas( metadata );
-            }
-        }, new HasBusyIndicatorDefaultErrorCallback( view ) ).getMetadata( dataSourceUuid, false, true );
-    }
-
-    private void loadSchemas( DatabaseMetadata metadata ) {
-        List< Pair< String, String > > options = new ArrayList<>( );
-        for ( SchemaMetadata schemaMetadata : metadata.getSchemas( ) ) {
-            options.add( new Pair<>( schemaMetadata.getSchemaName( ), schemaMetadata.getSchemaName( ) ) );
-        }
-        view.loadSchemaOptions( options );
-    }
-
-    private void loadTables( List< TableMetadata > response ) {
-        rows.clear();
-        for ( TableMetadata metadata : response ) {
-            rows.add( new DatabaseObjectRow( metadata.getTableName(), metadata.getTableType() ) );
-        }
-        dataProvider.updateRowCount( rows.size(), true );
-        dataProvider.updateRowData( 0, rows );
-        view.redraw();
-    }
-
-    private void initializeDatabaseObjectOptions( ) {
-        List< Pair< String, String > > options = new ArrayList<>( );
-        options.add( new Pair<>( DatabaseMetadata.TableType.ALL.name(), DatabaseMetadata.TableType.ALL.name() ) );
-        options.add( new Pair<>( DatabaseMetadata.TableType.TABLE.name(), DatabaseMetadata.TableType.TABLE.name() ) );
-        options.add( new Pair<>( DatabaseMetadata.TableType.VIEW.name(), DatabaseMetadata.TableType.VIEW.name() ) );
-        view.loadDatabaseObjectTypeOptions( options );
-    }
-
-    private String buildSearchTerm( String searchTerm ) {
-        if ( searchTerm == null || searchTerm.trim().isEmpty() ) {
-            return "%";
+    private void onSchemaSelected( String schemaName ) {
+        view.clearContent();
+        view.setContent( objectExplorer );
+        objectExplorer.initialize( new DatabaseObjectExplorer.Settings()
+                .dataSourceUuid( settings.dataSourceUuid() )
+                .selectedSchemaName( schemaName )
+                .showSchemaSelection( false )
+        );
+        objectsBreadcrumbItem.setName( schemaName != null ? schemaName :
+                translationService.getTranslation( DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_defaultSchema ) );
+        clearBreadcrumbs();
+        if ( schemaExplorer.hasItems() ) {
+            addBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem, objectsBreadcrumbItem );
         } else {
-            return "%" + searchTerm.trim() + "%";
+            addBreadcrumbs( dataSourceBreadcrumbItem, objectsBreadcrumbItem );
+        }
+        activateLastBreadcrum( true );
+    }
+
+    private void onDataBaseObjectSelected( String schemaName, String objectName ) {
+        view.clearContent();
+        view.setContent( objectViewer );
+        objectViewer.initialize( new TableObjectViewer.Settings()
+                .dataSourceUuid( settings.dataSourceUuid() )
+                .schemaName( schemaName )
+                .tableName( objectName ) );
+        objectViewerBreadcrumbItem.setName( objectName );
+        clearBreadcrumbs();
+        if ( schemaExplorer.hasItems() ) {
+            addBreadcrumbs( dataSourceBreadcrumbItem,
+                    schemasBreadcrumbItem, objectsBreadcrumbItem, objectViewerBreadcrumbItem );
+        } else {
+            addBreadcrumbs( dataSourceBreadcrumbItem, objectsBreadcrumbItem, objectViewerBreadcrumbItem );
+        }
+        activateLastBreadcrum( true );
+    }
+
+    private void onDataSourceBreacrumbItemSelected( ) {
+        if ( handler != null ) {
+            handler.onDataSourceSelected();
         }
     }
 
-    public static class DatabaseStructureExplorerSettings {
+    private void onShemasBreadcrumbItemSelected( ) {
+        view.clearContent( );
+        view.setContent( schemaExplorer );
 
-        private String selectedDataSourceUuid;
+        clearBreadcrumbs( );
+        addBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem );
+        activateLastBreadcrum( true );
+    }
 
-        private boolean enableDataSourceSelection;
+    private void onObjectsBreadcrumbItemSelected( ) {
+        view.clearContent();
+        view.setContent( objectExplorer );
 
-        public DatabaseStructureExplorerSettings( boolean enableDataSourceSelection ) {
-            this.enableDataSourceSelection = enableDataSourceSelection;
+        clearBreadcrumbs();
+        if ( schemaExplorer.hasItems() ) {
+            addBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem, objectsBreadcrumbItem );
+        } else {
+            addBreadcrumbs( dataSourceBreadcrumbItem, objectsBreadcrumbItem );
+        }
+        activateLastBreadcrum( true );
+    }
+
+    private void objectViewerBreadcrumbItemSelected( ) {
+        Window.alert( "objectViewerBreadcrumbItemSelected" );
+    }
+
+    private void clearBreadcrumbs() {
+        view.clearBreadcrumbs();
+        currentBreadcrumbs.clear();
+        dataSourceBreadcrumbItem.setActive( false );
+        schemasBreadcrumbItem.setActive( false );
+        objectsBreadcrumbItem.setActive( false );
+        objectViewerBreadcrumbItem.setActive( false );
+    }
+
+    private void addBreadcrumbs( BreadcrumbItem ... items ) {
+        for ( BreadcrumbItem item : items ) {
+            view.addBreadcrumbItem( item );
+            currentBreadcrumbs.add( item );
+        }
+    }
+
+    private void activateLastBreadcrum( boolean active ) {
+        if ( currentBreadcrumbs.size() > 1 ) {
+            currentBreadcrumbs.get( currentBreadcrumbs.size() -1 ).setActive( active );
+        }
+    }
+
+    private BreadcrumbItem createItem( String name, Command command ) {
+        BreadcrumbItem item = itemInstance.get();
+        item.setName( name );
+        item.setCommand( command );
+        return item;
+    }
+
+    private String buildDisplayableName( String dataSourceName ) {
+        return "<<" + dataSourceName;
+    }
+
+    public static class Settings {
+
+        /**
+         * Configures the data source name that will be displayed as label for the initial navigation breadcrumb.
+         */
+        private String dataSourceName;
+
+        /**
+         * Configures the data source that will be explored.
+         */
+        private String dataSourceUuid;
+
+        public Settings( ) {
         }
 
-        public DatabaseStructureExplorerSettings( boolean enableDataSourceSelection, String selectedDataSourceUuid ) {
-            this.enableDataSourceSelection = enableDataSourceSelection;
-            this.selectedDataSourceUuid = selectedDataSourceUuid;
+        public String dataSourceName( ) {
+            return dataSourceName;
         }
 
-        public String getSelectedDataSourceUuid( ) {
-            return selectedDataSourceUuid;
+        public Settings dataSourceName( String dataSourceName ) {
+            this.dataSourceName = dataSourceName;
+            return this;
         }
 
-        public boolean isEnableDataSourceSelection( ) {
-            return enableDataSourceSelection;
+        public String dataSourceUuid( ) {
+            return dataSourceUuid;
+        }
+
+        public Settings dataSourceUuid( String selectedDataSourceUuid ) {
+            this.dataSourceUuid = selectedDataSourceUuid;
+            return this;
         }
     }
 }

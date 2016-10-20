@@ -14,30 +14,17 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.dbexplorer;
+package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.table;
 
-import org.jboss.errai.common.client.api.IsElement;
-import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.BreadcrumbItem;
+import com.google.gwt.user.client.ui.IsWidget;
 import org.uberfire.client.mvp.UberElement;
 
-public interface DatabaseStructureExplorerView
-        extends UberElement< DatabaseStructureExplorerView.Presenter > {
+public interface TableObjectViewerView extends
+        UberElement< TableObjectViewerView.Presenter > {
 
     interface Presenter {
 
     }
 
-    interface Handler {
-
-        void onDataSourceSelected();
-
-    }
-
-    void clearBreadcrumbs();
-
-    void addBreadcrumbItem( BreadcrumbItem item );
-
-    void clearContent();
-
-    void setContent( IsElement content );
+    void setContent( IsWidget content );
 }
