@@ -25,7 +25,7 @@ import org.jboss.errai.common.client.dom.OrderedList;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.BreadcrumbItem;
+import org.kie.workbench.common.screens.datasource.management.client.widgets.BreadcrumbItem;
 
 @Dependent
 @Templated

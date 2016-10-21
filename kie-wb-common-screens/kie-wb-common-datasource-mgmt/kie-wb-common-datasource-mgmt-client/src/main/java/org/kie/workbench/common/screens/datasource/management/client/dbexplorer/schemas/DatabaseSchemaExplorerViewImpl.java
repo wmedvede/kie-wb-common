@@ -46,8 +46,8 @@ public class DatabaseSchemaExplorerViewImpl
     private Presenter presenter;
 
     @Inject
-    @DataField( "results-panel" )
-    private FlowPanel resultsPanel;
+    @DataField( "content-panel" )
+    private FlowPanel contentPanel;
 
     private PagedTable< DatabaseSchemaRow > dataGrid;
 
@@ -65,8 +65,8 @@ public class DatabaseSchemaExplorerViewImpl
                 return item.getName( );
             }
         } );
-        initializeResultsTable( );
-        resultsPanel.add( dataGrid );
+        initializeTable( );
+        contentPanel.add( dataGrid );
     }
 
     @Override
@@ -91,10 +91,10 @@ public class DatabaseSchemaExplorerViewImpl
 
     @Override
     public void hideBusyIndicator( ) {
-        BusyPopup.close();
+        BusyPopup.close( );
     }
 
-    private void initializeResultsTable( ) {
+    private void initializeTable( ) {
         dataGrid.setEmptyTableCaption( translationService.getTranslation(
                 DataSourceManagementConstants.DatabaseSchemaExplorerViewImpl_schemasListEmpty ) );
         dataGrid.setToolBarVisible( false );

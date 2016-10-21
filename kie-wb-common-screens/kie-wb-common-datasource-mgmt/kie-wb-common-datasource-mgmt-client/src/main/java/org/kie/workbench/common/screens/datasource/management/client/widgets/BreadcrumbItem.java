@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common;
+package org.kie.workbench.common.screens.datasource.management.client.widgets;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -55,13 +55,13 @@ public class BreadcrumbItem
     @Override
     public void onClick( ) {
         if ( command != null ) {
-            command.execute();
+            command.execute( );
         }
     }
 
     @Override
     public HTMLElement getElement( ) {
-        return view.getElement();
+        return view.getElement( );
     }
 
 }

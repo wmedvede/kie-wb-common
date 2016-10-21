@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.table;
+package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.tblviewer;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import org.uberfire.client.mvp.UberElement;

@@ -16,25 +16,22 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.dbexplorer;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
-import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.BreadcrumbItem;
-import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.InitializeCallback;
 import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.dbobjects.DatabaseObjectExplorer;
 import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.dbobjects.DatabaseObjectExplorerView;
-import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.table.TableObjectViewer;
 import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.schemas.DatabaseSchemaExplorer;
 import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.schemas.DatabaseSchemaExplorerView;
+import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.tblviewer.TableObjectViewer;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
+import org.kie.workbench.common.screens.datasource.management.client.util.InitializeCallback;
+import org.kie.workbench.common.screens.datasource.management.client.widgets.BreadcrumbItem;
 import org.uberfire.mvp.Command;
 
 @Dependent
@@ -49,7 +46,7 @@ public class DatabaseStructureExplorer
 
     private TableObjectViewer objectViewer;
 
-    private ManagedInstance<BreadcrumbItem> itemInstance;
+    private ManagedInstance< BreadcrumbItem > itemInstance;
 
     private BreadcrumbItem dataSourceBreadcrumbItem;
 
@@ -58,8 +55,6 @@ public class DatabaseStructureExplorer
     private BreadcrumbItem objectsBreadcrumbItem;
 
     private BreadcrumbItem objectViewerBreadcrumbItem;
-
-    private List<BreadcrumbItem> currentBreadcrumbs = new ArrayList<>(  );
 
     private TranslationService translationService;
 
@@ -72,7 +67,7 @@ public class DatabaseStructureExplorer
                                       DatabaseSchemaExplorer schemaExplorer,
                                       DatabaseObjectExplorer objectExplorer,
                                       TableObjectViewer objectViewer,
-                                      ManagedInstance<BreadcrumbItem> itemInstance,
+                                      ManagedInstance< BreadcrumbItem > itemInstance,
                                       TranslationService translationService ) {
         this.view = view;
         view.init( this );
@@ -85,43 +80,15 @@ public class DatabaseStructureExplorer
 
     @Override
     public HTMLElement getElement( ) {
-        return view.getElement();
+        return view.getElement( );
     }
 
     @PostConstruct
-    private void init( ) {
-
-        dataSourceBreadcrumbItem = createItem(
-                buildDisplayableName( DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_dataSourceTitle ),
-                new Command( ) {
-                    @Override
-                    public void execute( ) {
-                        onDataSourceBreacrumbItemSelected( );
-                    }
-                } );
-
-        schemasBreadcrumbItem = createItem(
-                translationService.getTranslation( DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_schemasTitle ),
-                new Command( ) {
-                    @Override
-                    public void execute( ) {
-                        onShemasBreadcrumbItemSelected( );
-                    }
-                } );
-
-        objectsBreadcrumbItem = createItem( "", new Command( ) {
-            @Override
-            public void execute( ) {
-                onObjectsBreadcrumbItemSelected();
-            }
-        } );
-
-        objectViewerBreadcrumbItem = createItem( "", new Command( ) {
-            @Override
-            public void execute( ) {
-                objectViewerBreadcrumbItemSelected();
-            }
-        } );
+    protected void init( ) {
+        dataSourceBreadcrumbItem = createDataSourceBreadcrumbItem();
+        schemasBreadcrumbItem = createSchemasBreadcrumbItem();
+        objectsBreadcrumbItem = createObjectsBreadcrumbItem();
+        objectViewerBreadcrumbItem = createObjectViewerBreadcrumbItem();
 
         schemaExplorer.addHandler( new DatabaseSchemaExplorerView.Handler( ) {
             @Override
@@ -139,8 +106,8 @@ public class DatabaseStructureExplorer
     }
 
     public void initialize( Settings settings, InitializeCallback callback ) {
-        dataSourceBreadcrumbItem.setName( settings.dataSourceName( ) );
         this.settings = settings;
+        dataSourceBreadcrumbItem.setName( settings.dataSourceName( ) );
         schemaExplorer.initialize( new DatabaseSchemaExplorer.Settings( )
                         .dataSourceUuid( settings.dataSourceUuid( ) ),
                 new InitializeCallback( ) {
@@ -155,7 +122,7 @@ public class DatabaseStructureExplorer
                     public void onInitializeSuccess( ) {
                         showSchemas( );
                         if ( callback != null ) {
-                            callback.onInitializeSuccess();
+                            callback.onInitializeSuccess( );
                         }
                     }
                 } );
@@ -165,11 +132,10 @@ public class DatabaseStructureExplorer
         this.handler = handler;
     }
 
-    private void showSchemas() {
+    protected void showSchemas( ) {
         if ( schemaExplorer.hasItems( ) ) {
             clearBreadcrumbs( );
-            addBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem );
-            activateLastBreadcrum( true );
+            setBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem );
             view.clearContent( );
             view.setContent( schemaExplorer );
         } else {
@@ -177,46 +143,43 @@ public class DatabaseStructureExplorer
         }
     }
 
-    private void onSchemaSelected( String schemaName ) {
-        view.clearContent();
+    protected void onSchemaSelected( String schemaName ) {
+        view.clearContent( );
         view.setContent( objectExplorer );
-        objectExplorer.initialize( new DatabaseObjectExplorer.Settings()
-                .dataSourceUuid( settings.dataSourceUuid() )
-                .selectedSchemaName( schemaName )
-                .showSchemaSelection( false )
+        objectExplorer.initialize( new DatabaseObjectExplorer.Settings( )
+                .dataSourceUuid( settings.dataSourceUuid( ) )
+                .schemaName( schemaName )
         );
         objectsBreadcrumbItem.setName( schemaName != null ? schemaName :
                 translationService.getTranslation( DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_defaultSchema ) );
-        clearBreadcrumbs();
-        if ( schemaExplorer.hasItems() ) {
-            addBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem, objectsBreadcrumbItem );
+        clearBreadcrumbs( );
+        if ( schemaExplorer.hasItems( ) ) {
+            setBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem, objectsBreadcrumbItem );
         } else {
-            addBreadcrumbs( dataSourceBreadcrumbItem, objectsBreadcrumbItem );
+            setBreadcrumbs( dataSourceBreadcrumbItem, objectsBreadcrumbItem );
         }
-        activateLastBreadcrum( true );
     }
 
     private void onDataBaseObjectSelected( String schemaName, String objectName ) {
-        view.clearContent();
+        view.clearContent( );
         view.setContent( objectViewer );
-        objectViewer.initialize( new TableObjectViewer.Settings()
-                .dataSourceUuid( settings.dataSourceUuid() )
+        objectViewer.initialize( new TableObjectViewer.Settings( )
+                .dataSourceUuid( settings.dataSourceUuid( ) )
                 .schemaName( schemaName )
                 .tableName( objectName ) );
         objectViewerBreadcrumbItem.setName( objectName );
-        clearBreadcrumbs();
-        if ( schemaExplorer.hasItems() ) {
-            addBreadcrumbs( dataSourceBreadcrumbItem,
+        clearBreadcrumbs( );
+        if ( schemaExplorer.hasItems( ) ) {
+            setBreadcrumbs( dataSourceBreadcrumbItem,
                     schemasBreadcrumbItem, objectsBreadcrumbItem, objectViewerBreadcrumbItem );
         } else {
-            addBreadcrumbs( dataSourceBreadcrumbItem, objectsBreadcrumbItem, objectViewerBreadcrumbItem );
+            setBreadcrumbs( dataSourceBreadcrumbItem, objectsBreadcrumbItem, objectViewerBreadcrumbItem );
         }
-        activateLastBreadcrum( true );
     }
 
     private void onDataSourceBreacrumbItemSelected( ) {
         if ( handler != null ) {
-            handler.onDataSourceSelected();
+            handler.onDataSourceSelected( );
         }
     }
 
@@ -225,51 +188,86 @@ public class DatabaseStructureExplorer
         view.setContent( schemaExplorer );
 
         clearBreadcrumbs( );
-        addBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem );
-        activateLastBreadcrum( true );
+        setBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem );
     }
 
     private void onObjectsBreadcrumbItemSelected( ) {
-        view.clearContent();
+        view.clearContent( );
         view.setContent( objectExplorer );
 
-        clearBreadcrumbs();
-        if ( schemaExplorer.hasItems() ) {
-            addBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem, objectsBreadcrumbItem );
+        clearBreadcrumbs( );
+        if ( schemaExplorer.hasItems( ) ) {
+            setBreadcrumbs( dataSourceBreadcrumbItem, schemasBreadcrumbItem, objectsBreadcrumbItem );
         } else {
-            addBreadcrumbs( dataSourceBreadcrumbItem, objectsBreadcrumbItem );
+            setBreadcrumbs( dataSourceBreadcrumbItem, objectsBreadcrumbItem );
         }
-        activateLastBreadcrum( true );
     }
 
-    private void objectViewerBreadcrumbItemSelected( ) {
-        Window.alert( "objectViewerBreadcrumbItemSelected" );
+    private void onObjectViewerBreadcrumbItemSelected( ) {
+        // do nothing, the object viewer breadcrumb is always the active breadcrumb when added.
     }
 
-    private void clearBreadcrumbs() {
-        view.clearBreadcrumbs();
-        currentBreadcrumbs.clear();
+    private void clearBreadcrumbs( ) {
+        view.clearBreadcrumbs( );
         dataSourceBreadcrumbItem.setActive( false );
         schemasBreadcrumbItem.setActive( false );
         objectsBreadcrumbItem.setActive( false );
         objectViewerBreadcrumbItem.setActive( false );
     }
 
-    private void addBreadcrumbs( BreadcrumbItem ... items ) {
+    private void setBreadcrumbs( BreadcrumbItem... items ) {
+        BreadcrumbItem lastItem = null;
         for ( BreadcrumbItem item : items ) {
             view.addBreadcrumbItem( item );
-            currentBreadcrumbs.add( item );
+            lastItem = item;
+        }
+        if ( lastItem != null && lastItem != dataSourceBreadcrumbItem ) {
+            lastItem.setActive( true );
         }
     }
 
-    private void activateLastBreadcrum( boolean active ) {
-        if ( currentBreadcrumbs.size() > 1 ) {
-            currentBreadcrumbs.get( currentBreadcrumbs.size() -1 ).setActive( active );
-        }
+    protected BreadcrumbItem createDataSourceBreadcrumbItem() {
+        return createItem(
+                buildDisplayableName( DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_dataSourceTitle ),
+                new Command( ) {
+                    @Override
+                    public void execute( ) {
+                        onDataSourceBreacrumbItemSelected( );
+                    }
+                } );
+    }
+
+    protected BreadcrumbItem createSchemasBreadcrumbItem() {
+        return createItem(
+                translationService.getTranslation( DataSourceManagementConstants.DatabaseStructureExplorerViewImpl_schemasTitle ),
+                new Command( ) {
+                    @Override
+                    public void execute( ) {
+                        onShemasBreadcrumbItemSelected( );
+                    }
+                } );
+    }
+
+    protected BreadcrumbItem createObjectsBreadcrumbItem() {
+        return createItem( "", new Command( ) {
+            @Override
+            public void execute( ) {
+                onObjectsBreadcrumbItemSelected( );
+            }
+        } );
+    }
+
+    protected BreadcrumbItem createObjectViewerBreadcrumbItem() {
+        return createItem( "", new Command( ) {
+            @Override
+            public void execute( ) {
+                onObjectViewerBreadcrumbItemSelected( );
+            }
+        } );
     }
 
     private BreadcrumbItem createItem( String name, Command command ) {
-        BreadcrumbItem item = itemInstance.get();
+        BreadcrumbItem item = itemInstance.get( );
         item.setName( name );
         item.setCommand( command );
         return item;
@@ -310,6 +308,26 @@ public class DatabaseStructureExplorer
         public Settings dataSourceUuid( String selectedDataSourceUuid ) {
             this.dataSourceUuid = selectedDataSourceUuid;
             return this;
+        }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( o == null || getClass( ) != o.getClass( ) ) return false;
+
+            Settings settings = ( Settings ) o;
+
+            if ( dataSourceName != null ? !dataSourceName.equals( settings.dataSourceName ) : settings.dataSourceName != null )
+                return false;
+            return dataSourceUuid != null ? dataSourceUuid.equals( settings.dataSourceUuid ) : settings.dataSourceUuid == null;
+
+        }
+
+        @Override
+        public int hashCode( ) {
+            int result = dataSourceName != null ? dataSourceName.hashCode( ) : 0;
+            result = 31 * result + ( dataSourceUuid != null ? dataSourceUuid.hashCode( ) : 0 );
+            return result;
         }
     }
 }

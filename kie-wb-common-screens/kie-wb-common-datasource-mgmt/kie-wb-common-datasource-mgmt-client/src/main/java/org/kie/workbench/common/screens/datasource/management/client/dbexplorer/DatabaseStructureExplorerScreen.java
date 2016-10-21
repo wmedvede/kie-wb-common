@@ -44,12 +44,11 @@ public class DatabaseStructureExplorerScreen {
     @OnStartup
     public void onStartup( final PlaceRequest placeRequest ) {
         this.placeRequest = placeRequest;
-        String selectedDataSourceUuid = placeRequest.getParameter( "selectedDataSourceUuid", null );
-        browser.initialize( new DatabaseStructureExplorer.Settings( ).dataSourceUuid( selectedDataSourceUuid ), null );
-    }
-
-        @PostConstruct
-    public void init( ) {
+        String dataSourceUuid = placeRequest.getParameter( "dataSourceUuid", null );
+        String dataDataSourceName = placeRequest.getParameter( "dataSourceName", "" );
+        browser.initialize( new DatabaseStructureExplorer.Settings( )
+                .dataSourceUuid( dataSourceUuid )
+                .dataSourceName( dataDataSourceName ), null );
     }
 
     @WorkbenchPartView

@@ -44,6 +44,7 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
+import org.kie.workbench.common.screens.datasource.management.client.util.UIUtil;
 import org.uberfire.commons.data.Pair;
 import org.uberfire.ext.widgets.common.client.common.BusyPopup;
 import org.uberfire.ext.widgets.common.client.tables.PagedTable;
@@ -56,7 +57,7 @@ public class DatabaseObjectExplorerViewImpl
     private Presenter presenter;
 
     @Inject
-    @DataField ( "header-panel" )
+    @DataField( "header-panel" )
     private Div headerPanel;
 
     @Inject
@@ -76,7 +77,7 @@ public class DatabaseObjectExplorerViewImpl
     private ListBox objectTypeSelector;
 
     @Inject
-    @DataField( "name-filter-label")
+    @DataField( "name-filter-label" )
     private Label nameFilterLabel;
 
     @Inject
@@ -135,12 +136,12 @@ public class DatabaseObjectExplorerViewImpl
 
     @Override
     public void loadSchemaOptions( List< Pair< String, String > > options, String selectedOption ) {
-        loadOptions( schemaSelector, options, selectedOption );
+        UIUtil.loadOptions( schemaSelector, options, selectedOption );
     }
 
     @Override
     public void loadDatabaseObjectTypeOptions( List< Pair< String, String > > options ) {
-        loadOptions( objectTypeSelector, options );
+        UIUtil.loadOptions( objectTypeSelector, options );
     }
 
     @Override
@@ -156,24 +157,24 @@ public class DatabaseObjectExplorerViewImpl
     @Override
     public void showSchemaSelector( boolean show ) {
         schemaSelectorLabel.setHidden( !show );
-        showElement( schemaSelector.getElement(), show );
+        showElement( schemaSelector.getElement( ), show );
     }
 
     @Override
     public void showObjectTypeFilter( boolean show ) {
         objectTypeSelectorLabel.setHidden( !show );
-        showElement( objectTypeSelector.getElement(), show );
+        showElement( objectTypeSelector.getElement( ), show );
     }
 
     @Override
     public void showObjectNameFilter( boolean show ) {
         nameFilterLabel.setHidden( !show );
-        showElement( nameFilterTextBox.getElement(), show );
+        showElement( nameFilterTextBox.getElement( ), show );
     }
 
     @Override
     public void showFilterButton( boolean show ) {
-        showElement( filterButton.getElement(), show );
+        showElement( filterButton.getElement( ), show );
     }
 
     @Override
@@ -188,17 +189,7 @@ public class DatabaseObjectExplorerViewImpl
 
     @Override
     public void hideBusyIndicator( ) {
-        BusyPopup.close();
-    }
-
-    @EventHandler( "schema-selector" )
-    private void onSchemaChangeHandler( ChangeEvent event ) {
-        presenter.onSchemaChange( );
-    }
-
-    @EventHandler( "object-type-selector" )
-    private void onObjectTypeChange( ChangeEvent event ) {
-        presenter.onDatabaseObjectTypeChange( );
+        BusyPopup.close( );
     }
 
     @EventHandler( "filter-button" )
@@ -264,28 +255,7 @@ public class DatabaseObjectExplorerViewImpl
         presenter.onOpen( row );
     }
 
-    private static void loadOptions( ListBox listBox, List< Pair< String, String > > options ) {
-        loadOptions( listBox, options, null );
-    }
-
-    private static void loadOptions( ListBox listBox, List< Pair< String, String > > options, String selectedOption ) {
-        Pair< String, String > option;
-        int selectedIndex = -1;
-        listBox.clear( );
-        for ( int i = 0; i < options.size( ); i++ ) {
-            option = options.get( i );
-            listBox.addItem( option.getK1( ), option.getK2( ) );
-            if ( selectedIndex < 0 && selectedOption != null && selectedOption.equals( option.getK2( ) ) ) {
-                selectedIndex = i;
-            }
-        }
-        if ( selectedIndex >= 0 ) {
-            listBox.setSelectedIndex( selectedIndex );
-        }
-    }
-
-    private void showElement(  com.google.gwt.dom.client.Element element,  boolean show ) {
+    private void showElement( com.google.gwt.dom.client.Element element, boolean show ) {
         element.getStyle( ).setDisplay( show ? Style.Display.INLINE_BLOCK : Style.Display.NONE );
     }
-
 }

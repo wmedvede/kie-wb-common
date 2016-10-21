@@ -30,7 +30,7 @@ import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
-import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.InitializeCallback;
+import org.kie.workbench.common.screens.datasource.management.client.util.InitializeCallback;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
 import org.kie.workbench.common.screens.datasource.management.metadata.DatabaseMetadata;
 import org.kie.workbench.common.screens.datasource.management.metadata.SchemaMetadata;
@@ -45,17 +45,15 @@ public class DatabaseSchemaExplorer
 
     private Caller< DatabaseMetadataService > metadataService;
 
-    private AsyncDataProvider<DatabaseSchemaRow > dataProvider;
+    private AsyncDataProvider< DatabaseSchemaRow > dataProvider;
 
     private TranslationService translationService;
 
-    private List<DatabaseSchemaRow > rows = new ArrayList<>(  );
+    private List< DatabaseSchemaRow > rows = new ArrayList<>( );
 
     private Settings settings;
 
     private DatabaseSchemaExplorerView.Handler handler;
-
-    private InitializeCallback initializeCallback;
 
     public DatabaseSchemaExplorer( ) {
     }
@@ -72,36 +70,24 @@ public class DatabaseSchemaExplorer
 
     @Override
     public HTMLElement getElement( ) {
-        return view.getElement();
+        return view.getElement( );
     }
 
     @PostConstruct
     private void init( ) {
-        dataProvider = new AsyncDataProvider<DatabaseSchemaRow >() {
+        dataProvider = new AsyncDataProvider< DatabaseSchemaRow >( ) {
             @Override
-            protected void onRangeChanged( HasData<DatabaseSchemaRow > display ) {
-                updateRowCount( rows.size(), true );
+            protected void onRangeChanged( HasData< DatabaseSchemaRow > display ) {
+                updateRowCount( rows.size( ), true );
                 updateRowData( 0, rows );
             }
         };
         view.setDataProvider( dataProvider );
     }
 
-    public void initialize( Settings settings, InitializeCallback initializeCallback  ) {
+    public void initialize( Settings settings, InitializeCallback initializeCallback ) {
         this.settings = settings;
-        this.initializeCallback = initializeCallback;
-        loadSchemas( settings.getDataSourceUuid() );
-    }
-
-    public boolean hasItems( ) {
-        return !rows.isEmpty();
-    }
-
-    private void clear() {
-        rows.clear( );
-        dataProvider.updateRowCount( rows.size( ), true );
-        dataProvider.updateRowData( 0, rows );
-        view.redraw( );
+        loadSchemas( settings.dataSourceUuid( ), initializeCallback );
     }
 
     public void addHandler( DatabaseSchemaExplorerView.Handler handler ) {
@@ -111,21 +97,25 @@ public class DatabaseSchemaExplorer
     @Override
     public void onOpen( DatabaseSchemaRow row ) {
         if ( handler != null ) {
-            handler.onOpen( row.getName() );
+            handler.onOpen( row.getName( ) );
         }
     }
 
-    private void loadSchemas( String dataSourceUuid ) {
-        clear();
+    public boolean hasItems( ) {
+        return !rows.isEmpty( );
+    }
+
+    private void loadSchemas( String dataSourceUuid, InitializeCallback initializeCallback ) {
+        clear( );
         view.showBusyIndicator( translationService.getTranslation(
                 DataSourceManagementConstants.DatabaseSchemaExplorerViewImpl_loadingDbSchemas ) );
         metadataService.call( new RemoteCallback< DatabaseMetadata >( ) {
             @Override
             public void callback( DatabaseMetadata metadata ) {
-                view.hideBusyIndicator();
-                loadSchemas( metadata.getSchemas() );
+                view.hideBusyIndicator( );
+                loadSchemas( metadata.getSchemas( ) );
                 if ( initializeCallback != null ) {
-                    initializeCallback.onInitializeSuccess();
+                    initializeCallback.onInitializeSuccess( );
                 }
             }
         }, new HasBusyIndicatorDefaultErrorCallback( view ) {
@@ -141,13 +131,21 @@ public class DatabaseSchemaExplorer
     }
 
     private void loadSchemas( List< SchemaMetadata > schemas ) {
-        rows.clear();
         for ( SchemaMetadata metadata : schemas ) {
-            rows.add( new DatabaseSchemaRow( metadata.getSchemaName() ) );
+            rows.add( new DatabaseSchemaRow( metadata.getSchemaName( ) ) );
         }
-        dataProvider.updateRowCount( rows.size(), true );
+        refreshRows();
+    }
+
+    private void clear( ) {
+        rows.clear( );
+        refreshRows();
+    }
+
+    private void refreshRows( ) {
+        dataProvider.updateRowCount( rows.size( ), true );
         dataProvider.updateRowData( 0, rows );
-        view.redraw();
+        view.redraw( );
     }
 
     public static class Settings {
@@ -160,13 +158,29 @@ public class DatabaseSchemaExplorer
         public Settings( ) {
         }
 
-        public String getDataSourceUuid( ) {
+        public String dataSourceUuid( ) {
             return dataSourceUuid;
         }
 
         public Settings dataSourceUuid( String selectedDataSourceUuid ) {
             this.dataSourceUuid = selectedDataSourceUuid;
             return this;
+        }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( o == null || getClass( ) != o.getClass( ) ) return false;
+
+            Settings settings = ( Settings ) o;
+
+            return dataSourceUuid != null ? dataSourceUuid.equals( settings.dataSourceUuid ) : settings.dataSourceUuid == null;
+
+        }
+
+        @Override
+        public int hashCode( ) {
+            return dataSourceUuid != null ? dataSourceUuid.hashCode( ) : 0;
         }
     }
 }

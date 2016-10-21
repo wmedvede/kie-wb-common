@@ -17,7 +17,7 @@
 package org.kie.workbench.common.screens.datasource.management.client.dbexplorer;
 
 import org.jboss.errai.common.client.api.IsElement;
-import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.BreadcrumbItem;
+import org.kie.workbench.common.screens.datasource.management.client.widgets.BreadcrumbItem;
 import org.uberfire.client.mvp.UberElement;
 
 public interface DatabaseStructureExplorerView
@@ -29,15 +29,15 @@ public interface DatabaseStructureExplorerView
 
     interface Handler {
 
-        void onDataSourceSelected();
+        void onDataSourceSelected( );
 
     }
 
-    void clearBreadcrumbs();
+    void clearBreadcrumbs( );
 
     void addBreadcrumbItem( BreadcrumbItem item );
 
-    void clearContent();
+    void clearContent( );
 
     void setContent( IsElement content );
 }

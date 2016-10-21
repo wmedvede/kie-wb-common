@@ -24,18 +24,18 @@ import javax.inject.Inject;
 
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.screens.datasource.management.client.resources.i18n.DataSourceManagementConstants;
+import org.kie.workbench.common.screens.datasource.management.client.util.InitializeCallback;
 import org.kie.workbench.common.screens.datasource.management.metadata.DatabaseMetadata;
 import org.kie.workbench.common.screens.datasource.management.metadata.SchemaMetadata;
 import org.kie.workbench.common.screens.datasource.management.metadata.TableMetadata;
-import org.kie.workbench.common.screens.datasource.management.service.DataManagementService;
 import org.kie.workbench.common.screens.datasource.management.service.DatabaseMetadataService;
-import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.commons.data.Pair;
 import org.uberfire.ext.widgets.common.client.callbacks.HasBusyIndicatorDefaultErrorCallback;
 
@@ -47,15 +47,11 @@ public class DatabaseObjectExplorer
 
     private Caller< DatabaseMetadataService > metadataService;
 
-    private Caller< DataManagementService > managementService;
-
-    private AsyncDataProvider<DatabaseObjectRow> dataProvider;
-
-    private PlaceManager placeManager;
+    private AsyncDataProvider< DatabaseObjectRow > dataProvider;
 
     private TranslationService translationService;
 
-    private List<DatabaseObjectRow> rows = new ArrayList<>(  );
+    private List< DatabaseObjectRow > rows = new ArrayList<>( );
 
     private Settings settings;
 
@@ -67,54 +63,48 @@ public class DatabaseObjectExplorer
     @Inject
     public DatabaseObjectExplorer( DatabaseObjectExplorerView view,
                                    Caller< DatabaseMetadataService > metadataService,
-                                   Caller< DataManagementService > managementService,
-                                   PlaceManager placeManager,
                                    TranslationService translationService ) {
         this.view = view;
         view.init( this );
         this.metadataService = metadataService;
-        this.managementService = managementService;
-        this.placeManager = placeManager;
         this.translationService = translationService;
     }
 
     @Override
     public HTMLElement getElement( ) {
-        return view.getElement();
+        return view.getElement( );
     }
 
     @PostConstruct
     private void init( ) {
         initializeDatabaseObjectOptions( );
-        dataProvider = new AsyncDataProvider<DatabaseObjectRow>() {
+        dataProvider = new AsyncDataProvider< DatabaseObjectRow >( ) {
             @Override
-            protected void onRangeChanged( HasData<DatabaseObjectRow> display ) {
-                updateRowCount( rows.size(), true );
+            protected void onRangeChanged( HasData< DatabaseObjectRow > display ) {
+                updateRowCount( rows.size( ), true );
                 updateRowData( 0, rows );
             }
         };
         view.setDataProvider( dataProvider );
     }
 
-    public void initialize( ) {
-        initialize( new Settings( )
-                .showSchemaSelection( true )
-                .showObjectTypeFilter( true )
-                .showObjectNameFilter( true ) );
+    public void initialize( Settings settings ) {
+        initialize( settings, null );
     }
 
-    public void initialize( Settings settings ) {
+    public void initialize( Settings settings, InitializeCallback initializeCallback ) {
         this.settings = settings;
-        view.showSchemaSelector( settings.isShowSchemaSelection() );
-        view.showObjectTypeFilter( settings.isShowObjectTypeFilter() );
-        view.showObjectNameFilter( settings.isShowObjectNameFilter() );
-        view.showFilterButton( settings.isShowObjectTypeFilter() || settings.isShowObjectNameFilter() );
-        view.showHeaderPanel( settings.isShowSchemaSelection() ||
-                settings.isShowObjectTypeFilter() || settings.isShowObjectNameFilter() );
-        if ( settings.isShowSchemaSelection() ) {
-            loadSchemas( settings.getDataSourceUuid(), settings.getSelectedSchemaName() );
+        view.showSchemaSelector( settings.isShowSchemaSelection( ) );
+        view.showObjectTypeFilter( settings.isShowObjectTypeFilter( ) );
+        view.showObjectNameFilter( settings.isShowObjectNameFilter( ) );
+        view.showFilterButton( settings.isShowObjectTypeFilter( ) || settings.isShowObjectNameFilter( ) );
+        view.showHeaderPanel( settings.isShowSchemaSelection( ) ||
+                settings.isShowObjectTypeFilter( ) || settings.isShowObjectNameFilter( ) );
+        if ( settings.isShowSchemaSelection( ) ) {
+            loadSchemas( settings.dataSourceUuid( ), settings.schemaName( ), initializeCallback );
         } else {
-            search( settings.getDataSourceUuid(), settings.getSelectedSchemaName(), DatabaseMetadata.TableType.ALL.name(), "%"  );
+            search( settings.dataSourceUuid( ),
+                    settings.schemaName( ), DatabaseMetadata.TableType.ALL.name( ), "%", initializeCallback );
         }
     }
 
@@ -123,104 +113,145 @@ public class DatabaseObjectExplorer
     }
 
     @Override
-    public void onSchemaChange( ) {
-    }
-
-    @Override
-    public void onDatabaseObjectTypeChange( ) {
-    }
-
-    @Override
     public void onSearch( ) {
-        search( settings.getDataSourceUuid(), getSchema(), view.getObjectType( ), view.getFilterTerm( ) );
+        search( settings.dataSourceUuid( ), getSchema( ), view.getObjectType( ), view.getFilterTerm( ) );
     }
 
-    private void search( String dataSource, String schema, String databaseObjectType, String searchTerm ) {
-        view.showBusyIndicator( translationService.getTranslation(
-                DataSourceManagementConstants.DatabaseObjectExplorerViewImpl_loadingDbObjects) );
-        metadataService.call( new RemoteCallback< List<TableMetadata> >( ) {
-            @Override
-            public void callback( List< TableMetadata > response ) {
-                view.hideBusyIndicator();
-                loadTables( response );
-            }
-        }, new HasBusyIndicatorDefaultErrorCallback( view ) ).findTables( dataSource,
-                schema, buildSearchTerm( searchTerm ), DatabaseMetadata.TableType.valueOf( databaseObjectType ) );
+    @Override
+    public void onOpen( DatabaseObjectRow row ) {
+        handler.onOpen( getSchema( ), row.getName( ) );
     }
 
-    private String getSchema() {
-        if ( settings.isShowSchemaSelection() ) {
-            return view.getSchema();
+    private String getSchema( ) {
+        if ( settings.isShowSchemaSelection( ) ) {
+            return view.getSchema( );
         } else {
-            return settings.getSelectedSchemaName();
+            return settings.schemaName( );
         }
     }
 
-    private void clear() {
+    private void clear( ) {
         rows.clear( );
+        refreshRows( );
+    }
+
+    private void refreshRows( ) {
         dataProvider.updateRowCount( rows.size( ), true );
         dataProvider.updateRowData( 0, rows );
         view.redraw( );
     }
 
-    @Override
-    public void onOpen( DatabaseObjectRow row ) {
-        handler.onOpen( getSchema(), row.getName() );
-    }
-
-    private void loadSchemas( String dataSourceUuid, String selectedSchema ) {
+    private void loadSchemas( String dataSourceUuid, String selectedSchema, InitializeCallback initializeCallback ) {
         view.showBusyIndicator( translationService.getTranslation(
                 DataSourceManagementConstants.DatabaseObjectExplorerViewImpl_loadingDbSchemas ) );
-        metadataService.call( new RemoteCallback< DatabaseMetadata >( ) {
+        metadataService.call( getLoadSchemasSuccessCallback( selectedSchema, initializeCallback ),
+                new HasBusyIndicatorDefaultErrorCallback( view ) {
+                    @Override
+                    public boolean error( Message message, Throwable throwable ) {
+                        boolean result = super.error( message, throwable );
+                        if ( initializeCallback != null ) {
+                            initializeCallback.onInitializeError( throwable );
+                        }
+                        return result;
+                    }
+                } ).getMetadata( dataSourceUuid, false, true );
+    }
+
+    private RemoteCallback< DatabaseMetadata > getLoadSchemasSuccessCallback( String selectedSchema,
+                                                                              InitializeCallback initializeCallback ) {
+        return new RemoteCallback< DatabaseMetadata >( ) {
             @Override
             public void callback( DatabaseMetadata metadata ) {
-                view.hideBusyIndicator();
-                loadSchemas( metadata, selectedSchema );
+                view.hideBusyIndicator( );
+                String currentSchema = selectedSchema;
+                if ( currentSchema == null && !metadata.getSchemas( ).isEmpty( ) ) {
+                    currentSchema = metadata.getSchemas( ).get( 0 ).getSchemaName( );
+                }
+                loadSchemas( metadata, currentSchema );
+                search( settings.dataSourceUuid( ),
+                        currentSchema, DatabaseMetadata.TableType.ALL.name( ), "%", initializeCallback );
             }
-        }, new HasBusyIndicatorDefaultErrorCallback( view ) ).getMetadata( dataSourceUuid, false, true );
+        };
     }
 
     private void loadSchemas( DatabaseMetadata metadata, String selectedSchema ) {
         String currentSchema = null;
         List< Pair< String, String > > options = new ArrayList<>( );
         for ( SchemaMetadata schemaMetadata : metadata.getSchemas( ) ) {
-            if ( schemaMetadata.getSchemaName().equals( selectedSchema ) ) {
+            if ( schemaMetadata.getSchemaName( ).equals( selectedSchema ) ) {
                 currentSchema = selectedSchema;
             }
             options.add( new Pair<>( schemaMetadata.getSchemaName( ), schemaMetadata.getSchemaName( ) ) );
         }
-        if ( currentSchema == null && metadata.getSchemas().size() > 0 ) {
-            currentSchema = metadata.getSchemas().get( 0 ).getSchemaName();
+        if ( currentSchema == null && !metadata.getSchemas( ).isEmpty( ) ) {
+            currentSchema = metadata.getSchemas( ).get( 0 ).getSchemaName( );
         }
-
         view.loadSchemaOptions( options, currentSchema );
+    }
 
-        search( settings.getDataSourceUuid(), currentSchema, DatabaseMetadata.TableType.ALL.name(), "%" );
+    private void search( String dataSource,
+                         String schema,
+                         String databaseObjectType,
+                         String searchTerm ) {
+        search( dataSource, schema, databaseObjectType, searchTerm, null );
+    }
+
+    private void search( String dataSource,
+                         String schema,
+                         String databaseObjectType,
+                         String searchTerm,
+                         InitializeCallback initializeCallback ) {
+        clear( );
+        view.showBusyIndicator( translationService.getTranslation(
+                DataSourceManagementConstants.DatabaseObjectExplorerViewImpl_loadingDbObjects ) );
+        metadataService.call( getSearchSuccessCallback( initializeCallback ),
+                new HasBusyIndicatorDefaultErrorCallback( view ) {
+                    @Override
+                    public boolean error( Message message, Throwable throwable ) {
+                        boolean result = super.error( message, throwable );
+                        if ( initializeCallback != null ) {
+                            initializeCallback.onInitializeError( throwable );
+                        }
+                        return result;
+                    }
+                } ).findTables( dataSource,
+                schema, buildSearchTerm( searchTerm ), DatabaseMetadata.TableType.valueOf( databaseObjectType ) );
+    }
+
+    private RemoteCallback< List< TableMetadata > > getSearchSuccessCallback( InitializeCallback initializeCallback ) {
+        return new RemoteCallback< List< TableMetadata > >( ) {
+            @Override
+            public void callback( List< TableMetadata > response ) {
+                view.hideBusyIndicator( );
+                loadTables( response );
+                if ( initializeCallback != null ) {
+                    initializeCallback.onInitializeSuccess( );
+                }
+            }
+        };
     }
 
     private void loadTables( List< TableMetadata > response ) {
-        rows.clear();
+        rows.clear( );
         for ( TableMetadata metadata : response ) {
-            rows.add( new DatabaseObjectRow( metadata.getTableName(), metadata.getTableType() ) );
+            rows.add( new DatabaseObjectRow( metadata.getTableName( ), metadata.getTableType( ) ) );
         }
-        dataProvider.updateRowCount( rows.size(), true );
-        dataProvider.updateRowData( 0, rows );
-        view.redraw();
+        refreshRows( );
     }
 
     private void initializeDatabaseObjectOptions( ) {
         List< Pair< String, String > > options = new ArrayList<>( );
-        options.add( new Pair<>( DatabaseMetadata.TableType.ALL.name(), DatabaseMetadata.TableType.ALL.name() ) );
-        options.add( new Pair<>( DatabaseMetadata.TableType.TABLE.name(), DatabaseMetadata.TableType.TABLE.name() ) );
-        options.add( new Pair<>( DatabaseMetadata.TableType.VIEW.name(), DatabaseMetadata.TableType.VIEW.name() ) );
+        options.add( new Pair<>( DatabaseMetadata.TableType.ALL.name( ), DatabaseMetadata.TableType.ALL.name( ) ) );
+        options.add( new Pair<>( DatabaseMetadata.TableType.TABLE.name( ), DatabaseMetadata.TableType.TABLE.name( ) ) );
+        options.add( new Pair<>( DatabaseMetadata.TableType.VIEW.name( ), DatabaseMetadata.TableType.VIEW.name( ) ) );
         view.loadDatabaseObjectTypeOptions( options );
     }
 
     private String buildSearchTerm( String searchTerm ) {
-        if ( searchTerm == null || searchTerm.trim().isEmpty() ) {
+        if ( searchTerm == null || searchTerm.trim( ).isEmpty( ) ) {
             return "%";
         } else {
-            return "%" + searchTerm.trim() + "%";
+            return "%" + searchTerm.trim( ) + "%";
         }
     }
 
@@ -234,7 +265,7 @@ public class DatabaseObjectExplorer
         /**
          * When set it's the pre-configured database schema, otherwise the first available schema will be set.
          */
-        private String selectedSchemaName;
+        private String schemaName;
 
         /**
          * Indicates if the schema selector should be visible.
@@ -242,16 +273,19 @@ public class DatabaseObjectExplorer
         private boolean showSchemaSelection;
 
         /**
-         * When true, the filtering of data objects is available.
+         * When true the filtering of data objects by type is available.
          */
         private boolean showObjectTypeFilter;
 
+        /**
+         * When true the filtering of data objects by name is available.
+         */
         private boolean showObjectNameFilter;
 
         public Settings( ) {
         }
 
-        public String getDataSourceUuid( ) {
+        public String dataSourceUuid( ) {
             return dataSourceUuid;
         }
 
@@ -260,12 +294,12 @@ public class DatabaseObjectExplorer
             return this;
         }
 
-        public String getSelectedSchemaName( ) {
-            return selectedSchemaName;
+        public String schemaName( ) {
+            return schemaName;
         }
 
-        public Settings selectedSchemaName( String selectedSchemaName ) {
-            this.selectedSchemaName = selectedSchemaName;
+        public Settings schemaName( String schemaName ) {
+            this.schemaName = schemaName;
             return this;
         }
 
@@ -294,6 +328,32 @@ public class DatabaseObjectExplorer
         public Settings showObjectNameFilter( boolean showObjectNameFilter ) {
             this.showObjectNameFilter = showObjectNameFilter;
             return this;
+        }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( o == null || getClass( ) != o.getClass( ) ) return false;
+
+            Settings settings = ( Settings ) o;
+
+            if ( showSchemaSelection != settings.showSchemaSelection ) return false;
+            if ( showObjectTypeFilter != settings.showObjectTypeFilter ) return false;
+            if ( showObjectNameFilter != settings.showObjectNameFilter ) return false;
+            if ( dataSourceUuid != null ? !dataSourceUuid.equals( settings.dataSourceUuid ) : settings.dataSourceUuid != null )
+                return false;
+            return schemaName != null ? schemaName.equals( settings.schemaName ) : settings.schemaName == null;
+
+        }
+
+        @Override
+        public int hashCode( ) {
+            int result = dataSourceUuid != null ? dataSourceUuid.hashCode( ) : 0;
+            result = 31 * result + ( schemaName != null ? schemaName.hashCode( ) : 0 );
+            result = 31 * result + ( showSchemaSelection ? 1 : 0 );
+            result = 31 * result + ( showObjectTypeFilter ? 1 : 0 );
+            result = 31 * result + ( showObjectNameFilter ? 1 : 0 );
+            return result;
         }
     }
 }

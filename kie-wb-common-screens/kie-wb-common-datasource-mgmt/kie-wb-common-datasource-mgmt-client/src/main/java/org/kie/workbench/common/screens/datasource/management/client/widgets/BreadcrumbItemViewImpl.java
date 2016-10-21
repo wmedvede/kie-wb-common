@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common;
+package org.kie.workbench.common.screens.datasource.management.client.widgets;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import org.jboss.errai.common.client.dom.Anchor;
 import org.jboss.errai.common.client.dom.DOMUtil;
+import org.jboss.errai.common.client.dom.Document;
+import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.dom.ListItem;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -35,17 +38,27 @@ public class BreadcrumbItemViewImpl
 
     private Presenter presenter;
 
-    private String name;
-
     @Inject
     @DataField( "breadcrumb-item" )
     private ListItem item;
 
     @Inject
     @DataField( "breadcrumb-item-anchor" )
-    private Anchor itemAnchor;
+    private Anchor itemAnchorContent;
+
+    @Inject
+    private Document document;
+
+    private HTMLElement itemStrongContent;
+
+    private String name;
 
     public BreadcrumbItemViewImpl( ) {
+    }
+
+    @PostConstruct
+    private void init( ) {
+        itemStrongContent = document.createElement( "strong" );
     }
 
     @Override
@@ -56,30 +69,33 @@ public class BreadcrumbItemViewImpl
     @Override
     public void setName( String name ) {
         this.name = name;
-        adjustItemContent();
+        adjustItemContent( );
     }
 
     @Override
     public void setActive( boolean active ) {
-        item.setClassName( active ? "active" : "" );
-        itemAnchor.setClassName( "" );
-        adjustItemContent();
+        if ( active ) {
+            DOMUtil.addCSSClass( item, "active" );
+        } else {
+            DOMUtil.removeCSSClass( item, "active" );
+        }
+        adjustItemContent( );
     }
 
     private void adjustItemContent( ) {
-        String currentClass = item.getClassName();
-        boolean isActive = currentClass != null && currentClass.contains( "active" );
+        boolean isActive = DOMUtil.hasCSSClass( item, "active" );
         DOMUtil.removeAllChildren( item );
         if ( isActive ) {
-            item.setInnerHTML( "<strong>" + name + "</strong>" );
+            itemStrongContent.setTextContent( name );
+            item.appendChild( itemStrongContent );
         } else {
-            itemAnchor.setTextContent( name );
-            item.appendChild( itemAnchor );
+            itemAnchorContent.setTextContent( name );
+            item.appendChild( itemAnchorContent );
         }
     }
 
     @EventHandler( "breadcrumb-item-anchor" )
     private void onItemClick( ClickEvent event ) {
-        presenter.onClick();
+        presenter.onClick( );
     }
 }

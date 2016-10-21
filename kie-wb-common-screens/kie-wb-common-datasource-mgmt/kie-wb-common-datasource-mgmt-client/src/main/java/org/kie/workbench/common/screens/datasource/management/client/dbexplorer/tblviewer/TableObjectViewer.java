@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.table;
+package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.tblviewer;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;

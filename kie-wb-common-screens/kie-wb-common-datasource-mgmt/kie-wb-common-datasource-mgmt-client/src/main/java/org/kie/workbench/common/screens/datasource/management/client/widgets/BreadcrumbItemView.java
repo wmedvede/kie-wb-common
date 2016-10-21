@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common;
+package org.kie.workbench.common.screens.datasource.management.client.widgets;
 
 import org.uberfire.client.mvp.UberElement;
 
@@ -22,7 +22,7 @@ public interface BreadcrumbItemView
         extends UberElement< BreadcrumbItemView.Presenter > {
 
     interface Presenter {
-        void onClick();
+        void onClick( );
     }
 
     void setName( String name );

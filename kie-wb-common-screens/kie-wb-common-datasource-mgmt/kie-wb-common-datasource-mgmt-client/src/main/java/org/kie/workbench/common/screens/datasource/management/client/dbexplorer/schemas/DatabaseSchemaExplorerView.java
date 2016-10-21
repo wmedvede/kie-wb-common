@@ -17,7 +17,6 @@
 package org.kie.workbench.common.screens.datasource.management.client.dbexplorer.schemas;
 
 import com.google.gwt.view.client.AsyncDataProvider;
-import org.kie.workbench.common.screens.datasource.management.client.dbexplorer.common.InitializeCallback;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.ext.widgets.common.client.common.HasBusyIndicator;
 

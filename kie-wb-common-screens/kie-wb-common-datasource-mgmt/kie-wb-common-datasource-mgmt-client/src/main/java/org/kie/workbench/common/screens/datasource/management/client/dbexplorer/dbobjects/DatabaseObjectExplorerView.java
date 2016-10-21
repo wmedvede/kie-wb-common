@@ -29,10 +29,6 @@ public interface DatabaseObjectExplorerView
 
     interface Presenter {
 
-        void onSchemaChange( );
-
-        void onDatabaseObjectTypeChange( );
-
         void onSearch( );
 
         void onOpen( DatabaseObjectRow row );
