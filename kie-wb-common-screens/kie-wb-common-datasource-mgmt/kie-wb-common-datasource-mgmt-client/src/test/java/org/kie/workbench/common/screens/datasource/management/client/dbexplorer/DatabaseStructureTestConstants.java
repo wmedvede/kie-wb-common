@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.util;
+package org.kie.workbench.common.screens.datasource.management.client.dbexplorer;
 
-public interface InitializeCallback {
+public interface DatabaseStructureTestConstants {
 
-    void onInitializeError( Throwable throwable );
+    String DATASOURCE_ID = "DATASOURCE_ID";
 
-    void onInitializeSuccess();
+    String DATASOURCE_NAME = "DATASOURCE_NAME";
+
+    String SCHEMA_NAME = "SCHEMA_NAME";
+
+    String DATA_OBJECT_NAME = "DATA_OBJECT_NAME";
+
+    String LOADING_MESSAGE = "LOADING_MESSAGE";
 }

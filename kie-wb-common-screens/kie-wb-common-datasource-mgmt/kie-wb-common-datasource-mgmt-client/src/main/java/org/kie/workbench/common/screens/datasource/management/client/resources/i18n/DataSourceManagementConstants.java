@@ -144,26 +144,51 @@ public interface DataSourceManagementConstants {
     String DataSourceDefExplorerScreen_Refresh = "DataSourceDefExplorerScreen.Refresh";
 
     @TranslationKey( defaultValue = "" )
-    String DatabaseStructureExplorerViewImpl_namePatternHelp = "DatabaseStructureExplorerViewImpl.namePatternHelp";
+    String DatabaseStructureExplorerViewImpl_schemasTitle = "DatabaseStructureExplorerViewImpl.schemasTitle";
 
     @TranslationKey( defaultValue = "" )
-    String DatabaseStructureExplorerViewImpl_dbObjectNameColumn = "DatabaseStructureExplorerViewImpl.dbObjectNameColumn";
+    String DatabaseStructureExplorerViewImpl_defaultSchema = "DatabaseStructureExplorerViewImpl.defaultSchema";
 
     @TranslationKey( defaultValue = "" )
-    String DatabaseStructureExplorerViewImpl_dbObjectTypeColumn = "DatabaseStructureExplorerViewImpl.dbObjectTypeColumn";
+    String DatabaseStructureExplorerViewImpl_dataSourceTitle = "DatabaseStructureExplorerViewImpl.dataSourceTitle";
 
     @TranslationKey( defaultValue = "" )
-    String DatabaseStructureExplorerViewImpl_dbObjectActionColumn = "DatabaseStructureExplorerViewImpl.dbObjectActionColumn";
+    String DatabaseSchemaExplorerViewImpl_loadingDbSchemas = "DatabaseSchemaExplorerViewImpl.loadingDbSchemas";
 
     @TranslationKey( defaultValue = "" )
-    String DatabaseStructureExplorerViewImpl_dbObjectOpen = "DatabaseStructureExplorerViewImpl.dbObjectOpen";
+    String DatabaseSchemaExplorerViewImpl_schemasListEmpty = "DatabaseSchemaExplorerViewImpl.schemasListEmpty";
 
     @TranslationKey( defaultValue = "" )
-    String DatabaseStructureExplorerViewImpl_dbObjectsListEmpty = "DatabaseStructureExplorerViewImpl.dbObjectsListEmpty";
+    String DatabaseSchemaExplorerViewImpl_schemaNameColumn = "DatabaseSchemaExplorerViewImpl.schemaNameColumn";
 
     @TranslationKey( defaultValue = "" )
-    String DatabaseStructureExplorerViewImpl_loadingDbObjects = "DatabaseStructureExplorerViewImpl.loadingDbObjects";
+    String DatabaseSchemaExplorerViewImpl_actionColumn = "DatabaseSchemaExplorerViewImpl.actionColumn";
 
     @TranslationKey( defaultValue = "" )
-    String DatabaseStructureExplorerViewImpl_loadingDbSchemas = "DatabaseStructureExplorerViewImpl.loadingDbSchemas";
+    String DatabaseSchemaExplorerViewImpl_schemaOpenAction = "DatabaseSchemaExplorerViewImpl.schemaOpenAction";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseObjectExplorerViewImpl_loadingDbObjects = "DatabaseObjectExplorerViewImpl.loadingDbObjects";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseObjectExplorerViewImpl_loadingDbSchemas = "DatabaseObjectExplorerViewImpl.loadingDbSchemas";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseObjectExplorerViewImpl_namePatternHelp = "DatabaseObjectExplorerViewImpl.namePatternHelp";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseObjectExplorerViewImpl_dbObjectNameColumn = "DatabaseObjectExplorerViewImpl.dbObjectNameColumn";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseObjectExplorerViewImpl_dbObjectsListEmpty = "DatabaseObjectExplorerViewImpl.dbObjectsListEmpty";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseObjectExplorerViewImpl_dbObjectTypeColumn = "DatabaseObjectExplorerViewImpl.dbObjectTypeColumn";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseObjectExplorerViewImpl_dbObjectOpen = "DatabaseObjectExplorerViewImpl.dbObjectOpen";
+
+    @TranslationKey( defaultValue = "" )
+    String DatabaseObjectExplorerViewImpl_dbObjectActionColumn = "DatabaseObjectExplorerViewImpl.dbObjectActionColumn";
+
 }

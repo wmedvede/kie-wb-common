@@ -74,7 +74,7 @@ public class DatabaseSchemaExplorer
     }
 
     @PostConstruct
-    private void init( ) {
+    protected void init( ) {
         dataProvider = new AsyncDataProvider< DatabaseSchemaRow >( ) {
             @Override
             protected void onRangeChanged( HasData< DatabaseSchemaRow > display ) {
@@ -83,6 +83,10 @@ public class DatabaseSchemaExplorer
             }
         };
         view.setDataProvider( dataProvider );
+    }
+
+    public void initialize( Settings settings ) {
+        initialize( settings, null );
     }
 
     public void initialize( Settings settings, InitializeCallback initializeCallback ) {
@@ -103,6 +107,13 @@ public class DatabaseSchemaExplorer
 
     public boolean hasItems( ) {
         return !rows.isEmpty( );
+    }
+
+    /**
+     * Intended for helping testing.
+     */
+    protected List<DatabaseSchemaRow> getItems() {
+        return rows;
     }
 
     private void loadSchemas( String dataSourceUuid, InitializeCallback initializeCallback ) {
@@ -180,7 +191,9 @@ public class DatabaseSchemaExplorer
 
         @Override
         public int hashCode( ) {
-            return dataSourceUuid != null ? dataSourceUuid.hashCode( ) : 0;
+            int result = dataSourceUuid != null ? dataSourceUuid.hashCode( ) : 0;
+            result = ~~result;
+            return result;
         }
     }
 }

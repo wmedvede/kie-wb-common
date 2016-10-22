@@ -160,7 +160,7 @@ public class DatabaseStructureExplorer
         }
     }
 
-    private void onDataBaseObjectSelected( String schemaName, String objectName ) {
+    protected void onDataBaseObjectSelected( String schemaName, String objectName ) {
         view.clearContent( );
         view.setContent( objectViewer );
         objectViewer.initialize( new TableObjectViewer.Settings( )
@@ -326,7 +326,9 @@ public class DatabaseStructureExplorer
         @Override
         public int hashCode( ) {
             int result = dataSourceName != null ? dataSourceName.hashCode( ) : 0;
+            result = ~~result;
             result = 31 * result + ( dataSourceUuid != null ? dataSourceUuid.hashCode( ) : 0 );
+            result = ~~result;
             return result;
         }
     }

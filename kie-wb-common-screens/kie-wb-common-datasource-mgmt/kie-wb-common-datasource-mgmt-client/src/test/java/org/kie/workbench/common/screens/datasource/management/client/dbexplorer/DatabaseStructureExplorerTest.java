@@ -33,13 +33,8 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 
 @RunWith( GwtMockitoTestRunner.class )
-public class DatabaseStructureExplorerTest {
-
-    private static final String DATASOURCE_ID = "DATASOURCE_ID";
-
-    private static final String DATASOURCE_NAME = "DATASOURCE_NAME";
-
-    private static final String SCHEMA_NAME = "SCHEMA_NAME";
+public class DatabaseStructureExplorerTest
+        implements DatabaseStructureTestConstants {
 
     @Mock
     private DatabaseStructureExplorerView view;
@@ -152,7 +147,7 @@ public class DatabaseStructureExplorerTest {
     }
 
     /**
-     * Tests the case where a schema was selected at the schemaBrowser.
+     * Tests the case where a schema was selected in the schemaBrowser.
      */
     @Test
     public void testSchemaSelected( ) {
@@ -179,6 +174,39 @@ public class DatabaseStructureExplorerTest {
         // the objectsExplorer should now be visible and the objectsBreadcrumbItem should be the active breadcrumb.
         verifyVisibleContent( objectExplorer );
         verifyIsActive( objectsBreadcrumbItem );
+    }
+
+    /**
+     * Tests the case where a database object was selected in the objectsExplorer.
+     */
+    @Test
+    public void testDatabaseObjectSelected() {
+        // the structure explorer was previously initialized.
+        testInitialize();
+
+        when( schemaExplorer.hasItems() ).thenReturn( true );
+
+        // emulates the execution of a database object selection by the objectExplorer.
+        structureExplorer.onDataBaseObjectSelected( SCHEMA_NAME, DATA_OBJECT_NAME );
+
+        // the breadcrumbs should have been cleared.
+        verifyBreadcrumbsCleared();
+
+        // the objectViewer should have been initialized with the given dataSource, schema, and database object name.
+        TableObjectViewer.Settings viewerSettings = new TableObjectViewer.Settings()
+                .dataSourceUuid( DATASOURCE_ID )
+                .schemaName( SCHEMA_NAME )
+                .tableName( DATA_OBJECT_NAME );
+
+        verify( objectViewer, times( 1 ) ).initialize( viewerSettings );
+
+        // the dataSourceBreadcrumbItem, schemasBreadcrumbItem, objectsBreadcrumbItem and the objectViewerBreadcrumbItem
+        // should be now available.
+        verifyBreadCrumbsAdded( dataSourceBreadcrumbItem,
+                schemasBreadcrumbItem, objectsBreadcrumbItem, objectViewerBreadcrumbItem );
+        // the objectViewer should now be visible and the objectViewerBreadcrumbItem should be the active breadcrumb.
+        verifyVisibleContent( objectViewer );
+        verifyIsActive( objectViewerBreadcrumbItem );
     }
 
     /**

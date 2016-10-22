@@ -349,10 +349,15 @@ public class DatabaseObjectExplorer
         @Override
         public int hashCode( ) {
             int result = dataSourceUuid != null ? dataSourceUuid.hashCode( ) : 0;
+            result = ~~result;
             result = 31 * result + ( schemaName != null ? schemaName.hashCode( ) : 0 );
+            result = ~~result;
             result = 31 * result + ( showSchemaSelection ? 1 : 0 );
+            result = ~~result;
             result = 31 * result + ( showObjectTypeFilter ? 1 : 0 );
+            result = ~~result;
             result = 31 * result + ( showObjectNameFilter ? 1 : 0 );
+            result = ~~result;
             return result;
         }
     }

@@ -130,5 +130,31 @@ public class TableObjectViewer
             this.tableName = tableName;
             return this;
         }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( o == null || getClass( ) != o.getClass( ) ) return false;
+
+            Settings settings = ( Settings ) o;
+
+            if ( dataSourceUuid != null ? !dataSourceUuid.equals( settings.dataSourceUuid ) : settings.dataSourceUuid != null )
+                return false;
+            if ( schemaName != null ? !schemaName.equals( settings.schemaName ) : settings.schemaName != null )
+                return false;
+            return tableName != null ? tableName.equals( settings.tableName ) : settings.tableName == null;
+
+        }
+
+        @Override
+        public int hashCode( ) {
+            int result = dataSourceUuid != null ? dataSourceUuid.hashCode( ) : 0;
+            result = ~~result;
+            result = 31 * result + ( schemaName != null ? schemaName.hashCode( ) : 0 );
+            result = ~~result;
+            result = 31 * result + ( tableName != null ? tableName.hashCode( ) : 0 );
+            result = ~~result;
+            return result;
+        }
     }
 }

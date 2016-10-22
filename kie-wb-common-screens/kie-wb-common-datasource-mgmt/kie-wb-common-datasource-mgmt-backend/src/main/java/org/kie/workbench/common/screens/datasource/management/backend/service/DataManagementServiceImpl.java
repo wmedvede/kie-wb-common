@@ -91,7 +91,7 @@ public class DataManagementServiceImpl
 
             TableDisplayerSettingsBuilder settingsBuilder = DisplayerSettingsFactory.newTableSettings( )
                     .dataset( dataSetDef.getUUID( ) )
-                    .title( "Table editor -> " + table.toUpperCase() )
+                    .title( table )
                     .titleVisible( true )
                     .tablePageSize( 20 )
                     .tableOrderEnabled( true );
