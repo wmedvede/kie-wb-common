@@ -19,16 +19,9 @@ package org.kie.workbench.common.screens.datasource.management.client.explorer.c
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
-import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.LinkedGroupItem;
-import org.jboss.errai.common.client.dom.Div;
-import org.jboss.errai.common.client.dom.Label;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -40,25 +33,8 @@ public class DefItemViewImpl
         implements DefItemView {
 
     @Inject
-    @DataField( "def-explorer-item" )
-    private Div item;
-
-    @Inject
-    @DataField( "def-explorer-item-content" )
-    private Div itemContent;
-
-    /*
-    @Inject
-    @DataField( "item-label" )
-    private Label itemLabel;
-*/
-    @Inject
-    @DataField( "def-explorer-item-edit-button" )
-    private Button editButton;
-
-    @Inject
-    @DataField( "def-explorer-item-browse-button" )
-    private Button browseButton;
+    @DataField( "item" )
+    private LinkedGroupItem item;
 
     Presenter presenter;
 
@@ -67,12 +43,12 @@ public class DefItemViewImpl
 
     @Override
     public void setName( String name ) {
-        itemContent.setTextContent( name );
+        item.setText( name );
     }
 
     @Override
     public String getName() {
-        return itemContent.getTextContent();
+        return item.getText();
     }
 
     @Override
@@ -80,28 +56,9 @@ public class DefItemViewImpl
         this.presenter = presenter;
     }
 
-    @Override
-    public void showEditAction( boolean showEditAction ) {
-        editButton.getElement().getStyle().setDisplay( showEditAction ? Style.Display.INLINE_BLOCK :Style.Display.NONE );
-    }
-
-    @Override
-    public void enableEditAction( boolean enabled ) {
-        editButton.setEnabled( enabled );
-    }
-
-    @Override
-    public void showBrowseAction( boolean showBrowseAction ) {
-        browseButton.getElement().getStyle().setDisplay( showBrowseAction ? Style.Display.INLINE_BLOCK :Style.Display.NONE );
-    }
-
-    @EventHandler( "def-explorer-item-edit-button" )
-    private void onEdit( ClickEvent event ) {
+    @EventHandler( "item" )
+    private void onItemClick( ClickEvent event ) {
         presenter.onClick();
     }
 
-    @EventHandler( "def-explorer-item-browse-button" )
-    private void onBrowse( ClickEvent event ) {
-        presenter.onBrowse();
-    }
 }

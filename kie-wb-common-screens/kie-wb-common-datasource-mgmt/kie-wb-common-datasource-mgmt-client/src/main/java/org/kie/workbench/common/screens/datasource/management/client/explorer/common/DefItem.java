@@ -59,30 +59,11 @@ public class DefItem
     }
 
     @Override
-    public void onBrowse( ) {
-        if ( itemHandler != null ) {
-            itemHandler.onBrowse( getId() );
-        }
-    }
-
-    @Override
     public void addItemHandler( DefItemView.ItemHandler itemHandler ) {
         this.itemHandler = itemHandler;
     }
 
     public String getId() {
         return itemId;
-    }
-
-    public void showEditAction( boolean showEditAction ) {
-        view.showEditAction( showEditAction );
-    }
-
-    public void showBrowseAction( boolean showBrowseAction ) {
-        view.showBrowseAction( showBrowseAction );
-    }
-
-    public void enableEditAction( boolean enabled ) {
-        view.enableEditAction( enabled );
     }
 }

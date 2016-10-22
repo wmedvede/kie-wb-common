@@ -83,7 +83,7 @@ public class DefExplorerContentTest {
     public void setup() {
         this.explorerContent = new DefExplorerContent( view, null, placeManager ) {
             @Override
-            protected DefItem createItem( boolean showEditAction, boolean showBrowseAction ) {
+            protected DefItem createItem() {
                 return defItem;
             }
 

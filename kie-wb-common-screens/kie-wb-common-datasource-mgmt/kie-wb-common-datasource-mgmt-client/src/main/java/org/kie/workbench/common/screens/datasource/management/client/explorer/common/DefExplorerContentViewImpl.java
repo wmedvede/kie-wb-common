@@ -96,9 +96,6 @@ public class DefExplorerContentViewImpl
         driversPanelLink.getElement().setAttribute( "data-target", "#" + driversPanelLinkId );
         driversPanel.setId( driversPanelLinkId );
 
-        dataSourcesListGroup.addStyleName( "list-view-pf list-view-pf-view" );
-        driversListGroup.addStyleName( "list-view-pf list-view-pf-view" );
-
     }
 
     @Override
