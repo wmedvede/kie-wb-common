@@ -76,7 +76,7 @@ public class DatabaseSchemaExplorerTest
         when( metadataService.getMetadata( settings.dataSourceUuid(), false, true ) ).thenReturn( metadata );
         when( metadata.getSchemas() ).thenReturn( schemas );
         when( translationService.getTranslation(
-                DataSourceManagementConstants.DatabaseSchemaExplorerViewImpl_loadingDbSchemas ) ).thenReturn( LOADING_MESSAGE );
+                DataSourceManagementConstants.DatabaseSchemaExplorerViewImpl_loadingDbSchemas ) ).thenReturn( LOADING_MESSAGE1 );
 
         schemaExplorer.initialize( settings );
 
@@ -89,7 +89,7 @@ public class DatabaseSchemaExplorerTest
 
         // the UI should have been updated.
         verify( view, times( 1 ) ).setDataProvider( any( AsyncDataProvider.class ) );
-        verify( view, times( 1 ) ).showBusyIndicator( LOADING_MESSAGE );
+        verify( view, times( 1 ) ).showBusyIndicator( LOADING_MESSAGE1 );
         verify( view, times( 1 ) ).hideBusyIndicator();
         verify( view, times( 2 ) ).redraw();
     }

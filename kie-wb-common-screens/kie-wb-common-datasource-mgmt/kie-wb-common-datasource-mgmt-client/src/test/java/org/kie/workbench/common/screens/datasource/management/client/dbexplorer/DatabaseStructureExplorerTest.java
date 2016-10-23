@@ -187,7 +187,7 @@ public class DatabaseStructureExplorerTest
         when( schemaExplorer.hasItems() ).thenReturn( true );
 
         // emulates the execution of a database object selection by the objectExplorer.
-        structureExplorer.onDataBaseObjectSelected( SCHEMA_NAME, DATA_OBJECT_NAME );
+        structureExplorer.onDataBaseObjectSelected( SCHEMA_NAME, DATABASE_OBJECT_NAME );
 
         // the breadcrumbs should have been cleared.
         verifyBreadcrumbsCleared();
@@ -196,7 +196,7 @@ public class DatabaseStructureExplorerTest
         TableObjectViewer.Settings viewerSettings = new TableObjectViewer.Settings()
                 .dataSourceUuid( DATASOURCE_ID )
                 .schemaName( SCHEMA_NAME )
-                .tableName( DATA_OBJECT_NAME );
+                .tableName( DATABASE_OBJECT_NAME );
 
         verify( objectViewer, times( 1 ) ).initialize( viewerSettings );
 

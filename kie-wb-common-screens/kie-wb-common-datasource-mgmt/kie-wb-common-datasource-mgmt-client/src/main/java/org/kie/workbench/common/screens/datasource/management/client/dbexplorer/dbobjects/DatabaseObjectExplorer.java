@@ -76,8 +76,8 @@ public class DatabaseObjectExplorer
     }
 
     @PostConstruct
-    private void init( ) {
-        initializeDatabaseObjectOptions( );
+    protected void init( ) {
+        setObjectOptions( );
         dataProvider = new AsyncDataProvider< DatabaseObjectRow >( ) {
             @Override
             protected void onRangeChanged( HasData< DatabaseObjectRow > display ) {
@@ -97,9 +97,10 @@ public class DatabaseObjectExplorer
         view.showSchemaSelector( settings.isShowSchemaSelection( ) );
         view.showObjectTypeFilter( settings.isShowObjectTypeFilter( ) );
         view.showObjectNameFilter( settings.isShowObjectNameFilter( ) );
-        view.showFilterButton( settings.isShowObjectTypeFilter( ) || settings.isShowObjectNameFilter( ) );
-        view.showHeaderPanel( settings.isShowSchemaSelection( ) ||
-                settings.isShowObjectTypeFilter( ) || settings.isShowObjectNameFilter( ) );
+        boolean hasFilter = settings.isShowSchemaSelection( ) ||
+                settings.isShowObjectTypeFilter( ) || settings.isShowObjectNameFilter( );
+        view.showFilterButton( hasFilter );
+        view.showHeaderPanel( hasFilter );
         if ( settings.isShowSchemaSelection( ) ) {
             loadSchemas( settings.dataSourceUuid( ), settings.schemaName( ), initializeCallback );
         } else {
@@ -120,6 +121,13 @@ public class DatabaseObjectExplorer
     @Override
     public void onOpen( DatabaseObjectRow row ) {
         handler.onOpen( getSchema( ), row.getName( ) );
+    }
+
+    /**
+     * Intended for helping testing.
+     */
+    protected List< DatabaseObjectRow > getItems() {
+        return rows;
     }
 
     private String getSchema( ) {
@@ -239,7 +247,7 @@ public class DatabaseObjectExplorer
         refreshRows( );
     }
 
-    private void initializeDatabaseObjectOptions( ) {
+    private void setObjectOptions( ) {
         List< Pair< String, String > > options = new ArrayList<>( );
         options.add( new Pair<>( DatabaseMetadata.TableType.ALL.name( ), DatabaseMetadata.TableType.ALL.name( ) ) );
         options.add( new Pair<>( DatabaseMetadata.TableType.TABLE.name( ), DatabaseMetadata.TableType.TABLE.name( ) ) );

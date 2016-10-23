@@ -24,7 +24,11 @@ public interface DatabaseStructureTestConstants {
 
     String SCHEMA_NAME = "SCHEMA_NAME";
 
-    String DATA_OBJECT_NAME = "DATA_OBJECT_NAME";
+    String CATALOG_NAME = "CATALOG_NAME";
 
-    String LOADING_MESSAGE = "LOADING_MESSAGE";
+    String DATABASE_OBJECT_NAME = "DATABASE_OBJECT_NAME";
+
+    String LOADING_MESSAGE1 = "LOADING_MESSAGE1";
+
+    String LOADING_MESSAGE2 = "LOADING_MESSAGE2";
 }
