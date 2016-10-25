@@ -57,6 +57,9 @@ public class DatabaseObjectExplorer
 
     private DatabaseObjectExplorerView.Handler handler;
 
+    protected static final DatabaseMetadata.TableType[] availableSearchTypes =
+            new DatabaseMetadata.TableType[] { DatabaseMetadata.TableType.VIEW, DatabaseMetadata.TableType.TABLE };
+
     public DatabaseObjectExplorer( ) {
     }
 
@@ -223,7 +226,7 @@ public class DatabaseObjectExplorer
                         return result;
                     }
                 } ).findTables( dataSource,
-                schema, buildSearchTerm( searchTerm ), DatabaseMetadata.TableType.valueOf( databaseObjectType ) );
+                schema, buildSearchTerm( searchTerm ), buildSearchType( view.getObjectType() ) );
     }
 
     private RemoteCallback< List< TableMetadata > > getSearchSuccessCallback( InitializeCallback initializeCallback ) {
@@ -260,6 +263,14 @@ public class DatabaseObjectExplorer
             return "%";
         } else {
             return "%" + searchTerm.trim( ) + "%";
+        }
+    }
+
+    private DatabaseMetadata.TableType[] buildSearchType( String searchType ) {
+        if ( searchType == null || DatabaseMetadata.TableType.ALL.name().equals( searchType ) ) {
+            return availableSearchTypes;
+        } else {
+            return new DatabaseMetadata.TableType[] { DatabaseMetadata.TableType.valueOf( searchType ) };
         }
     }
 

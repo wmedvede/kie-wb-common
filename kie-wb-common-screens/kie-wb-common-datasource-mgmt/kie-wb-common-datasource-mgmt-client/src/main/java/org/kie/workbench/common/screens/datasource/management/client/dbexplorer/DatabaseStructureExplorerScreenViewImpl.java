@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,40 +14,36 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.editor.driver;
+package org.kie.workbench.common.screens.datasource.management.client.dbexplorer;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.ui.IsWidget;
-import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.kie.workbench.common.screens.datasource.management.client.editor.common.DefEditorBaseViewImpl;
 
 @Dependent
 @Templated
-public class DriverDefEditorViewImpl
-        extends DefEditorBaseViewImpl
-        implements DriverDefEditorView {
-
-    @Inject
-    @DataField ( "content-panel" )
-    private FlowPanel contentPanel;
+public class DatabaseStructureExplorerScreenViewImpl
+        implements DatabaseStructureExplorerScreenView, IsElement {
 
     private Presenter presenter;
 
-    public DriverDefEditorViewImpl( ) {
+    @Inject
+    @DataField( "structure-explorer" )
+    private DatabaseStructureExplorer explorer;
+
+    public DatabaseStructureExplorerScreenViewImpl( ) {
     }
 
     @Override
-    public void init( final Presenter presenter ) {
+    public void init( Presenter presenter ) {
         this.presenter = presenter;
-        super.init( presenter );
     }
 
     @Override
-    public void setContent( IsWidget content ) {
-        contentPanel.add( content );
+    public void initialize( DatabaseStructureExplorer.Settings settings ) {
+        explorer.initialize( settings );
     }
 }

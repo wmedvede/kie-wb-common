@@ -94,7 +94,7 @@ public class DatabaseObjectExplorerTest
         // schemas are loaded in this case and also the database objects.
         when( metadataService.getMetadata( settings.dataSourceUuid(), false, true ) ).thenReturn( metadata );
         when( metadataService.findTables(
-                settings.dataSourceUuid(), SCHEMA_NAME, "%%%", DatabaseMetadata.TableType.ALL ) ).thenReturn( dbObjects );
+                settings.dataSourceUuid(), SCHEMA_NAME, "%%%", objectExplorer.availableSearchTypes ) ).thenReturn( dbObjects );
         when( metadata.getSchemas() ).thenReturn( schemas );
         when( translationService.getTranslation(
                 DataSourceManagementConstants.DatabaseObjectExplorerViewImpl_loadingDbSchemas ) ).thenReturn( LOADING_MESSAGE1 );
@@ -128,7 +128,7 @@ public class DatabaseObjectExplorerTest
 
         // database objects are loaded in this case
         when( metadataService.findTables(
-                settings.dataSourceUuid(), SCHEMA_NAME, "%%%", DatabaseMetadata.TableType.ALL ) ).thenReturn( dbObjects );
+                settings.dataSourceUuid(), SCHEMA_NAME, "%%%", objectExplorer.availableSearchTypes ) ).thenReturn( dbObjects );
         when( metadata.getSchemas() ).thenReturn( schemas );
         when( translationService.getTranslation(
                 DataSourceManagementConstants.DatabaseObjectExplorerViewImpl_loadingDbObjects ) ).thenReturn( LOADING_MESSAGE1 );
@@ -194,7 +194,7 @@ public class DatabaseObjectExplorerTest
         when( view.getFilterTerm() ).thenReturn( "filterTerm" );
 
         when( metadataService.findTables(
-                DATASOURCE_ID, SCHEMA_NAME, "%filterTerm%", DatabaseMetadata.TableType.ALL ) ).thenReturn( dbObjects );
+                DATASOURCE_ID, SCHEMA_NAME, "%filterTerm%", objectExplorer.availableSearchTypes ) ).thenReturn( dbObjects );
         when( translationService.getTranslation(
                 DataSourceManagementConstants.DatabaseObjectExplorerViewImpl_loadingDbObjects ) ).thenReturn( LOADING_MESSAGE1 );
 

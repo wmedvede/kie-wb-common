@@ -14,32 +14,20 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.screens.datasource.management.client.dbexplorer;
+package org.kie.workbench.common.screens.datasource.management.client.editor.common;
 
-public class DatabaseObjectRow {
+import org.jboss.errai.ui.client.local.api.IsElement;
+import org.uberfire.client.mvp.UberElement;
 
-    private String name;
+public interface DefEditorActionsPanelView
+        extends UberElement< DefEditorActionsPanelView.Presenter >, IsElement {
 
-    private String type;
+    interface Presenter {
 
-    public DatabaseObjectRow( String name, String type ) {
-        this.name = name;
-        this.type = type;
-    }
+        void onSave( );
 
-    public String getName( ) {
-        return name;
-    }
+        void onCancel( );
 
-    public void setName( String name ) {
-        this.name = name;
-    }
-
-    public String getType( ) {
-        return type;
-    }
-
-    public void setType( String type ) {
-        this.type = type;
+        void onDelete( );
     }
 }

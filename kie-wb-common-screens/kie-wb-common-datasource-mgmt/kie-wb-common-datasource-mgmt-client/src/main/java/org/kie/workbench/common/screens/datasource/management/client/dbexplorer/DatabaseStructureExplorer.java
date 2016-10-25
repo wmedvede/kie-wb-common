@@ -62,6 +62,9 @@ public class DatabaseStructureExplorer
 
     private DatabaseStructureExplorerView.Handler handler;
 
+    public DatabaseStructureExplorer( ) {
+    }
+
     @Inject
     public DatabaseStructureExplorer( DatabaseStructureExplorerView view,
                                       DatabaseSchemaExplorer schemaExplorer,
@@ -103,6 +106,10 @@ public class DatabaseStructureExplorer
                 onDataBaseObjectSelected( schemaName, objectName );
             }
         } );
+    }
+
+    public void initialize( Settings settings ) {
+        initialize( settings, null );
     }
 
     public void initialize( Settings settings, InitializeCallback callback ) {

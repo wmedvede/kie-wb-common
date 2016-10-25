@@ -16,21 +16,14 @@
 
 package org.kie.workbench.common.screens.datasource.management.client.dbexplorer;
 
-public interface DatabaseStructureTestConstants {
+import org.uberfire.client.mvp.UberElement;
 
-    String DATASOURCE_ID = "DATASOURCE_ID";
+public interface DatabaseStructureExplorerScreenView
+        extends UberElement< DatabaseStructureExplorerScreenView.Presenter > {
 
-    String DATASOURCE_NAME = "DATASOURCE_NAME";
+    interface Presenter {
+    }
 
-    String SCHEMA_NAME = "SCHEMA_NAME";
+    void initialize( DatabaseStructureExplorer.Settings settings );
 
-    String CATALOG_NAME = "CATALOG_NAME";
-
-    String DATABASE_OBJECT_NAME = "DATABASE_OBJECT_NAME";
-
-    String LOADING_MESSAGE1 = "LOADING_MESSAGE1";
-
-    String LOADING_MESSAGE2 = "LOADING_MESSAGE2";
-
-    String TRANSLATION_TEXT = "TRANSLATION_TEXT";
 }

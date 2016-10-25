@@ -21,13 +21,7 @@ import org.jboss.errai.ui.shared.api.annotations.TranslationKey;
 public interface DataSourceManagementConstants {
 
     @TranslationKey( defaultValue = "" )
-    String DataSourceDefEditor_TestDataSourceMenu = "DataSourceDefEditor.TestDataSourceMenu";
-
-    @TranslationKey( defaultValue = "" )
     String DataSourceDefEditor_InvalidNameMessage = "DataSourceDefEditor.InvalidNameMessage";
-
-    @TranslationKey( defaultValue = "" )
-    String DataSourceDefEditor_InvalidJndiMessage = "DataSourceDefEditor.InvalidJndiMessage";
 
     @TranslationKey( defaultValue = "" )
     String DataSourceDefEditor_InvalidConnectionURLMessage = "DataSourceDefEditor.InvalidConnectionURLMessage";
@@ -78,9 +72,6 @@ public interface DataSourceManagementConstants {
     String DataSourceDefPage_pagetTitle = "DataSourceDefPageViewImpl.pageTitle";
 
     @TranslationKey( defaultValue = "" )
-    String DriverDefEditor_CheckStatusMenu = "DriverDefEditor.CheckStatusMenu";
-
-    @TranslationKey( defaultValue = "" )
     String DriverDefEditor_InvalidNameMessage = "DriverDefEditor.InvalidNameMessage";
 
     @TranslationKey( defaultValue = "" )
@@ -100,15 +91,6 @@ public interface DataSourceManagementConstants {
 
     @TranslationKey( defaultValue = "" )
     String DriverDefEditor_DriverHasDependantsForDeleteMessage = "DriverDefEditor.DriverHasDependantsForDeleteMessage";
-
-    @TranslationKey( defaultValue = "" )
-    String DriverDefEditor_DriverNotRegisteredMessage = "DriverDefEditor.DriverNotRegisteredMessage";
-
-    @TranslationKey( defaultValue = "" )
-    String DriverDefEditor_DriverHasNoDependantsMessage="DriverDefEditor.DriverHasNoDependantsMessage";
-
-    @TranslationKey( defaultValue = "" )
-    String DriverDefEditor_DriverHasDependantsMessage="DriverDefEditor.DriverHasDependantsMessage";
 
     @TranslationKey( defaultValue = "" )
     String NewDriverDefWizard_title = "NewDriverDefWizard.title";
@@ -191,4 +173,6 @@ public interface DataSourceManagementConstants {
     @TranslationKey( defaultValue = "" )
     String DatabaseObjectExplorerViewImpl_dbObjectActionColumn = "DatabaseObjectExplorerViewImpl.dbObjectActionColumn";
 
+    @TranslationKey( defaultValue = "" )
+    String DatabaseStructureExplorerScreen_title = "DatabaseStructureExplorerScreen.title";
 }
