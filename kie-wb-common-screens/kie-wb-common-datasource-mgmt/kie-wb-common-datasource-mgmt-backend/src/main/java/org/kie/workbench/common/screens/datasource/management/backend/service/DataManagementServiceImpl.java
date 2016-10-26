@@ -76,12 +76,10 @@ public class DataManagementServiceImpl
             DataSetDef dataSetDef = DataSetDefBuilder.newBuilder( )
                     .dataSetUuid( buildDataSetUuid( dataSourceUuid, schema, table ) )
                     .dataSetName( buildDataSetName( schema, table ) )
-                    .dataSourceUuid( deploymentInfo.getJndi( ) )
+                    .dataSourceUuid( deploymentInfo.getUuid() )
                     .schema( schema )
                     .table( buildDataSetTableName( dataSourceUuid, table ) )
-                    // set the isPubilc property to false to avoid the created data sets to be listed in the
-                    // data set perspective.
-                    //.isPublic( false )
+                    .isPublic( false )
                     .build( );
 
             dataSetDefRegistry.registerDataSetDef( dataSetDef );

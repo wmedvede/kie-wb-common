@@ -22,6 +22,13 @@ import org.jboss.errai.bus.server.annotations.Remote;
 @Remote
 public interface DataManagementService {
 
+    /**
+     * Calculates the required settings needed to draw a TableDisplayer for a given database table.
+     * @param dataSourceUuid a datasource identifier.
+     * @param schema a schema name where the table is located. (null values are accepted)
+     * @param table the name of the table that will be displayed. (null values are not accepted.
+     * @return the calculated displayer settings required for drawing the table.
+     */
     DisplayerSettings getDisplayerSettings( String dataSourceUuid, String schema, String table );
 
 }
