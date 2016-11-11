@@ -44,6 +44,9 @@ public class DataSourceServicesHelper {
     @Named( "ioStrategy" )
     private IOService ioService;
 
+    @Inject
+    private DefRegistry defRegistry;
+
     /**
      *  Root to the platform data sources and drivers repository.
      */
@@ -94,6 +97,10 @@ public class DataSourceServicesHelper {
         return Paths.convert( dataSourcesNioPath );
     }
 
+    public DefRegistry getDefRegistry( ) {
+        return defRegistry;
+    }
+
     private String getGlobalFileSystemName() {
         String name = System.getProperty( "org.kie.workbench.datasource-filesystem" );
         if ( name == null || "".equals( name ) ) {
@@ -101,5 +108,4 @@ public class DataSourceServicesHelper {
         }
         return name;
     }
-
 }

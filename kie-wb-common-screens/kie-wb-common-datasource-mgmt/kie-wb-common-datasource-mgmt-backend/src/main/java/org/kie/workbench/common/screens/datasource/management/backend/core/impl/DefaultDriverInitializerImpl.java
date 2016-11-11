@@ -130,6 +130,7 @@ public class DefaultDriverInitializerImpl
                 try {
                     if ( !ioService.exists( targetPath ) ) {
                         source = DriverDefSerializer.serialize( driverDef );
+                        serviceHelper.getDefRegistry().setEntry( Paths.convert( targetPath ), driverDef );
                         ioService.write( targetPath, source, optionsFactory.makeCommentedOption( "system generated driver" ) );
                     }
                 } catch ( Exception e ) {

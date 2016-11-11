@@ -51,6 +51,10 @@ public abstract class WildflyBaseClient {
     private static final String ADMIN = PREFIX + ".admin";
     private static final String PASSWORD = PREFIX + ".password";
     private static final String REALM = PREFIX + ".realm";
+    private static final String PROFILE = PREFIX + ".profile";
+    private static final String SERVER_GROUP = PREFIX + ".serverGroup";
+    private static final String REFERENCE_SERVER_HOST = PREFIX + ".referenceServerHost";
+    private static final String REFERENCE_SERVER_NAME = PREFIX + ".referenceServerName";
 
     protected static final String DEFAULT_HOST = "localhost";
     protected static final int DEFAULT_PORT = 9990;
@@ -63,6 +67,10 @@ public abstract class WildflyBaseClient {
     protected String admin;
     protected String password;
     protected String realm;
+    protected String profile;
+    protected String serverGroup;
+    protected String referenceServerHost;
+    protected String referenceServerName;
 
     public void loadConfig( Properties properties ) {
         try {
@@ -80,6 +88,10 @@ public abstract class WildflyBaseClient {
             admin = getManagedProperty( properties, ADMIN, DEFAULT_ADMIN );
             password = getManagedProperty( properties, PASSWORD, DEFAULT_ADMIN_PASSWORD );
             realm = getManagedProperty( properties, REALM, DEFAULT_REALM );
+            profile = getManagedProperty( properties, PROFILE, null );
+            serverGroup = getManagedProperty( properties, SERVER_GROUP, null );
+            referenceServerHost = getManagedProperty( properties, REFERENCE_SERVER_HOST, null );
+            referenceServerName = getManagedProperty( properties, REFERENCE_SERVER_NAME, null );
 
         } catch ( Exception e ) {
             logger.error( "An error was produced during data source configuration file reading" );
