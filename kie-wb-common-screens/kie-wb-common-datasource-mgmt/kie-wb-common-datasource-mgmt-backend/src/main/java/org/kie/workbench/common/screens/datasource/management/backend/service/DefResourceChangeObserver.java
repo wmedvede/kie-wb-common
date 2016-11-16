@@ -16,36 +16,24 @@
 
 package org.kie.workbench.common.screens.datasource.management.backend.service;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.inject.Inject;
 
-import org.kie.workbench.common.screens.datasource.management.backend.core.DataSourceProviderFactory;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.workbench.events.ResourceAddedEvent;
 import org.uberfire.workbench.events.ResourceDeletedEvent;
 import org.uberfire.workbench.events.ResourceRenamedEvent;
 import org.uberfire.workbench.events.ResourceUpdatedEvent;
 
+/**
+ * Observes vfs events on data source and drivers definition files and notifies the interested handler.
+ */
 @ApplicationScoped
 public class DefResourceChangeObserver {
 
     private DefChangeHandler defChangeHandler;
 
-    private DataSourceProviderFactory dataSourceProviderFactory;
-
     public DefResourceChangeObserver( ) {
-    }
-
-    @Inject
-    public DefResourceChangeObserver( DataSourceProviderFactory dataSourceProviderFactory ) {
-        this.dataSourceProviderFactory = dataSourceProviderFactory;
-    }
-
-    @PostConstruct
-    private void init() {
-        setDefChangeHandler( dataSourceProviderFactory.getDataSourceProvider().getDefChangeHandler() );
     }
 
     public void setDefChangeHandler( DefChangeHandler defChangeHandler ) {
@@ -54,26 +42,26 @@ public class DefResourceChangeObserver {
 
     public void onResourceAdd( @Observes final ResourceAddedEvent resourceAddedEvent ) {
         if ( defChangeHandler != null && isProcessable( resourceAddedEvent.getPath( ) ) ) {
-            defChangeHandler.processResourceAdd( resourceAddedEvent.getPath(), resourceAddedEvent.getSessionInfo() );
+            defChangeHandler.processResourceAdd( resourceAddedEvent.getPath( ), resourceAddedEvent.getSessionInfo( ) );
         }
     }
 
     public void onResourceUpdate( @Observes final ResourceUpdatedEvent resourceUpdatedEvent ) {
         if ( defChangeHandler != null && isProcessable( resourceUpdatedEvent.getPath( ) ) ) {
-            defChangeHandler.processResourceUpdate( resourceUpdatedEvent.getPath(), resourceUpdatedEvent.getSessionInfo() );
+            defChangeHandler.processResourceUpdate( resourceUpdatedEvent.getPath( ), resourceUpdatedEvent.getSessionInfo( ) );
         }
     }
 
     public void onResourceRename( @Observes final ResourceRenamedEvent resourceRenamedEvent ) {
         if ( defChangeHandler != null && isProcessable( resourceRenamedEvent.getDestinationPath( ) ) ) {
-            defChangeHandler.processResourceRename( resourceRenamedEvent.getPath(),
-                    resourceRenamedEvent.getDestinationPath(), resourceRenamedEvent.getSessionInfo() );
+            defChangeHandler.processResourceRename( resourceRenamedEvent.getPath( ),
+                    resourceRenamedEvent.getDestinationPath( ), resourceRenamedEvent.getSessionInfo( ) );
         }
     }
 
     public void onResourceDelete( @Observes final ResourceDeletedEvent resourceDeletedEvent ) {
         if ( defChangeHandler != null && isProcessable( resourceDeletedEvent.getPath( ) ) ) {
-            defChangeHandler.processResourceDelete( resourceDeletedEvent.getPath(), resourceDeletedEvent.getSessionInfo() );
+            defChangeHandler.processResourceDelete( resourceDeletedEvent.getPath( ), resourceDeletedEvent.getSessionInfo( ) );
         }
     }
 

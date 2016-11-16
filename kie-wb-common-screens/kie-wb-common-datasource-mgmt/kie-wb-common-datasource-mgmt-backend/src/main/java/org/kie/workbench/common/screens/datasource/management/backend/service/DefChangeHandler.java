@@ -19,6 +19,10 @@ package org.kie.workbench.common.screens.datasource.management.backend.service;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.rpc.SessionInfo;
 
+/**
+ * This interface enables the definition of a component that can react upon modifications on datasource or driver
+ * definition files.
+ */
 public interface DefChangeHandler {
 
     void processResourceAdd( Path path, SessionInfo sessionInfo );
