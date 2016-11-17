@@ -68,7 +68,7 @@ public class DataSourceDefEditorServiceTest
         super.setup();
 
         editorService = new DataSourceDefEditorServiceImpl( runtimeManager,
-                serviceHelper, ioService, projectService, optionsFactory, renameService, artifactResolver,
+                serviceHelper, ioService, projectService, optionsFactory, pathNamingService, artifactResolver,
                 dataSourceDefQueryService, driverDefService, newDataSourceEvent, updateDataSourceEvent, deleteDataSourceEvent );
 
         dataSourceDef = new DataSourceDef();
@@ -149,7 +149,7 @@ public class DataSourceDefEditorServiceTest
             fail( e.getMessage() );
         }
         // 2) the update notification was fired.
-        verify( updateDataSourceEvent, times( 1 ) ).fire( new UpdateDataSourceEvent( originalDataSourceDef, dataSourceDef, project, SESSION_ID, IDENTITY ) );
+        verify( updateDataSourceEvent, times( 1 ) ).fire( new UpdateDataSourceEvent( dataSourceDef, project, SESSION_ID, IDENTITY, originalDataSourceDef ) );
     }
 
     @Override

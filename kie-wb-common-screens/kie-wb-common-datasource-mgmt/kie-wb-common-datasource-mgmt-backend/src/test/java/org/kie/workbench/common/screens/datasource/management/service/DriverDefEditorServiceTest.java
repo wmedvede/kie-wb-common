@@ -65,7 +65,7 @@ public class DriverDefEditorServiceTest
         super.setup();
 
         editorService = new DriverDefEditorServiceImpl( runtimeManager,
-                serviceHelper, ioService, projectService, optionsFactory, renameService, artifactResolver,
+                serviceHelper, ioService, projectService, optionsFactory, pathNamingService, artifactResolver,
                 newDriverEvent, updateDriverEvent, deleteDriverEvent );
 
         driverDef = new DriverDef();
@@ -156,7 +156,7 @@ public class DriverDefEditorServiceTest
             fail ( e.getMessage() );
         }
         // 2) the update notification was fired.
-        verify( updateDriverEvent, times( 1 ) ).fire( new UpdateDriverEvent( originalDriverDef, driverDef, project, SESSION_ID, IDENTITY ) );
+        verify( updateDriverEvent, times( 1 ) ).fire( new UpdateDriverEvent( driverDef, project, SESSION_ID, IDENTITY, originalDriverDef ) );
     }
 
     @Override
