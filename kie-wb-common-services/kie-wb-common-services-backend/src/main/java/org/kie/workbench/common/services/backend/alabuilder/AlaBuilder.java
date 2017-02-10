@@ -16,10 +16,13 @@
 
 package org.kie.workbench.common.services.backend.alabuilder;
 
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -49,8 +52,12 @@ import org.guvnor.ala.pipeline.events.PipelineEventListener;
 import org.guvnor.ala.pipeline.execution.PipelineExecutor;
 import org.guvnor.ala.registry.PipelineRegistry;
 import org.guvnor.ala.source.git.config.GitConfig;
+import org.guvnor.common.services.project.builder.model.BuildMessage;
 import org.guvnor.common.services.project.builder.model.BuildResults;
+import org.guvnor.common.services.project.model.GAV;
 import org.guvnor.common.services.project.model.Project;
+import org.guvnor.common.services.shared.message.Level;
+import org.guvnor.m2repo.backend.server.ExtendedM2RepoService;
 import org.guvnor.structure.repositories.Repository;
 import org.guvnor.structure.repositories.RepositoryService;
 import org.uberfire.backend.vfs.Path;
@@ -59,34 +66,49 @@ import org.uberfire.backend.vfs.PathFactory;
 import static org.guvnor.ala.pipeline.StageUtil.*;
 
 @ApplicationScoped
-public class Builder {
+public class AlaBuilder {
 
     private static final String ALA_BUILDER_PIPELINE = "ALA-Builder-Pipeline";
 
-    private PipelineRegistry pipelineRegistry;
-
     private RepositoryService repositoryService;
+
+    private ExtendedM2RepoService m2RepoService;
+
+    private PipelineRegistry pipelineRegistry;
 
     private Instance< ConfigExecutor > configExecutors;
 
     private PipelineExecutor executor;
 
+    public AlaBuilder( ) {
+    }
+
     @Inject
-    public Builder( PipelineRegistry pipelineRegistry,
-                    RepositoryService repositoryService,
-                    final Instance< ConfigExecutor > configExecutors ) {
-        this.pipelineRegistry = pipelineRegistry;
+    public AlaBuilder( RepositoryService repositoryService,
+                       ExtendedM2RepoService m2RepoService,
+                       PipelineRegistry pipelineRegistry,
+                       final Instance< ConfigExecutor > configExecutors ) {
         this.repositoryService = repositoryService;
+        this.m2RepoService = m2RepoService;
+        this.pipelineRegistry = pipelineRegistry;
         this.configExecutors = configExecutors;
     }
 
     @PostConstruct
     private void init( ) {
         initPipeline( );
-        initExecutor();
+        initExecutor( );
     }
 
-    public BuildResults build( final Project project ) {
+    public BuildResults build( Project project ) {
+        return doBuild( project, false );
+    }
+
+    public BuildResults buildAndDeploy( Project project ) {
+        return doBuild( project, true );
+    }
+
+    private BuildResults doBuild( final Project project, boolean deploy ) {
         final BuildResults results = new BuildResults( project.getPom( ).getGav( ) );
         final Path rootPath = project.getRootPath( );
         final Path repoPath = PathFactory.newPath( "repo", rootPath.toURI( ).substring( 0, rootPath.toURI( ).indexOf( rootPath.getFileName( ) ) ) );
@@ -101,44 +123,56 @@ public class Builder {
                 put( "project-dir", project.getProjectName( ) );
             }
         };
-        executor.execute( buildInput, pipe, this::processBuildResult
-                , new PipelineEventListener( ) {
-            @Override
-            public void beforePipelineExecution( BeforePipelineExecutionEvent bpee ) {
+        executor.execute( buildInput,
+                pipe,
+                ( Consumer< MavenBinary > ) mavenBinary -> processBuildResult( mavenBinary, deploy ),
+                new PipelineEventListener( ) {
+                    @Override
+                    public void beforePipelineExecution( BeforePipelineExecutionEvent event ) {
+                        results.addBuildMessage( newBuildMessage( Level.INFO, "Build pipeline started" ) );
+                    }
 
-            }
+                    @Override
+                    public void afterPipelineExecution( AfterPipelineExecutionEvent event ) {
+                        results.addBuildMessage( newBuildMessage( Level.INFO, "Build pipeline finished" ) );
+                    }
 
-            @Override
-            public void afterPipelineExecution( AfterPipelineExecutionEvent apee ) {
+                    @Override
+                    public void beforeStageExecution( BeforeStageExecutionEvent event ) {
+                        results.addBuildMessage( newBuildMessage( Level.INFO, "Stage started: " + event.getStage().getName() ) );
+                    }
 
-            }
+                    @Override
+                    public void onStageError( OnErrorStageExecutionEvent event ) {
+                        results.addBuildMessage( newBuildMessage( Level.ERROR, "Stage Error: " + event.getStage().getName() ) );
+                    }
 
-            @Override
-            public void beforeStageExecution( BeforeStageExecutionEvent bsee ) {
+                    @Override
+                    public void afterStageExecution( AfterStageExecutionEvent event ) {
+                        results.addBuildMessage( newBuildMessage( Level.INFO, "Stage finished: " + event.getStage().getName() ) );
+                    }
 
-            }
-
-            @Override
-            public void onStageError( OnErrorStageExecutionEvent oesee ) {
-
-            }
-
-            @Override
-            public void afterStageExecution( AfterStageExecutionEvent asee ) {
-
-            }
-
-            @Override
-            public void onPipelineError( OnErrorPipelineExecutionEvent oepee ) {
-
-            }
-        } );
+                    @Override
+                    public void onPipelineError( OnErrorPipelineExecutionEvent event ) {
+                        results.addBuildMessage( newBuildMessage( Level.ERROR, "Build pipe line error: " + event.getError().getMessage() ) );
+                    }
+                } );
 
         return results;
     }
 
-    private void processBuildResult( MavenBinary mavenBinary ) {
-        System.out.println(" XXXX Project was built: " + mavenBinary.getProject() );
+    private void processBuildResult( MavenBinary mavenBinary, boolean deploy ) {
+        if ( deploy ) {
+            GAV gav = new GAV( mavenBinary.getGroupId( ), mavenBinary.getArtifactId( ), mavenBinary.getArtifactId( ) );
+            try (
+                    final InputStream in = Files.newInputStream( mavenBinary.getPath( ).toFile( ).toPath( ) )
+            ) {
+                m2RepoService.deployJar( in, gav );
+            } catch ( Exception e ) {
+                e.printStackTrace( );
+                //TODO treat this error
+            }
+        }
     }
 
     private void initPipeline( ) {
@@ -176,19 +210,26 @@ public class Builder {
             };
         } );
 
-        final Pipeline wildflyPipeline = PipelineFactory
+        final Pipeline alaBuilderPipeline = PipelineFactory
                 .startFrom( sourceConfig )
                 .andThen( projectConfig )
                 .andThen( buildConfig )
                 .andThen( buildExecution )
                 .buildAs( ALA_BUILDER_PIPELINE );
 
-        pipelineRegistry.registerPipeline( wildflyPipeline );
+        pipelineRegistry.registerPipeline( alaBuilderPipeline );
     }
 
     private void initExecutor( ) {
         final Collection< ConfigExecutor > configs = new ArrayList<>( );
-        configExecutors.iterator().forEachRemaining( configs::add );
+        configExecutors.iterator( ).forEachRemaining( configs::add );
         executor = new PipelineExecutor( configs );
+    }
+
+    private BuildMessage newBuildMessage( Level level, String text ) {
+        BuildMessage buildMessage = new BuildMessage();
+        buildMessage.setLevel( level );
+        buildMessage.setText( text );
+        return buildMessage;
     }
 }
