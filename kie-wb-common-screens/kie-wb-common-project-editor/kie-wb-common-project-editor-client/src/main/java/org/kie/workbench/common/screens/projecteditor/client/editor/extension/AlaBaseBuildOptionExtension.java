@@ -32,29 +32,27 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.screens.projecteditor.client.resources.ProjectEditorResources;
-import org.kie.workbench.common.services.shared.alabuilder.AlaBuildService;
+import org.kie.workbench.common.services.shared.alabuilder.AlaClientBuilder;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
 import org.uberfire.ext.widgets.common.client.common.BusyPopup;
 import org.uberfire.workbench.events.NotificationEvent;
 
-public class AlaBuildOptionExtension
+public abstract class AlaBaseBuildOptionExtension
         implements BuildOptionExtension {
 
-    private static final String LINK_NAME = "Build and Deploy with Guvnor ALA";
+    protected Caller< AlaClientBuilder > buildService;
 
-    private Caller< AlaBuildService > buildService;
+    protected Event< BuildResults > buildResultsEvent;
 
-    private Event< BuildResults > buildResultsEvent;
+    protected Event< NotificationEvent > notificationEvent;
 
-    private Event< NotificationEvent > notificationEvent;
-
-    public AlaBuildOptionExtension( ) {
+    public AlaBaseBuildOptionExtension( ) {
     }
 
     @Inject
-    public AlaBuildOptionExtension( Caller< AlaBuildService > buildService,
-                                    Event< BuildResults > buildResultsEvent,
-                                    Event< NotificationEvent > notificationEvent ) {
+    public AlaBaseBuildOptionExtension( Caller< AlaClientBuilder > buildService,
+                                        Event< BuildResults > buildResultsEvent,
+                                        Event< NotificationEvent > notificationEvent ) {
         this.buildService = buildService;
         this.buildResultsEvent = buildResultsEvent;
         this.notificationEvent = notificationEvent;
@@ -65,8 +63,12 @@ public class AlaBuildOptionExtension
         return Collections.singleton( createNavLink( project ) );
     }
 
+    abstract String getLinkName();
+
+    abstract void launchBuild( Project project );
+
     private Widget createNavLink( final Project project ) {
-        return new AnchorListItem( LINK_NAME ) {{
+        return new AnchorListItem( getLinkName() ) {{
             addClickHandler( createClickHandler( project ) );
         }};
     }
@@ -75,13 +77,13 @@ public class AlaBuildOptionExtension
         return new ClickHandler( ) {
             @Override
             public void onClick( ClickEvent event ) {
-                BusyPopup.showMessage( "Building project with Guvnor ALA" );
-                buildService.call( getBuildSuccessCallback( ), getBuildErrorCallback( ) ).buildAndDeploy( project );
+                BusyPopup.showMessage( "Building project with: " + getLinkName() );
+                launchBuild( project );
             }
         };
     }
 
-    private RemoteCallback getBuildSuccessCallback( ) {
+    protected RemoteCallback getBuildSuccessCallback( ) {
         return ( RemoteCallback< BuildResults > ) result -> {
             if ( result.getErrorMessages( ).isEmpty( ) ) {
                 notificationEvent.fire( new NotificationEvent( ProjectEditorResources.CONSTANTS.BuildSuccessful( ),
@@ -95,7 +97,7 @@ public class AlaBuildOptionExtension
         };
     }
 
-    private ErrorCallback< ? > getBuildErrorCallback( ) {
+    protected ErrorCallback< ? > getBuildErrorCallback( ) {
         return new DefaultErrorCallback( ) {
             @Override
             public boolean error( Message message, Throwable throwable ) {

@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.shared.alabuilder;
+package org.kie.workbench.common.services.backend.alabuilder.impl;
 
-import org.guvnor.common.services.project.builder.model.BuildResults;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.guvnor.common.services.project.model.Project;
-import org.jboss.errai.bus.server.annotations.Remote;
+import org.guvnor.common.services.project.service.DeploymentMode;
+import org.kie.workbench.common.services.backend.alabuilder.LocalBuildExecConfig;
+import org.uberfire.backend.vfs.Path;
+import org.uberfire.workbench.events.ResourceChange;
 
-@Remote
-public interface AlaBuildService {
+public class LocalBuildExecConfigImpl implements LocalBuildExecConfig {
 
-    BuildResults build( Project project );
 
-    BuildResults buildAndDeploy( Project project );
 }

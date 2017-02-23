@@ -21,31 +21,39 @@ import javax.inject.Inject;
 
 import org.guvnor.common.services.project.builder.model.BuildResults;
 import org.guvnor.common.services.project.model.Project;
+import org.guvnor.common.services.project.service.DeploymentMode;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.kie.workbench.common.services.shared.alabuilder.AlaBuildService;
+import org.kie.workbench.common.services.shared.alabuilder.AlaClientBuilder;
 
+//TODO remove this class
+@Deprecated
 @Service
 @ApplicationScoped
-public class AlaBuildServiceImpl
-        implements AlaBuildService {
+public class AlaClientBuilderImpl
+        implements AlaClientBuilder {
 
     private AlaBuilder builder;
 
-    public AlaBuildServiceImpl( ) {
+    public AlaClientBuilderImpl( ) {
     }
 
     @Inject
-    public AlaBuildServiceImpl( AlaBuilder builder ) {
+    public AlaClientBuilderImpl( AlaBuilder builder ) {
         this.builder = builder;
     }
 
     @Override
-    public BuildResults build( Project project ) {
-        return builder.build( project );
+    public BuildResults localBuild( Project project ) {
+        return builder.localBuild( project );
     }
 
     @Override
-    public BuildResults buildAndDeploy( Project project ) {
-        return builder.buildAndDeploy( project );
+    public BuildResults localBuildAndDeploy( Project project ) {
+        return builder.localBuildAndDeploy( project, DeploymentMode.VALIDATED, false );
+    }
+
+    @Override
+    public BuildResults localFullBuild( Project project ) {
+        return builder.localFullBuild( project );
     }
 }
