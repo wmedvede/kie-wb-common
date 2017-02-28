@@ -16,8 +16,6 @@
 
 package org.kie.workbench.common.services.backend.ala;
 
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,19 +24,13 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.guvnor.ala.build.maven.model.MavenBinary;
-import org.guvnor.ala.build.maven.model.impl.MavenProjectBinaryBuildImpl;
 import org.guvnor.ala.pipeline.Input;
 import org.guvnor.ala.pipeline.Pipeline;
 import org.guvnor.ala.registry.PipelineRegistry;
-import org.guvnor.common.services.project.builder.model.BuildResults;
-import org.guvnor.common.services.project.model.GAV;
 import org.guvnor.common.services.project.model.Project;
 import org.guvnor.m2repo.backend.server.ExtendedM2RepoService;
-import org.guvnor.structure.repositories.Repository;
 import org.guvnor.structure.repositories.RepositoryService;
 import org.uberfire.backend.vfs.Path;
-import org.uberfire.backend.vfs.PathFactory;
 import org.uberfire.workbench.events.ResourceChange;
 
 /**
@@ -99,28 +91,6 @@ public class BuildPipelineInvoker {
             result[ 0 ] = localBinaryConfig;
         } );
         return result[ 0 ];
-    }
-
-    public BuildResults invokeMavenBuildPipeline( Project project, boolean deploy ) {
-        final BuildResults results = new BuildResults( project.getPom( ).getGav( ) );
-        final Path rootPath = project.getRootPath( );
-        final Path repoPath = PathFactory.newPath( "repo", rootPath.toURI( ).substring( 0, rootPath.toURI( ).indexOf( rootPath.getFileName( ) ) ) );
-        final Repository repository = repositoryService.getRepository( repoPath );
-
-        final Pipeline pipe = pipelineRegistry.getPipelineByName( BuildPipelineInitializer.MAVEN_BUILD_PIPELINE );
-
-        final Input buildInput = new Input( ) {
-            {
-                put( "repo-name", repository.getAlias( ) );
-                put( "branch", repository.getDefaultBranch( ) );
-                put( "project-dir", project.getProjectName( ) );
-            }
-        };
-        buildPipelineInitializer.getExecutor( ).execute( buildInput, pipe, ( Consumer< MavenBinary > ) mavenBinary -> {
-            processBuildResult( mavenBinary, deploy, results );
-        } );
-
-        return results;
     }
 
     private void addResourceChanges( Input input, Map< Path, Collection< ResourceChange > > resourceChanges ) {
@@ -224,23 +194,6 @@ public class BuildPipelineInvoker {
 
         public boolean isSingleResource( ) {
             return resource != null;
-        }
-    }
-
-    private void processBuildResult( MavenBinary mavenBinary, boolean deploy, BuildResults results ) {
-        if ( mavenBinary instanceof MavenProjectBinaryBuildImpl ) {
-            results.addAllBuildMessages( ( ( MavenProjectBinaryBuildImpl ) mavenBinary ).getBuildResults( ).getMessages( ) );
-        }
-        if ( deploy ) {
-            GAV gav = new GAV( mavenBinary.getGroupId( ), mavenBinary.getArtifactId( ), mavenBinary.getArtifactId( ) );
-            try (
-                    final InputStream in = Files.newInputStream( mavenBinary.getPath( ).toFile( ).toPath( ) )
-            ) {
-                m2RepoService.deployJar( in, gav );
-            } catch ( Exception e ) {
-                e.printStackTrace( );
-                //TODO treat this error
-            }
         }
     }
 }

@@ -18,18 +18,12 @@ package org.kie.workbench.common.services.backend.ala;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
 import java.util.function.Function;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import org.guvnor.ala.build.maven.config.MavenBuildConfig;
-import org.guvnor.ala.build.maven.config.MavenBuildExecConfig;
-import org.guvnor.ala.build.maven.config.MavenProjectConfig;
 import org.guvnor.ala.config.BinaryConfig;
 import org.guvnor.ala.config.BuildConfig;
 import org.guvnor.ala.config.ProjectConfig;
@@ -41,18 +35,15 @@ import org.guvnor.ala.pipeline.PipelineFactory;
 import org.guvnor.ala.pipeline.Stage;
 import org.guvnor.ala.pipeline.execution.PipelineExecutor;
 import org.guvnor.ala.registry.PipelineRegistry;
-import org.guvnor.ala.source.git.config.GitConfig;
 import org.kie.workbench.common.services.backend.ala.impl.LocalBuildConfigImpl;
 import org.uberfire.commons.services.cdi.Startup;
 import org.uberfire.commons.services.cdi.StartupType;
 
-import static org.guvnor.ala.pipeline.StageUtil.config;
+import static org.guvnor.ala.pipeline.StageUtil.*;
 
 @ApplicationScoped
 @Startup( StartupType.BOOTSTRAP )
 public class BuildPipelineInitializer {
-
-    public static final String MAVEN_BUILD_PIPELINE = "maven-build-pipeline";
 
     public static final String LOCAL_BUILD_PIPELINE = "local-build-pipeline";
 
@@ -81,56 +72,8 @@ public class BuildPipelineInitializer {
 
     @PostConstruct
     private void init( ) {
-        initMavenBuildPipeline( );
         initLocalBuildPipeline( );
         initExecutors( );
-    }
-
-    /**
-     * Initializes a maven build based pipeline.
-     */
-    private void initMavenBuildPipeline( ) {
-        final Stage< Input, SourceConfig > sourceConfig = config( "Git Source", ( Function< Input, SourceConfig > ) ( s ) -> {
-            return new GitConfig( ) {
-            };
-        } );
-
-        final Stage< SourceConfig, ProjectConfig > projectConfig = config( "Maven Project", ( Function< SourceConfig, ProjectConfig > ) ( s ) -> {
-            return new MavenProjectConfig( ) {
-            };
-        } );
-
-        final Stage< ProjectConfig, BuildConfig > buildConfig = config( "Maven Build Config", ( Function< ProjectConfig, BuildConfig > ) ( s ) -> {
-            return new MavenBuildConfig( ) {
-                @Override
-                public List< String > getGoals( ) {
-                    final List< String > result = new ArrayList<>( );
-                    result.add( "clean" );
-                    result.add( "package" );
-                    return result;
-                }
-
-                @Override
-                public Properties getProperties( ) {
-                    final Properties result = new Properties( );
-                    result.setProperty( "failIfNoTests", "false" );
-                    return result;
-                }
-            };
-        } );
-
-        final Stage< BuildConfig, BinaryConfig > buildExecution = config( "Maven Build", ( Function< BuildConfig, BinaryConfig > ) ( s ) -> {
-            return new MavenBuildExecConfig( ) {
-            };
-        } );
-
-        final Pipeline alaBuilderPipeline = PipelineFactory
-                .startFrom( sourceConfig )
-                .andThen( projectConfig )
-                .andThen( buildConfig )
-                .andThen( buildExecution )
-                .buildAs( MAVEN_BUILD_PIPELINE );
-        pipelineRegistry.registerPipeline( alaBuilderPipeline );
     }
 
     /**

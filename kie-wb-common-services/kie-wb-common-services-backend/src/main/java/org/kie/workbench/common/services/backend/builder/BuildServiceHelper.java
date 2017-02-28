@@ -112,10 +112,6 @@ public class BuildServiceHelper {
         buildPipelineInvoker.invokeLocalBuildPipeLine( buildRequest, consumer );
     }
 
-    private BuildResults doBuild( final Project project, boolean deploy ) {
-        return buildPipelineInvoker.invokeMavenBuildPipeline( project, deploy );
-    }
-
     private LocalBuildConfig.DeploymentType toDeploymentType( DeploymentMode deploymentMode ) {
         return deploymentMode == DeploymentMode.VALIDATED ? LocalBuildConfig.DeploymentType.VALIDATED : LocalBuildConfig.DeploymentType.FORCED;
     }
