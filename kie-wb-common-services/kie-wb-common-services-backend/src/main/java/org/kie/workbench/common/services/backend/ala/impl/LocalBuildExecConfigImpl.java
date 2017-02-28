@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder;
+package org.kie.workbench.common.services.backend.ala.impl;
 
-import org.guvnor.ala.config.ProjectConfig;
+import org.kie.workbench.common.services.backend.ala.LocalBuildExecConfig;
 
-public interface LocalProjectConfig extends ProjectConfig {
+public class LocalBuildExecConfigImpl implements LocalBuildExecConfig {
+
 
 }

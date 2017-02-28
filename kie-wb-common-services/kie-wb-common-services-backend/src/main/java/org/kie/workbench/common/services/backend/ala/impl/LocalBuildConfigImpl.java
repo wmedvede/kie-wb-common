@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder;
+package org.kie.workbench.common.services.backend.ala.impl;
 
-import org.guvnor.ala.source.Source;
-import org.uberfire.java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
-public class LocalSource implements Source {
+import org.guvnor.ala.pipeline.ContextAware;
+import org.kie.workbench.common.services.backend.ala.LocalBuildConfig;
 
-    private Path path;
+public class LocalBuildConfigImpl
+        implements LocalBuildConfig, ContextAware {
 
-    public LocalSource( Path path ) {
-        this.path = path;
+    private Map< String, ? > context;
+
+    @Override
+    public void setContext( Map< String, ? > context ) {
+        this.context = context;
     }
 
     @Override
-    public Path getPath( ) {
-        return path;
+    public Map< String, String > getResourceChanges( ) {
+        return context != null ? ( Map< String, String > ) context.get( "input" ) : new HashMap<>( );
     }
 }

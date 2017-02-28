@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder;
+package org.kie.workbench.common.services.backend.ala;
 
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;

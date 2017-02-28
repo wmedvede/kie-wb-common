@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder;
+package org.kie.workbench.common.services.backend.ala;
 
-import org.guvnor.ala.config.BinaryConfig;
+import org.guvnor.ala.source.Source;
+import org.uberfire.java.nio.file.Path;
 
-public interface LocalBuildExecConfig extends BinaryConfig {
+public class LocalSource implements Source {
 
+    private Path path;
+
+    public LocalSource( Path path ) {
+        this.path = path;
+    }
+
+    @Override
+    public Path getPath( ) {
+        return path;
+    }
 }

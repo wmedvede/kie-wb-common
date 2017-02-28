@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder;
+package org.kie.workbench.common.services.backend.ala;
 
-import org.guvnor.ala.config.ProjectConfig;
-import org.guvnor.common.services.project.model.Project;
+import org.guvnor.ala.config.SourceConfig;
 
-public interface LocalProject
-        extends ProjectConfig {
+public interface LocalSourceConfig extends SourceConfig {
 
-    Project getProject( );
+    String ROOT_PATH = "root-path";
 
+    default String getRootPath() {
+        return "${input." + ROOT_PATH + "}";
+    }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder;
+package org.kie.workbench.common.services.backend.ala;
 
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
@@ -25,7 +25,7 @@ import org.guvnor.ala.config.ProjectConfig;
 import org.guvnor.ala.pipeline.BiFunctionConfigExecutor;
 import org.guvnor.ala.source.Source;
 import org.guvnor.common.services.project.model.Project;
-import org.kie.workbench.common.services.backend.alabuilder.impl.LocalProjectImpl;
+import org.kie.workbench.common.services.backend.ala.impl.LocalProjectImpl;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.uberfire.backend.server.util.Paths;
 

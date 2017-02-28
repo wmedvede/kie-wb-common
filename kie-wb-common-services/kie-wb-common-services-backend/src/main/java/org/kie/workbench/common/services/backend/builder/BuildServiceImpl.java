@@ -27,9 +27,7 @@ import org.guvnor.common.services.project.builder.service.BuildService;
 import org.guvnor.common.services.project.model.Project;
 import org.guvnor.common.services.project.service.DeploymentMode;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.kie.workbench.common.services.backend.alabuilder.AlaBuilder;
-import org.kie.workbench.common.services.backend.alabuilder.LocalBuildConfig;
-import org.kie.workbench.common.services.backend.alabuilder.LocalBuildExecConfig;
+import org.kie.workbench.common.services.backend.ala.LocalBuildConfig;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.workbench.events.ResourceChange;
@@ -38,7 +36,7 @@ import org.uberfire.workbench.events.ResourceChange;
 @ApplicationScoped
 public class BuildServiceImpl implements BuildService {
 
-    private AlaBuilder alaBuilder;
+    private BuildServiceHelper buildServiceHelper;
 
     private KieProjectService projectService;
 
@@ -50,16 +48,16 @@ public class BuildServiceImpl implements BuildService {
 
     @Inject
     public BuildServiceImpl( final KieProjectService projectService,
-                             final AlaBuilder alaBuilder,
+                             final BuildServiceHelper buildServiceHelper,
                              final LRUBuilderCache cache ) {
         this.projectService = projectService;
-        this.alaBuilder = alaBuilder;
+        this.buildServiceHelper = buildServiceHelper;
         this.cache = cache;
     }
 
     @Override
     public BuildResults build( final Project project ) {
-        return alaBuilder.localBuild( project );
+        return buildServiceHelper.localBuild( project );
     }
 
     @Override
@@ -84,7 +82,7 @@ public class BuildServiceImpl implements BuildService {
     public BuildResults buildAndDeploy( final Project project,
                                         final boolean suppressHandlers,
                                         final DeploymentMode mode ) {
-        return alaBuilder.localBuildAndDeploy( project, mode, suppressHandlers );
+        return buildServiceHelper.localBuildAndDeploy( project, mode, suppressHandlers );
     }
 
     @Override
@@ -95,17 +93,17 @@ public class BuildServiceImpl implements BuildService {
 
     @Override
     public IncrementalBuildResults addPackageResource( final Path resource ) {
-        return buildIncrementally( resource, LocalBuildConfig.BuildType.ADD_RESOURCE );
+        return buildIncrementally( resource, LocalBuildConfig.BuildType.INCREMENTAL_ADD_RESOURCE );
     }
 
     @Override
     public IncrementalBuildResults deletePackageResource( final Path resource ) {
-        return buildIncrementally( resource, LocalBuildConfig.BuildType.DELETE_RESOURCE );
+        return buildIncrementally( resource, LocalBuildConfig.BuildType.INCREMENTAL_DELETE_RESOURCE );
     }
 
     @Override
     public IncrementalBuildResults updatePackageResource( final Path resource ) {
-        return buildIncrementally( resource, LocalBuildConfig.BuildType.UPDATE_RESOURCE );
+        return buildIncrementally( resource, LocalBuildConfig.BuildType.INCREMENTAL_UPDATE_RESOURCE );
     }
 
     private IncrementalBuildResults buildIncrementally( Path resource, LocalBuildConfig.BuildType buildType ) {
@@ -113,7 +111,7 @@ public class BuildServiceImpl implements BuildService {
         if ( project == null ) {
             return new IncrementalBuildResults( );
         }
-        return alaBuilder.localBuild( project, buildType, resource );
+        return buildServiceHelper.localBuild( project, buildType, resource );
     }
 
     @Override
@@ -122,17 +120,10 @@ public class BuildServiceImpl implements BuildService {
         if ( project == null ) {
             return new IncrementalBuildResults( );
         }
-        return alaBuilder.localBuild( project, changes );
+        return buildServiceHelper.localBuild( project, changes );
     }
 
-    public BuildInfo getBuildInfo( Project project ) {
-        final Builder builder = cache.assertBuilder( project );
-        if ( builder.isBuilt() ) {
-            alaBuilder.build( project );
-        }
-        return new BuildInfoImpl( builder );
-    }
-
+    //TODO, check the removal of this method currently only used by a test.
     LRUBuilderCache getCache( ) {
         return cache;
     }

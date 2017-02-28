@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder.impl;
+package org.kie.workbench.common.services.backend.ala;
 
-import org.guvnor.common.services.project.model.Project;
-import org.kie.workbench.common.services.backend.alabuilder.LocalProject;
+import org.guvnor.ala.config.ProjectConfig;
 
-public class LocalProjectImpl
-        implements LocalProject {
-
-    private Project project;
-
-    public LocalProjectImpl( Project project ) {
-        this.project = project;
-    }
-
-    @Override
-    public Project getProject( ) {
-        return project;
-    }
+public interface LocalProjectConfig extends ProjectConfig {
 
 }

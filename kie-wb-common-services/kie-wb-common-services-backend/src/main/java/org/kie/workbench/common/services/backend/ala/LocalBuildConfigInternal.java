@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder;
+package org.kie.workbench.common.services.backend.ala;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.guvnor.ala.config.BuildConfig;
 import org.guvnor.common.services.project.model.Project;
-import org.guvnor.common.services.project.service.DeploymentMode;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.workbench.events.ResourceChange;
 
@@ -30,13 +29,13 @@ public class LocalBuildConfigInternal implements BuildConfig {
 
     private LocalBuildConfig.BuildType buildType;
 
+    private LocalBuildConfig.DeploymentType deploymentType;
+
     private Project project;
 
     private Path resource;
 
     private Map< Path, Collection< ResourceChange > > resourceChanges = new HashMap<>( );
-
-    private DeploymentMode deploymentMode;
 
     private boolean suppressHandlers;
 
@@ -48,16 +47,23 @@ public class LocalBuildConfigInternal implements BuildConfig {
         this.buildType = LocalBuildConfig.BuildType.FULL_BUILD;
     }
 
-    public LocalBuildConfigInternal( LocalBuildConfig.BuildType buildType, Project project, Path resource ) {
-        this.buildType = buildType;
+    public LocalBuildConfigInternal( Project project, LocalBuildConfig.DeploymentType deploymentType, boolean suppressHandlers ) {
         this.project = project;
+        this.deploymentType = deploymentType;
+        this.suppressHandlers = suppressHandlers;
+        this.buildType = LocalBuildConfig.BuildType.FULL_BUILD_AND_DEPLOY;
+    }
+
+    public LocalBuildConfigInternal( Project project, LocalBuildConfig.BuildType buildType, Path resource ) {
+        this.project = project;
+        this.buildType = buildType;
         this.resource = resource;
     }
 
     public LocalBuildConfigInternal( Project project, Map< Path, Collection< ResourceChange > > resourceChanges ) {
         this.project = project;
         this.resourceChanges = resourceChanges;
-        this.buildType = LocalBuildConfig.BuildType.BATCH_CHANGES;
+        this.buildType = LocalBuildConfig.BuildType.INCREMENTAL_BATCH_CHANGES;
     }
 
     public LocalBuildConfig.BuildType getBuildType( ) {
@@ -76,8 +82,8 @@ public class LocalBuildConfigInternal implements BuildConfig {
         return resourceChanges;
     }
 
-    public DeploymentMode getDeploymentMode( ) {
-        return deploymentMode;
+    public LocalBuildConfig.DeploymentType getDeploymentType( ) {
+        return deploymentType;
     }
 
     public boolean isSuppressHandlers( ) {

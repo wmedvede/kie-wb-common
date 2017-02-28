@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder;
+package org.kie.workbench.common.services.backend.ala;
 
 import org.guvnor.ala.config.BinaryConfig;
 import org.guvnor.common.services.project.builder.model.BuildResults;
 import org.guvnor.common.services.project.builder.model.IncrementalBuildResults;
+import org.kie.workbench.common.services.backend.builder.Builder;
 
 public interface LocalBinaryConfig extends BinaryConfig {
 
     BuildResults getBuildResults( );
 
     IncrementalBuildResults getIncrementalBuildResults( );
+
+    Builder getBuilder();
 
 }

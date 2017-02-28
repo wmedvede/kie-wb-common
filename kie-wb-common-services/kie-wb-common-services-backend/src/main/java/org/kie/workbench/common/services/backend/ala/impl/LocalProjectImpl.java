@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder;
+package org.kie.workbench.common.services.backend.ala.impl;
 
-import org.guvnor.ala.config.BuildConfig;
+import org.guvnor.common.services.project.model.Project;
+import org.kie.workbench.common.services.backend.ala.LocalProject;
 
-public interface LocalBuildConfig extends BuildConfig {
+public class LocalProjectImpl
+        implements LocalProject {
 
-    enum BuildType {
-        FULL_BUILD, FULL_BUILD_AND_DEPLOY, ADD_RESOURCE, DELETE_RESOURCE, UPDATE_RESOURCE, BATCH_CHANGES
+    private Project project;
+
+    public LocalProjectImpl( Project project ) {
+        this.project = project;
     }
 
-    default String getBuildType( ) {
-        return "${input.build-type}";
+    @Override
+    public Project getProject( ) {
+        return project;
     }
 
-    default String getResource( ) {
-        return "${input.resource}";
-    }
-
-    default String getResourceChanges( ) {
-        return "${input.resource-changes}";
-    }
 }

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder.impl;
+package org.kie.workbench.common.services.backend.ala.impl;
 
 import org.guvnor.common.services.project.builder.model.BuildResults;
 import org.guvnor.common.services.project.builder.model.IncrementalBuildResults;
-import org.kie.workbench.common.services.backend.alabuilder.LocalBinaryConfig;
+import org.kie.workbench.common.services.backend.ala.LocalBinaryConfig;
+import org.kie.workbench.common.services.backend.builder.Builder;
 
 public class LocalBuildBinaryImpl
         implements LocalBinaryConfig {
@@ -27,7 +28,14 @@ public class LocalBuildBinaryImpl
 
     private IncrementalBuildResults incrementalBuildResults;
 
+    private Builder builder;
+
     public LocalBuildBinaryImpl( BuildResults buildResults ) {
+        this.buildResults = buildResults;
+    }
+
+    public LocalBuildBinaryImpl( Builder builder, BuildResults buildResults ) {
+        this.builder = builder;
         this.buildResults = buildResults;
     }
 
@@ -43,5 +51,10 @@ public class LocalBuildBinaryImpl
     @Override
     public IncrementalBuildResults getIncrementalBuildResults( ) {
         return incrementalBuildResults;
+    }
+
+    @Override
+    public Builder getBuilder( ) {
+        return builder;
     }
 }

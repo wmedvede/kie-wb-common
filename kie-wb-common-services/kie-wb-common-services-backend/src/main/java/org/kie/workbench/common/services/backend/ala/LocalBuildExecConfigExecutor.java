@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder;
+package org.kie.workbench.common.services.backend.ala;
 
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
@@ -22,45 +22,45 @@ import javax.inject.Inject;
 
 import org.guvnor.ala.config.Config;
 import org.guvnor.ala.pipeline.BiFunctionConfigExecutor;
-import org.kie.workbench.common.services.backend.alabuilder.impl.LocalBuildBinaryImpl;
-import org.kie.workbench.common.services.backend.builder.BuildServiceHelper;
+import org.guvnor.common.services.project.service.DeploymentMode;
+import org.kie.workbench.common.services.backend.ala.impl.LocalBuildBinaryImpl;
 
 @ApplicationScoped
 public class LocalBuildExecConfigExecutor
         implements BiFunctionConfigExecutor< LocalBuildConfigInternal, LocalBuildExecConfig, LocalBinaryConfig > {
 
-    private BuildServiceHelper serviceHelper;
+    private LocalBuildHelper serviceHelper;
 
     public LocalBuildExecConfigExecutor( ) {
     }
 
     @Inject
-    public LocalBuildExecConfigExecutor( BuildServiceHelper serviceHelper ) {
+    public LocalBuildExecConfigExecutor( LocalBuildHelper serviceHelper ) {
         this.serviceHelper = serviceHelper;
     }
 
     @Override
     public Optional< LocalBinaryConfig > apply( LocalBuildConfigInternal localBuildConfigInternal, LocalBuildExecConfig localBuildExecConfig ) {
         Optional< LocalBinaryConfig > result = Optional.empty( );
-
+        LocalBuildHelper.BuildResult buildResult;
         switch ( localBuildConfigInternal.getBuildType( ) ) {
             case FULL_BUILD:
-                result = Optional.of( new LocalBuildBinaryImpl(
-                        serviceHelper.build( localBuildConfigInternal.getProject( ) ) ) );
+                buildResult = serviceHelper.build( localBuildConfigInternal.getProject( ) );
+                result = Optional.of( new LocalBuildBinaryImpl( buildResult.getBuilder(), buildResult.getBuildResults() ) );
                 break;
-            case ADD_RESOURCE:
+            case INCREMENTAL_ADD_RESOURCE:
                 result = Optional.of( new LocalBuildBinaryImpl(
                         serviceHelper.addPackageResource( localBuildConfigInternal.getResource( ) ) ) );
                 break;
-            case UPDATE_RESOURCE:
+            case INCREMENTAL_UPDATE_RESOURCE:
                 result = Optional.of( new LocalBuildBinaryImpl(
                         serviceHelper.updatePackageResource( localBuildConfigInternal.getResource( ) ) ) );
                 break;
-            case DELETE_RESOURCE:
+            case INCREMENTAL_DELETE_RESOURCE:
                 result = Optional.of( new LocalBuildBinaryImpl(
                         serviceHelper.deletePackageResource( localBuildConfigInternal.getResource( ) ) ) );
                 break;
-            case BATCH_CHANGES:
+            case INCREMENTAL_BATCH_CHANGES:
                 result = Optional.of(
                         new LocalBuildBinaryImpl( serviceHelper.applyBatchResourceChanges(
                                 localBuildConfigInternal.getProject( ),
@@ -68,10 +68,11 @@ public class LocalBuildExecConfigExecutor
                 break;
             case FULL_BUILD_AND_DEPLOY:
                 result = Optional.of(
-                        new LocalBuildBinaryImpl( serviceHelper.buildAndDeploy(
-                                localBuildConfigInternal.getProject( ),
-                                localBuildConfigInternal.isSuppressHandlers( ),
-                                localBuildConfigInternal.getDeploymentMode( ) ) ) );
+                        new LocalBuildBinaryImpl(
+                                serviceHelper.buildAndDeploy( localBuildConfigInternal.getProject( ),
+                                        localBuildConfigInternal.isSuppressHandlers( ),
+                                        toDeploymentMode( localBuildConfigInternal.getDeploymentType( ) ) ) ) );
+                break;
         }
         return result;
     }
@@ -85,6 +86,10 @@ public class LocalBuildExecConfigExecutor
     @Override
     public String outputId( ) {
         return "local-binary";
+    }
+
+    private DeploymentMode toDeploymentMode( LocalBuildConfig.DeploymentType deploymentType ) {
+        return deploymentType == LocalBuildConfig.DeploymentType.VALIDATED ? DeploymentMode.VALIDATED : DeploymentMode.FORCED;
     }
 
 }

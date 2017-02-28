@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.services.backend.alabuilder;
+package org.kie.workbench.common.services.backend.ala;
 
-import org.guvnor.ala.config.SourceConfig;
+import org.guvnor.ala.config.BinaryConfig;
 
-public interface LocalSourceConfig extends SourceConfig {
-
-    default String getRootPath() {
-        return "${input.root-path}";
-    }
+public interface LocalBuildExecConfig extends BinaryConfig {
 
 }
