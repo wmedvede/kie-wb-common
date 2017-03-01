@@ -18,6 +18,7 @@ package org.kie.workbench.common.services.backend.builder;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Consumer;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -58,6 +59,11 @@ public class BuildServiceImpl implements BuildService {
     @Override
     public BuildResults build( final Project project ) {
         return buildServiceHelper.localBuild( project );
+    }
+
+    public void build( final Project project, final Consumer<Builder> consumer ) {
+        buildServiceHelper.build( project, localBinaryConfig ->
+                consumer.accept( localBinaryConfig.getBuilder() ) );
     }
 
     @Override

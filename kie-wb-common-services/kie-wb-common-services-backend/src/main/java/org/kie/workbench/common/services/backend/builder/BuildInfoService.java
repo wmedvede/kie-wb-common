@@ -19,12 +19,13 @@ package org.kie.workbench.common.services.backend.builder;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.guvnor.common.services.project.builder.service.BuildService;
 import org.guvnor.common.services.project.model.Project;
 
 @ApplicationScoped
 public class BuildInfoService {
 
-    private BuildServiceHelper buildServiceHelper;
+    private BuildService buildService;
 
     private LRUBuilderCache builderCache;
 
@@ -32,18 +33,16 @@ public class BuildInfoService {
     }
 
     @Inject
-    public BuildInfoService( BuildServiceHelper buildServiceHelper, LRUBuilderCache builderCache ) {
-        this.buildServiceHelper = buildServiceHelper;
+    public BuildInfoService( BuildService buildService, LRUBuilderCache builderCache ) {
+        this.buildService = buildService;
         this.builderCache = builderCache;
     }
 
     public BuildInfo getBuildInfo( Project project ) {
-        final Builder[] builder = { builderCache.assertBuilder( project ) };
-        if ( !builder[ 0 ].isBuilt() ) {
-            buildServiceHelper.build( project, localBinaryConfig ->
-                    builder[ 0 ] = localBinaryConfig.getBuilder() );
+        final Builder[] result = { builderCache.assertBuilder( project ) };
+        if ( !result[ 0 ].isBuilt() ) {
+            ( (BuildServiceImpl) buildService ).build( project, builder -> result[ 0 ] = builder );
         }
-        return new BuildInfoImpl( builder[ 0 ] );
+        return new BuildInfoImpl( result[ 0 ] );
     }
-
 }
