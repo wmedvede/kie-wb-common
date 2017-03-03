@@ -130,6 +130,10 @@ public class LRUBuilderCache extends LRUCache<Project, Builder> {
         return makeBuilder(project);
     }
 
+    public synchronized Builder getBuilder(final Project project) {
+        return getEntry(project);
+    }
+
     private Builder makeBuilder(Project project) {
         Builder builder = getEntry(project);
         if (builder == null) {

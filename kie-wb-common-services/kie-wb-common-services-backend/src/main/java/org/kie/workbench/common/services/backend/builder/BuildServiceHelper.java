@@ -53,7 +53,7 @@ public class BuildServiceHelper {
         return result[ 0 ];
     }
 
-    public void build( Project project, Consumer< LocalBinaryConfig > consumer ) {
+    public void localBuild( Project project, Consumer< LocalBinaryConfig > consumer ) {
         invokeLocalBuildPipeLine( project, consumer );
     }
 

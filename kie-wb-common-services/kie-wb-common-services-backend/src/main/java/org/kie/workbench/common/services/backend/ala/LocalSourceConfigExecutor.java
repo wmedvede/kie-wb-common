@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.services.backend.ala;
 
+import java.net.URI;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -23,9 +24,8 @@ import javax.inject.Inject;
 import org.guvnor.ala.config.Config;
 import org.guvnor.ala.pipeline.FunctionConfigExecutor;
 import org.guvnor.ala.source.Source;
-import org.uberfire.backend.server.util.Paths;
-import org.uberfire.backend.vfs.Path;
-import org.uberfire.backend.vfs.PathFactory;
+import org.uberfire.java.nio.file.Path;
+import org.uberfire.java.nio.file.Paths;
 
 @ApplicationScoped
 public class LocalSourceConfigExecutor
@@ -37,8 +37,8 @@ public class LocalSourceConfigExecutor
 
     @Override
     public Optional< Source > apply( LocalSourceConfig localSourceConfig ) {
-        Path path = PathFactory.newPath( "pom.xml", localSourceConfig.getRootPath( ) );
-        return Optional.of( new LocalSource( Paths.convert( path ) ) );
+        Path path = Paths.get( URI.create( localSourceConfig.getRootPath() ) );
+        return Optional.of( new LocalSource( path ) );
     }
 
     @Override

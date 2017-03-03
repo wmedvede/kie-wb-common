@@ -86,9 +86,9 @@ public class LocalBuildConfigExecutor
         Map< Path, Collection< ResourceChange > > resourceChanges = new HashMap<>( );
         input.entrySet( )
                 .stream( )
-                .filter( entry -> entry.getKey( ).startsWith( LocalBuildConfig.BATCH_CHANGE ) )
+                .filter( entry -> entry.getKey( ).startsWith( LocalBuildConfig.RESOURCE_CHANGE ) )
                 .forEach( entry -> {
-                    resourceChanges.put( decodePath( entry.getKey( ), LocalBuildConfig.BATCH_CHANGE ), decodeChanges( entry.getValue( ) ) );
+                    resourceChanges.put( decodePath( entry.getKey( ), LocalBuildConfig.RESOURCE_CHANGE ), decodeChanges( entry.getValue( ) ) );
                 } );
         return resourceChanges;
     }

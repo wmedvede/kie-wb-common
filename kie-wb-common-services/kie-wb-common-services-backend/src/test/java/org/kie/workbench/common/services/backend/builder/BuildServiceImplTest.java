@@ -16,240 +16,192 @@
 
 package org.kie.workbench.common.services.backend.builder;
 
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Collections;
-import javax.enterprise.inject.Instance;
+import java.util.Collection;
+import java.util.Map;
+import java.util.function.Consumer;
 
-import com.google.common.base.Charsets;
-import org.guvnor.common.services.project.builder.service.PostBuildHandler;
-import org.guvnor.common.services.project.model.GAV;
-import org.guvnor.common.services.project.model.MavenRepositoryMetadata;
-import org.guvnor.common.services.project.model.POM;
-import org.guvnor.common.services.project.model.ProjectRepositories;
+import org.guvnor.common.services.project.builder.model.BuildResults;
+import org.guvnor.common.services.project.builder.model.IncrementalBuildResults;
 import org.guvnor.common.services.project.service.DeploymentMode;
-import org.guvnor.common.services.project.service.POMService;
-import org.guvnor.common.services.project.service.ProjectRepositoriesService;
-import org.guvnor.common.services.project.service.ProjectRepositoryResolver;
-import org.guvnor.m2repo.backend.server.ExtendedM2RepoService;
-import org.guvnor.test.TestFileSystem;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kie.api.builder.KieFileSystem;
+import org.kie.workbench.common.services.backend.ala.LocalBinaryConfig;
+import org.kie.workbench.common.services.backend.ala.LocalBuildConfig;
 import org.kie.workbench.common.services.shared.project.KieProject;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.uberfire.backend.server.util.Paths;
+import org.mockito.stubbing.Answer;
 import org.uberfire.backend.vfs.Path;
+import org.uberfire.workbench.events.ResourceChange;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith( MockitoJUnitRunner.class )
 public class BuildServiceImplTest {
 
     @Mock
-    private POMService pomService;
-
-    @Mock
-    private ExtendedM2RepoService m2RepoService;
-
-    @Mock
-    private ProjectRepositoryResolver repositoryResolver;
-
-    @Mock
-    private ProjectRepositoriesService projectRepositoriesService;
-
-    @Mock
-    private Instance<PostBuildHandler> handlers;
-
     private LRUBuilderCache cache;
 
-    private TestFileSystem testFileSystem;
-
+    @Mock
     private KieProjectService projectService;
 
-    private BuildServiceImpl service;
+    @Mock
+    private BuildServiceHelper buildServiceHelper;
 
-    @BeforeClass
-    public static void setupSystemProperties() {
-        //These are not needed for the tests
-        System.setProperty( "org.uberfire.nio.git.daemon.enabled",
-                            "false" );
-        System.setProperty( "org.uberfire.nio.git.ssh.enabled",
-                            "false" );
-        System.setProperty( "org.uberfire.sys.repo.monitor.disabled",
-                            "true" );
-    }
+    private BuildServiceImpl buildService;
 
+    @Mock
+    private KieProject project;
+
+    @Mock
+    private Path path;
+
+    @Mock
+    private Builder builder;
+
+    @Mock
+    private BuildResults buildResults;
+
+    @Mock
+    private IncrementalBuildResults incrementalBuildResults;
+
+    @Mock
+    private Map< Path, Collection< ResourceChange > > resourceChanges;
+
+    @Mock
+    private LocalBinaryConfig localBinaryConfig;
 
     @Before
-    public void setUp() throws Exception {
-        testFileSystem = new TestFileSystem();
-        projectService = testFileSystem.getReference( KieProjectService.class );
-        cache = testFileSystem.getReference( LRUBuilderCache.class );
-
-        //TODO arreglar este test si prospera la idea
-        /*
-        service = spy( new BuildServiceImpl( pomService,
-                                             m2RepoService,
-                                             projectService,
-                                             repositoryResolver,
-                                             projectRepositoriesService,
-                                             cache,
-                                             handlers,
-                                             null,
-                null ) );
-
-*/
-        final ProjectRepositories projectRepositories = new ProjectRepositories();
-        when( projectRepositoriesService.load( any( Path.class ) ) ).thenReturn( projectRepositories );
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        testFileSystem.tearDown();
+    public void setUp( ) {
+        buildService = new BuildServiceImpl( projectService, buildServiceHelper, cache );
     }
 
     @Test
-    public void testBuildAndDeployNonSnapshot() {
-        final KieProject project = projectMock();
-        final POM pom = mock( POM.class );
-        final GAV gav = new GAV( "groupID",
-                                 "artifactID",
-                                 "1.0.0" );
-        when( project.getPom() ).thenReturn( pom );
-        when( pom.getGav() ).thenReturn( gav );
-        when( repositoryResolver.getRepositoriesResolvingArtifact( eq( gav ) ) ).thenReturn( Collections.<MavenRepositoryMetadata>emptySet() );
+    public void testBuild( ) {
+        when( buildServiceHelper.localBuild( project ) ).thenReturn( buildResults );
+        BuildResults result = buildService.build( project );
+        assertEquals( buildResults, result );
 
-        service.buildAndDeploy( project );
-
-        verify( service,
-                times( 1 ) ).buildAndDeploy( eq( project ),
-                                             eq( DeploymentMode.VALIDATED ) );
-        verify( projectRepositoriesService,
-                times( 1 ) ).load( any( Path.class ) );
-        verify( repositoryResolver,
-                times( 1 ) ).getRepositoriesResolvingArtifact( eq( gav ) );
     }
 
     @Test
-    public void testBuildAndDeploySnapshot() {
-        final KieProject project = projectMock();
-        final POM pom = mock( POM.class );
-        final GAV gav = new GAV( "groupID",
-                                 "artifactID",
-                                 "1.0.0-SNAPSHOT" );
-        when( project.getPom() ).thenReturn( pom );
-        when( pom.getGav() ).thenReturn( gav );
-        when( repositoryResolver.getRepositoriesResolvingArtifact( eq( gav ) ) ).thenReturn( Collections.<MavenRepositoryMetadata>emptySet() );
+    public void testBuildWithConsumer( ) {
+        // emulate the buildServiceHelper response
+        when( localBinaryConfig.getBuilder( ) ).thenReturn( builder );
+        doAnswer( new Answer< Void >( ) {
+            public Void answer( InvocationOnMock invocation ) {
+                Consumer consumer = ( Consumer ) invocation.getArguments( )[ 1 ];
+                consumer.accept( localBinaryConfig );
+                return null;
+            }
+        } ).when( buildServiceHelper ).localBuild( eq( project ), any( Consumer.class ) );
 
-        service.buildAndDeploy( project );
-
-        verify( service,
-                times( 1 ) ).buildAndDeploy( eq( project ),
-                                             eq( DeploymentMode.VALIDATED ) );
-        verify( projectRepositoriesService,
-                never() ).load( any( Path.class ) );
-        verify( repositoryResolver,
-                never() ).getRepositoriesResolvingArtifact( eq( gav ) );
+        buildService.build( project, new Consumer< Builder >( ) {
+            @Override
+            public void accept( Builder result ) {
+                // the resulting builder must the returned by the buildServiceHelper
+                assertEquals( builder, result );
+            }
+        } );
+        verify( buildServiceHelper, times( 1 ) ).localBuild( eq( project ), any( Consumer.class ) );
     }
 
     @Test
-    public void testBuildAndDeploySuppressHandlersNonSnapshot() {
-        final KieProject project = projectMock();
-        final POM pom = mock( POM.class );
-        final GAV gav = new GAV( "groupID",
-                                 "artifactID",
-                                 "1.0.0" );
-        when( project.getPom() ).thenReturn( pom );
-        when( pom.getGav() ).thenReturn( gav );
-        when( repositoryResolver.getRepositoriesResolvingArtifact( eq( gav ) ) ).thenReturn( Collections.<MavenRepositoryMetadata>emptySet() );
-
-        service.buildAndDeploy( project,
-                                true );
-
-        verify( service,
-                times( 1 ) ).buildAndDeploy( eq( project ),
-                                             eq( true ),
-                                             eq( DeploymentMode.VALIDATED ) );
-        verify( projectRepositoriesService,
-                times( 1 ) ).load( any( Path.class ) );
-        verify( repositoryResolver,
-                times( 1 ) ).getRepositoriesResolvingArtifact( eq( gav ) );
+    public void testIsBuiltTrue( ) {
+        when( cache.assertBuilder( project ) ).thenReturn( builder );
+        when( builder.isBuilt( ) ).thenReturn( true );
+        assertTrue( buildService.isBuilt( project ) );
     }
 
     @Test
-    public void testBuildAndDeploySuppressHandlersSnapshot() {
-        final KieProject project = projectMock();
-        final POM pom = mock( POM.class );
-        final GAV gav = new GAV( "groupID",
-                                 "artifactID",
-                                 "1.0.0-SNAPSHOT" );
-        when( project.getPom() ).thenReturn( pom );
-        when( pom.getGav() ).thenReturn( gav );
-        when( repositoryResolver.getRepositoriesResolvingArtifact( eq( gav ) ) ).thenReturn( Collections.<MavenRepositoryMetadata>emptySet() );
-
-        service.buildAndDeploy( project,
-                                true );
-
-        verify( service,
-                times( 1 ) ).buildAndDeploy( eq( project ),
-                                             eq( true ),
-                                             eq( DeploymentMode.VALIDATED ) );
-        verify( projectRepositoriesService,
-                never() ).load( any( Path.class ) );
-        verify( repositoryResolver,
-                never() ).getRepositoriesResolvingArtifact( eq( gav ) );
+    public void testIsBuiltFalse( ) {
+        when( cache.assertBuilder( project ) ).thenReturn( builder );
+        when( builder.isBuilt( ) ).thenReturn( false );
+        assertFalse( buildService.isBuilt( project ) );
     }
 
     @Test
-    public void testBuildThatDoesNotUpdateTheCache() throws Exception {
-        final Path path = path();
-
-        service.build( projectService.resolveProject( path ) );
-
-        assertTrue( cachedFileSystemDoesNotChange() );
+    public void testBuildAndDeploy( ) {
+        prepareBuildAndDeploy( project, DeploymentMode.VALIDATED, false );
+        BuildResults result = buildService.buildAndDeploy( project );
+        assertEquals( buildResults, result );
+        verifyBuildAndDeploy( project, DeploymentMode.VALIDATED, false );
     }
 
     @Test
-    public void testUpdatePackageResourceThatDoesNotUpdateTheCache() throws Exception {
-        final Path path = path();
-
-        service.build( projectService.resolveProject( path ) );
-        service.updatePackageResource( path );
-
-        assertTrue( cachedFileSystemDoesNotChange() );
+    public void testBuildAndDeployWithDeploymentMode( ) {
+        prepareBuildAndDeploy( project, DeploymentMode.VALIDATED, false );
+        BuildResults result = buildService.buildAndDeploy( project, DeploymentMode.VALIDATED );
+        assertEquals( buildResults, result );
+        verifyBuildAndDeploy( project, DeploymentMode.VALIDATED, false );
     }
 
-    private KieProject projectMock() {
-        return mock( KieProject.class );
+    @Test
+    public void testBuildAndDeployWithSuppressHandlers( ) {
+        prepareBuildAndDeploy( project, DeploymentMode.VALIDATED, false );
+        BuildResults result = buildService.buildAndDeploy( project, false );
+        assertEquals( buildResults, result );
+        verifyBuildAndDeploy( project, DeploymentMode.VALIDATED, false );
     }
 
-    private Path path() throws URISyntaxException {
-        final URL urlToValidate = this.getClass().getResource( "/GuvnorM2RepoDependencyExample1/src/main/resources/rule2.drl" );
-        return Paths.convert( testFileSystem.fileSystemProvider.getPath( urlToValidate.toURI() ) );
+    @Test
+    public void testBuildAndDeployWithDeploymentModeAndSuppressHandlers( ) {
+        prepareBuildAndDeploy( project, DeploymentMode.VALIDATED, false );
+        BuildResults result = buildService.buildAndDeploy( project, false, DeploymentMode.VALIDATED );
+        assertEquals( buildResults, result );
+        verifyBuildAndDeploy( project, DeploymentMode.VALIDATED, false );
     }
 
-    private String content() {
-        return "package org.kie.workbench.common.services.builder.tests.test1\n" +
-                "\n" +
-                "rule R2\n" +
-                "when\n" +
-                "Ban()\n" +
-                "then\n" +
-                "end";
+    private void prepareBuildAndDeploy( KieProject project, DeploymentMode deploymentMode, boolean suppressHandlers ) {
+        when( buildServiceHelper.localBuildAndDeploy( project, deploymentMode, suppressHandlers ) ).thenReturn( buildResults );
     }
 
-    private boolean cachedFileSystemDoesNotChange() throws URISyntaxException {
-        final Builder builder = service.getCache().assertBuilder( projectService.resolveProject( path() ) );
-        final KieFileSystem fileSystem = builder.getKieFileSystem();
-        final String fileContent = new String( fileSystem.read( "src/main/resources/rule2.drl" ), Charsets.UTF_8 );
+    private void verifyBuildAndDeploy( KieProject project, DeploymentMode deploymentMode, boolean suppressHandlers ) {
+        verify( buildServiceHelper, times( 1 ) ).localBuildAndDeploy( project, deploymentMode, suppressHandlers );
+    }
 
-        return fileContent.contains( "Bean" );
+    @Test
+    public void testAddPackageResource( ) {
+        prepareIncrementalBuild( path, LocalBuildConfig.BuildType.INCREMENTAL_ADD_RESOURCE );
+        IncrementalBuildResults result = buildService.addPackageResource( path );
+        assertEquals( incrementalBuildResults, result );
+        verifyIncrementalBuild( path, LocalBuildConfig.BuildType.INCREMENTAL_ADD_RESOURCE );
+    }
+
+    @Test
+    public void testDeletePackageResource( ) {
+        prepareIncrementalBuild( path, LocalBuildConfig.BuildType.INCREMENTAL_DELETE_RESOURCE );
+        IncrementalBuildResults result = buildService.deletePackageResource( path );
+        assertEquals( incrementalBuildResults, result );
+        verifyIncrementalBuild( path, LocalBuildConfig.BuildType.INCREMENTAL_DELETE_RESOURCE );
+    }
+
+    @Test
+    public void testUpdatePackageResource( ) {
+        prepareIncrementalBuild( path, LocalBuildConfig.BuildType.INCREMENTAL_UPDATE_RESOURCE );
+        IncrementalBuildResults result = buildService.updatePackageResource( path );
+        assertEquals( incrementalBuildResults, result );
+        verifyIncrementalBuild( path, LocalBuildConfig.BuildType.INCREMENTAL_UPDATE_RESOURCE );
+    }
+
+    private void prepareIncrementalBuild( Path path, LocalBuildConfig.BuildType buildType ) {
+        when( projectService.resolveProject( path ) ).thenReturn( project );
+        when( buildServiceHelper.localBuild( project, buildType, path ) ).thenReturn( incrementalBuildResults );
+    }
+
+    private void verifyIncrementalBuild( Path path, LocalBuildConfig.BuildType buildType ) {
+        verify( buildServiceHelper, times( 1 ) ).localBuild( project, buildType, path );
+    }
+
+    @Test
+    public void testApplyBatchResourceChanges( ) {
+        when( buildServiceHelper.localBuild( project, resourceChanges ) ).thenReturn( incrementalBuildResults );
+        IncrementalBuildResults result = buildService.applyBatchResourceChanges( project, resourceChanges );
+        assertEquals( incrementalBuildResults, result );
+        verify( buildServiceHelper, times( 1 ) ).localBuild( project, resourceChanges );
     }
 }

@@ -29,47 +29,48 @@ import org.kie.workbench.common.services.backend.ala.impl.LocalBuildBinaryImpl;
 public class LocalBuildExecConfigExecutor
         implements BiFunctionConfigExecutor< LocalBuildConfigInternal, LocalBuildExecConfig, LocalBinaryConfig > {
 
-    private LocalBuildHelper serviceHelper;
+    private LocalBuildHelper buildHelper;
 
     public LocalBuildExecConfigExecutor( ) {
     }
 
     @Inject
-    public LocalBuildExecConfigExecutor( LocalBuildHelper serviceHelper ) {
-        this.serviceHelper = serviceHelper;
+    public LocalBuildExecConfigExecutor( LocalBuildHelper buildHelper ) {
+        this.buildHelper = buildHelper;
     }
 
     @Override
     public Optional< LocalBinaryConfig > apply( LocalBuildConfigInternal localBuildConfigInternal, LocalBuildExecConfig localBuildExecConfig ) {
         Optional< LocalBinaryConfig > result = Optional.empty( );
         LocalBuildHelper.BuildResult buildResult;
+
         switch ( localBuildConfigInternal.getBuildType( ) ) {
             case FULL_BUILD:
-                buildResult = serviceHelper.build( localBuildConfigInternal.getProject( ) );
+                buildResult = buildHelper.build( localBuildConfigInternal.getProject( ) );
                 result = Optional.of( new LocalBuildBinaryImpl( buildResult.getBuilder(), buildResult.getBuildResults() ) );
                 break;
             case INCREMENTAL_ADD_RESOURCE:
                 result = Optional.of( new LocalBuildBinaryImpl(
-                        serviceHelper.addPackageResource( localBuildConfigInternal.getResource( ) ) ) );
+                        buildHelper.addPackageResource( localBuildConfigInternal.getResource( ) ) ) );
                 break;
             case INCREMENTAL_UPDATE_RESOURCE:
                 result = Optional.of( new LocalBuildBinaryImpl(
-                        serviceHelper.updatePackageResource( localBuildConfigInternal.getResource( ) ) ) );
+                        buildHelper.updatePackageResource( localBuildConfigInternal.getResource( ) ) ) );
                 break;
             case INCREMENTAL_DELETE_RESOURCE:
                 result = Optional.of( new LocalBuildBinaryImpl(
-                        serviceHelper.deletePackageResource( localBuildConfigInternal.getResource( ) ) ) );
+                        buildHelper.deletePackageResource( localBuildConfigInternal.getResource( ) ) ) );
                 break;
             case INCREMENTAL_BATCH_CHANGES:
                 result = Optional.of(
-                        new LocalBuildBinaryImpl( serviceHelper.applyBatchResourceChanges(
+                        new LocalBuildBinaryImpl( buildHelper.applyBatchResourceChanges(
                                 localBuildConfigInternal.getProject( ),
                                 localBuildConfigInternal.getResourceChanges( ) ) ) );
                 break;
             case FULL_BUILD_AND_DEPLOY:
                 result = Optional.of(
                         new LocalBuildBinaryImpl(
-                                serviceHelper.buildAndDeploy( localBuildConfigInternal.getProject( ),
+                                buildHelper.buildAndDeploy( localBuildConfigInternal.getProject( ),
                                         localBuildConfigInternal.isSuppressHandlers( ),
                                         toDeploymentMode( localBuildConfigInternal.getDeploymentType( ) ) ) ) );
                 break;

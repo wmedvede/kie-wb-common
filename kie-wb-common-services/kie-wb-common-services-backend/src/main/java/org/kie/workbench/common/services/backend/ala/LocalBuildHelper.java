@@ -347,7 +347,6 @@ public class LocalBuildHelper {
         }
     }
 
-
     private void checkRepositories( final Project project ) {
         // Check is the POM's GAV resolves to any pre-existing artifacts.
         final GAV gav = project.getPom( ).getGav( );

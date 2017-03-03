@@ -53,4 +53,24 @@ public class BuildInfoImpl
     public KieContainer getKieContainer( ) {
         return builder.getKieContainer();
     }
+
+    public Builder getBuilder() {
+        return builder;
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) return true;
+        if ( o == null || getClass( ) != o.getClass( ) ) return false;
+
+        BuildInfoImpl buildInfo = ( BuildInfoImpl ) o;
+
+        return builder != null ? builder.equals( buildInfo.builder ) : buildInfo.builder == null;
+
+    }
+
+    @Override
+    public int hashCode( ) {
+        return builder != null ? builder.hashCode( ) : 0;
+    }
 }

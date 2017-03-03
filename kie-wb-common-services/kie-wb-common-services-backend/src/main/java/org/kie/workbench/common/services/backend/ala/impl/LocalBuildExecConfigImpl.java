@@ -20,5 +20,4 @@ import org.kie.workbench.common.services.backend.ala.LocalBuildExecConfig;
 
 public class LocalBuildExecConfigImpl implements LocalBuildExecConfig {
 
-
 }

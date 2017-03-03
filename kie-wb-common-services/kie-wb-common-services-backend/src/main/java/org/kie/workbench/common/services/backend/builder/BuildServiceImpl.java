@@ -61,9 +61,9 @@ public class BuildServiceImpl implements BuildService {
         return buildServiceHelper.localBuild( project );
     }
 
-    public void build( final Project project, final Consumer<Builder> consumer ) {
-        buildServiceHelper.build( project, localBinaryConfig ->
-                consumer.accept( localBinaryConfig.getBuilder() ) );
+    public void build( final Project project, final Consumer< Builder > consumer ) {
+        buildServiceHelper.localBuild( project, localBinaryConfig ->
+                consumer.accept( localBinaryConfig.getBuilder( ) ) );
     }
 
     @Override
@@ -129,8 +129,4 @@ public class BuildServiceImpl implements BuildService {
         return buildServiceHelper.localBuild( project, changes );
     }
 
-    //TODO, check the removal of this method currently only used by a test.
-    LRUBuilderCache getCache( ) {
-        return cache;
-    }
 }

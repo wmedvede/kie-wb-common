@@ -28,8 +28,6 @@ import org.guvnor.ala.pipeline.Input;
 import org.guvnor.ala.pipeline.Pipeline;
 import org.guvnor.ala.registry.PipelineRegistry;
 import org.guvnor.common.services.project.model.Project;
-import org.guvnor.m2repo.backend.server.ExtendedM2RepoService;
-import org.guvnor.structure.repositories.RepositoryService;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.workbench.events.ResourceChange;
 
@@ -43,26 +41,19 @@ public class BuildPipelineInvoker {
 
     private PipelineRegistry pipelineRegistry;
 
-    private ExtendedM2RepoService m2RepoService;
-
-    private RepositoryService repositoryService;
-
     public BuildPipelineInvoker( ) {
     }
 
     @Inject
     public BuildPipelineInvoker( final BuildPipelineInitializer buildPipelineInitializer,
-                                 final PipelineRegistry pipelineRegistry,
-                                 final ExtendedM2RepoService m2RepoService,
-                                 final RepositoryService repositoryService ) {
+                                 final PipelineRegistry pipelineRegistry ) {
         this.buildPipelineInitializer = buildPipelineInitializer;
         this.pipelineRegistry = pipelineRegistry;
-        this.m2RepoService = m2RepoService;
-        this.repositoryService = repositoryService;
     }
 
     public void invokeLocalBuildPipeLine( LocalBuildRequest buildRequest,
                                           Consumer< LocalBinaryConfig > consumer ) {
+
         Pipeline pipe = pipelineRegistry.getPipelineByName( BuildPipelineInitializer.LOCAL_BUILD_PIPELINE );
 
         Input input = new Input( ) {
@@ -104,7 +95,7 @@ public class BuildPipelineInvoker {
     }
 
     private String encodeResourceChangePath( Path path ) {
-        return LocalBuildConfig.BATCH_CHANGE + encodePath( path );
+        return LocalBuildConfig.RESOURCE_CHANGE + encodePath( path );
     }
 
     private String encodeResourceChanges( Collection< ResourceChange > resourceChanges ) {
@@ -194,6 +185,34 @@ public class BuildPipelineInvoker {
 
         public boolean isSingleResource( ) {
             return resource != null;
+        }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( o == null || getClass( ) != o.getClass( ) ) return false;
+
+            LocalBuildRequest that = ( LocalBuildRequest ) o;
+
+            if ( suppressHandlers != that.suppressHandlers ) return false;
+            if ( project != null ? !project.equals( that.project ) : that.project != null ) return false;
+            if ( buildType != that.buildType ) return false;
+            if ( resource != null ? !resource.equals( that.resource ) : that.resource != null ) return false;
+            if ( resourceChanges != null ? !resourceChanges.equals( that.resourceChanges ) : that.resourceChanges != null )
+                return false;
+            return deploymentType == that.deploymentType;
+
+        }
+
+        @Override
+        public int hashCode( ) {
+            int result = project != null ? project.hashCode( ) : 0;
+            result = 31 * result + ( buildType != null ? buildType.hashCode( ) : 0 );
+            result = 31 * result + ( resource != null ? resource.hashCode( ) : 0 );
+            result = 31 * result + ( resourceChanges != null ? resourceChanges.hashCode( ) : 0 );
+            result = 31 * result + ( deploymentType != null ? deploymentType.hashCode( ) : 0 );
+            result = 31 * result + ( suppressHandlers ? 1 : 0 );
+            return result;
         }
     }
 }

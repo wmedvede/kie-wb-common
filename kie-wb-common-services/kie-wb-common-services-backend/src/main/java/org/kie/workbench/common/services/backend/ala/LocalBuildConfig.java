@@ -26,7 +26,7 @@ public interface LocalBuildConfig extends BuildConfig {
 
     String RESOURCE = "resource";
 
-    String BATCH_CHANGE = "batch-change:";
+    String RESOURCE_CHANGE = "resource-change:";
 
     String DEPLOYMENT_TYPE = "deployment-type";
 

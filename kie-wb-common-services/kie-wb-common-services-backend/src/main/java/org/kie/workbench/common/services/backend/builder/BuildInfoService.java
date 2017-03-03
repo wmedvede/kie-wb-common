@@ -39,8 +39,8 @@ public class BuildInfoService {
     }
 
     public BuildInfo getBuildInfo( Project project ) {
-        final Builder[] result = { builderCache.assertBuilder( project ) };
-        if ( !result[ 0 ].isBuilt() ) {
+        final Builder[] result = { builderCache.getBuilder( project ) };
+        if ( result[ 0 ] == null || !result[ 0 ].isBuilt() ) {
             ( (BuildServiceImpl) buildService ).build( project, builder -> result[ 0 ] = builder );
         }
         return new BuildInfoImpl( result[ 0 ] );
