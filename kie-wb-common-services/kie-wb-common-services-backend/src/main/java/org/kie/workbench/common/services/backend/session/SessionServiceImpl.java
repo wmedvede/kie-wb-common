@@ -21,7 +21,7 @@ import org.drools.core.ClockType;
 import org.drools.core.SessionConfiguration;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
-import org.kie.workbench.common.services.backend.builder.BuildInfoService;
+import org.kie.workbench.common.services.backend.builder.service.BuildInfoService;
 import org.kie.workbench.common.services.shared.project.KieProject;
 
 public class SessionServiceImpl

@@ -22,9 +22,8 @@ import javax.inject.Named;
 import org.drools.compiler.kie.builder.impl.InternalKieModule;
 import org.kie.api.builder.KieModule;
 import org.kie.scanner.KieModuleMetaData;
-import org.kie.workbench.common.services.backend.builder.BuildInfoService;
-import org.kie.workbench.common.services.backend.builder.LRUBuilderCache;
-import org.kie.workbench.common.services.backend.builder.LRUProjectDependenciesClassLoaderCache;
+import org.kie.workbench.common.services.backend.builder.service.BuildInfoService;
+import org.kie.workbench.common.services.backend.builder.core.LRUProjectDependenciesClassLoaderCache;
 import org.kie.workbench.common.services.shared.project.KieProject;
 
 /**
