@@ -64,6 +64,16 @@ public class BuildPipelineInitializer {
     }
 
     /**
+     * Intended mainly for testing
+     */
+    public BuildPipelineInitializer( PipelineRegistry pipelineRegistry,
+                                     Collection< ConfigExecutor > configs ) {
+        this.pipelineRegistry = pipelineRegistry;
+        initLocalBuildPipeline();
+        initExecutor( configs );
+    }
+
+    /**
      * @return A pipeline executor for executing the initialized pipelines.
      */
     public PipelineExecutor getExecutor( ) {
@@ -73,7 +83,7 @@ public class BuildPipelineInitializer {
     @PostConstruct
     private void init( ) {
         initLocalBuildPipeline( );
-        initExecutors( );
+        initExecutor( );
     }
 
     /**
@@ -110,9 +120,13 @@ public class BuildPipelineInitializer {
         pipelineRegistry.registerPipeline( localBuildPipeline );
     }
 
-    private void initExecutors( ) {
+    private void initExecutor( ) {
         final Collection< ConfigExecutor > configs = new ArrayList<>( );
         configExecutors.iterator( ).forEachRemaining( configs::add );
+        initExecutor( configs );
+    }
+
+    private void initExecutor( final Collection< ConfigExecutor > configs ) {
         executor = new PipelineExecutor( configs );
     }
 }

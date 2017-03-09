@@ -41,8 +41,8 @@ public class LRUProjectDependenciesClassLoaderCache extends LRUCache<KieProject,
         this.buildInfoService = buildInfoService;
     }
 
-    protected void setBuilderCache( final LRUBuilderCache builderCache) {
-        //TODO remove this method I fix the tests
+    protected void setBuildInfoService( final BuildInfoService buildInfoService ) {
+        this.buildInfoService = buildInfoService;
     }
 
     public synchronized ClassLoader assertDependenciesClassLoader(final KieProject project) {
