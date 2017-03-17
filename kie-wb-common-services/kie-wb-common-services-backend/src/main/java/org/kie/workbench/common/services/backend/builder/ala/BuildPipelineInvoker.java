@@ -25,12 +25,18 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.guvnor.ala.build.maven.model.MavenBinary;
+import org.guvnor.ala.build.maven.model.impl.MavenProjectBinaryBuildImpl;
 import org.guvnor.ala.pipeline.Input;
 import org.guvnor.ala.pipeline.Pipeline;
 import org.guvnor.ala.pipeline.execution.PipelineExecutor;
 import org.guvnor.ala.registry.PipelineRegistry;
+import org.guvnor.common.services.project.builder.model.BuildResults;
 import org.guvnor.common.services.project.model.Project;
+import org.guvnor.structure.repositories.Repository;
+import org.guvnor.structure.repositories.RepositoryService;
 import org.uberfire.backend.vfs.Path;
+import org.uberfire.backend.vfs.PathFactory;
 import org.uberfire.workbench.events.ResourceChange;
 
 /**
@@ -43,15 +49,19 @@ public class BuildPipelineInvoker {
 
     private PipelineRegistry pipelineRegistry;
 
+    private RepositoryService repositoryService;
+
     public BuildPipelineInvoker( ) {
         //Empty constructor for Weld proxying
     }
 
     @Inject
     public BuildPipelineInvoker( @Named("buildPipelineExecutor") final PipelineExecutor executor,
-                                 final PipelineRegistry pipelineRegistry ) {
+                                 final PipelineRegistry pipelineRegistry,
+                                 final RepositoryService repositoryService ) {
         this.executor = executor;
         this.pipelineRegistry = pipelineRegistry;
+        this.repositoryService = repositoryService;
     }
 
     /**
@@ -99,6 +109,30 @@ public class BuildPipelineInvoker {
         return result[ 0 ];
     }
 
+    public BuildResults invokeMavenBuildPipeline( Project project, boolean deploy ) {
+        final BuildResults results = new BuildResults( project.getPom( ).getGav( ) );
+        final Path rootPath = project.getRootPath( );
+        final Path repoPath = PathFactory.newPath( "repo", rootPath.toURI( ).substring( 0, rootPath.toURI( ).indexOf( rootPath.getFileName( ) ) ) );
+        final Repository repository = repositoryService.getRepository( repoPath );
+
+        final Pipeline pipe = pipelineRegistry.getPipelineByName( BuildPipelineInitializer.MAVEN_BUILD_PIPELINE );
+
+        final Input buildInput = new Input( ) {
+            {
+                put( "repo-name", repository.getAlias( ) );
+                put( "branch", repository.getDefaultBranch( ) );
+                put( "project-dir", project.getProjectName( ) );
+            }
+        };
+        executor.execute( buildInput, pipe, ( Consumer< MavenBinary > ) mavenBinary -> {
+            if ( mavenBinary instanceof MavenProjectBinaryBuildImpl ) {
+                results.addAllBuildMessages( ( ( MavenProjectBinaryBuildImpl ) mavenBinary ).getBuildResults( ).getMessages( ) );
+            }
+        } );
+
+        return results;
+    }
+
     private void addResourceChanges( Input input, Map< Path, Collection< ResourceChange > > resourceChanges ) {
         resourceChanges.entrySet( ).forEach( entry -> {
             input.put( encodeResourceChangePath( entry.getKey( ) ), encodeResourceChanges( entry.getValue( ) ) );
@@ -119,6 +153,26 @@ public class BuildPipelineInvoker {
                 .map( change -> change.getType( ).name( ) )
                 .collect( Collectors.joining( "," ) );
     }
+
+    //TODO REMOVE THIS
+    /*
+    private void processBuildResult( MavenBinary mavenBinary, boolean deploy, BuildResults results ) {
+        if ( mavenBinary instanceof MavenProjectBinaryBuildImpl ) {
+            results.addAllBuildMessages( ( ( MavenProjectBinaryBuildImpl ) mavenBinary ).getBuildResults( ).getMessages( ) );
+        }
+        if ( deploy ) {
+            GAV gav = new GAV( mavenBinary.getGroupId( ), mavenBinary.getArtifactId( ), mavenBinary.getArtifactId( ) );
+            try (
+                    final InputStream in = Files.newInputStream( mavenBinary.getPath( ).toFile( ).toPath( ) )
+            ) {
+                m2RepoService.deployJar( in, gav );
+            } catch ( Exception e ) {
+                e.printStackTrace( );
+                //TODO treat this error
+            }
+        }
+    }
+    */
 
     /**
      * This class models the configuration parameters for a project build execution.

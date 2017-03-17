@@ -25,6 +25,7 @@ import org.guvnor.ala.pipeline.Pipeline;
 import org.guvnor.ala.pipeline.execution.PipelineExecutor;
 import org.guvnor.ala.registry.PipelineRegistry;
 import org.guvnor.common.services.project.model.Project;
+import org.guvnor.structure.repositories.RepositoryService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +50,9 @@ public class BuildPipelineInvokerTest
 
     @Mock
     private PipelineRegistry pipelineRegistry;
+
+    @Mock
+    private RepositoryService repositoryService;
 
     private BuildPipelineInvoker pipelineInvoker;
 
@@ -77,7 +81,8 @@ public class BuildPipelineInvokerTest
 
     @Before
     public void setUp( ) {
-        pipelineInvoker = new BuildPipelineInvoker( pipelineExecutor, pipelineRegistry );
+        //TODO review if we really wants that the pileline inovoker receives teh repositoryService
+        pipelineInvoker = new BuildPipelineInvoker( pipelineExecutor, pipelineRegistry, repositoryService );
         when( pipelineRegistry.getPipelineByName( BuildPipelineInitializer.LOCAL_BUILD_PIPELINE ) ).thenReturn( pipeline );
 
         when( buildRequest.getProject( ) ).thenReturn( project );
