@@ -384,8 +384,6 @@ public class DataModelServiceConstructorTest {
         PipelineRegistry pipelineRegistry = new InMemoryPipelineRegistry();
         BuildPipelineInitializer pipelineInitializer = new BuildPipelineInitializer( pipelineRegistry,
                 getConfigExecutors( projectService, buildHelper ) );
-
-        //TODO arreglar esto, y crear el repository service correctamente
         RepositoryService repositoryService = new RepositoryServiceImpl();
         BuildPipelineInvoker pipelineInvoker = new BuildPipelineInvoker( pipelineInitializer.getExecutor(), pipelineRegistry, repositoryService );
 

@@ -20,10 +20,19 @@ import org.guvnor.common.services.project.builder.model.BuildResults;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.bus.server.annotations.Remote;
 
+/**
+ * Service for invoking project purely based on the guvnor ala maven based build.
+ */
 @Remote
 public interface MavenBuildService {
 
-    //TODO check if we keep this as a separate service
+    /**
+     * Builds a project by invoking a maven build through a pipeline.
+     * @param project the project to build.
+     * @param deploy true if the resulting maven artifact should be deployed in current WB m2 repository.
+     *
+     * @return the results of the build operation.
+     */
     BuildResults build( Project project, boolean deploy );
 
 }

@@ -26,28 +26,28 @@ import org.kie.workbench.common.services.shared.builder.service.MavenBuildServic
 import org.uberfire.workbench.events.NotificationEvent;
 
 @ApplicationScoped
-public class MavenBuildOptionExtension
+public class MavenBuildAndDeployOptionExtension
         extends MavenBuildOptionExtensionBase {
 
     @Inject
-    public MavenBuildOptionExtension( Caller< MavenBuildService > mavenBuildService,
-                                      Event< NotificationEvent > notificationEvent,
-                                      Event< BuildResults > buildResultsEvent ) {
+    public MavenBuildAndDeployOptionExtension( Caller< MavenBuildService > mavenBuildService,
+                                               Event< NotificationEvent > notificationEvent,
+                                               Event< BuildResults > buildResultsEvent ) {
         super( mavenBuildService, notificationEvent, buildResultsEvent );
     }
 
     @Override
     protected String getLinkName( ) {
-        return "Maven Build";
+        return "Maven Build & Deploy";
     }
 
     @Override
     protected String getBuildingMessage( ) {
-        return "Executing Project Maven Build";
+        return "Executing Project Maven Build & Deploy";
     }
 
     @Override
     protected boolean isDeployment( ) {
-        return false;
+        return true;
     }
 }

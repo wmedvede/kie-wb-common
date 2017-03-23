@@ -20,17 +20,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.guvnor.ala.build.maven.config.MavenBuildConfig;
-import org.guvnor.ala.build.maven.config.MavenBuildExecConfig;
 import org.guvnor.ala.build.maven.config.MavenProjectConfig;
 import org.guvnor.ala.config.BinaryConfig;
 import org.guvnor.ala.config.BuildConfig;
@@ -164,8 +161,8 @@ public class BuildPipelineInitializer {
                     }
                 } );
 
-        final Stage< BuildConfig, BinaryConfig > buildExecution = config( "Maven Build",
-                ( s ) -> new MavenBuildExecConfig( ) {
+        final Stage< BuildConfig, BinaryConfig > buildExecution = config( "Local Maven Build",
+                ( s ) -> new LocalMavenBuildExecConfig( ) {
                 } );
 
         final Pipeline alaBuilderPipeline = PipelineFactory
