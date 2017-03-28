@@ -49,8 +49,10 @@ import org.kie.workbench.common.screens.datamodeller.model.persistence.Persisten
 import org.kie.workbench.common.screens.datamodeller.model.persistence.TransactionType;
 import org.kie.workbench.common.screens.datamodeller.service.DataModelerService;
 import org.kie.workbench.common.screens.datamodeller.service.PersistenceDescriptorEditorService;
+import org.kie.workbench.common.widgets.client.popups.validation.ValidationPopup;
 import org.kie.workbench.common.widgets.metadata.client.KieEditorWrapperView;
 import org.kie.workbench.common.widgets.metadata.client.widget.OverviewWidgetPresenter;
+import org.mockito.Mock;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.ext.editor.commons.client.history.VersionRecordManager;
@@ -85,6 +87,9 @@ public class PersistenceDescriptorEditorPresenterTest {
 
     PersistenceDescriptorEditorPresenter presenter;
 
+    @Mock
+    ValidationPopup validationPopup;
+
     @Before
     public void setup() {
         presenter = new PersistenceDescriptorEditorPresenter( view,
@@ -92,7 +97,8 @@ public class PersistenceDescriptorEditorPresenterTest {
                                                               dataSourceSelector,
                                                               new PersistenceDescriptorEditorServiceCallerMock(),
                                                               null,
-                                                              new DataModelerServiceCallerMock()
+                                                              new DataModelerServiceCallerMock(),
+                                                              validationPopup
                                                                 ) {
             {
                 kieView = mock( KieEditorWrapperView.class );
