@@ -39,6 +39,12 @@ public class PersistenceDescriptorValidationMessage
             this.params = params;
     }
 
+    public PersistenceDescriptorValidationMessage( long id,
+                                                   Level level,
+                                                   String text ) {
+        this( id, level, text, new ArrayList<>( ) );
+    }
+
     public List< String > getParams( ) {
         return params;
     }

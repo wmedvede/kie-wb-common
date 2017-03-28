@@ -388,7 +388,7 @@ public class PersistenceDescriptorEditorPresenter
                             CommonConstants.INSTANCE.ItemValidatedSuccessfully( ),
                             NotificationEvent.NotificationType.SUCCESS ) );
                 } else {
-                    validationPopup.showMessages( messages );
+                    validationPopup.showTranslatedMessages( messages );
                 }
             }
         };

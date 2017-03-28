@@ -16,10 +16,14 @@
 
 package org.kie.workbench.common.screens.datamodeller.backend.server.validation;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.guvnor.common.services.shared.message.Level;
 import org.guvnor.common.services.shared.validation.model.ValidationMessage;
+import org.kie.workbench.common.screens.datamodeller.validation.PersistenceDescriptorValidationMessage;
 
-public class ValidationMessages {
+public class PersistenceDescriptorValidationMessages {
 
     private static long ID_SEQUENCE = 1000;
 
@@ -29,11 +33,11 @@ public class ValidationMessages {
 
     static final long CLASS_NOT_FOUND_ID = ID_SEQUENCE++;
 
-    static final String CLASS_NOT_FOUND = "Class {0} was not found in current project class path";
+    static final String CLASS_NOT_FOUND = "Class \"{0}\" was not found in current project class path";
 
     static final long CLASS_NOT_PERSISTABLE_ID = ID_SEQUENCE++;
 
-    static final String CLASS_NOT_PERSISTABLE = "Class {0} must be a persistable class";
+    static final String CLASS_NOT_PERSISTABLE = "Class \"{0}\" must be a persistable class";
 
     static final long PERSISTABLE_CLASS_NAME_EMPTY_ID = ID_SEQUENCE++;
 
@@ -67,24 +71,24 @@ public class ValidationMessages {
 
     static final String PROPERTY_NAME_EMPTY = "Property name should have a non empty String value";
 
+    static final long INDEXED_PROPERTY_NAME_EMPTY_ID = ID_SEQUENCE++;
+
+    static final String INDEXED_PROPERTY_NAME_EMPTY = "Property #{0} must have a non empty name";
+
     static final long PROPERTY_VALUE_EMPTY_ID = ID_SEQUENCE++;
 
-    static final String PROPERTY_VALUE_EMPTY = "Property {0} has an empty value assigned";
+    static final String PROPERTY_VALUE_EMPTY = "Property \"{0}\" has an empty value assigned";
 
-    public static ValidationMessage newValidationMessage( long id, Level level, String text ) {
-        ValidationMessage validationMessage = new ValidationMessage();
-        validationMessage.setId( id );
-        validationMessage.setLevel( level );
-        validationMessage.setText( text );
-        return validationMessage;
+    public static ValidationMessage newValidationMessage( long id, Level level, String text, List<String> params ) {
+        return new PersistenceDescriptorValidationMessage( id, level, text, params );
     }
 
-    public static ValidationMessage newErrorMessage( long id, String text ) {
-        return newValidationMessage( id, Level.ERROR, text );
+    public static ValidationMessage newErrorMessage( long id, String text, String ... params ) {
+        return newValidationMessage( id, Level.ERROR, text, Arrays.asList( params != null ? params : new String[]{} ) );
     }
 
-    public static ValidationMessage newWarningMessage( long id, String text ) {
-        return newValidationMessage( id, Level.WARNING, text );
+    public static ValidationMessage newWarningMessage( long id, String text, String ... params ) {
+        return newValidationMessage( id, Level.WARNING, text, Arrays.asList( params != null ? params : new String[]{} ) );
     }
 
 }

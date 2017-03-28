@@ -18,7 +18,9 @@ package org.kie.workbench.common.screens.datamodeller.backend.server.validation;
 
 import java.lang.annotation.Annotation;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
@@ -26,12 +28,14 @@ import javax.persistence.MappedSuperclass;
 
 import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 
+import static org.kie.workbench.common.screens.datamodeller.backend.server.validation.PersistenceDescriptorValidationMessages.newErrorMessage;
+
 /**
  * Class for validating if a class has the minimal configuration to be considered as persistable.
  */
 public class PersistableClassValidator {
 
-    public PersistableClassValidator() {
+    public PersistableClassValidator( ) {
     }
 
     /**
@@ -40,30 +44,31 @@ public class PersistableClassValidator {
      * @param classLoader a classloader from where the class className and the referenced types by the className can be loaded.
      * @return a list of validation messages.
      */
-    public ValidationMessage validate( String className, ClassLoader classLoader ) {
-        ValidationMessage message = null;
-        Class<?> clazz;
+    public List<ValidationMessage> validate( String className, ClassLoader classLoader ) {
+        List<ValidationMessage> result = new ArrayList<>( );
+        Class< ? > clazz;
         try {
-            if ( className == null || className.trim().isEmpty() ) {
-                message = ValidationMessages.newErrorMessage( ValidationMessages.PERSISTABLE_CLASS_NAME_EMPTY_ID,
-                        ValidationMessages.PERSISTABLE_CLASS_NAME_EMPTY );
+            if ( className == null || className.trim( ).isEmpty( ) ) {
+                result.add( newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTABLE_CLASS_NAME_EMPTY_ID,
+                        PersistenceDescriptorValidationMessages.PERSISTABLE_CLASS_NAME_EMPTY ) );
+                return result;
             }
             clazz = classLoader.loadClass( className );
-            Annotation[] annotations = clazz.getAnnotations();
-            Optional<Annotation> persistable = Arrays.stream( annotations )
+            Annotation[] annotations = clazz.getAnnotations( );
+            Optional< Annotation > persistable = Arrays.stream( annotations )
                     .filter( annotation ->
-                            Entity.class.equals( annotation.annotationType() ) ||
-                            Embeddable.class.equals( annotation.annotationType() ) ||
-                            MappedSuperclass.class.equals( annotation.annotationType() ) )
-                    .findFirst();
-            if ( !persistable.isPresent() ) {
-                message = ValidationMessages.newErrorMessage( ValidationMessages.CLASS_NOT_PERSISTABLE_ID,
-                        MessageFormat.format( ValidationMessages.CLASS_NOT_PERSISTABLE, className ) );
+                            Entity.class.equals( annotation.annotationType( ) ) ||
+                                    Embeddable.class.equals( annotation.annotationType( ) ) ||
+                                    MappedSuperclass.class.equals( annotation.annotationType( ) ) )
+                    .findFirst( );
+            if ( !persistable.isPresent( ) ) {
+                result.add( newErrorMessage( PersistenceDescriptorValidationMessages.CLASS_NOT_PERSISTABLE_ID,
+                        MessageFormat.format( PersistenceDescriptorValidationMessages.CLASS_NOT_PERSISTABLE, className ), className ) );
             }
         } catch ( ClassNotFoundException e ) {
-            message = ValidationMessages.newErrorMessage( ValidationMessages.CLASS_NOT_FOUND_ID,
-                    MessageFormat.format( ValidationMessages.CLASS_NOT_FOUND, className ) );
+            result.add( newErrorMessage( PersistenceDescriptorValidationMessages.CLASS_NOT_FOUND_ID,
+                    MessageFormat.format( PersistenceDescriptorValidationMessages.CLASS_NOT_FOUND, className ), className ) );
         }
-        return message;
+        return result;
     }
 }

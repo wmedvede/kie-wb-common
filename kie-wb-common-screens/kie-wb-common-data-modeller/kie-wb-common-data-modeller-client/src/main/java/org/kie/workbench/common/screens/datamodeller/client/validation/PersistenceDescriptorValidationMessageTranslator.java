@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.screens.datamodeller.client.validation;
 
+import java.util.Arrays;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -56,7 +57,8 @@ public class PersistenceDescriptorValidationMessageTranslator
 
         if ( translationService.getTranslation( translationKey ) != null ) {
             if ( pdValidationMessage.getParams( ) != null && !pdValidationMessage.getParams( ).isEmpty( ) ) {
-                result.setText( translationService.format( translationKey, pdValidationMessage.getParams( ) ) );
+                pdValidationMessage.getParams().toArray( new String[ pdValidationMessage.getParams().size() ] );
+                result.setText( translationService.format( translationKey, pdValidationMessage.getParams().toArray() ) );
             } else {
                 result.setText( translationService.getTranslation( translationKey ) );
             }

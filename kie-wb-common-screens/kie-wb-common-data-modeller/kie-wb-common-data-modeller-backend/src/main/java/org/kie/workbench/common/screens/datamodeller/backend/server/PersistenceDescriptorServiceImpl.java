@@ -59,6 +59,7 @@ public class PersistenceDescriptorServiceImpl implements PersistenceDescriptorSe
     private PersistenceDescriptorValidator descriptorValidator;
 
     public PersistenceDescriptorServiceImpl() {
+        //Empty constructor for Weld proxying
     }
 
     @Inject
