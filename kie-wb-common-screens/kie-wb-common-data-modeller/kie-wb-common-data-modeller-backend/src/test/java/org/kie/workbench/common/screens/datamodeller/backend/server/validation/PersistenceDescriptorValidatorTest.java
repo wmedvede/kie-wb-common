@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.screens.datamodeller.backend.server.validation;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,116 +65,163 @@ public class PersistenceDescriptorValidatorTest {
     @Mock
     private KieProject project;
 
-    @Mock
     private ClassLoader classLoader;
 
     private PersistenceDescriptorModel descriptor;
 
     @Before
-    public void setUp() {
+    public void setUp( ) {
         validator = new PersistenceDescriptorValidatorImpl( projectService, classLoaderHelper );
-        descriptor = new PersistenceDescriptorModel();
+        descriptor = createValidDescriptor( );
 
+        classLoader = this.getClass( ).getClassLoader( );
         when( projectService.resolveProject( path ) ).thenReturn( project );
         when( classLoaderHelper.getProjectClassLoader( project ) ).thenReturn( classLoader );
     }
 
-    /**
-     * Tests the validation of a well formed persistence descriptor.
-     */
     @Test
-    public void testValidateValidDescriptor() {
-        descriptor.setVersion( VERSION );
-        PersistenceUnitModel unit = new PersistenceUnitModel();
-        descriptor.setPersistenceUnit( unit );
-        unit.setJtaDataSource( JTA_DATASOURCE );
-        unit.setName( PERSISTENCE_UNIT_NAME );
-        unit.setProvider( PERSISTENCE_PROVIDER );
-        unit.setTransactionType( TransactionType.JTA );
-
-        List<Property> properties = new ArrayList<>(  );
-        properties.add( new Property( "name1", "value1" ) );
-        properties.add( new Property( "name2", "value2" ) );
-        unit.setProperties( properties );
-
-        List<ValidationMessage> result = validator.validate( path, descriptor );
-        assertTrue( result.isEmpty() );
+    public void testValidateValidDescriptor( ) {
+        List< ValidationMessage > result = validator.validate( path, descriptor );
+        assertTrue( result.isEmpty( ) );
     }
 
     @Test
-    public void testValidateInvalidProject() {
+    public void testValidateInvalidProject( ) {
         when( projectService.resolveProject( path ) ).thenReturn( null );
-        List<ValidationMessage> result = validator.validate( path, descriptor );
-        assertEquals( 1, result.size() );
+        List< ValidationMessage > result = validator.validate( path, descriptor );
+        //no more errors are produced since the validations stops if the project is not found.
+        assertEquals( 1, result.size( ) );
         ValidationMessage expectedMessage = newErrorMessage( PersistenceDescriptorValidationMessages.DESCRIPTOR_NOT_BELONG_TO_PROJECT_ID,
                 PersistenceDescriptorValidationMessages.DESCRIPTOR_NOT_BELONG_TO_PROJECT );
         assertEquals( expectedMessage, result.get( 0 ) );
     }
 
     @Test
-    public void testValidateMissingPersistenceUnit() {
+    public void testValidateMissingPersistenceUnit( ) {
         descriptor.setPersistenceUnit( null );
-        List<ValidationMessage> result = validator.validate( path, descriptor );
-        assertEquals( 1, result.size() );
+        List< ValidationMessage > result = validator.validate( path, descriptor );
+        //no more errors are produced since the validation stops if the persistence unit is missing.
+        assertEquals( 1, result.size( ) );
         ValidationMessage expectedMessage = newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NOT_FOUND_ID,
                 PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NOT_FOUND );
         assertEquals( expectedMessage, result.get( 0 ) );
     }
 
     @Test
-    public void testValidateInvalidDescriptor() {
-        //create a descriptor that generates all the possible validation messages we can control.
-        descriptor.setPersistenceUnit( new PersistenceUnitModel() );
-        List<ValidationMessage> result = validator.validate( path, descriptor );
+    public void testValidateMissingPersistenceUnitName( ) {
+        descriptor.getPersistenceUnit( ).setName( null );
+        List< ValidationMessage > result = validator.validate( path, descriptor );
+        ValidationMessage expectedMessage;
+        //persistence unit name validation should fail
+        expectedMessage = newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NAME_EMPTY_ID,
+                PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NAME_EMPTY );
+        assertTrue( result.contains( expectedMessage ) );
+    }
 
-        List<ValidationMessage> expectedMessages = new ArrayList<>(  );
+    @Test
+    public void testValidateMissingPersistenceProvider( ) {
+        descriptor.getPersistenceUnit( ).setProvider( null );
+        List< ValidationMessage > result = validator.validate( path, descriptor );
+        ValidationMessage expectedMessage;
+        //persistence provider validation should fail
+        expectedMessage = newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_PROVIDER_ID,
+                PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_PROVIDER_EMPTY );
+        assertTrue( result.contains( expectedMessage ) );
+    }
 
+    @Test
+    public void testValidateMissingTransactionType( ) {
+        descriptor.getPersistenceUnit( ).setTransactionType( null );
+        List< ValidationMessage > result = validator.validate( path, descriptor );
+        ValidationMessage expectedMessage;
+        //transaction type validation should fail
+        expectedMessage = newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_TRANSACTION_TYPE_EMPTY_ID,
+                PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_TRANSACTION_TYPE_EMPTY );
+        assertTrue( result.contains( expectedMessage ) );
+    }
 
-        //TODO, continue here
+    @Test
+    public void testValidateMissingJtaDataSource( ) {
+        descriptor.getPersistenceUnit( ).setTransactionType( TransactionType.JTA );
+        descriptor.getPersistenceUnit( ).setJtaDataSource( null );
+        List< ValidationMessage > result = validator.validate( path, descriptor );
+        ValidationMessage expectedMessage;
+        //jta datasource validation should fail
+        expectedMessage = newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_JTA_DATASOURCE_EMPTY_ID,
+                PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_JTA_DATASOURCE_EMPTY );
+        assertTrue( result.contains( expectedMessage ) );
+    }
 
-/*
-        expectedMessages.add(  )
+    @Test
+    public void testValidateMissingNonJtaDataSource( ) {
+        descriptor.getPersistenceUnit( ).setTransactionType( TransactionType.RESOURCE_LOCAL );
+        descriptor.getPersistenceUnit( ).setNonJtaDataSource( null );
+        List< ValidationMessage > result = validator.validate( path, descriptor );
+        ValidationMessage expectedMessage;
+        //jta datasource validation should fail
+        expectedMessage = newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NON_JTA_DATASOURCE_EMPTY_ID,
+                PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NON_JTA_DATASOURCE_EMPTY );
+        assertTrue( result.contains( expectedMessage ) );
+    }
 
-        ValidationMessage expectedMessage = newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NOT_FOUND_ID,
-                PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NOT_FOUND );
-        assertEquals( expectedMessage, result.get( 0 ) );
+    @Test
+    public void testValidateNonPersistableClass( ) {
+        //add a non persistable class
+        descriptor.getPersistenceUnit( ).getClasses( ).add( NonPersistableClass1.class.getName( ) );
+        List< ValidationMessage > result = validator.validate( path, descriptor );
+        ValidationMessage expectedMessage;
+        //validation for the non persistable class should fail.
+        expectedMessage = newErrorMessage( PersistenceDescriptorValidationMessages.CLASS_NOT_PERSISTABLE_ID,
+                MessageFormat.format( PersistenceDescriptorValidationMessages.CLASS_NOT_PERSISTABLE, NonPersistableClass1.class.getName( ) ), NonPersistableClass1.class.getName( ) );
+        assertTrue( result.contains( expectedMessage ) );
+    }
 
-*/
+    @Test
+    public void testValidatePropertyWithMissingName( ) {
+        //add a property with no name
+        descriptor.getPersistenceUnit( ).addProperty( new Property( null, "someValue" ) );
+        List< ValidationMessage > result = validator.validate( path, descriptor );
+        ValidationMessage expectedMessage;
+        //validation for the property with missing name should fail.
+        expectedMessage = newErrorMessage( PersistenceDescriptorValidationMessages.INDEXED_PROPERTY_NAME_EMPTY_ID,
+                MessageFormat.format( PersistenceDescriptorValidationMessages.INDEXED_PROPERTY_NAME_EMPTY, "3" ), "3" );
+        assertTrue( result.contains( expectedMessage ) );
+    }
 
-        /*
+    @Test
+    public void testValidatePropertyWithMissingValue( ) {
+        //add a property with no name
+        descriptor.getPersistenceUnit( ).addProperty( new Property( "someName", null ) );
+        List< ValidationMessage > result = validator.validate( path, descriptor );
+        ValidationMessage expectedMessage;
+        //validation for the property with missing value should fail.
+        expectedMessage = PersistenceDescriptorValidationMessages.newWarningMessage( PersistenceDescriptorValidationMessages.PROPERTY_VALUE_EMPTY_ID,
+                MessageFormat.format( PersistenceDescriptorValidationMessages.PROPERTY_VALUE_EMPTY, "someName" ), "someName" );
+        assertTrue( result.contains( expectedMessage ) );
+    }
 
-                    messages.add( newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NOT_FOUND_ID,
-                    PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NOT_FOUND ) );
-            return messages;
-        }
+    private PersistenceDescriptorModel createValidDescriptor( ) {
+        PersistenceDescriptorModel descriptor = new PersistenceDescriptorModel( );
+        descriptor.setVersion( VERSION );
+        PersistenceUnitModel unit = new PersistenceUnitModel( );
+        descriptor.setPersistenceUnit( unit );
+        unit.setJtaDataSource( JTA_DATASOURCE );
+        unit.setName( PERSISTENCE_UNIT_NAME );
+        unit.setProvider( PERSISTENCE_PROVIDER );
+        unit.setTransactionType( TransactionType.JTA );
 
-        if ( unitModel.getName( ) == null || unitModel.getName( ).trim( ).isEmpty( ) ) {
-            messages.add( newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NAME_EMPTY_ID,
-                    PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NAME_EMPTY ) );
-        }
+        List< Property > properties = new ArrayList<>( );
+        properties.add( new Property( "name1", "value1" ) );
+        properties.add( new Property( "name2", "value2" ) );
+        unit.setProperties( properties );
 
-        if ( unitModel.getProvider( ) == null || unitModel.getProvider( ).trim( ).isEmpty( ) ) {
-            messages.add( newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_PROVIDER_ID,
-                    PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_PROVIDER_EMPTY ) );
-        }
+        List< String > classes = new ArrayList<>( );
+        classes.add( PersistableClass1.class.getName( ) );
+        classes.add( PersistableClass2.class.getName( ) );
+        classes.add( PersistableClass3.class.getName( ) );
+        descriptor.getPersistenceUnit( ).setClasses( classes );
 
-        if ( unitModel.getTransactionType( ) == null ) {
-            messages.add( newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_TRANSACTION_TYPE_EMPTY_ID,
-                    PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_TRANSACTION_TYPE_EMPTY ) );
-        } else if ( unitModel.getTransactionType( ) == TransactionType.JTA &&
-                ( unitModel.getJtaDataSource( ) == null || unitModel.getJtaDataSource( ).trim( ).isEmpty( ) ) ) {
-            messages.add( newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_JTA_DATASOURCE_EMPTY_ID,
-                    PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_JTA_DATASOURCE_EMPTY ) );
-        } else if ( unitModel.getTransactionType( ) == TransactionType.RESOURCE_LOCAL &&
-                ( unitModel.getNonJtaDataSource( ) == null || unitModel.getNonJtaDataSource( ).trim( ).isEmpty( ) ) ) {
-            messages.add( newErrorMessage( PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NON_JTA_DATASOURCE_EMPTY_ID,
-                    PersistenceDescriptorValidationMessages.PERSISTENCE_UNIT_NON_JTA_DATASOURCE_EMPTY ) );
-        }
-
-
-
-
-         */
+        return descriptor;
     }
 
 }
