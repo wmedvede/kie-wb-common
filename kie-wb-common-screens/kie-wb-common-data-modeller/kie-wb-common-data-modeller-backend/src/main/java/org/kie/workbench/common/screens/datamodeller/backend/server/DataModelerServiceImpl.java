@@ -93,6 +93,7 @@ import org.kie.workbench.common.services.datamodeller.driver.model.DriverError;
 import org.kie.workbench.common.services.datamodeller.driver.model.ModelDriverResult;
 import org.kie.workbench.common.services.datamodeller.util.DriverUtils;
 import org.kie.workbench.common.services.datamodeller.util.NamingUtils;
+import org.kie.workbench.common.services.datamodeller.util.TimeProfiler;
 import org.kie.workbench.common.services.refactoring.service.RefactoringQueryService;
 import org.kie.workbench.common.services.shared.project.KieProject;
 import org.slf4j.Logger;
@@ -328,6 +329,7 @@ public class DataModelerServiceImpl
     private Pair<DataModel, ModelDriverResult> loadModel(final KieProject project,
                                                          boolean processErrors) {
 
+        TimeProfiler loadModelProfiler = TimeProfiler.addTimeProfiler(this.getClass(), "loadModel");
         if (logger.isDebugEnabled()) {
             logger.debug("Loading data model from path: " + project.getRootPath());
         }
@@ -370,6 +372,9 @@ public class DataModelerServiceImpl
                 logger.debug("Time elapsed when loading " + projectPath.getFileName() + ": " + (endTime - startTime) + " ms");
             }
 
+            loadModelProfiler.stop();
+            loadModelProfiler.print();
+            
             return new Pair<DataModel, ModelDriverResult>(dataModel,
                                                           result);
         } catch (Exception e) {
