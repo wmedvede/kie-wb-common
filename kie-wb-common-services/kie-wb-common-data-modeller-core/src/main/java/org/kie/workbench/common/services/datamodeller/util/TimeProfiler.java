@@ -56,7 +56,7 @@ public class TimeProfiler {
     }
 
     public void print() {
-        System.out.println("TimeProfiler " + name + " elapsed time: " + elapsedTime());
+        System.out.println("TimeProfiler " + name + " total time: " + elapsedTime());
     }
 
     public static TimeProfiler addTimeProfiler(String name) {
@@ -69,6 +69,11 @@ public class TimeProfiler {
     public static TimeProfiler addTimeProfiler(Class clazz,
                                                String name) {
         return addTimeProfiler(clazz.getSimpleName() + "-" + name);
+    }
+
+    public static TimeProfiler getTimeProfiler(Class clazz,
+                                               String name) {
+        return getTimeProfiler(clazz.getSimpleName() + "-" + name);
     }
 
     public static TimeProfiler getTimeProfiler(String name) {

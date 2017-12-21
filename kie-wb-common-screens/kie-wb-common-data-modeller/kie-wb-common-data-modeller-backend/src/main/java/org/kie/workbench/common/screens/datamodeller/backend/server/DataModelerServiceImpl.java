@@ -329,7 +329,7 @@ public class DataModelerServiceImpl
     private Pair<DataModel, ModelDriverResult> loadModel(final KieProject project,
                                                          boolean processErrors) {
 
-        TimeProfiler loadModelProfiler = TimeProfiler.addTimeProfiler(this.getClass(), "loadModel");
+        TimeProfiler.addTimeProfiler(this.getClass(), "loadModel").start();
         if (logger.isDebugEnabled()) {
             logger.debug("Loading data model from path: " + project.getRootPath());
         }
@@ -341,19 +341,27 @@ public class DataModelerServiceImpl
         Package defaultPackage = null;
 
         try {
+
+            TimeProfiler.addTimeProfiler(this.getClass(), "resolveDefaultPackage").start();
             projectPath = project.getRootPath();
             defaultPackage = projectService.resolveDefaultPackage(project);
+            TimeProfiler.getTimeProfiler(this.getClass(), "resolveDefaultPackage").stop().print();
+
             if (logger.isDebugEnabled()) {
                 logger.debug("Current project path is: " + projectPath);
             }
 
+            TimeProfiler.addTimeProfiler(this.getClass(), "getProjectClassLoader").start();
             ClassLoader classLoader = classLoaderHelper.getProjectClassLoader(project);
+            TimeProfiler.getTimeProfiler(this.getClass(), "getProjectClassLoader").stop().print();
 
+            TimeProfiler.addTimeProfiler(this.getClass(), "roasterLoadModel").start();
             ModelDriver modelDriver = new JavaRoasterModelDriver(ioService,
                                                                  Paths.convert(defaultPackage.getPackageMainSrcPath()),
                                                                  classLoader,
                                                                  filterHolder);
             ModelDriverResult result = modelDriver.loadModel();
+            TimeProfiler.getTimeProfiler(this.getClass(), "roasterLoadModel").stop().print();
             dataModel = result.getDataModel();
 
             if (processErrors && result.hasErrors()) {
@@ -362,19 +370,24 @@ public class DataModelerServiceImpl
             }
 
             //by now we still use the DMO to calculate project external dependencies.
+            TimeProfiler.addTimeProfiler(this.getClass(), "getProjectDataModelOracle").start();
             ProjectDataModelOracle projectDataModelOracle = dataModelService.getProjectDataModel(projectPath);
+            TimeProfiler.getTimeProfiler(this.getClass(), "getProjectDataModelOracle").stop().print();
+
+            TimeProfiler.addTimeProfiler(this.getClass(), "loadExternalDependencies").start();
             ProjectDataModelOracleUtils.loadExternalDependencies(dataModel,
                                                                  projectDataModelOracle,
                                                                  classLoader);
+            TimeProfiler.getTimeProfiler(this.getClass(), "loadExternalDependencies").stop().print();
+
 
             Long endTime = System.currentTimeMillis();
             if (logger.isDebugEnabled()) {
                 logger.debug("Time elapsed when loading " + projectPath.getFileName() + ": " + (endTime - startTime) + " ms");
             }
 
-            loadModelProfiler.stop();
-            loadModelProfiler.print();
-            
+            TimeProfiler.getTimeProfiler(this.getClass(), "loadModel").stop().print();
+
             return new Pair<DataModel, ModelDriverResult>(dataModel,
                                                           result);
         } catch (Exception e) {

@@ -24,6 +24,7 @@ import org.kie.api.builder.KieModule;
 import org.kie.scanner.KieModuleMetaData;
 import org.kie.workbench.common.services.backend.builder.service.BuildInfoService;
 import org.kie.workbench.common.services.backend.builder.core.LRUProjectDependenciesClassLoaderCache;
+import org.kie.workbench.common.services.datamodeller.util.TimeProfiler;
 import org.kie.workbench.common.services.shared.project.KieProject;
 
 /**
@@ -41,8 +42,14 @@ public class ProjectClassLoaderHelper {
 
     public ClassLoader getProjectClassLoader( KieProject project ) {
 
+        TimeProfiler.addTimeProfiler(this.getClass(), "getKieModuleIgnoringErrors").start();
         final KieModule module = buildInfoService.getBuildInfo( project ).getKieModuleIgnoringErrors();
+        TimeProfiler.getTimeProfiler(this.getClass(), "getKieModuleIgnoringErrors").stop().print();
+
+        TimeProfiler.addTimeProfiler(this.getClass(), "getDependenciesClassLoader").start();
         ClassLoader dependenciesClassLoader = dependenciesClassLoaderCache.assertDependenciesClassLoader( project );
+        TimeProfiler.getTimeProfiler(this.getClass(), "getDependenciesClassLoader").stop().print();
+
         ClassLoader projectClassLoader;
         if ( module instanceof InternalKieModule ) {
             //will always be an internal kie module

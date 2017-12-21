@@ -23,6 +23,7 @@ import org.guvnor.common.services.project.builder.service.BuildService;
 import org.guvnor.common.services.project.model.Project;
 import org.kie.workbench.common.services.backend.builder.core.Builder;
 import org.kie.workbench.common.services.backend.builder.core.LRUBuilderCache;
+import org.kie.workbench.common.services.datamodeller.util.TimeProfiler;
 
 /**
  * Service for providing access to the build information for a given project.
@@ -55,10 +56,15 @@ public class BuildInfoService {
      * @return the BuildInfo for the given project.
      */
     public BuildInfo getBuildInfo( Project project ) {
+        TimeProfiler.addTimeProfiler(this.getClass(), "getBuilder").start();
         final Builder[] result = { builderCache.getBuilder( project ) };
         if ( result[ 0 ] == null || !result[ 0 ].isBuilt() ) {
+            TimeProfiler.addTimeProfiler(this.getClass(), "buildProject").start();
             ( (BuildServiceImpl ) buildService ).build( project, builder -> result[ 0 ] = builder );
+            TimeProfiler.getTimeProfiler(this.getClass(), "buildProject").stop().print();
         }
+        TimeProfiler.getTimeProfiler(this.getClass(), "getBuilder").stop().print();
+
         return new BuildInfoImpl( result[ 0 ] );
     }
 }
