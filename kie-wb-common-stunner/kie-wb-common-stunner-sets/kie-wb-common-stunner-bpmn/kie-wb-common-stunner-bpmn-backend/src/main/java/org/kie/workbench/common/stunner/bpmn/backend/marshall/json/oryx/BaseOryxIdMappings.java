@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
@@ -69,6 +70,8 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.Time
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.UnitCost;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.WorkingHours;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.AdHocAutostart;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.AdHocCompletionCondition;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.AdHocOrdering;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.CalledElement;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.CreatedBy;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.Description;
@@ -162,6 +165,8 @@ public abstract class BaseOryxIdMappings implements OryxIdMappings {
                 "timersettings");
             put(EmbeddedSubprocess.class,
                 "Subprocess");
+            put(AdHocSubprocess.class,
+                "AdHocSubprocess");
             put(AdHoc.class,
                 "adhocprocess");
             put(ProcessInstanceDescription.class,
@@ -198,6 +203,10 @@ public abstract class BaseOryxIdMappings implements OryxIdMappings {
                 "errorref");
             put(IntermediateErrorEventCatching.class,
                 "IntermediateErrorEvent");
+            put(AdHocOrdering.class,
+                "adhocordering");
+            put(AdHocCompletionCondition.class,
+                "adhoccompletioncondition");
 
             // Simulation properties
             put(TimeUnit.class,
@@ -331,7 +340,7 @@ public abstract class BaseOryxIdMappings implements OryxIdMappings {
             put(IntermediateMessageEventThrowing.class,
                 intermediateMessageEventThrowingPropertiesMap);
             intermediateMessageEventThrowingPropertiesMap.put(AssignmentsInfo.class,
-                                                             "assignmentsinfo");
+                                                              "assignmentsinfo");
 
             Map<Class<?>, String> endEventPropertiesMap = new HashMap<Class<?>, String>();
             put(EndNoneEvent.class,
@@ -360,6 +369,12 @@ public abstract class BaseOryxIdMappings implements OryxIdMappings {
                 embeddedSubprocessPropertiesMap);
             embeddedSubprocessPropertiesMap.put(ProcessVariables.class,
                                                 "vardefs");
+
+            Map<Class<?>, String> adHocSubprocessPropertiesMap = new HashMap<>();
+            put(AdHocSubprocess.class,
+                adHocSubprocessPropertiesMap);
+            adHocSubprocessPropertiesMap.put(ProcessVariables.class,
+                                             "vardefs");
 
             Map<Class<?>, String> exclusiveDatabasedGatewayPropertiesMap = new HashMap<Class<?>, String>();
             put(ExclusiveDatabasedGateway.class,

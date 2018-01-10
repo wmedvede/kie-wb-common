@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2018 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.client.forms.fields.timerEditor;
+package org.kie.workbench.common.stunner.bpmn.client.forms.fields.scriptEditor;
 
 import javax.inject.Inject;
 
@@ -22,30 +22,32 @@ import org.kie.workbench.common.forms.dynamic.client.rendering.FieldRenderer;
 import org.kie.workbench.common.forms.dynamic.client.rendering.formGroups.FormGroup;
 import org.kie.workbench.common.forms.dynamic.client.rendering.formGroups.impl.def.DefaultFormGroup;
 import org.kie.workbench.common.forms.dynamic.service.shared.RenderMode;
-import org.kie.workbench.common.stunner.bpmn.forms.model.TimerSettingsFieldDefinition;
+import org.kie.workbench.common.stunner.bpmn.forms.model.ScriptTypeFieldDefinition;
 
-public class TimerSettingsFieldRenderer
-        extends FieldRenderer<TimerSettingsFieldDefinition, DefaultFormGroup> {
+public class ScriptTypeFieldRenderer
+        extends FieldRenderer<ScriptTypeFieldDefinition, DefaultFormGroup> {
 
-    private final TimerSettingsFieldEditorWidget widget;
+    private final ScriptTypeFieldEditorWidget widget;
 
     @Inject
-    public TimerSettingsFieldRenderer(final TimerSettingsFieldEditorWidget widget) {
+    public ScriptTypeFieldRenderer(final ScriptTypeFieldEditorWidget widget) {
         this.widget = widget;
     }
 
     @Override
     protected FormGroup getFormGroup(RenderMode renderMode) {
-        DefaultFormGroup formGroup  = formGroupsInstance.get();
+        DefaultFormGroup formGroup = formGroupsInstance.get();
 
-        formGroup.render(widget, field);
+        formGroup.render(widget,
+                         field);
 
+        widget.setMode(field.getMode());
         return formGroup;
     }
 
     @Override
     public String getName() {
-        return TimerSettingsFieldDefinition.FIELD_TYPE.getTypeName();
+        return ScriptTypeFieldDefinition.FIELD_TYPE.getTypeName();
     }
 
     @Override
@@ -55,6 +57,6 @@ public class TimerSettingsFieldRenderer
 
     @Override
     public String getSupportedCode() {
-        return TimerSettingsFieldDefinition.FIELD_TYPE.getTypeName();
+        return ScriptTypeFieldDefinition.FIELD_TYPE.getTypeName();
     }
 }

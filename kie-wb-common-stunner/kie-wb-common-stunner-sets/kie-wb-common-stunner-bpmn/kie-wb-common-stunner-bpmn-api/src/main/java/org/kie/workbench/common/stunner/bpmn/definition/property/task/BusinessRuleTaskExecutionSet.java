@@ -24,8 +24,6 @@ import org.kie.workbench.common.forms.adf.definitions.annotations.FieldParam;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormDefinition;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormField;
 import org.kie.workbench.common.forms.adf.definitions.annotations.field.selector.SelectorDataProvider;
-import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.selectors.listBox.type.ListBoxFieldType;
-import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.textArea.type.TextAreaFieldType;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNPropertySet;
 import org.kie.workbench.common.stunner.bpmn.forms.model.ComboBoxFieldType;
 import org.kie.workbench.common.stunner.core.definition.annotation.Property;
@@ -49,53 +47,31 @@ public class BusinessRuleTaskExecutionSet implements BPMNPropertySet {
     protected RuleFlowGroup ruleFlowGroup;
 
     @Property
-    @FormField(
-            type = TextAreaFieldType.class,
-            afterElement = "ruleFlowGroup",
-            settings = {@FieldParam(name = "rows", value = "5")}
-    )
+    @FormField(afterElement = "ruleFlowGroup",
+            settings = {@FieldParam(name = "mode", value = "ACTION_SCRIPT")})
     @Valid
     private OnEntryAction onEntryAction;
 
     @Property
-    @FormField(
-            type = TextAreaFieldType.class,
-            afterElement = "onEntryAction",
-            settings = {@FieldParam(name = "rows", value = "5")}
-    )
+    @FormField(afterElement = "onEntryAction",
+            settings = {@FieldParam(name = "mode", value = "ACTION_SCRIPT")})
     @Valid
     private OnExitAction onExitAction;
 
     @Property
-    @FormField(
-            type = ListBoxFieldType.class,
-            afterElement = "onExitAction"
-    )
-    @SelectorDataProvider(
-            type = SelectorDataProvider.ProviderType.REMOTE,
-            className = "org.kie.workbench.common.stunner.bpmn.backend.dataproviders.ScriptLanguageFormProvider")
-    @Valid
-    protected ScriptLanguage scriptLanguage;
-
-    @Property
-    @FormField(
-            afterElement = "scriptLanguage"
-    )
+    @FormField(afterElement = "onExitAction")
     @Valid
     private IsAsync isAsync;
 
     @Property
-    @FormField(
-            afterElement = "isAsync"
-    )
+    @FormField(afterElement = "isAsync")
     @Valid
     private AdHocAutostart adHocAutostart;
 
     public BusinessRuleTaskExecutionSet() {
         this(new RuleFlowGroup(),
-             new OnEntryAction(""),
-             new OnExitAction(""),
-             new ScriptLanguage(),
+             new OnEntryAction(),
+             new OnExitAction(),
              new IsAsync(),
              new AdHocAutostart());
     }
@@ -103,13 +79,11 @@ public class BusinessRuleTaskExecutionSet implements BPMNPropertySet {
     public BusinessRuleTaskExecutionSet(final @MapsTo("ruleFlowGroup") RuleFlowGroup ruleFlowGroup,
                                         final @MapsTo("onEntryAction") OnEntryAction onEntryAction,
                                         final @MapsTo("onExitAction") OnExitAction onExitAction,
-                                        final @MapsTo("scriptLanguage") ScriptLanguage scriptLanguage,
                                         final @MapsTo("isAsync") IsAsync isAsync,
                                         final @MapsTo("adHocAutostart") AdHocAutostart adHocAutostart) {
         this.ruleFlowGroup = ruleFlowGroup;
         this.onEntryAction = onEntryAction;
         this.onExitAction = onExitAction;
-        this.scriptLanguage = scriptLanguage;
         this.isAsync = isAsync;
         this.adHocAutostart = adHocAutostart;
     }
@@ -138,14 +112,6 @@ public class BusinessRuleTaskExecutionSet implements BPMNPropertySet {
         this.onExitAction = onExitAction;
     }
 
-    public ScriptLanguage getScriptLanguage() {
-        return scriptLanguage;
-    }
-
-    public void setScriptLanguage(ScriptLanguage scriptLanguage) {
-        this.scriptLanguage = scriptLanguage;
-    }
-
     public IsAsync getIsAsync() {
         return isAsync;
     }
@@ -167,7 +133,6 @@ public class BusinessRuleTaskExecutionSet implements BPMNPropertySet {
         return HashUtil.combineHashCodes(ruleFlowGroup.hashCode(),
                                          onEntryAction.hashCode(),
                                          onExitAction.hashCode(),
-                                         scriptLanguage.hashCode(),
                                          isAsync.hashCode(),
                                          adHocAutostart.hashCode());
     }
@@ -179,7 +144,6 @@ public class BusinessRuleTaskExecutionSet implements BPMNPropertySet {
             return ruleFlowGroup.equals(other.ruleFlowGroup) &&
                     onEntryAction.equals(other.onEntryAction) &&
                     onExitAction.equals(other.onExitAction) &&
-                    scriptLanguage.equals(other.scriptLanguage) &&
                     isAsync.equals(other.isAsync) &&
                     adHocAutostart.equals(other.adHocAutostart);
         }

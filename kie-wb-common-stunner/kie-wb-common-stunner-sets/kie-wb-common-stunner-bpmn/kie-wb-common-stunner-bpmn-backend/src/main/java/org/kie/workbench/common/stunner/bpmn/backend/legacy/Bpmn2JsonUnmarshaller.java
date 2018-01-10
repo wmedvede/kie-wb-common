@@ -166,8 +166,12 @@ import org.jboss.drools.impl.DroolsPackageImpl;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceFactoryImpl;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.util.Utils;
 import org.kie.workbench.common.stunner.bpmn.backend.marshall.json.oryx.Bpmn2OryxManager;
+import org.kie.workbench.common.stunner.bpmn.backend.marshall.json.oryx.property.ScriptTypeListTypeSerializer;
+import org.kie.workbench.common.stunner.bpmn.backend.marshall.json.oryx.property.ScriptTypeTypeSerializer;
 import org.kie.workbench.common.stunner.bpmn.backend.marshall.json.oryx.property.TimerSettingsTypeSerializer;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.TimerSettingsValue;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleReference;
 import org.osgi.framework.InvalidSyntaxException;
@@ -3890,34 +3894,11 @@ public class Bpmn2JsonUnmarshaller {
             sp.setName("");
         }
         // process on-entry and on-exit actions as custom elements
-        if (properties.get("onentryactions") != null && properties.get("onentryactions").length() > 0) {
-            OnEntryScriptType onEntryScript = DroolsFactory.eINSTANCE.createOnEntryScriptType();
-            onEntryScript.setScript(wrapInCDATABlock(properties.get("onentryactions")));
-            String scriptLanguage = getScriptLanguageFormat(properties);
-            onEntryScript.setScriptFormat(scriptLanguage);
-            if (sp.getExtensionValues() == null || sp.getExtensionValues().size() < 1) {
-                ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
-                sp.getExtensionValues().add(extensionElement);
-            }
-            FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
-                    (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_ENTRY_SCRIPT,
-                    onEntryScript);
-            sp.getExtensionValues().get(0).getValue().add(extensionElementEntry);
-        }
-        if (properties.get("onexitactions") != null && properties.get("onexitactions").length() > 0) {
-            OnExitScriptType onExitScript = DroolsFactory.eINSTANCE.createOnExitScriptType();
-            onExitScript.setScript(wrapInCDATABlock(properties.get("onexitactions")));
-            String scriptLanguage = getScriptLanguageFormat(properties);
-            onExitScript.setScriptFormat(scriptLanguage);
-            if (sp.getExtensionValues() == null || sp.getExtensionValues().size() < 1) {
-                ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
-                sp.getExtensionValues().add(extensionElement);
-            }
-            FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
-                    (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_EXIT_SCRIPT,
-                    onExitScript);
-            sp.getExtensionValues().get(0).getValue().add(extensionElementEntry);
-        }
+        applyOnEntryActions(sp,
+                            properties);
+        applyOnExitActions(sp,
+                           properties);
+
         // isAsync metadata
         if (properties.get("isasync") != null && properties.get("isasync").length() > 0 && properties.get("isasync").equals("true")) {
             Utils.setMetaDataExtensionValue(sp,
@@ -4379,10 +4360,67 @@ public class Bpmn2JsonUnmarshaller {
                 ahsp.setOrdering(AdHocOrdering.SEQUENTIAL);
             }
         }
-        if (properties.get("adhoccompletioncondition") != null) {
+        String adHocCompletionCondition = properties.get("adhoccompletioncondition");
+        if (adHocCompletionCondition != null) {
+            ScriptTypeValue value = new ScriptTypeTypeSerializer().parse(adHocCompletionCondition);
             FormalExpression completionConditionExpression = Bpmn2Factory.eINSTANCE.createFormalExpression();
-            completionConditionExpression.setBody(wrapInCDATABlock(properties.get("adhoccompletioncondition")));
+            completionConditionExpression.setBody(wrapInCDATABlock(value.getScript()));
+            completionConditionExpression.setLanguage(Utils.getScriptLanguageFormat(value.getLanguage()));
             ahsp.setCompletionCondition(completionConditionExpression);
+        }
+    }
+
+    protected void applyOnEntryActions(BaseElement element,
+                                       Map<String, String> properties) {
+        if (properties.get("onentryactions") != null && properties.get("onentryactions").length() > 0) {
+            ScriptTypeListValue onEntryActions = new ScriptTypeListTypeSerializer().parse(properties.get("onentryactions"));
+
+            //TODO check how to add more actions.
+            ScriptTypeValue onEntryAction = null;
+            if (!onEntryActions.isEmpty()) {
+                onEntryAction = onEntryActions.getValues().get(0);
+
+                OnEntryScriptType onEntryScript = DroolsFactory.eINSTANCE.createOnEntryScriptType();
+                onEntryScript.setScript(wrapInCDATABlock(onEntryAction.getScript()));
+                String scriptLanguage = Utils.getScriptLanguageFormat(onEntryAction.getLanguage());
+                onEntryScript.setScriptFormat(scriptLanguage);
+
+                if (element.getExtensionValues() == null || element.getExtensionValues().size() < 1) {
+                    ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
+                    element.getExtensionValues().add(extensionElement);
+                }
+                FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
+                        (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_ENTRY_SCRIPT,
+                        onEntryScript);
+                element.getExtensionValues().get(0).getValue().add(extensionElementEntry);
+            }
+        }
+    }
+
+    protected void applyOnExitActions(BaseElement element,
+                                      Map<String, String> properties) {
+        if (properties.get("onexitactions") != null && properties.get("onexitactions").length() > 0) {
+            ScriptTypeListValue onExitActions = new ScriptTypeListTypeSerializer().parse(properties.get("onexitactions"));
+
+            //TODO check how to add more actions.
+            ScriptTypeValue onExitAction = null;
+            if (!onExitActions.isEmpty()) {
+                onExitAction = onExitActions.getValues().get(0);
+
+                OnExitScriptType onExitScript = DroolsFactory.eINSTANCE.createOnExitScriptType();
+                onExitScript.setScript(wrapInCDATABlock(onExitAction.getScript()));
+                String scriptLanguage = Utils.getScriptLanguageFormat(onExitAction.getLanguage());
+                onExitScript.setScriptFormat(scriptLanguage);
+
+                if (element.getExtensionValues() == null || element.getExtensionValues().size() < 1) {
+                    ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
+                    element.getExtensionValues().add(extensionElement);
+                }
+                FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
+                        (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_EXIT_SCRIPT,
+                        onExitScript);
+                element.getExtensionValues().get(0).getValue().add(extensionElementEntry);
+            }
         }
     }
 
@@ -5622,34 +5660,10 @@ public class Bpmn2JsonUnmarshaller {
             }
         }
         // process on-entry and on-exit actions as custom elements
-        if (properties.get("onentryactions") != null && properties.get("onentryactions").length() > 0) {
-            OnEntryScriptType onEntryScript = DroolsFactory.eINSTANCE.createOnEntryScriptType();
-            onEntryScript.setScript(wrapInCDATABlock(properties.get("onentryactions")));
-            String scriptLanguage = getScriptLanguageFormat(properties);
-            onEntryScript.setScriptFormat(scriptLanguage);
-            if (callActivity.getExtensionValues() == null || callActivity.getExtensionValues().size() < 1) {
-                ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
-                callActivity.getExtensionValues().add(extensionElement);
-            }
-            FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
-                    (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_ENTRY_SCRIPT,
-                    onEntryScript);
-            callActivity.getExtensionValues().get(0).getValue().add(extensionElementEntry);
-        }
-        if (properties.get("onexitactions") != null && properties.get("onexitactions").length() > 0) {
-            OnExitScriptType onExitScript = DroolsFactory.eINSTANCE.createOnExitScriptType();
-            onExitScript.setScript(wrapInCDATABlock(properties.get("onexitactions")));
-            String scriptLanguage = getScriptLanguageFormat(properties);
-            onExitScript.setScriptFormat(scriptLanguage);
-            if (callActivity.getExtensionValues() == null || callActivity.getExtensionValues().size() < 1) {
-                ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
-                callActivity.getExtensionValues().add(extensionElement);
-            }
-            FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
-                    (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_EXIT_SCRIPT,
-                    onExitScript);
-            callActivity.getExtensionValues().get(0).getValue().add(extensionElementEntry);
-        }
+        applyOnEntryActions(callActivity,
+                            properties);
+        applyOnExitActions(callActivity,
+                           properties);
         // simulation
         if (properties.get("distributiontype") != null && properties.get("distributiontype").length() > 0) {
             TimeParameters timeParams = BpsimFactory.eINSTANCE.createTimeParameters();
@@ -5974,34 +5988,11 @@ public class Bpmn2JsonUnmarshaller {
             }
         }
         // process on-entry and on-exit actions as custom elements
-        if (properties.get("onentryactions") != null && properties.get("onentryactions").length() > 0) {
-            OnEntryScriptType onEntryScript = DroolsFactory.eINSTANCE.createOnEntryScriptType();
-            onEntryScript.setScript(wrapInCDATABlock(properties.get("onentryactions")));
-            String scriptLanguage = getScriptLanguageFormat(properties);
-            onEntryScript.setScriptFormat(scriptLanguage);
-            if (task.getExtensionValues() == null || task.getExtensionValues().size() < 1) {
-                ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
-                task.getExtensionValues().add(extensionElement);
-            }
-            FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
-                    (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_ENTRY_SCRIPT,
-                    onEntryScript);
-            task.getExtensionValues().get(0).getValue().add(extensionElementEntry);
-        }
-        if (properties.get("onexitactions") != null && properties.get("onexitactions").length() > 0) {
-            OnExitScriptType onExitScript = DroolsFactory.eINSTANCE.createOnExitScriptType();
-            onExitScript.setScript(wrapInCDATABlock(properties.get("onexitactions")));
-            String scriptLanguage = getScriptLanguageFormat(properties);
-            onExitScript.setScriptFormat(scriptLanguage);
-            if (task.getExtensionValues() == null || task.getExtensionValues().size() < 1) {
-                ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
-                task.getExtensionValues().add(extensionElement);
-            }
-            FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
-                    (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_EXIT_SCRIPT,
-                    onExitScript);
-            task.getExtensionValues().get(0).getValue().add(extensionElementEntry);
-        }
+        applyOnEntryActions(task,
+                            properties);
+        applyOnExitActions(task,
+                           properties);
+
         // multi instance
         if (properties.get("multipleinstance") != null && properties.get("multipleinstance").length() > 0 && properties.get("multipleinstance").equals("true")) {
             // will be revisited at end

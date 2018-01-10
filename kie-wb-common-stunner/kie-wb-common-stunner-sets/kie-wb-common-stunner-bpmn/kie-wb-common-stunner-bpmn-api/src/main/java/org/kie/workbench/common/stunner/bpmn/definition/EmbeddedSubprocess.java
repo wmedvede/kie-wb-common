@@ -25,9 +25,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FieldParam;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormDefinition;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormField;
-import org.kie.workbench.common.forms.adf.definitions.annotations.field.selector.SelectorDataProvider;
 import org.kie.workbench.common.forms.adf.definitions.settings.FieldPolicy;
-import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.textArea.type.TextAreaFieldType;
 import org.kie.workbench.common.stunner.bpmn.definition.property.background.BackgroundSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DataIOModel;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.RectangleDimensionsSet;
@@ -37,9 +35,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.Simu
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsAsync;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnEntryAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnExitAction;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptLanguage;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessData;
-import org.kie.workbench.common.stunner.bpmn.forms.model.ConditionalComboBoxFieldType;
 import org.kie.workbench.common.stunner.core.definition.annotation.Definition;
 import org.kie.workbench.common.stunner.core.definition.annotation.Property;
 import org.kie.workbench.common.stunner.core.definition.annotation.PropertySet;
@@ -74,58 +70,32 @@ public class EmbeddedSubprocess extends BaseSubprocess implements DataIOModel {
                     new FontSet(),
                     new RectangleDimensionsSet(),
                     new SimulationSet(),
-                    new OnEntryAction(""),
-                    new OnExitAction(""),
-                    new ScriptLanguage(),
+                    new OnEntryAction(),
+                    new OnExitAction(),
                     new IsAsync(),
                     new ProcessData());
         }
     }
 
     @Property
-    @FormField(
-            type = TextAreaFieldType.class,
-            afterElement = "general",
-            settings = {@FieldParam(name = "rows", value = "5")}
-    )
+    @FormField(afterElement = "general",
+            settings = {@FieldParam(name = "mode", value = "ACTION_SCRIPT")})
     @Valid
     private OnEntryAction onEntryAction;
 
     @Property
-    @FormField(
-            type = TextAreaFieldType.class,
-            afterElement = "onEntryAction",
-            settings = {@FieldParam(name = "rows", value = "5")}
-    )
+    @FormField(afterElement = "onEntryAction",
+            settings = {@FieldParam(name = "mode", value = "ACTION_SCRIPT")})
     @Valid
     private OnExitAction onExitAction;
 
     @Property
-    @FormField(
-            type = ConditionalComboBoxFieldType.class,
-            afterElement = "onExitAction",
-            settings = {
-                    @FieldParam(name = "relatedField", value = "onEntryAction;onExitAction"),
-                    @FieldParam(name = "allowCustomValue", value = "false")
-            }
-    )
-    @SelectorDataProvider(
-            type = SelectorDataProvider.ProviderType.REMOTE,
-            className = "org.kie.workbench.common.stunner.bpmn.backend.dataproviders.ScriptLanguageFormProvider")
-    @Valid
-    protected ScriptLanguage scriptLanguage;
-
-    @Property
-    @FormField(
-            afterElement = "scriptLanguage"
-    )
+    @FormField(afterElement = "onExitAction")
     @Valid
     private IsAsync isAsync;
 
     @PropertySet
-    @FormField(
-            afterElement = "isAsync"
-    )
+    @FormField(afterElement = "isAsync")
     @Valid
     private ProcessData processData;
 
@@ -140,7 +110,6 @@ public class EmbeddedSubprocess extends BaseSubprocess implements DataIOModel {
                               final @MapsTo("simulationSet") SimulationSet simulationSet,
                               final @MapsTo("onEntryAction") OnEntryAction onEntryAction,
                               final @MapsTo("onExitAction") OnExitAction onExitAction,
-                              final @MapsTo("scriptLanguage") ScriptLanguage scriptLanguage,
                               final @MapsTo("isAsync") IsAsync isAsync,
                               final @MapsTo("processData") ProcessData processData) {
         super(general,
@@ -150,7 +119,6 @@ public class EmbeddedSubprocess extends BaseSubprocess implements DataIOModel {
               simulationSet);
         this.onEntryAction = onEntryAction;
         this.onExitAction = onExitAction;
-        this.scriptLanguage = scriptLanguage;
         this.isAsync = isAsync;
         this.processData = processData;
     }
@@ -199,14 +167,6 @@ public class EmbeddedSubprocess extends BaseSubprocess implements DataIOModel {
         this.onExitAction = onExitAction;
     }
 
-    public ScriptLanguage getScriptLanguage() {
-        return scriptLanguage;
-    }
-
-    public void setScriptLanguage(final ScriptLanguage scriptLanguage) {
-        this.scriptLanguage = scriptLanguage;
-    }
-
     public IsAsync getIsAsync() {
         return isAsync;
     }
@@ -220,7 +180,6 @@ public class EmbeddedSubprocess extends BaseSubprocess implements DataIOModel {
         return HashUtil.combineHashCodes(super.hashCode(),
                                          onEntryAction.hashCode(),
                                          onExitAction.hashCode(),
-                                         scriptLanguage.hashCode(),
                                          isAsync.hashCode(),
                                          processData.hashCode());
     }
@@ -232,7 +191,6 @@ public class EmbeddedSubprocess extends BaseSubprocess implements DataIOModel {
             return super.equals(other) &&
                     onEntryAction.equals(other.onEntryAction) &&
                     onExitAction.equals(other.onExitAction) &&
-                    scriptLanguage.equals(other.scriptLanguage) &&
                     isAsync.equals(other.isAsync) &&
                     processData.equals(other.processData);
         }

@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import org.kie.workbench.common.stunner.bpmn.client.resources.BPMNSVGGlyphFactory;
 import org.kie.workbench.common.stunner.bpmn.client.resources.BPMNSVGViewFactory;
+import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
@@ -34,17 +35,25 @@ import org.kie.workbench.common.stunner.svg.client.shape.factory.SVGShapeViewRes
 import org.kie.workbench.common.stunner.svg.client.shape.view.SVGShapeView;
 
 public class SubprocessShapeDef extends BaseDimensionedShapeDef
-        implements BPMNSvgShapeDef<BaseSubprocess>{
+        implements BPMNSvgShapeDef<BaseSubprocess> {
 
     public static final SVGShapeViewResources<BaseSubprocess, BPMNSVGViewFactory> VIEW_RESOURCES =
             new SVGShapeViewResources<BaseSubprocess, BPMNSVGViewFactory>()
-                    .put(ReusableSubprocess.class, BPMNSVGViewFactory::reusableSubProcess)
-                    .put(EmbeddedSubprocess.class, BPMNSVGViewFactory::embeddedSubProcess);
+                    .put(ReusableSubprocess.class,
+                         BPMNSVGViewFactory::reusableSubProcess)
+                    .put(EmbeddedSubprocess.class,
+                         BPMNSVGViewFactory::embeddedSubProcess)
+                    .put(AdHocSubprocess.class,
+                         BPMNSVGViewFactory::adHocSubProcess);
 
     public static final Map<Class<? extends BaseSubprocess>, SvgDataUriGlyph> GLYPHS =
             new HashMap<Class<? extends BaseSubprocess>, SvgDataUriGlyph>() {{
-                put(ReusableSubprocess.class, BPMNSVGGlyphFactory.REUSABLE_SUBPROCESS_GLYPH);
-                put(EmbeddedSubprocess.class, BPMNSVGGlyphFactory.ADHOC_SUBPROCESS_GLYPH);
+                put(ReusableSubprocess.class,
+                    BPMNSVGGlyphFactory.REUSABLE_SUBPROCESS_GLYPH);
+                put(EmbeddedSubprocess.class,
+                    BPMNSVGGlyphFactory.EMBEDDED_SUBPROCESS_GLYPH);
+                put(AdHocSubprocess.class,
+                    BPMNSVGGlyphFactory.ADHOC_SUBPROCESS_GLYPH);
             }};
 
     @Override
@@ -71,7 +80,8 @@ public class SubprocessShapeDef extends BaseDimensionedShapeDef
                                            final BaseSubprocess task) {
         return newViewInstance(Optional.ofNullable(task.getDimensionsSet().getWidth()),
                                Optional.ofNullable(task.getDimensionsSet().getHeight()),
-                               VIEW_RESOURCES.getResource(factory, task));
+                               VIEW_RESOURCES.getResource(factory,
+                                                          task));
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2018 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.kie.workbench.common.stunner.bpmn.definition.property.task;
 
 import javax.validation.Valid;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.forms.adf.definitions.annotations.metaModel.FieldDefinition;
@@ -34,7 +35,7 @@ import org.kie.workbench.common.stunner.core.definition.property.PropertyType;
 @Bindable
 @Property
 @FieldDefinition(i18nMode = I18nMode.OVERRIDE_I18N_KEY)
-public class Script implements BPMNProperty {
+public class AdHocCompletionCondition implements BPMNProperty {
 
     @Type
     public static final PropertyType type = new ScriptType();
@@ -44,10 +45,10 @@ public class Script implements BPMNProperty {
     @Valid
     private ScriptTypeValue value;
 
-    public Script() {
+    public AdHocCompletionCondition() {
     }
 
-    public Script(final ScriptTypeValue value) {
+    public AdHocCompletionCondition(@MapsTo("value") final ScriptTypeValue value) {
         this.value = value;
     }
 
@@ -66,8 +67,8 @@ public class Script implements BPMNProperty {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof Script) {
-            Script other = (Script) o;
+        if (o instanceof AdHocCompletionCondition) {
+            AdHocCompletionCondition other = (AdHocCompletionCondition) o;
             return (null != value) ? value.equals(other.value) : null == other.value;
         }
         return false;

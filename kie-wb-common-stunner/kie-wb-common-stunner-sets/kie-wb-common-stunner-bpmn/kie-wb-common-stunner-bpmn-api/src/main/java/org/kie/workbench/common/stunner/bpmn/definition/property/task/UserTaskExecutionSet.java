@@ -23,8 +23,6 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FieldParam;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormDefinition;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormField;
-import org.kie.workbench.common.forms.adf.definitions.annotations.field.selector.SelectorDataProvider;
-import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.selectors.listBox.type.ListBoxFieldType;
 import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.textArea.type.TextAreaFieldType;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNPropertySet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.assignee.Actors;
@@ -40,9 +38,7 @@ import org.kie.workbench.common.stunner.core.util.HashUtil;
 @Portable
 @Bindable
 @PropertySet
-@FormDefinition(
-        startElement = "taskName"
-)
+@FormDefinition(startElement = "taskName")
 public class UserTaskExecutionSet implements BPMNPropertySet {
 
     @Property
@@ -51,9 +47,7 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
     protected TaskName taskName;
 
     @Property
-    @FormField(
-            afterElement = "taskName"
-    )
+    @FormField(afterElement = "taskName")
     @Valid
     private Subject subject;
 
@@ -84,23 +78,17 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
     private AssignmentsInfo assignmentsinfo;
 
     @Property
-    @FormField(
-            afterElement = "assignmentsinfo"
-    )
+    @FormField(afterElement = "assignmentsinfo")
     @Valid
     private IsAsync isAsync;
 
     @Property
-    @FormField(
-            afterElement = "isAsync"
-    )
+    @FormField(afterElement = "isAsync")
     @Valid
     private Skippable skippable;
 
     @Property
-    @FormField(
-            afterElement = "skippable"
-    )
+    @FormField(afterElement = "skippable")
     @Valid
     private Priority priority;
 
@@ -125,40 +113,21 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
     private CreatedBy createdBy;
 
     @Property
-    @FormField(
-            afterElement = "createdBy"
-    )
+    @FormField(afterElement = "createdBy")
     @Valid
     private AdHocAutostart adHocAutostart;
 
     @Property
-    @FormField(
-            type = TextAreaFieldType.class,
-            afterElement = "adHocAutostart",
-            settings = {@FieldParam(name = "rows", value = "5")}
-    )
+    @FormField(afterElement = "adHocAutostart",
+            settings = {@FieldParam(name = "mode", value = "ACTION_SCRIPT")})
     @Valid
     private OnEntryAction onEntryAction;
 
     @Property
-    @FormField(
-            type = TextAreaFieldType.class,
-            afterElement = "onEntryAction",
-            settings = {@FieldParam(name = "rows", value = "5")}
-    )
+    @FormField(afterElement = "onEntryAction",
+            settings = {@FieldParam(name = "mode", value = "ACTION_SCRIPT")})
     @Valid
     private OnExitAction onExitAction;
-
-    @Property
-    @FormField(
-            type = ListBoxFieldType.class,
-            afterElement = "onExitAction"
-    )
-    @SelectorDataProvider(
-            type = SelectorDataProvider.ProviderType.REMOTE,
-            className = "org.kie.workbench.common.stunner.bpmn.backend.dataproviders.ScriptLanguageFormProvider")
-    @Valid
-    protected ScriptLanguage scriptLanguage;
 
     public UserTaskExecutionSet() {
         this(new TaskName("Task"),
@@ -172,9 +141,8 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
              new Description(""),
              new CreatedBy(),
              new AdHocAutostart(),
-             new OnEntryAction(""),
-             new OnExitAction(""),
-             new ScriptLanguage());
+             new OnEntryAction(),
+             new OnExitAction());
     }
 
     public UserTaskExecutionSet(final @MapsTo("taskName") TaskName taskName,
@@ -189,8 +157,7 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
                                 final @MapsTo("createdBy") CreatedBy createdBy,
                                 final @MapsTo("adHocAutostart") AdHocAutostart adHocAutostart,
                                 final @MapsTo("onEntryAction") OnEntryAction onEntryAction,
-                                final @MapsTo("onExitAction") OnExitAction onExitAction,
-                                final @MapsTo("scriptLanguage") ScriptLanguage scriptLanguage) {
+                                final @MapsTo("onExitAction") OnExitAction onExitAction) {
         this.taskName = taskName;
         this.actors = actors;
         this.groupid = groupid;
@@ -204,7 +171,6 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
         this.adHocAutostart = adHocAutostart;
         this.onEntryAction = onEntryAction;
         this.onExitAction = onExitAction;
-        this.scriptLanguage = scriptLanguage;
     }
 
     public TaskName getTaskName() {
@@ -311,14 +277,6 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
         this.onExitAction = onExitAction;
     }
 
-    public ScriptLanguage getScriptLanguage() {
-        return scriptLanguage;
-    }
-
-    public void setScriptLanguage(ScriptLanguage scriptLanguage) {
-        this.scriptLanguage = scriptLanguage;
-    }
-
     @Override
     public int hashCode() {
         return HashUtil.combineHashCodes(taskName.hashCode(),
@@ -333,8 +291,7 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
                                          createdBy.hashCode(),
                                          adHocAutostart.hashCode(),
                                          onEntryAction.hashCode(),
-                                         onExitAction.hashCode(),
-                                         scriptLanguage.hashCode());
+                                         onExitAction.hashCode());
     }
 
     @Override
@@ -353,8 +310,7 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
                     createdBy.equals(other.createdBy) &&
                     adHocAutostart.equals(other.adHocAutostart) &&
                     onEntryAction.equals(other.onEntryAction) &&
-                    onExitAction.equals(other.onExitAction) &&
-                    scriptLanguage.equals(other.scriptLanguage);
+                    onExitAction.equals(other.onExitAction);
         }
         return false;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2018 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,46 +16,37 @@
 
 package org.kie.workbench.common.stunner.bpmn.definition.property.task;
 
-import javax.validation.Valid;
-
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.forms.adf.definitions.annotations.metaModel.FieldDefinition;
 import org.kie.workbench.common.forms.adf.definitions.annotations.metaModel.FieldValue;
 import org.kie.workbench.common.forms.adf.definitions.annotations.metaModel.I18nMode;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNProperty;
-import org.kie.workbench.common.stunner.bpmn.definition.property.type.ScriptType;
 import org.kie.workbench.common.stunner.core.definition.annotation.Property;
-import org.kie.workbench.common.stunner.core.definition.annotation.property.Type;
 import org.kie.workbench.common.stunner.core.definition.annotation.property.Value;
-import org.kie.workbench.common.stunner.core.definition.property.PropertyType;
 
 @Portable
 @Bindable
 @Property
 @FieldDefinition(i18nMode = I18nMode.OVERRIDE_I18N_KEY)
-public class Script implements BPMNProperty {
-
-    @Type
-    public static final PropertyType type = new ScriptType();
+public class AdHocOrdering implements BPMNProperty {
 
     @Value
     @FieldValue
-    @Valid
-    private ScriptTypeValue value;
+    private String value;
 
-    public Script() {
+    public AdHocOrdering() {
     }
 
-    public Script(final ScriptTypeValue value) {
+    public AdHocOrdering(final String value) {
         this.value = value;
     }
 
-    public ScriptTypeValue getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(final ScriptTypeValue value) {
+    public void setValue(final String value) {
         this.value = value;
     }
 
@@ -66,8 +57,8 @@ public class Script implements BPMNProperty {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof Script) {
-            Script other = (Script) o;
+        if (o instanceof AdHocOrdering) {
+            AdHocOrdering other = (AdHocOrdering) o;
             return (null != value) ? value.equals(other.value) : null == other.value;
         }
         return false;
