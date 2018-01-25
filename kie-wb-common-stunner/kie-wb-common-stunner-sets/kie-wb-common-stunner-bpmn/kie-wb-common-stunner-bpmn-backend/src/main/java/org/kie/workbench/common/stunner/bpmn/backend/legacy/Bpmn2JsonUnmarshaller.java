@@ -4424,6 +4424,48 @@ public class Bpmn2JsonUnmarshaller {
         }
     }
 
+    protected void applyConditionalEventProperties(ConditionalEventDefinition event,
+                                                   Map<String, String> properties) {
+        FormalExpression conditionExpression = Bpmn2Factory.eINSTANCE.createFormalExpression();
+        ScriptTypeValue value = new ScriptTypeTypeSerializer().parse(properties.get("conditionexpression"));
+        if (value.getLanguage() != null && !value.getLanguage().isEmpty()) {
+            String languageFormat = Utils.getScriptLanguageFormat(value.getLanguage());
+            if (languageFormat == null) {
+                //default to drools
+                languageFormat = "http://www.jboss.org/drools/rule";
+            }
+            conditionExpression.setLanguage(languageFormat);
+        }
+
+        if (value.getScript() != null && !value.getScript().isEmpty()) {
+            String scriptStr = value.getScript().replaceAll("\\\\n",
+                                                            "\n");
+            conditionExpression.setBody(wrapInCDATABlock(scriptStr));
+        }
+        event.setCondition(conditionExpression);
+    }
+
+    protected void applySequenceFlowCondition(SequenceFlow sequenceFlow,
+                                              Map<String, String> properties) {
+        String conditionExpression = properties.get("conditionexpression");
+        if (conditionExpression != null && !conditionExpression.isEmpty()) {
+            ScriptTypeValue value = new ScriptTypeTypeSerializer().parse(conditionExpression);
+            if (value.getScript() != null && !value.getScript().isEmpty()) {
+                FormalExpression expr = Bpmn2Factory.eINSTANCE.createFormalExpression();
+                expr.setBody(wrapInCDATABlock(value.getScript()));
+                if (value.getLanguage() != null && !value.getLanguage().isEmpty()) {
+                    String languageFormat = Utils.getScriptLanguageFormat(value.getLanguage());
+                    if (languageFormat == null) {
+                        //default to mvel
+                        languageFormat = "http://www.mvel.org/2.0";
+                    }
+                    expr.setLanguage(languageFormat);
+                }
+                sequenceFlow.setConditionExpression(expr);
+            }
+        }
+    }
+
     protected void applyEndEventProperties(EndEvent ee,
                                            Map<String, String> properties) {
         ee.setId(properties.get("resourceId"));
@@ -4742,26 +4784,8 @@ public class Bpmn2JsonUnmarshaller {
                         ((ErrorEventDefinition) event.getEventDefinitions().get(0)).getAnyAttribute().add(extensionEntry);
                     }
                 } else if (ed instanceof ConditionalEventDefinition) {
-                    FormalExpression conditionExpression = Bpmn2Factory.eINSTANCE.createFormalExpression();
-                    if (properties.get("conditionlanguage") != null && !"".equals(properties.get("conditionlanguage"))) {
-                        // currently supporting drools and mvel
-                        String languageStr;
-                        if (properties.get("conditionlanguage").equals("drools")) {
-                            languageStr = "http://www.jboss.org/drools/rule";
-                        } else if (properties.get("conditionlanguage").equals("mvel")) {
-                            languageStr = "http://www.mvel.org/2.0";
-                        } else {
-                            // default to drools
-                            languageStr = "http://www.jboss.org/drools/rule";
-                        }
-                        conditionExpression.setLanguage(languageStr);
-                    }
-                    if (properties.get("conditionexpression") != null && !"".equals(properties.get("conditionexpression"))) {
-                        String scriptStr = properties.get("conditionexpression").replaceAll("\\\\n",
-                                                                                            "\n");
-                        conditionExpression.setBody(wrapInCDATABlock(scriptStr));
-                    }
-                    ((ConditionalEventDefinition) event.getEventDefinitions().get(0)).setCondition(conditionExpression);
+                    applyConditionalEventProperties((ConditionalEventDefinition) ed,
+                                                    properties);
                 } else if (ed instanceof EscalationEventDefinition) {
                     if (properties.get("escalationcode") != null && !"".equals(properties.get("escalationcode"))) {
                         ExtendedMetaData metadata = ExtendedMetaData.INSTANCE;
@@ -4999,26 +5023,8 @@ public class Bpmn2JsonUnmarshaller {
                     ((ErrorEventDefinition) event.getEventDefinitions().get(0)).getAnyAttribute().add(extensionEntry);
                 }
             } else if (ed instanceof ConditionalEventDefinition) {
-                FormalExpression conditionExpression = Bpmn2Factory.eINSTANCE.createFormalExpression();
-                if (properties.get("conditionlanguage") != null && !"".equals(properties.get("conditionlanguage"))) {
-                    // currently supporting drools and mvel
-                    String languageStr;
-                    if (properties.get("conditionlanguage").equals("drools")) {
-                        languageStr = "http://www.jboss.org/drools/rule";
-                    } else if (properties.get("conditionlanguage").equals("mvel")) {
-                        languageStr = "http://www.mvel.org/2.0";
-                    } else {
-                        // default to drools
-                        languageStr = "http://www.jboss.org/drools/rule";
-                    }
-                    conditionExpression.setLanguage(languageStr);
-                }
-                if (properties.get("conditionexpression") != null && !"".equals(properties.get("conditionexpression"))) {
-                    String scriptStr = properties.get("conditionexpression").replaceAll("\\\\n",
-                                                                                        "\n");
-                    conditionExpression.setBody(wrapInCDATABlock(scriptStr));
-                }
-                ((ConditionalEventDefinition) event.getEventDefinitions().get(0)).setCondition(conditionExpression);
+                applyConditionalEventProperties((ConditionalEventDefinition) ed,
+                                                properties);
             } else if (ed instanceof EscalationEventDefinition) {
                 if (properties.get("escalationcode") != null && !"".equals(properties.get("escalationcode"))) {
                     ExtendedMetaData metadata = ExtendedMetaData.INSTANCE;
@@ -6932,29 +6938,8 @@ public class Bpmn2JsonUnmarshaller {
             audit.getDocumentation().add(createDocumentation(properties.get("auditing")));
             sequenceFlow.setAuditing(audit);
         }
-        if (properties.get("conditionexpression") != null && !"".equals(properties.get("conditionexpression"))) {
-            FormalExpression expr = Bpmn2Factory.eINSTANCE.createFormalExpression();
-            String scriptStr = properties.get("conditionexpression");
-            expr.setBody(wrapInCDATABlock(scriptStr));
-            // check if language was specified
-            if (properties.get("conditionexpressionlanguage") != null && !"".equals(properties.get("conditionexpressionlanguage"))) {
-                String languageStr;
-                if (properties.get("conditionexpressionlanguage").equals("drools")) {
-                    languageStr = "http://www.jboss.org/drools/rule";
-                } else if (properties.get("conditionexpressionlanguage").equals("mvel")) {
-                    languageStr = "http://www.mvel.org/2.0";
-                } else if (properties.get("conditionexpressionlanguage").equals("java")) {
-                    languageStr = "http://www.java.com/java";
-                } else if (properties.get("conditionexpressionlanguage").equals("javascript")) {
-                    languageStr = "http://www.javascript.com/javascript";
-                } else {
-                    // default to mvel
-                    languageStr = "http://www.mvel.org/2.0";
-                }
-                expr.setLanguage(languageStr);
-            }
-            sequenceFlow.setConditionExpression(expr);
-        }
+        applySequenceFlowCondition(sequenceFlow,
+                                   properties);
         if (properties.get("priority") != null && !"".equals(properties.get("priority"))) {
             ExtendedMetaData metadata = ExtendedMetaData.INSTANCE;
             EAttributeImpl priorityElement = (EAttributeImpl) metadata.demandFeature(

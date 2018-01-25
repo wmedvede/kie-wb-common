@@ -175,8 +175,6 @@ import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonProp
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.BOUNDARYCANCELACTIVITY;
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.CALLEDELEMENT;
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.CONDITIONEXPRESSION;
-import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.CONDITIONEXPRESSIONLANGUAGE;
-import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.CONDITIONLANGUAGE;
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.CURRENCY;
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.CUSTOMTYPE;
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.DATAINPUT;
@@ -219,7 +217,6 @@ import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonProp
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.PACKAGE;
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.PRIORITY;
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.PROCESSN;
-import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.SCRIPT_LANGUAGE;
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.SIGNALREF;
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.SIGNALSCOPE;
 import static org.kie.workbench.common.stunner.bpmn.backend.legacy.Bpmn2JsonPropertyIds.STANDARDDEVIATION;
@@ -769,24 +766,10 @@ public class Bpmn2JsonMarshaller {
                 }
             } else if (ed instanceof ConditionalEventDefinition) {
                 FormalExpression conditionalExp = (FormalExpression) ((ConditionalEventDefinition) ed).getCondition();
-                if (conditionalExp.getBody() != null) {
-                    properties.put(CONDITIONEXPRESSION,
-                                   conditionalExp.getBody().replaceAll("\n",
-                                                                       "\\\\n"));
-                }
-                if (conditionalExp.getLanguage() != null) {
-                    String languageVal = conditionalExp.getLanguage();
-                    if (languageVal.equals("http://www.jboss.org/drools/rule")) {
-                        properties.put(CONDITIONLANGUAGE,
-                                       "drools");
-                    } else if (languageVal.equals("http://www.mvel.org/2.0")) {
-                        properties.put(CONDITIONLANGUAGE,
-                                       "mvel");
-                    } else {
-                        // default to drools
-                        properties.put(CONDITIONLANGUAGE,
-                                       "drools");
-                    }
+                if (conditionalExp != null) {
+                    setConditionExpressionProperties(conditionalExp,
+                                                     properties,
+                                                     "drools");
                 }
             } else if (ed instanceof EscalationEventDefinition) {
                 if (((EscalationEventDefinition) ed).getEscalationRef() != null) {
@@ -898,23 +881,10 @@ public class Bpmn2JsonMarshaller {
                 }
             } else if (ed instanceof ConditionalEventDefinition) {
                 FormalExpression conditionalExp = (FormalExpression) ((ConditionalEventDefinition) ed).getCondition();
-                if (conditionalExp.getBody() != null) {
-                    properties.put(CONDITIONEXPRESSION,
-                                   conditionalExp.getBody());
-                }
-                if (conditionalExp.getLanguage() != null) {
-                    String languageVal = conditionalExp.getLanguage();
-                    if (languageVal.equals("http://www.jboss.org/drools/rule")) {
-                        properties.put(CONDITIONLANGUAGE,
-                                       "drools");
-                    } else if (languageVal.equals("http://www.mvel.org/2.0")) {
-                        properties.put(CONDITIONLANGUAGE,
-                                       "mvel");
-                    } else {
-                        // default to drools
-                        properties.put(CONDITIONLANGUAGE,
-                                       "drools");
-                    }
+                if (conditionalExp != null) {
+                    setConditionExpressionProperties(conditionalExp,
+                                                     properties,
+                                                     "drools");
                 }
             } else if (ed instanceof EscalationEventDefinition) {
                 if (((EscalationEventDefinition) ed).getEscalationRef() != null) {
@@ -1035,6 +1005,21 @@ public class Bpmn2JsonMarshaller {
             }
         }
         return onExitActions;
+    }
+
+    public void setConditionExpressionProperties(final FormalExpression conditionExpression,
+                                                 final Map<String, Object> properties,
+                                                 final String defaultLanguage) {
+        String language = Utils.getScriptLanguage(conditionExpression.getLanguage());
+        final String script = conditionExpression.getBody();
+        if (language != null || script != null) {
+            if (language == null) {
+                language = defaultLanguage;
+            }
+            properties.put(CONDITIONEXPRESSION,
+                           new ScriptTypeTypeSerializer().serialize(new ScriptTypeValue(language,
+                                                                                        script)));
+        }
     }
 
     private List<String> marshallLanes(Lane lane,
@@ -3323,28 +3308,9 @@ public class Bpmn2JsonMarshaller {
         }
         Expression conditionExpression = sequenceFlow.getConditionExpression();
         if (conditionExpression instanceof FormalExpression) {
-            if (((FormalExpression) conditionExpression).getBody() != null) {
-                properties.put(CONDITIONEXPRESSION,
-                               ((FormalExpression) conditionExpression).getBody());
-            }
-            if (((FormalExpression) conditionExpression).getLanguage() != null) {
-                String cd = ((FormalExpression) conditionExpression).getLanguage();
-                String cdStr = "";
-                if (cd.equalsIgnoreCase("http://www.java.com/java")) {
-                    cdStr = "java";
-                } else if (cd.equalsIgnoreCase("http://www.jboss.org/drools/rule")) {
-                    cdStr = "drools";
-                } else if (cd.equalsIgnoreCase("http://www.mvel.org/2.0")) {
-                    cdStr = "mvel";
-                } else if (cd.equalsIgnoreCase("http://www.javascript.com/javascript")) {
-                    cdStr = "javascript";
-                } else {
-                    // default to mvel
-                    cdStr = "mvel";
-                }
-                properties.put(CONDITIONEXPRESSIONLANGUAGE,
-                               cdStr);
-            }
+            setConditionExpressionProperties((FormalExpression) conditionExpression,
+                                             properties,
+                                             "mvel");
         }
         boolean foundBgColor = false;
         boolean foundBrColor = false;
