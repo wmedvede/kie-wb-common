@@ -70,8 +70,10 @@ public class BusinessRuleTaskExecutionSet implements BPMNPropertySet {
 
     public BusinessRuleTaskExecutionSet() {
         this(new RuleFlowGroup(),
-             new OnEntryAction(),
-             new OnExitAction(),
+             new OnEntryAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
+                                                                                      ""))),
+             new OnExitAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
+                                                                                     ""))),
              new IsAsync(),
              new AdHocAutostart());
     }

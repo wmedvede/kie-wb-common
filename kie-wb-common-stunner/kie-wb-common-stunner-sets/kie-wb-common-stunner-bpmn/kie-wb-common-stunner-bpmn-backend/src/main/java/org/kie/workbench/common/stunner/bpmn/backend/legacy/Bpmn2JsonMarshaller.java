@@ -160,6 +160,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.marshall.json.oryx.property
 import org.kie.workbench.common.stunner.bpmn.backend.marshall.json.oryx.property.ScriptTypeTypeSerializer;
 import org.kie.workbench.common.stunner.bpmn.backend.marshall.json.oryx.property.TimerSettingsTypeSerializer;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.TimerSettingsValue;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnEntryAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 import org.slf4j.Logger;
@@ -958,14 +959,22 @@ public class Bpmn2JsonMarshaller {
     }
 
     public ScriptTypeValue getOnEntryAction(final OnEntryScriptType onEntryScriptType) {
-        final String language = Utils.getScriptLanguage(onEntryScriptType.getScriptFormat());
+        String language = Utils.getScriptLanguage(onEntryScriptType.getScriptFormat());
+        if (language == null) {
+            //default to java
+            language = "java";
+        }
         final String script = onEntryScriptType.getScript();
         return new ScriptTypeValue(language,
                                    script);
     }
 
     public ScriptTypeValue getOnExitAction(final OnExitScriptType onExitScriptType) {
-        final String language = Utils.getScriptLanguage(onExitScriptType.getScriptFormat());
+        String language = Utils.getScriptLanguage(onExitScriptType.getScriptFormat());
+        if (language == null) {
+            //default to java
+            language = "java";
+        }
         final String script = onExitScriptType.getScript();
         return new ScriptTypeValue(language,
                                    script);
@@ -973,6 +982,7 @@ public class Bpmn2JsonMarshaller {
 
     public ScriptTypeListValue getOnEntryActions(final List<ExtensionAttributeValue> extensionValues) {
         final ScriptTypeListValue onEntryActions = new ScriptTypeListValue();
+        ScriptTypeValue onEntryAction;
         if (extensionValues != null && !extensionValues.isEmpty()) {
             for (ExtensionAttributeValue extattrval : extensionValues) {
                 FeatureMap extensionElements = extattrval.getValue();
@@ -982,7 +992,10 @@ public class Bpmn2JsonMarshaller {
                              true);
 
                 for (OnEntryScriptType onEntryScript : onEntryExtensions) {
-                    onEntryActions.addValue(getOnEntryAction(onEntryScript));
+                    onEntryAction = getOnEntryAction(onEntryScript);
+                    if (onEntryAction.getScript() != null && !onEntryAction.getScript().isEmpty()) {
+                        onEntryActions.addValue(onEntryAction);
+                    }
                 }
             }
         }
@@ -991,6 +1004,7 @@ public class Bpmn2JsonMarshaller {
 
     public ScriptTypeListValue getOnExitActions(final List<ExtensionAttributeValue> extensionValues) {
         final ScriptTypeListValue onExitActions = new ScriptTypeListValue();
+        ScriptTypeValue onExitAction;
         if (extensionValues != null && !extensionValues.isEmpty()) {
             for (ExtensionAttributeValue extattrval : extensionValues) {
                 FeatureMap extensionElements = extattrval.getValue();
@@ -1000,7 +1014,10 @@ public class Bpmn2JsonMarshaller {
                              true);
 
                 for (OnExitScriptType onExitScript : onExitExtensions) {
-                    onExitActions.addValue(getOnExitAction(onExitScript));
+                    onExitAction = getOnExitAction(onExitScript);
+                    if (onExitAction.getScript() != null && !onExitAction.getScript().isEmpty()) {
+                        onExitActions.addValue(onExitAction);
+                    }
                 }
             }
         }
@@ -1020,6 +1037,22 @@ public class Bpmn2JsonMarshaller {
                            new ScriptTypeTypeSerializer().serialize(new ScriptTypeValue(language,
                                                                                         script)));
         }
+    }
+
+    public void setScriptProperties(final ScriptTask scriptTask,
+                                    final Map<String, Object> properties) {
+        String script = scriptTask.getScript() != null ? scriptTask.getScript() : "";
+        String language = null;
+        if (scriptTask.getScriptFormat() != null && !scriptTask.getScriptFormat().isEmpty()) {
+            language = Utils.getScriptLanguage(scriptTask.getScriptFormat());
+            if (language == null) {
+                // default to java
+                language = "java";
+            }
+        }
+        properties.put("script",
+                       new ScriptTypeTypeSerializer().serialize(new ScriptTypeValue(language,
+                                                                                    script)));
     }
 
     private List<String> marshallLanes(Lane lane,
@@ -1915,25 +1948,8 @@ public class Bpmn2JsonMarshaller {
                 }
             }
         } else if (task instanceof ScriptTask) {
-            ScriptTask scriptTask = (ScriptTask) task;
-            properties.put("script",
-                           scriptTask.getScript() != null ? scriptTask.getScript() : "");
-            String format = scriptTask.getScriptFormat();
-            if (format != null && format.length() > 0) {
-                String formatToWrite = "";
-                if (format.equals("http://www.java.com/java")) {
-                    formatToWrite = "java";
-                } else if (format.equals("http://www.mvel.org/2.0")) {
-                    formatToWrite = "mvel";
-                } else if (format.equals("http://www.javascript.com/javascript")) {
-                    formatToWrite = "javascript";
-                } else {
-                    // default to java
-                    formatToWrite = "java";
-                }
-                properties.put("script_language",
-                               formatToWrite);
-            }
+            setScriptProperties((ScriptTask) task,
+                                properties);
             taskType = "Script";
         } else if (task instanceof ServiceTask) {
             taskType = "Service";

@@ -44,8 +44,9 @@ public class ScriptTypeListValue {
         this.values = values;
     }
 
-    public void addValue(ScriptTypeValue value) {
+    public ScriptTypeListValue addValue(ScriptTypeValue value) {
         this.values.add(value);
+        return this;
     }
 
     public boolean isEmpty() {

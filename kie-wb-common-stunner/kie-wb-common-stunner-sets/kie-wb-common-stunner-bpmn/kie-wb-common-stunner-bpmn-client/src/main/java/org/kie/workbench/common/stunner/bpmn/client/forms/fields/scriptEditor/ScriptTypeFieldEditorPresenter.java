@@ -28,6 +28,8 @@ import org.uberfire.client.mvp.UberElement;
 import org.uberfire.commons.data.Pair;
 
 import static org.kie.workbench.common.stunner.bpmn.forms.model.ScriptTypeMode.ACTION_SCRIPT;
+import static org.kie.workbench.common.stunner.bpmn.forms.model.ScriptTypeMode.COMPLETION_CONDITION;
+import static org.kie.workbench.common.stunner.bpmn.forms.model.ScriptTypeMode.FLOW_CONDITION;
 
 public class ScriptTypeFieldEditorPresenter
         extends FieldEditorPresenter<ScriptTypeValue> {
@@ -50,8 +52,7 @@ public class ScriptTypeFieldEditorPresenter
 
         String getLanguage();
 
-        void setLanguageOptions(List<Pair<String, String>> options,
-                                String selectedValue);
+        void setLanguageOptions(List<Pair<String, String>> options);
     }
 
     private final View view;
@@ -76,8 +77,7 @@ public class ScriptTypeFieldEditorPresenter
     }
 
     public void setMode(ScriptTypeMode mode) {
-        view.setLanguageOptions(getLanguageOptions(mode),
-                                null);
+        view.setLanguageOptions(getLanguageOptions(mode));
     }
 
     private List<Pair<String, String>> getLanguageOptions(ScriptTypeMode mode) {
@@ -89,7 +89,16 @@ public class ScriptTypeFieldEditorPresenter
                                    JAVASCRIPT));
             options.add(new Pair<>(MVEL,
                                    MVEL));
-        } else if (mode == ScriptTypeMode.COMPLETION_CONDITION) {
+        } else if (mode == COMPLETION_CONDITION) {
+            options.add(new Pair<>(MVEL,
+                                   MVEL));
+            options.add(new Pair<>(DROOLS,
+                                   DROOLS));
+        } else if (mode == FLOW_CONDITION) {
+            options.add(new Pair<>(JAVA,
+                                   JAVA));
+            options.add(new Pair<>(JAVASCRIPT,
+                                   JAVASCRIPT));
             options.add(new Pair<>(MVEL,
                                    MVEL));
             options.add(new Pair<>(DROOLS,
@@ -99,19 +108,19 @@ public class ScriptTypeFieldEditorPresenter
     }
 
     protected void onLanguageChange() {
-        ScriptTypeValue oldValue = value;
-        value = copy(oldValue,
-                     true);
-        value.setLanguage(view.getLanguage());
-        notifyChange(oldValue,
-                     value);
+        onChange();
     }
 
     protected void onScriptChange() {
+        onChange();
+    }
+
+    protected void onChange() {
         ScriptTypeValue oldValue = value;
         value = copy(oldValue,
                      true);
         value.setScript(view.getScript());
+        value.setLanguage(view.getLanguage());
         notifyChange(oldValue,
                      value);
     }

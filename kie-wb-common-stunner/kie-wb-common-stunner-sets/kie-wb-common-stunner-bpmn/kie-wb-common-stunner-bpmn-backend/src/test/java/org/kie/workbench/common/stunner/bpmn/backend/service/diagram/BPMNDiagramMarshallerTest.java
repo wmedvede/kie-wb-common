@@ -1210,23 +1210,21 @@ public class BPMNDiagramMarshallerTest {
         assertNotNull(sequenceFlow1);
         assertNotNull(sequenceFlow1.getExecutionSet());
         assertNotNull(sequenceFlow1.getExecutionSet().getConditionExpression());
-        assertNotNull(sequenceFlow1.getExecutionSet().getConditionExpressionLanguage());
         assertNotNull(sequenceFlow1.getExecutionSet().getPriority());
         assertNotNull(sequenceFlow1.getGeneral());
         assertNotNull(sequenceFlow1.getGeneral().getName());
         assertEquals("route1",
                      sequenceFlow1.getGeneral().getName().getValue());
         assertEquals("age >= 10;",
-                     sequenceFlow1.getExecutionSet().getConditionExpression().getValue());
+                     sequenceFlow1.getExecutionSet().getConditionExpression().getValue().getScript());
         assertEquals("javascript",
-                     sequenceFlow1.getExecutionSet().getConditionExpressionLanguage().getValue());
+                     sequenceFlow1.getExecutionSet().getConditionExpression().getValue().getLanguage());
         assertEquals("2",
                      sequenceFlow1.getExecutionSet().getPriority().getValue());
 
         assertNotNull(sequenceFlow2);
         assertNotNull(sequenceFlow2.getExecutionSet());
         assertNotNull(sequenceFlow2.getExecutionSet().getConditionExpression());
-        assertNotNull(sequenceFlow2.getExecutionSet().getConditionExpressionLanguage());
         assertNotNull(sequenceFlow2.getExecutionSet().getPriority());
         assertNotNull(sequenceFlow2.getGeneral());
         assertNotNull(sequenceFlow2.getGeneral().getName());
@@ -1235,9 +1233,9 @@ public class BPMNDiagramMarshallerTest {
         assertEquals("age\n" +
                              "<\n" +
                              "10;",
-                     sequenceFlow2.getExecutionSet().getConditionExpression().getValue());
+                     sequenceFlow2.getExecutionSet().getConditionExpression().getValue().getScript());
         assertEquals("java",
-                     sequenceFlow2.getExecutionSet().getConditionExpressionLanguage().getValue());
+                     sequenceFlow2.getExecutionSet().getConditionExpression().getValue().getLanguage());
         assertEquals("1",
                      sequenceFlow2.getExecutionSet().getPriority().getValue());
     }
@@ -2286,7 +2284,7 @@ public class BPMNDiagramMarshallerTest {
         assertTrue(result.contains("</drools:onExit-script>"));
 
         assertTrue(result.contains("<bpmn2:completionCondition xsi:type=\"bpmn2:tFormalExpression\""));
-        assertTrue(result.contains("language=\"http://www.jboss.org/drools\"><![CDATA[autocomplete]]></bpmn2:completionCondition>"));
+        assertTrue(result.contains("language=\"http://www.jboss.org/drools/rule\"><![CDATA[autocomplete]]></bpmn2:completionCondition>"));
     }
 
     @Test
@@ -2427,7 +2425,7 @@ public class BPMNDiagramMarshallerTest {
                         .map(view -> ((SequenceFlow) view.getDefinition()))
                         .findFirst();
 
-        String conditionLanguage = (sequenceFlow.isPresent() ? sequenceFlow.get().getExecutionSet().getConditionExpressionLanguage().getValue() : null);
+        String conditionLanguage = (sequenceFlow.isPresent() ? sequenceFlow.get().getExecutionSet().getConditionExpression().getValue().getLanguage() : null);
         assertEquals(value,
                      conditionLanguage);
     }

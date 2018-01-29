@@ -46,8 +46,8 @@ public class ScriptTypeTypeSerializer implements Bpmn2OryxPropertySerializer<Scr
         final List<String> tokens = parseScriptTokens(value);
         final String language = tokens.get(0);
         final String script = tokens.get(1);
-        return new ScriptTypeValue(language,
-                                   script);
+        return new ScriptTypeValue(!language.isEmpty() ? language : null,
+                                   !script.isEmpty() ? script : null);
     }
 
     @Override

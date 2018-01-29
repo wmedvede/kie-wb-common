@@ -163,7 +163,7 @@
         </bpmn2:dataInputAssociation>
       </bpmn2:userTask>
       <bpmn2:sequenceFlow id="_451CFE91-C71F-4EB8-9A64-596ED158E049" drools:selectable="true" color:background-color="#000000" color:border-color="#000000" color:color="#000000" sourceRef="_ECC96FE9-4829-4FFE-B71A-5C0E028C4A19" targetRef="_2177CC71-66EF-472B-9056-A7EC9BEB02DC"/>
-      <bpmn2:completionCondition xsi:type="bpmn2:tFormalExpression" id="_DUUaQ_bcEeelgqL1QFmPLA" language="http://www.jboss.org/drools"><![CDATA[autocomplete]]></bpmn2:completionCondition>
+      <bpmn2:completionCondition xsi:type="bpmn2:tFormalExpression" id="_DUUaQ_bcEeelgqL1QFmPLA" language="http://www.jboss.org/drools/rule"><![CDATA[autocomplete]]></bpmn2:completionCondition>
     </bpmn2:adHocSubProcess>
     <bpmn2:sequenceFlow id="_F8A49C00-5B4A-4E0E-AF5D-C35EF4DE4226" drools:selectable="true" color:background-color="#000000" color:border-color="#000000" color:color="#000000" sourceRef="_A6CD2AC6-2329-47DC-9F94-BEA4B27F3AEF" targetRef="_B65DDF51-9822-4B12-8669-2018A845A01B"/>
     <bpmn2:userTask id="_16F8B701-80AC-49ED-BF7C-8CE7C99AA018" drools:selectable="true" drools:scriptFormat="http://www.java.com/java" color:background-color="#fafad2" color:border-color="#000000" color:color="#000000" name="Task2">

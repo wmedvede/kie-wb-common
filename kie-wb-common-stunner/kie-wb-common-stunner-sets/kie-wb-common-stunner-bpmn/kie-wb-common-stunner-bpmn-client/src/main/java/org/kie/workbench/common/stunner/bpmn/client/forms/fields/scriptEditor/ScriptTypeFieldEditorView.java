@@ -21,7 +21,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.dom.Event;
-import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.dom.Option;
 import org.jboss.errai.common.client.dom.Select;
 import org.jboss.errai.common.client.dom.TextArea;
@@ -37,8 +36,6 @@ import org.uberfire.commons.data.Pair;
 public class ScriptTypeFieldEditorView
         implements IsElement,
                    ScriptTypeFieldEditorPresenter.View {
-
-    private static final String NOT_SELECTED = "NOT_SELECTED";
 
     @Inject
     @DataField("language")
@@ -67,27 +64,20 @@ public class ScriptTypeFieldEditorView
 
     @Override
     public void setLanguage(String language) {
-        if (language != null) {
-            this.language.setValue(language);
-        } else {
-            this.language.setValue(NOT_SELECTED);
-        }
+        this.language.setValue(language);
     }
 
     @Override
     public String getLanguage() {
-        String value = language.getValue();
-        return NOT_SELECTED.equals(value) ? null : value;
+        return language.getValue();
     }
 
     @Override
-    public void setLanguageOptions(List<Pair<String, String>> options,
-                                   String selectedValue) {
+    public void setLanguageOptions(List<Pair<String, String>> options) {
         clearSelect(language);
         options.forEach(option ->
                                 language.add(newOption(option.getK1(),
                                                        option.getK2())));
-        setLanguage(selectedValue);
     }
 
     private Option newOption(final String text,
@@ -103,19 +93,6 @@ public class ScriptTypeFieldEditorView
         for (int i = 0; i < options; i++) {
             select.remove(0);
         }
-        select.add(defaultOption());
-    }
-
-    private HTMLElement defaultOption() {
-        final HTMLElement option = Window.getDocument().createElement("option");
-        option.setAttribute("value",
-                            NOT_SELECTED);
-        option.setAttribute("disabled",
-                            "");
-        option.setAttribute("selected",
-                            "");
-        option.setTextContent("Select the script language");
-        return option;
     }
 
     @EventHandler("language")

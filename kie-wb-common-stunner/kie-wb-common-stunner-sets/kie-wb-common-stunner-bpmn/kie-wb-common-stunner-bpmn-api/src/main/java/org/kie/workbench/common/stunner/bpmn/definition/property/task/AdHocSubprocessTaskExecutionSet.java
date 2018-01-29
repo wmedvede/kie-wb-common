@@ -24,9 +24,9 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FieldParam;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormDefinition;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormField;
-import org.kie.workbench.common.forms.adf.definitions.annotations.metaModel.FieldLabel;
+import org.kie.workbench.common.forms.adf.definitions.annotations.field.selector.SelectorDataProvider;
+import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.selectors.listBox.type.ListBoxFieldType;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNPropertySet;
-import org.kie.workbench.common.stunner.core.definition.annotation.Name;
 import org.kie.workbench.common.stunner.core.definition.annotation.Property;
 import org.kie.workbench.common.stunner.core.definition.annotation.PropertySet;
 import org.kie.workbench.common.stunner.core.util.HashUtil;
@@ -37,17 +37,19 @@ import org.kie.workbench.common.stunner.core.util.HashUtil;
 @FormDefinition(startElement = "adHocCompletionCondition")
 public class AdHocSubprocessTaskExecutionSet implements BPMNPropertySet {
 
-    @Name
-    @FieldLabel
-    public static final transient String propertySetName = "Implementation/Execution";
-
     @Property
     @FormField(settings = {@FieldParam(name = "mode", value = "COMPLETION_CONDITION")})
     @Valid
     private AdHocCompletionCondition adHocCompletionCondition;
 
     @Property
-    @FormField(afterElement = "adHocCompletionCondition")
+    @FormField(afterElement = "adHocCompletionCondition",
+            type = ListBoxFieldType.class,
+            settings = {@FieldParam(name = "addEmptyOption", value = "false")}
+    )
+    @SelectorDataProvider(
+            type = SelectorDataProvider.ProviderType.CLIENT,
+            className = "org.kie.workbench.common.stunner.bpmn.client.dataproviders.AdHocOrderingProvider")
     @Valid
     private AdHocOrdering adHocOrdering;
 
@@ -66,10 +68,13 @@ public class AdHocSubprocessTaskExecutionSet implements BPMNPropertySet {
     private OnExitAction onExitAction;
 
     public AdHocSubprocessTaskExecutionSet() {
-        this(new AdHocCompletionCondition(),
-             new AdHocOrdering(),
-             new OnEntryAction(),
-             new OnExitAction());
+        this(new AdHocCompletionCondition(new ScriptTypeValue("mvel",
+                                                              "autocomplete")),
+             new AdHocOrdering("Sequential"),
+             new OnEntryAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
+                                                                                      ""))),
+             new OnExitAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
+                                                                                     ""))));
     }
 
     public AdHocSubprocessTaskExecutionSet(final @MapsTo("adHocCompletionCondition") AdHocCompletionCondition adHocCompletionCondition,
@@ -81,10 +86,6 @@ public class AdHocSubprocessTaskExecutionSet implements BPMNPropertySet {
         this.onEntryAction = onEntryAction;
         this.onEntryAction = onEntryAction;
         this.onExitAction = onExitAction;
-    }
-
-    public String getPropertySetName() {
-        return propertySetName;
     }
 
     public AdHocCompletionCondition getAdHocCompletionCondition() {

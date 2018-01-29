@@ -18,5 +18,6 @@ package org.kie.workbench.common.stunner.bpmn.forms.model;
 
 public enum ScriptTypeMode {
     ACTION_SCRIPT,
+    FLOW_CONDITION,
     COMPLETION_CONDITION
 }

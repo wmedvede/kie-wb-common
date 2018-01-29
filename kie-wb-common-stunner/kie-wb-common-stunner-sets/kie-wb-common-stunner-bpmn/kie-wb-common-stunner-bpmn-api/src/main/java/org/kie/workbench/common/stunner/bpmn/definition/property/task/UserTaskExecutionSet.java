@@ -141,8 +141,10 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
              new Description(""),
              new CreatedBy(),
              new AdHocAutostart(),
-             new OnEntryAction(),
-             new OnExitAction());
+             new OnEntryAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
+                                                                                      ""))),
+             new OnExitAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
+                                                                                     ""))));
     }
 
     public UserTaskExecutionSet(final @MapsTo("taskName") TaskName taskName,

@@ -35,6 +35,8 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.Simu
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsAsync;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnEntryAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnExitAction;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessData;
 import org.kie.workbench.common.stunner.core.definition.annotation.Definition;
 import org.kie.workbench.common.stunner.core.definition.annotation.Property;
@@ -70,8 +72,10 @@ public class EmbeddedSubprocess extends BaseSubprocess implements DataIOModel {
                     new FontSet(),
                     new RectangleDimensionsSet(),
                     new SimulationSet(),
-                    new OnEntryAction(),
-                    new OnExitAction(),
+                    new OnEntryAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
+                                                                                             ""))),
+                    new OnExitAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
+                                                                                            ""))),
                     new IsAsync(),
                     new ProcessData());
         }

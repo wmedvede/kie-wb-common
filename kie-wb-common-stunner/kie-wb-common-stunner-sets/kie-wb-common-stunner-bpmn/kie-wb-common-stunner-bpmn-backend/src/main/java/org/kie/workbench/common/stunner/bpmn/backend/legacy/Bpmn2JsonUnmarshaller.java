@@ -4364,8 +4364,18 @@ public class Bpmn2JsonUnmarshaller {
         if (adHocCompletionCondition != null) {
             ScriptTypeValue value = new ScriptTypeTypeSerializer().parse(adHocCompletionCondition);
             FormalExpression completionConditionExpression = Bpmn2Factory.eINSTANCE.createFormalExpression();
-            completionConditionExpression.setBody(wrapInCDATABlock(value.getScript()));
-            completionConditionExpression.setLanguage(Utils.getScriptLanguageFormat(value.getLanguage()));
+            String completionExpression = value.getScript();
+            if (completionExpression == null || completionExpression.isEmpty()) {
+                //default to autocomplete
+                completionExpression = "autocomplete";
+            }
+            completionConditionExpression.setBody(wrapInCDATABlock(completionExpression));
+            String languageFormat = Utils.getScriptLanguageFormat(value.getLanguage());
+            if (languageFormat == null) {
+                //default to mvel
+                languageFormat = "mvel";
+            }
+            completionConditionExpression.setLanguage(languageFormat);
             ahsp.setCompletionCondition(completionConditionExpression);
         }
     }
@@ -4374,25 +4384,26 @@ public class Bpmn2JsonUnmarshaller {
                                        Map<String, String> properties) {
         if (properties.get("onentryactions") != null && properties.get("onentryactions").length() > 0) {
             ScriptTypeListValue onEntryActions = new ScriptTypeListTypeSerializer().parse(properties.get("onentryactions"));
-
-            //TODO check how to add more actions.
-            ScriptTypeValue onEntryAction = null;
             if (!onEntryActions.isEmpty()) {
-                onEntryAction = onEntryActions.getValues().get(0);
-
-                OnEntryScriptType onEntryScript = DroolsFactory.eINSTANCE.createOnEntryScriptType();
-                onEntryScript.setScript(wrapInCDATABlock(onEntryAction.getScript()));
-                String scriptLanguage = Utils.getScriptLanguageFormat(onEntryAction.getLanguage());
-                onEntryScript.setScriptFormat(scriptLanguage);
-
-                if (element.getExtensionValues() == null || element.getExtensionValues().size() < 1) {
-                    ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
-                    element.getExtensionValues().add(extensionElement);
+                ScriptTypeValue onEntryAction = onEntryActions.getValues().get(0);
+                if (onEntryAction.getScript() != null && !onEntryAction.getScript().isEmpty()) {
+                    OnEntryScriptType onEntryScript = DroolsFactory.eINSTANCE.createOnEntryScriptType();
+                    onEntryScript.setScript(wrapInCDATABlock(onEntryAction.getScript()));
+                    String scriptLanguage = Utils.getScriptLanguageFormat(onEntryAction.getLanguage());
+                    if (scriptLanguage == null) {
+                        //default to java
+                        scriptLanguage = "http://www.java.com/java";
+                    }
+                    onEntryScript.setScriptFormat(scriptLanguage);
+                    if (element.getExtensionValues() == null || element.getExtensionValues().size() < 1) {
+                        ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
+                        element.getExtensionValues().add(extensionElement);
+                    }
+                    FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
+                            (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_ENTRY_SCRIPT,
+                            onEntryScript);
+                    element.getExtensionValues().get(0).getValue().add(extensionElementEntry);
                 }
-                FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
-                        (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_ENTRY_SCRIPT,
-                        onEntryScript);
-                element.getExtensionValues().get(0).getValue().add(extensionElementEntry);
             }
         }
     }
@@ -4401,25 +4412,26 @@ public class Bpmn2JsonUnmarshaller {
                                       Map<String, String> properties) {
         if (properties.get("onexitactions") != null && properties.get("onexitactions").length() > 0) {
             ScriptTypeListValue onExitActions = new ScriptTypeListTypeSerializer().parse(properties.get("onexitactions"));
-
-            //TODO check how to add more actions.
-            ScriptTypeValue onExitAction = null;
             if (!onExitActions.isEmpty()) {
-                onExitAction = onExitActions.getValues().get(0);
-
-                OnExitScriptType onExitScript = DroolsFactory.eINSTANCE.createOnExitScriptType();
-                onExitScript.setScript(wrapInCDATABlock(onExitAction.getScript()));
-                String scriptLanguage = Utils.getScriptLanguageFormat(onExitAction.getLanguage());
-                onExitScript.setScriptFormat(scriptLanguage);
-
-                if (element.getExtensionValues() == null || element.getExtensionValues().size() < 1) {
-                    ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
-                    element.getExtensionValues().add(extensionElement);
+                ScriptTypeValue onExitAction = onExitActions.getValues().get(0);
+                if (onExitAction.getScript() != null && !onExitAction.getScript().isEmpty()) {
+                    OnExitScriptType onExitScript = DroolsFactory.eINSTANCE.createOnExitScriptType();
+                    onExitScript.setScript(wrapInCDATABlock(onExitAction.getScript()));
+                    String scriptLanguage = Utils.getScriptLanguageFormat(onExitAction.getLanguage());
+                    if (scriptLanguage == null) {
+                        //default to java
+                        scriptLanguage = "http://www.java.com/java";
+                    }
+                    onExitScript.setScriptFormat(scriptLanguage);
+                    if (element.getExtensionValues() == null || element.getExtensionValues().size() < 1) {
+                        ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
+                        element.getExtensionValues().add(extensionElement);
+                    }
+                    FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
+                            (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_EXIT_SCRIPT,
+                            onExitScript);
+                    element.getExtensionValues().get(0).getValue().add(extensionElementEntry);
                 }
-                FeatureMap.Entry extensionElementEntry = new SimpleFeatureMapEntry(
-                        (Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_EXIT_SCRIPT,
-                        onExitScript);
-                element.getExtensionValues().get(0).getValue().add(extensionElementEntry);
             }
         }
     }
@@ -5402,13 +5414,18 @@ public class Bpmn2JsonUnmarshaller {
 
     protected void applyScriptTaskProperties(ScriptTask scriptTask,
                                              Map<String, String> properties) {
-        if (properties.get("script") != null && properties.get("script").length() > 0) {
-            String scriptStr = properties.get("script");
-            scriptTask.setScript(wrapInCDATABlock(scriptStr));
-        }
-        if (properties.get("script_language") != null && properties.get("script_language").length() > 0) {
-            String scriptLanguage = getScriptLanguageFormat(properties);
-            scriptTask.setScriptFormat(scriptLanguage);
+        String scriptTypeStr = properties.get("script");
+        if (scriptTypeStr != null && !scriptTypeStr.isEmpty()) {
+            ScriptTypeValue value = new ScriptTypeTypeSerializer().parse(scriptTypeStr);
+            if (value.getScript() != null && !value.getScript().isEmpty()) {
+                scriptTask.setScript(wrapInCDATABlock(value.getScript()));
+            }
+            String languageFormat = Utils.getScriptLanguageFormat(value.getLanguage());
+            if (languageFormat == null) {
+                //default to java
+                languageFormat = "http://www.java.com/java";
+            }
+            scriptTask.setScriptFormat(languageFormat);
         }
     }
 
