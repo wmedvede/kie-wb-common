@@ -28,6 +28,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
 import org.guvnor.common.services.project.model.Module;
 import org.guvnor.common.services.project.model.Package;
@@ -167,7 +169,7 @@ public class DataModelerServiceHelper {
                                   fileName.indexOf("."));
     }
 
-    public Set<String> resolvePackages(final KieModule project) {
+    public Set<String> resolvePackages(final KieModule project) throws DecoderException {
         final Set<String> packages = new HashSet<String>();
 
         final Path rootPath = Paths.convert(project.getRootPath());
@@ -219,10 +221,11 @@ public class DataModelerServiceHelper {
     }
 
     private String getPackagePart(final String javaPathURI,
-                                  final Path path) {
+                                  final Path path) throws DecoderException {
         String pathURI = path.toUri().toString();
         String packagePart = pathURI.substring(javaPathURI.length() + 1,
                                                pathURI.length());
+        packagePart = new URLCodec().decode(packagePart);
         return packagePart.replace("/",
                                    ".");
     }

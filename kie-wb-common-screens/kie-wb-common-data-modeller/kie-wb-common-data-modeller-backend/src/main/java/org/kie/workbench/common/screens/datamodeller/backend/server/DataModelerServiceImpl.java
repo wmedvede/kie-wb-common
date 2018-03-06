@@ -30,6 +30,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.Entity;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.guvnor.common.services.backend.exceptions.ExceptionUtilities;
 import org.guvnor.common.services.backend.validation.GenericValidator;
 import org.guvnor.common.services.project.model.Module;
@@ -1354,7 +1356,7 @@ public class DataModelerServiceImpl
      * Given a path within a module calculates the expected class name for the given class.
      */
     private String calculateClassName(final Module module,
-                                      final Path path) {
+                                      final Path path) throws DecoderException {
 
         String rootPathURI = module.getRootPath().toURI();
         String pathURI = path.toURI();
@@ -1384,6 +1386,8 @@ public class DataModelerServiceImpl
         if (strPath == null) {
             return null;
         }
+
+        strPath = new URLCodec().decode(strPath);
 
         strPath = strPath.replace("/",
                                   ".");

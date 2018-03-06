@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.apache.commons.codec.net.URLCodec;
 import org.appformer.maven.support.DependencyFilter;
 import org.appformer.maven.support.PomModel;
 import org.drools.compiler.kie.builder.impl.InternalKieModule;
@@ -398,7 +399,14 @@ public class Builder implements Serializable {
     }
 
     private String destinationPath(final Path resource) {
-        final String destinationPath = resource.toUri().toString().substring(projectPrefix.length());
+
+        String destinationPath = null;
+
+        try {
+            destinationPath = new URLCodec().decode(resource.toUri().toString().substring(projectPrefix.length()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         if (destinationPath.startsWith("/")) {
             // File in sub module
