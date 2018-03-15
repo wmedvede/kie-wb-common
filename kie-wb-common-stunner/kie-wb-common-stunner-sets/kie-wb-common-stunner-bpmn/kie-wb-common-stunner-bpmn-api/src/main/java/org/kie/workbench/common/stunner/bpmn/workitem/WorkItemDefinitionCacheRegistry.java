@@ -25,12 +25,12 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Typed;
 
 @Dependent
-@Typed(WorkItemDefinitionInMemoryRegistry.class)
-public class WorkItemDefinitionInMemoryRegistry implements WorkItemDefinitionRegistry {
+@Typed(WorkItemDefinitionCacheRegistry.class)
+public class WorkItemDefinitionCacheRegistry implements WorkItemDefinitionRegistry {
 
     private final Map<String, WorkItemDefinition> definitions;
 
-    public WorkItemDefinitionInMemoryRegistry() {
+    public WorkItemDefinitionCacheRegistry() {
         this.definitions = new HashMap<>();
     }
 

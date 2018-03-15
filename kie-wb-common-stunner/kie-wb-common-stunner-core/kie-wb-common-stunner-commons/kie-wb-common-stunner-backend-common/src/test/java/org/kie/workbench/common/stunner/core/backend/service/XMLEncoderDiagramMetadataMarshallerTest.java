@@ -31,7 +31,7 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(MockitoJUnitRunner.class)
 public class XMLEncoderDiagramMetadataMarshallerTest {
 
-    private static final String TEST1 = "org/kie/workbench/common/stunner/backend/service/test1.meta";
+    private static final String TEST1 = "org/kie/workbench/common/stunner/core/backend/test1.meta";
 
     private XMLEncoderDiagramMetadataMarshaller tested;
 

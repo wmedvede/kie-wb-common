@@ -26,7 +26,7 @@ import javax.enterprise.inject.Specializes;
 import javax.inject.Inject;
 
 import org.kie.workbench.common.stunner.bpmn.backend.workitem.WorkItemDefinitionBackendRegistry;
-import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinitionInMemoryRegistry;
+import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinitionCacheRegistry;
 import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinitionMetadataRegistry;
 import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinitionService;
 import org.kie.workbench.common.stunner.core.backend.service.BackendFileSystemManager;
@@ -58,7 +58,7 @@ public class WorkItemDefinitionBackendShowcaseRegistry
     }
 
     @Inject
-    public WorkItemDefinitionBackendShowcaseRegistry(final WorkItemDefinitionInMemoryRegistry registry,
+    public WorkItemDefinitionBackendShowcaseRegistry(final WorkItemDefinitionCacheRegistry registry,
                                                      final WorkItemDefinitionService service,
                                                      final WorkItemDefinitionMetadataRegistry metadataRegistry,
                                                      final BackendFileSystemManager backendFileSystemManager) {

@@ -35,7 +35,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.kie.workbench.common.stunner.bpmn.client.resources.BPMNImageResources;
 import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinition;
-import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinitionInMemoryRegistry;
+import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinitionCacheRegistry;
 import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinitionMetadataRegistry;
 import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinitionRegistry;
 import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinitionService;
@@ -62,14 +62,14 @@ public class WorkItemDefinitionClientRegistry
 
     private final SessionManager sessionManager;
     private final Caller<WorkItemDefinitionService> service;
-    private final ManagedInstance<WorkItemDefinitionInMemoryRegistry> registryInstances;
+    private final ManagedInstance<WorkItemDefinitionCacheRegistry> registryInstances;
     private final WorkItemDefinitionMetadataRegistry metadataRegistry;
-    private final Map<String, WorkItemDefinitionInMemoryRegistry> sessionRegistries;
+    private final Map<String, WorkItemDefinitionCacheRegistry> sessionRegistries;
 
     @Inject
     public WorkItemDefinitionClientRegistry(final SessionManager sessionManager,
                                             final Caller<WorkItemDefinitionService> service,
-                                            final ManagedInstance<WorkItemDefinitionInMemoryRegistry> registryInstances,
+                                            final ManagedInstance<WorkItemDefinitionCacheRegistry> registryInstances,
                                             final WorkItemDefinitionMetadataRegistry metadataRegistry) {
         this.sessionManager = sessionManager;
         this.service = service;
@@ -130,16 +130,16 @@ public class WorkItemDefinitionClientRegistry
         removeRegistry(sessionDestroyedEvent.getSessionUUID());
     }
 
-    private WorkItemDefinitionInMemoryRegistry getCurrentSessionRegistry() {
+    private WorkItemDefinitionCacheRegistry getCurrentSessionRegistry() {
         return getRegistry(sessionManager.getCurrentSession());
     }
 
-    private WorkItemDefinitionInMemoryRegistry getRegistry(final ClientSession session) {
+    private WorkItemDefinitionCacheRegistry getRegistry(final ClientSession session) {
         return obtainRegistry(session.getSessionUUID());
     }
 
-    private WorkItemDefinitionInMemoryRegistry obtainRegistry(final String sessionUUID) {
-        WorkItemDefinitionInMemoryRegistry registry = sessionRegistries.get(sessionUUID);
+    private WorkItemDefinitionCacheRegistry obtainRegistry(final String sessionUUID) {
+        WorkItemDefinitionCacheRegistry registry = sessionRegistries.get(sessionUUID);
         if (null == registry) {
             registry = registryInstances.get();
             sessionRegistries.put(sessionUUID,
@@ -149,7 +149,7 @@ public class WorkItemDefinitionClientRegistry
     }
 
     private void removeRegistry(final String sessionUUID) {
-        final WorkItemDefinitionInMemoryRegistry registry = sessionRegistries.remove(sessionUUID);
+        final WorkItemDefinitionCacheRegistry registry = sessionRegistries.remove(sessionUUID);
         if (null != registry) {
             registry.clear();
             registryInstances.destroy(registry);

@@ -37,7 +37,7 @@ public class WorkItemDefinitionMetadataRegistry
 
     private final Function<Metadata, Path> rootPathMetadataSupplier;
     private BiConsumer<Path, Consumer<Collection<WorkItemDefinition>>> workItemsByPathSupplier;
-    private Supplier<WorkItemDefinitionInMemoryRegistry> registrySupplier;
+    private Supplier<WorkItemDefinitionCacheRegistry> registrySupplier;
 
     @Inject
     public WorkItemDefinitionMetadataRegistry() {
@@ -53,7 +53,7 @@ public class WorkItemDefinitionMetadataRegistry
         return this;
     }
 
-    public WorkItemDefinitionMetadataRegistry setRegistrySupplier(final Supplier<WorkItemDefinitionInMemoryRegistry> registrySupplier) {
+    public WorkItemDefinitionMetadataRegistry setRegistrySupplier(final Supplier<WorkItemDefinitionCacheRegistry> registrySupplier) {
         this.registrySupplier = registrySupplier;
         return this;
     }
@@ -77,7 +77,7 @@ public class WorkItemDefinitionMetadataRegistry
         return getMemoryRegistry().get(name);
     }
 
-    public WorkItemDefinitionInMemoryRegistry getMemoryRegistry() {
+    public WorkItemDefinitionCacheRegistry getMemoryRegistry() {
         return registrySupplier.get();
     }
 }

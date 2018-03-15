@@ -2841,7 +2841,7 @@ public class BPMNDiagramMarshallerTest {
         return (Iterator<Element>) diagram.getGraph().nodes().iterator();
     }
 
-    private InputStream loadStream(String path) {
+    private static InputStream loadStream(String path) {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
     }
 

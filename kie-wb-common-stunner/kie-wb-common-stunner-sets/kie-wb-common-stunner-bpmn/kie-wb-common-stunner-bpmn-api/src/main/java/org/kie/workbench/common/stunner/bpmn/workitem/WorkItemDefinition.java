@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.workitem;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.kie.workbench.common.stunner.core.util.HashUtil;
 
 @Portable
 public class WorkItemDefinition {
@@ -110,5 +111,37 @@ public class WorkItemDefinition {
 
     public String getResults() {
         return results;
+    }
+
+    @Override
+    public int hashCode() {
+        return HashUtil.combineHashCodes(super.hashCode(),
+                                         name.hashCode(),
+                                         description.hashCode(),
+                                         category.hashCode(),
+                                         displayName.hashCode(),
+                                         documentation.hashCode(),
+                                         iconData.hashCode(),
+                                         defaultHandler.hashCode(),
+                                         parameters.hashCode(),
+                                         results.hashCode());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof WorkItemDefinition) {
+            WorkItemDefinition other = (WorkItemDefinition) o;
+            return super.equals(other) &&
+                    name.equals(other.name) &&
+                    description.equals(other.description) &&
+                    category.equals(other.category) &&
+                    displayName.equals(other.displayName) &&
+                    documentation.equals(other.documentation) &&
+                    iconData.equals(other.iconData) &&
+                    defaultHandler.equals(other.defaultHandler) &&
+                    parameters.equals(other.parameters) &&
+                    results.equals(other.results);
+        }
+        return false;
     }
 }
