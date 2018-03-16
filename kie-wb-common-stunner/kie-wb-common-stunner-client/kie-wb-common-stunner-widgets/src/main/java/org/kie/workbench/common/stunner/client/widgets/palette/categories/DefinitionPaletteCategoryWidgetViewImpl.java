@@ -20,6 +20,8 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.user.client.DOM;
+import org.jboss.errai.common.client.dom.DOMUtil;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.common.client.dom.Document;
 import org.jboss.errai.common.client.dom.HTMLElement;
@@ -92,6 +94,21 @@ public class DefinitionPaletteCategoryWidgetViewImpl implements DefinitionPalett
         floatingPanel.appendChild(groupHeader);
 
         floatingPanel.appendChild(groupWidget.getElement());
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        if (visible) {
+            floatingPanel.getStyle().removeProperty("display");
+        } else {
+            floatingPanel.getStyle().setProperty("display", "none");
+        }
+
+    }
+
+    @Override
+    public boolean isVisible() {
+        return !"none".equals(floatingPanel.getStyle().getPropertyValue("display"));
     }
 
     @EventHandler("categoryIcon")

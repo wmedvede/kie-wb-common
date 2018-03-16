@@ -16,6 +16,8 @@
 
 package org.kie.workbench.common.stunner.client.widgets.palette;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
@@ -67,7 +69,7 @@ public class BS3PaletteWidgetImpl
     private Consumer<PaletteIDefinitionItemEvent> itemDropCallback;
     private Consumer<PaletteIDefinitionItemEvent> itemDragStartCallback;
     private Consumer<PaletteIDefinitionItemEvent> itemDragUpdateCallback;
-
+    private Map<String, DefinitionPaletteCategoryWidget> categoryWidgets = new HashMap<>();
     private BS3PaletteWidgetView view;
 
     @Inject
@@ -195,17 +197,19 @@ public class BS3PaletteWidgetImpl
     protected AbstractPalette<DefaultPaletteDefinition> bind() {
         if (null != paletteDefinition) {
             paletteDefinition.getItems().forEach(item -> {
-                //TODO borrar itero los items
-                //y creo el elemento que toca, segun si es una categoria o no.
-
-                final BS3PaletteWidgetPresenter widget = item instanceof DefaultPaletteCategory ?
-                        categoryWidgetInstances.get() :
-                        definitionPaletteItemWidgetInstances.get();
-
+                BS3PaletteWidgetPresenter widget;
+                if (item instanceof DefaultPaletteCategory) {
+                    widget = categoryWidgetInstances.get();
+                    categoryWidgets.put(item.getId(),
+                                        (DefinitionPaletteCategoryWidget) widget);
+                } else {
+                    widget = definitionPaletteItemWidgetInstances.get();
+                }
                 //registro el itemMouseHandler para cada elemento de la paleta.
                 //este es el unico registro de eventos q en realidad se hace sobre los elementos internos.
                 final Consumer<PaletteItemMouseEvent> itemMouseEventHandler =
-                        event -> handleMouseDownEvent(item, event);
+                        event -> handleMouseDownEvent(item,
+                                                      event);
                 widget.initialize(item,
                                   getShapeFactory(),
                                   itemMouseEventHandler);
@@ -244,27 +248,13 @@ public class BS3PaletteWidgetImpl
      * Recibe la notificacion de que uno del los items internos de la paleta ha sido cliqueado.
      * Basicamente lo que hay que hacer es determinar para el item correspondiente corresponde comenzar
      * el dragg and dropp.
-     *
      */
     private void handleMouseDownEvent(final DefaultPaletteItem item,
                                       final PaletteItemMouseEvent event) {
         PortablePreconditions.checkNotNull("event",
                                            event);
-        if (event.getId().equals(item.getId())) {
-            //TODO remove, El evento podria ser que que estan haciendo click en la propia categoria
-            //o en un subitem dentro de la categoria.
-            //este efecto en Stunner se va, ya que no queremos tener mas ese efecto de hacer dragg
-            //sobre la categoria completa y arrastrar el elemento por defecto.
-            //Peeeero en DMN tal vez si hay q mantenerlo.
-
-            Window.alert("we don't want dragg from the category icon any more.");
-            /*
-            final String catDefId = item.getDefinitionId();
-            BS3PaletteWidgetImpl.this.onPaletteItemMouseDown(catDefId,
-                                                             event.getMouseX(),
-                                                             event.getMouseY());
-            */
-
+        if (categoryWidgets.containsKey(event.getId())) {
+            showCategory(event.getId());
         } else {
             //pues sino el mouse click es directamente sobre un elemento
             final String defId = getItemDefinitionId(event.getId());
@@ -277,6 +267,13 @@ public class BS3PaletteWidgetImpl
     private String getItemDefinitionId(final String itemId) {
         return DefaultPaletteUtils.getPaletteItemDefinitionId(paletteDefinition,
                                                               itemId);
+    }
+
+    private void showCategory(final String categoryId) {
+        //Window.alert("Please show this Category: " + categoryId);
+        categoryWidgets.entrySet().stream().filter(entry -> !entry.getKey().equals(categoryId)).forEach(entry -> entry.getValue().setVisible(false));
+        DefinitionPaletteCategoryWidget widget = categoryWidgets.get(categoryId);
+        widget.setVisible(!widget.isVisible());
     }
 
     private void onPaletteItemMouseDown(final String id,

@@ -33,6 +33,10 @@ public interface DefinitionPaletteCategoryWidgetView extends UberElement<Definit
 
     void addGroup(DefinitionPaletteGroupWidget groupWidget);
 
+    void setVisible(boolean visible);
+
+    boolean isVisible();
+
     interface Presenter extends BS3PaletteWidgetPresenter<DefaultPaletteCategory> {
 
         DefaultPaletteCategory getCategory();

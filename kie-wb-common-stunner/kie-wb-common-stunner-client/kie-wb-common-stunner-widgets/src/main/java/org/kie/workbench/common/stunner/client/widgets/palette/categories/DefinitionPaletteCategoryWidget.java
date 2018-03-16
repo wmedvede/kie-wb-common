@@ -79,15 +79,14 @@ public class DefinitionPaletteCategoryWidget implements DefinitionPaletteCategor
                     shapeFactory);
     }
 
-    public void show() {
-
+    public void setVisible(final boolean visible) {
+        view.setVisible(visible);
     }
 
-    public void hide() {
-
+    public boolean isVisible() {
+        return view.isVisible();
     }
 
-    public void
     private void renderItems(final List<DefaultPaletteItem> items,
                              final ShapeFactory<?, ?> shapeFactory) {
         if (items != null && !items.isEmpty()) {
