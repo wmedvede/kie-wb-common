@@ -17,6 +17,8 @@
 package org.kie.workbench.common.stunner.bpmn.client.components.palette;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -30,6 +32,8 @@ import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.kie.workbench.common.stunner.bpmn.client.resources.BPMNImageResources;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNCategories;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
+import org.kie.workbench.common.stunner.bpmn.definition.EndNoneEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateTimerEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.Lane;
 import org.kie.workbench.common.stunner.bpmn.definition.NoneTask;
 import org.kie.workbench.common.stunner.bpmn.definition.ParallelGateway;
@@ -42,6 +46,7 @@ import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinition;
 import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinitionRegistry;
 import org.kie.workbench.common.stunner.core.api.DefinitionManager;
 import org.kie.workbench.common.stunner.core.client.canvas.AbstractCanvasHandler;
+import org.kie.workbench.common.stunner.core.client.components.palette.AbstractPaletteDefinitionBuilder;
 import org.kie.workbench.common.stunner.core.client.components.palette.DefaultPaletteCategory;
 import org.kie.workbench.common.stunner.core.client.components.palette.DefaultPaletteDefinition;
 import org.kie.workbench.common.stunner.core.client.components.palette.DefaultPaletteDefinitionBuilders.CategoryBuilder;
@@ -73,10 +78,21 @@ public class BPMNPaletteDefinitionBuilder
                          category -> category
                                  .bindToDefinition(SequenceFlow.class)
                                  .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categorySequence().getSafeUri())))
-                    .put(BPMNCategories.EVENTS,
+                    .put(BPMNCategories.START_EVENTS,
                          category -> category
                                  .bindToDefinition(StartNoneEvent.class)
-                                 .useGlyph(Builder.build(BPMNImageResources.INSTANCE.cagetoryEvents().getSafeUri())))
+                                 .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryStartEvents().getSafeUri())))
+                    //TODO en realidad ahora no tendria sentido tener un nodo por defecto asociado a una Categoria.
+                    //pues en la nueva paleta las cosas van mezcladas
+                    //BUENO en realidad tal vez tenga sentido para DMN??
+                    .put(BPMNCategories.INTERMEDIATE_EVENTS,
+                         category -> category
+                                 .bindToDefinition(IntermediateTimerEvent.class)
+                                 .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryIntermediateEvents().getSafeUri())))
+                    .put(BPMNCategories.END_EVENTS,
+                         category -> category
+                                 .bindToDefinition(EndNoneEvent.class)
+                                 .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryEndEvents().getSafeUri())))
                     .put(BPMNCategories.GATEWAYS,
                          category -> category
                                  .bindToDefinition(ParallelGateway.class)
@@ -88,6 +104,50 @@ public class BPMNPaletteDefinitionBuilder
                     .put(BPMNCategories.SERVICE_TASKS,
                          category -> category
                                  .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryServiceTasks().getSafeUri())));
+
+    //palette categories order customization.
+    private static final AbstractPaletteDefinitionBuilder.ItemPriorityProvider ITEM_PRIORITIES = id -> {
+        if (BPMNCategories.START_EVENTS.equals(id)) {
+            return 100;
+        }
+        if (BPMNCategories.INTERMEDIATE_EVENTS.equals(id)) {
+            return 200;
+        }
+        if (BPMNCategories.END_EVENTS.equals(id)) {
+            return 300;
+        }
+        if (BPMNCategories.ACTIVITIES.equals(id)) {
+            return 400;
+        }
+        if (BPMNCategories.GATEWAYS.equals(id)) {
+            return 500;
+        }
+        if (BPMNCategories.CONTAINERS.equals(id)) {
+            return 600;
+        }
+        if (BPMNCategories.SERVICE_TASKS.equals(id)) {
+            return 700;
+        }
+
+        //TODO remove this experimental priority
+        if ("org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent".equals(id)) {
+            return 1000;
+        }
+
+        //TODO remove this experimental priority
+        if ("org.kie.workbench.common.stunner.bpmn.definition.BaseCatchingIntermediateEvent".equals(id)) {
+            return 2000;
+        }
+
+        return -1;
+    };
+
+    private static final Map<String, String> CUSTOM_GROUPS = new HashMap<String, String>() {
+        {
+            put(Lane.class.getName(),
+                "org.kie.workbench.common.stunner.bpmn.definition.customGroup.Containers");
+        }
+    };
 
     private final DefinitionManager definitionManager;
     private final ExpandedPaletteDefinitionBuilder paletteDefinitionBuilder;
@@ -117,10 +177,12 @@ public class BPMNPaletteDefinitionBuilder
     public void init() {
         paletteDefinitionBuilder
                 .itemFilter(isDefinitionAllowed())
+                .itemPriorities(ITEM_PRIORITIES)
                 .categoryFilter(category -> !BPMNCategories.CONNECTING_OBJECTS.equals(category))
                 .categoryDefinitionIdProvider(CATEGORY_DEFINITION.definitionIdProvider())
                 .categoryGlyphProvider(CATEGORY_DEFINITION.glyphProvider())
-                .categoryMessages(CATEGORY_DEFINITION.categoryMessageProvider(translationService));
+                .categoryMessages(CATEGORY_DEFINITION.categoryMessageProvider(translationService))
+                .customGroupIdProvider(CUSTOM_GROUPS::get);
     }
 
     @Override

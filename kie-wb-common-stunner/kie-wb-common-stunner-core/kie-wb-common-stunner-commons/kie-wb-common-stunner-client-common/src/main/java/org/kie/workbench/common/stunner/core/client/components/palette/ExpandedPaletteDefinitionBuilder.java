@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import org.kie.workbench.common.stunner.core.client.components.palette.DefaultPaletteDefinitionBuilders.CategoryBuilder;
 import org.kie.workbench.common.stunner.core.client.components.palette.DefaultPaletteDefinitionBuilders.GroupBuilder;
 import org.kie.workbench.common.stunner.core.client.components.palette.DefaultPaletteDefinitionBuilders.ItemBuilder;
+import org.kie.workbench.common.stunner.core.client.components.palette.DefaultPaletteDefinitionProviders.DefaultCustomGroupMessageProvider;
 import org.kie.workbench.common.stunner.core.client.components.palette.DefaultPaletteDefinitionProviders.DefaultMessageProvider;
 import org.kie.workbench.common.stunner.core.client.components.palette.DefaultPaletteDefinitionProviders.DefaultMorphGroupMessageProvider;
 import org.kie.workbench.common.stunner.core.client.service.ClientFactoryService;
@@ -46,6 +47,8 @@ public class ExpandedPaletteDefinitionBuilder
     private Function<String, Glyph> categoryGlyphProvider;
     private ItemMessageProvider groupMessageProvider;
     private ItemMessageProvider categoryMessageProvider;
+    private Function<String, String> customGroupIdProvider;
+    private ItemMessageProvider customGroupMessageProvider;
 
     public ExpandedPaletteDefinitionBuilder categoryDefinitionIdProvider(final Function<String, String> categoryDefinitionIdProvider) {
         this.categoryDefinitionIdProvider = categoryDefinitionIdProvider;
@@ -67,11 +70,23 @@ public class ExpandedPaletteDefinitionBuilder
         return this;
     }
 
+    public ExpandedPaletteDefinitionBuilder customGroupIdProvider(final Function<String, String> customGroupIdProvider) {
+        this.customGroupIdProvider = customGroupIdProvider;
+        return this;
+    }
+
+    public ExpandedPaletteDefinitionBuilder customGroupMessages(final ItemMessageProvider provider) {
+        this.customGroupMessageProvider = provider;
+        return this;
+    }
+
     @Inject
     public ExpandedPaletteDefinitionBuilder(final DefinitionUtils definitionUtils,
                                             final ClientFactoryService clientFactoryServices,
                                             final StunnerTranslationService translationService) {
-        super(definitionUtils, clientFactoryServices, translationService);
+        super(definitionUtils,
+              clientFactoryServices,
+              translationService);
     }
 
     @Override
@@ -81,6 +96,7 @@ public class ExpandedPaletteDefinitionBuilder
                 .categoryDefinitionIdProvider(id -> null)
                 .categoryGlyphProvider(DefaultPaletteDefinitionProviders.DEFAULT_CATEGORY_GLYPH_PROVIDER)
                 .groupMessages(new DefaultMorphGroupMessageProvider(translationService))
+                .customGroupMessages(new DefaultCustomGroupMessageProvider(translationService))
                 .categoryMessages(new DefaultMessageProvider());
     }
 
@@ -95,11 +111,13 @@ public class ExpandedPaletteDefinitionBuilder
         if (categoryFilter.test(categoryId)) {
             DefaultPaletteCategory category = (DefaultPaletteCategory) items.get(categoryId);
             if (null == category) {
+                final int catPriority = getItemPriority(categoryId);
                 final String catDefId = categoryDefinitionIdProvider.apply(categoryId);
                 final String catTitle = categoryMessageProvider.getTitle(categoryId);
                 final String catDesc = categoryMessageProvider.getDescription(categoryId);
                 final Glyph categoryGlyph = categoryGlyphProvider.apply(categoryId);
                 category = new CategoryBuilder()
+                        .setPriority(catPriority)
                         .setItemId(categoryId)
                         .setDefinitionId(catDefId)
                         .setTitle(catTitle)
@@ -107,7 +125,8 @@ public class ExpandedPaletteDefinitionBuilder
                         .setTooltip(catTitle)
                         .setGlyph(categoryGlyph)
                         .build();
-                items.put(categoryId, category);
+                items.put(categoryId,
+                          category);
             }
             final MorphDefinition morphDefinition = definitionUtils.getMorphDefinition(definition);
             final boolean hasMorphBase = null != morphDefinition;
@@ -121,9 +140,11 @@ public class ExpandedPaletteDefinitionBuilder
                             .filter(g -> g.getId().equals(morphBaseId))
                             .findFirst();
                     if (!groupOp.isPresent()) {
+                        final int groupPriority = getItemPriority(morphBaseId);
                         final String groupTitle = groupMessageProvider.getTitle(morphBaseId);
                         final String groupDesc = groupMessageProvider.getDescription(morphBaseId);
                         group = new GroupBuilder()
+                                .setPriority(groupPriority)
                                 .setItemId(morphBaseId)
                                 .setDefinitionId(morphDefault)
                                 .setTitle(groupTitle)
@@ -134,12 +155,38 @@ public class ExpandedPaletteDefinitionBuilder
                         group = (DefaultPaletteGroup) groupOp.get();
                     }
                 }
+            } else {
+                //item has no morph base, but might belong to a custom group
+                final String customGroupId = customGroupIdProvider != null ? customGroupIdProvider.apply(id) : null;
+                if (customGroupId != null && groupFilter.test(customGroupId)) {
+                    final Optional<DefaultPaletteItem> groupOp = category.getItems().stream()
+                            .filter(g -> g.getId().equals(customGroupId))
+                            .findFirst();
+                    if (!groupOp.isPresent()) {
+                        final int groupPriority = getItemPriority(customGroupId);
+                        final String groupTitle = customGroupMessageProvider.getTitle(customGroupId);
+                        final String groupDesc = groupMessageProvider.getDescription(customGroupId);
+                        group = new GroupBuilder()
+                                .setPriority(groupPriority)
+                                .setItemId(customGroupId)
+                                //TODO check ir we need to set the customGroupId here
+                                //.setDefinitionId(morphDefault)
+                                .setTitle(groupTitle)
+                                .setDescription(groupDesc)
+                                .build();
+                        category.getItems().add(group);
+                    } else {
+                        group = (DefaultPaletteGroup) groupOp.get();
+                    }
+                }
             }
 
+            final int itemPriority = getItemPriority(id);
             final String title = definitionAdapter.getTitle(definition);
             final String description = definitionAdapter.getDescription(definition);
             final DefaultPaletteItem item =
                     new ItemBuilder()
+                            .setPriority(itemPriority)
                             .setItemId(id)
                             .setDefinitionId(id)
                             .setTitle(title)
@@ -148,7 +195,8 @@ public class ExpandedPaletteDefinitionBuilder
 
             if (null != group) {
                 if (null != morphDefault && morphDefault.equals(id)) {
-                    group.getItems().add(0, item);
+                    group.getItems().add(0,
+                                         item);
                 } else {
                     group.getItems().add(item);
                 }

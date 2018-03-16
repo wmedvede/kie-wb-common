@@ -43,9 +43,20 @@ public interface BPMNImageResources extends ClientBundleWithLookup {
     @DataResource.MimeType("image/svg+xml")
     DataResource categoryGateway();
 
-    @ClientBundle.Source("images/categories/event.svg")
+    //TODO set the proper icon in the startEvents.svg file
+    @ClientBundle.Source("images/categories/startEvents.svg")
     @DataResource.MimeType("image/svg+xml")
-    DataResource categoryEvent();
+    DataResource categoryStartEvents();
+
+    //TODO set the proper icon in the intermediateEvents.svg file
+    @ClientBundle.Source("images/categories/intermediateEvents.svg")
+    @DataResource.MimeType("image/svg+xml")
+    DataResource categoryIntermediateEvents();
+
+    //TODO set the proper icon in the endEvents.svg file
+    @ClientBundle.Source("images/categories/endEvents.svg")
+    @DataResource.MimeType("image/svg+xml")
+    DataResource categoryEndEvents();
 
     @ClientBundle.Source("images/categories/library.svg")
     @DataResource.MimeType("image/svg+xml")
@@ -191,10 +202,6 @@ public interface BPMNImageResources extends ClientBundleWithLookup {
 
     @ClientBundle.Source("images/icons/default-service-node-icon.png")
     ImageResource serviceNodeIcon();
-
-    @ClientBundle.Source("images/misc/circle.svg")
-    @DataResource.MimeType("image/svg+xml")
-    DataResource cagetoryEvents();
 
     //This is a hack for OOME related to SVG, or image/svg+xml;base64 URLs
     @Source("images/glyph-oome-hack.png")
