@@ -79,7 +79,8 @@
     width: auto;
     min-width: 12em;
     border-left-color: #fff;
-    display: block;
+    /* TODO remove aca esta la magia, cuando se haga el hover pues el kie-palette-flyout pasa a tener display:block  */
+    /*display: block;*/
 }
 
 .kie-palette .list-group-item:hover > p {

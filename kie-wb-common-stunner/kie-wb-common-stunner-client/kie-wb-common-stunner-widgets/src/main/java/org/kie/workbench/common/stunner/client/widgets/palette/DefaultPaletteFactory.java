@@ -82,6 +82,8 @@ public class DefaultPaletteFactory<H extends AbstractCanvasHandler>
 
     private DefaultPaletteWidget getPaletteWidget(final H canvasHandler) {
         final DefaultPaletteWidget palette = palettes.get();
+
+        //TODO register listeners for the palette events cicle
         palette.onItemDrop(event -> buildCanvasShapeEvent.fire(new BuildCanvasShapeEvent(canvasHandler,
                                                                                          event.getDefintion(),
                                                                                          event.getFactory(),

@@ -69,7 +69,10 @@ public class BS3PaletteWidgetViewImpl implements BS3PaletteWidgetView,
                               double y,
                               double width,
                               double height) {
+        //TODO remove, ok ya sabemos que hay q comenzar a hacer drag de un item
+        //recuperamos el icono q habria q presentar
         final Glyph glyph = presenter.getShapeGlyph(itemId);
+        //TODO remove, ya tenemos un componente de base ncargado de hacer el drag el icono.!!
         itemDragProxy = shapeGlyphDragHandler.show(new ShapeGlyphDragHandler.Item() {
                                                        @Override
                                                        public Glyph getShape() {
@@ -92,6 +95,9 @@ public class BS3PaletteWidgetViewImpl implements BS3PaletteWidgetView,
                                                        @Override
                                                        public void onStart(int x,
                                                                            int y) {
+                                                           //TODO remove, guay, ese componente ya informa a la paleta
+                                                           //sobre el ciclo del dragg q se esta ejecutando.
+                                                           //informa a la paleta q arranca el drag
                                                            presenter.onDragStart(itemId,
                                                                                  x,
                                                                                  y);
@@ -100,6 +106,7 @@ public class BS3PaletteWidgetViewImpl implements BS3PaletteWidgetView,
                                                        @Override
                                                        public void onMove(int x,
                                                                           int y) {
+                                                           //TODO remove, informa a la paleta que el elemento se esta moviendo
                                                            presenter.onDragProxyMove(itemId,
                                                                                      (double) x,
                                                                                      (double) y);
@@ -108,6 +115,7 @@ public class BS3PaletteWidgetViewImpl implements BS3PaletteWidgetView,
                                                        @Override
                                                        public void onComplete(int x,
                                                                               int y) {
+                                                           //TODO remove, informa a la paleta que el drag del elemento ha terminado
                                                            presenter.onDragProxyComplete(itemId,
                                                                                          (double) x,
                                                                                          (double) y);

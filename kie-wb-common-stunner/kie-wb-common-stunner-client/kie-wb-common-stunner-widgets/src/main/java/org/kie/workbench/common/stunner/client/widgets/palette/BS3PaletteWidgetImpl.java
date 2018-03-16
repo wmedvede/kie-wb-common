@@ -24,6 +24,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.Window;
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
@@ -114,6 +115,9 @@ public class BS3PaletteWidgetImpl
         return this;
     }
 
+    /***
+     * TODO remove the view notifies me that a dragg on en element has started.
+     */
     @SuppressWarnings("unchecked")
     public void onDragStart(final String definitionId,
                             final double x,
@@ -122,6 +126,7 @@ public class BS3PaletteWidgetImpl
             final Object definition = clientFactoryServices.getClientFactoryManager().newDefinition(definitionId);
             final ShapeFactory<?, ? extends Shape> factory = getShapeFactory();
             // Fire the callback as shape drag starts.
+            //TODO finally notify interested clients of the pallete that the dragg has started.
             itemDragStartCallback.accept(new PaletteIDefinitionItemEvent(definitionId,
                                                                          definition,
                                                                          factory,
@@ -130,6 +135,7 @@ public class BS3PaletteWidgetImpl
         }
     }
 
+    //TODO remove the view notifies me, that the dragged element is being moved.
     @Override
     public void onDragProxyMove(String definitionId,
                                 double x,
@@ -138,6 +144,7 @@ public class BS3PaletteWidgetImpl
             final Object definition = clientFactoryServices.getClientFactoryManager().newDefinition(definitionId);
             final ShapeFactory<?, ? extends Shape> factory = getShapeFactory();
             // Fire the callback as shape dragged over the target canvas.
+            //TODO finally notify interested clients that the dragged elemet is being moved.
             itemDragUpdateCallback.accept(new PaletteIDefinitionItemEvent(definitionId,
                                                                           definition,
                                                                           factory,
@@ -188,9 +195,15 @@ public class BS3PaletteWidgetImpl
     protected AbstractPalette<DefaultPaletteDefinition> bind() {
         if (null != paletteDefinition) {
             paletteDefinition.getItems().forEach(item -> {
+                //TODO borrar itero los items
+                //y creo el elemento que toca, segun si es una categoria o no.
+
                 final BS3PaletteWidgetPresenter widget = item instanceof DefaultPaletteCategory ?
                         categoryWidgetInstances.get() :
                         definitionPaletteItemWidgetInstances.get();
+
+                //registro el itemMouseHandler para cada elemento de la paleta.
+                //este es el unico registro de eventos q en realidad se hace sobre los elementos internos.
                 final Consumer<PaletteItemMouseEvent> itemMouseEventHandler =
                         event -> handleMouseDownEvent(item, event);
                 widget.initialize(item,
@@ -202,6 +215,8 @@ public class BS3PaletteWidgetImpl
         return this;
     }
 
+    //TODO the view notifies me that the dragg has finished. The element was e.g. droped in the desired position
+    //in the canvas.
     @Override
     @SuppressWarnings("unchecked")
     public void onDragProxyComplete(final String definitionId,
@@ -211,6 +226,7 @@ public class BS3PaletteWidgetImpl
             final Object definition = clientFactoryServices.getClientFactoryManager().newDefinition(definitionId);
             final ShapeFactory<?, ? extends Shape> factory = getShapeFactory();
             // Fire the callback as shape dropped onto the target canvas.
+            //TODO remove, notify interesed parties that an element has been dragged into the canvas.
             itemDropCallback.accept(new PaletteIDefinitionItemEvent(definitionId,
                                                                     definition,
                                                                     factory,
@@ -224,16 +240,33 @@ public class BS3PaletteWidgetImpl
         return getShapeFactory().getGlyph(definitionId);
     }
 
+    /**
+     * Recibe la notificacion de que uno del los items internos de la paleta ha sido cliqueado.
+     * Basicamente lo que hay que hacer es determinar para el item correspondiente corresponde comenzar
+     * el dragg and dropp.
+     *
+     */
     private void handleMouseDownEvent(final DefaultPaletteItem item,
                                       final PaletteItemMouseEvent event) {
         PortablePreconditions.checkNotNull("event",
                                            event);
         if (event.getId().equals(item.getId())) {
+            //TODO remove, El evento podria ser que que estan haciendo click en la propia categoria
+            //o en un subitem dentro de la categoria.
+            //este efecto en Stunner se va, ya que no queremos tener mas ese efecto de hacer dragg
+            //sobre la categoria completa y arrastrar el elemento por defecto.
+            //Peeeero en DMN tal vez si hay q mantenerlo.
+
+            Window.alert("we don't want dragg from the category icon any more.");
+            /*
             final String catDefId = item.getDefinitionId();
             BS3PaletteWidgetImpl.this.onPaletteItemMouseDown(catDefId,
                                                              event.getMouseX(),
                                                              event.getMouseY());
+            */
+
         } else {
+            //pues sino el mouse click es directamente sobre un elemento
             final String defId = getItemDefinitionId(event.getId());
             BS3PaletteWidgetImpl.this.onPaletteItemMouseDown(defId,
                                                              event.getMouseX(),
