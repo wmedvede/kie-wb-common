@@ -22,6 +22,8 @@ public class BPMNCategories {
 
     public static final String ACTIVITIES = "Activities";
 
+    public static final String SUB_PROCESSES = "SubProcesses";
+
     public static final String START_EVENTS = "StartEvents";
 
     public static final String INTERMEDIATE_EVENTS = "IntermediateEvents";

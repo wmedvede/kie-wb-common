@@ -36,13 +36,17 @@ public class ThrowingIntermediateEventShapeDef
 
     public static final SVGShapeViewResources<BaseThrowingIntermediateEvent, BPMNSVGViewFactory> VIEW_RESOURCES =
             new SVGShapeViewResources<BaseThrowingIntermediateEvent, BPMNSVGViewFactory>()
-                    .put(IntermediateSignalEventThrowing.class, BPMNSVGViewFactory::intermediateSignalThrowingEvent)
-                    .put(IntermediateMessageEventThrowing.class, BPMNSVGViewFactory::intermediateMessageThrowingEvent);
+                    .put(IntermediateSignalEventThrowing.class,
+                         BPMNSVGViewFactory::intermediateSignalThrowingEvent)
+                    .put(IntermediateMessageEventThrowing.class,
+                         BPMNSVGViewFactory::intermediateMessageThrowingEvent);
 
     public static final Map<Class<? extends BaseThrowingIntermediateEvent>, SvgDataUriGlyph> GLYPHS =
             new HashMap<Class<? extends BaseThrowingIntermediateEvent>, SvgDataUriGlyph>() {{
-                put(IntermediateSignalEventThrowing.class, BPMNSVGGlyphFactory.INTERMEDIATE_SIGNAL_EVENT_GLYPH);
-                put(IntermediateMessageEventThrowing.class, BPMNSVGGlyphFactory.INTERMEDIATE_MESSAGE_EVENT_GLYPH);
+                put(IntermediateSignalEventThrowing.class,
+                    BPMNSVGGlyphFactory.INTERMEDIATE_SIGNAL_EVENT_THROWING_GLYPH);
+                put(IntermediateMessageEventThrowing.class,
+                    BPMNSVGGlyphFactory.INTERMEDIATE_MESSAGE_EVENT_THROWING_GLYPH);
             }};
 
     @Override
@@ -63,7 +67,8 @@ public class ThrowingIntermediateEventShapeDef
     public SVGShapeView<?> newViewInstance(final BPMNSVGViewFactory factory,
                                            final BaseThrowingIntermediateEvent intermediateTimerEvent) {
         return VIEW_RESOURCES
-                .getResource(factory, intermediateTimerEvent)
+                .getResource(factory,
+                             intermediateTimerEvent)
                 .build(false);
     }
 

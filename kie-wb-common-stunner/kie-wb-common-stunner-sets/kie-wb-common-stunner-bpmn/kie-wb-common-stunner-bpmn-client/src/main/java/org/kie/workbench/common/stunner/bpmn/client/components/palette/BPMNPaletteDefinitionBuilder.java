@@ -37,6 +37,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.IntermediateTimerEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.Lane;
 import org.kie.workbench.common.stunner.bpmn.definition.NoneTask;
 import org.kie.workbench.common.stunner.bpmn.definition.ParallelGateway;
+import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
 import org.kie.workbench.common.stunner.bpmn.definition.StartNoneEvent;
 import org.kie.workbench.common.stunner.bpmn.qualifiers.BPMN;
@@ -70,21 +71,10 @@ public class BPMNPaletteDefinitionBuilder
 
     private static final CategoryDefinitionProvider CATEGORY_DEFINITION =
             new CategoryDefinitionProvider(BPMNCategories.class)
-                    .put(BPMNCategories.ACTIVITIES,
-                         category -> category
-                                 .bindToDefinition(NoneTask.class)
-                                 .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryActivity().getSafeUri())))
-                    .put(BPMNCategories.CONNECTING_OBJECTS,
-                         category -> category
-                                 .bindToDefinition(SequenceFlow.class)
-                                 .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categorySequence().getSafeUri())))
                     .put(BPMNCategories.START_EVENTS,
                          category -> category
                                  .bindToDefinition(StartNoneEvent.class)
                                  .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryStartEvents().getSafeUri())))
-                    //TODO en realidad ahora no tendria sentido tener un nodo por defecto asociado a una Categoria.
-                    //pues en la nueva paleta las cosas van mezcladas
-                    //BUENO en realidad tal vez tenga sentido para DMN??
                     .put(BPMNCategories.INTERMEDIATE_EVENTS,
                          category -> category
                                  .bindToDefinition(IntermediateTimerEvent.class)
@@ -93,6 +83,14 @@ public class BPMNPaletteDefinitionBuilder
                          category -> category
                                  .bindToDefinition(EndNoneEvent.class)
                                  .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryEndEvents().getSafeUri())))
+                    .put(BPMNCategories.ACTIVITIES,
+                         category -> category
+                                 .bindToDefinition(NoneTask.class)
+                                 .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryActivity().getSafeUri())))
+                    .put(BPMNCategories.SUB_PROCESSES,
+                         category -> category
+                                 .bindToDefinition(ReusableSubprocess.class)
+                                 .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categorySubProcess().getSafeUri())))
                     .put(BPMNCategories.GATEWAYS,
                          category -> category
                                  .bindToDefinition(ParallelGateway.class)
@@ -101,6 +99,10 @@ public class BPMNPaletteDefinitionBuilder
                          category -> category
                                  .bindToDefinition(Lane.class)
                                  .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryContainer().getSafeUri())))
+                    .put(BPMNCategories.CONNECTING_OBJECTS,
+                         category -> category
+                                 .bindToDefinition(SequenceFlow.class)
+                                 .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categorySequence().getSafeUri())))
                     .put(BPMNCategories.SERVICE_TASKS,
                          category -> category
                                  .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryServiceTasks().getSafeUri())));
@@ -119,23 +121,23 @@ public class BPMNPaletteDefinitionBuilder
         if (BPMNCategories.ACTIVITIES.equals(id)) {
             return 400;
         }
-        if (BPMNCategories.GATEWAYS.equals(id)) {
+        if (BPMNCategories.SUB_PROCESSES.equals(id)) {
             return 500;
         }
-        if (BPMNCategories.CONTAINERS.equals(id)) {
+        if (BPMNCategories.GATEWAYS.equals(id)) {
             return 600;
         }
-        if (BPMNCategories.SERVICE_TASKS.equals(id)) {
+        if (BPMNCategories.CONTAINERS.equals(id)) {
             return 700;
         }
-
-        //TODO remove this experimental priority
-        if ("org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent".equals(id)) {
-            return 1000;
+        if (BPMNCategories.SERVICE_TASKS.equals(id)) {
+            return 800;
         }
 
-        //TODO remove this experimental priority
         if ("org.kie.workbench.common.stunner.bpmn.definition.BaseCatchingIntermediateEvent".equals(id)) {
+            return 1000;
+        }
+        if ("org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent".equals(id)) {
             return 2000;
         }
 
