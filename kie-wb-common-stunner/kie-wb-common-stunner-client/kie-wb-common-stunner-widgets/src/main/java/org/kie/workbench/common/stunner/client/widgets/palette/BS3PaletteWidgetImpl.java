@@ -95,7 +95,7 @@ public class BS3PaletteWidgetImpl
     public void init() {
         view.init(this);
         view.setShapeGlyphDragHandler(shapeGlyphDragHandler);
-        view.setBackgroundColor(BG_COLOR);
+        //view.setBackgroundColor(BG_COLOR);
         view.showEmptyView(true);
     }
 

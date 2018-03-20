@@ -22,7 +22,7 @@ import org.kie.workbench.common.stunner.core.definition.shape.Glyph;
 
 public class DefaultPaletteDefinitionBuilders {
 
-    public static final int ITEM_ICON_SIZE = 15;
+    public static final int ITEM_ICON_SIZE = 14;
 
     public static abstract class AbstractItemBuilder<I extends DefaultPaletteItem, T extends AbstractItemBuilder> {
 
@@ -116,7 +116,7 @@ public class DefaultPaletteDefinitionBuilders {
 
     public static class CategoryBuilder extends AbstractItemBuilder<DefaultPaletteCategory, CategoryBuilder> {
 
-        private static final int ICON_SIZE = 20;
+        private static final int ICON_SIZE = 21;
 
         private Glyph glyph;
 
