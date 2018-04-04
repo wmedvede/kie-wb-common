@@ -34,6 +34,7 @@ import org.kie.workbench.common.stunner.client.widgets.presenters.session.Sessio
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.error.DiagramClientErrorHandler;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.session.ClientFullSession;
 import org.kie.workbench.common.stunner.core.client.session.ClientSessionFactory;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.ClearSessionCommand;
@@ -54,6 +55,7 @@ import org.kie.workbench.common.stunner.core.client.session.command.impl.UndoSes
 import org.kie.workbench.common.stunner.core.client.session.command.impl.ValidateSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.VisitGraphSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientFullSession;
+import org.kie.workbench.common.stunner.core.preferences.StunnerPreferences;
 import org.kie.workbench.common.stunner.project.client.editor.event.OnDiagramFocusEvent;
 import org.kie.workbench.common.stunner.project.client.editor.event.OnDiagramLoseFocusEvent;
 import org.kie.workbench.common.stunner.project.client.screens.ProjectMessagesListener;
@@ -167,6 +169,9 @@ public class AbstractProjectDiagramEditorTest {
     protected ClientTranslationService translationService;
 
     @Mock
+    protected StunnerPreferencesRegistry stunnerPreferencesRegistry;
+
+    @Mock
     protected AlertsButtonMenuItemBuilder alertsButtonMenuItemBuilder;
 
     @Mock
@@ -244,6 +249,9 @@ public class AbstractProjectDiagramEditorTest {
     @Captor
     private ArgumentCaptor<SessionPresenter.SessionPresenterCallback> clientSessionPresenterCallbackCaptor;
 
+    @Mock
+    private StunnerPreferences stunnerPreferences;
+
     abstract class ClientResourceTypeMock implements ClientResourceType {
 
     }
@@ -274,6 +282,7 @@ public class AbstractProjectDiagramEditorTest {
         when(sessionPresenter.getInstance()).thenReturn(clientFullSession);
         when(sessionPresenter.withToolbar(anyBoolean())).thenReturn(sessionPresenter);
         when(sessionPresenter.withPalette(anyBoolean())).thenReturn(sessionPresenter);
+        when(sessionPresenter.withPreferences(stunnerPreferences)).thenReturn(sessionPresenter);
         when(sessionPresenter.displayNotifications(any(Predicate.class))).thenReturn(sessionPresenter);
         when(sessionPresenter.getView()).thenReturn(sessionPresenterView);
 
@@ -295,6 +304,7 @@ public class AbstractProjectDiagramEditorTest {
 
         when(alertsButtonMenuItemBuilder.build()).thenReturn(alertsButtonMenuItem);
         when(versionRecordManager.getPathToLatest()).thenReturn(filePath);
+        when(stunnerPreferencesRegistry.get()).thenReturn(stunnerPreferences);
 
         resourceType = mockResourceType();
         presenter = createDiagramEditor();
@@ -329,7 +339,8 @@ public class AbstractProjectDiagramEditorTest {
                                                                             onDiagramLostFocusEvent,
                                                                             projectMessagesListener,
                                                                             diagramClientErrorHandler,
-                                                                            translationService) {
+                                                                            translationService,
+                                                                            stunnerPreferencesRegistry) {
             {
                 fileMenuBuilder = AbstractProjectDiagramEditorTest.this.fileMenuBuilder;
                 workbenchContext = AbstractProjectDiagramEditorTest.this.workbenchContext;

@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.kie.workbench.common.dmn.client.decision.DecisionNavigatorDock;
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.canvas.CanvasHandler;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
 import org.kie.workbench.common.workbench.client.PerspectiveIds;
 import org.mockito.Mock;
@@ -44,13 +45,16 @@ public class DMNDiagramEditorTest {
     private DecisionNavigatorDock decisionNavigatorDock;
 
     @Mock
+    private StunnerPreferencesRegistry stunnerPreferencesRegistry;
+
+    @Mock
     private SessionManager sessionManager;
 
     private DMNDiagramEditor editor;
 
     @Before
     public void setup() {
-        editor = spy(new DMNDiagramEditor(null, null, null, null, null, null, null, sessionManager, null, null, null, null, null, null, null, null, decisionNavigatorDock));
+        editor = spy(new DMNDiagramEditor(null, null, null, null, null, null, null, sessionManager, null, null, null, null, null, null, null, null, stunnerPreferencesRegistry, decisionNavigatorDock));
     }
 
     @Test

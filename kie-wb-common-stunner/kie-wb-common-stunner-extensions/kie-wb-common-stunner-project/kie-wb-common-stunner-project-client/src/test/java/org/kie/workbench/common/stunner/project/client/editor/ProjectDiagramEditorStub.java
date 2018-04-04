@@ -22,6 +22,7 @@ import org.kie.workbench.common.stunner.client.widgets.presenters.session.Sessio
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.error.DiagramClientErrorHandler;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.SessionCommandFactory;
 import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientFullSession;
 import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientReadOnlySession;
@@ -55,7 +56,8 @@ class ProjectDiagramEditorStub extends AbstractProjectDiagramEditor<ClientResour
                                     Event<OnDiagramLoseFocusEvent> onDiagramLostFocusEvent,
                                     ProjectMessagesListener projectMessagesListener,
                                     DiagramClientErrorHandler diagramClientErrorHandler,
-                                    ClientTranslationService translationService) {
+                                    ClientTranslationService translationService,
+                                    StunnerPreferencesRegistry stunnerPreferencesRegistry) {
         super(view,
               placeManager,
               errorPopupPresenter,
@@ -71,7 +73,8 @@ class ProjectDiagramEditorStub extends AbstractProjectDiagramEditor<ClientResour
               onDiagramLostFocusEvent,
               projectMessagesListener,
               diagramClientErrorHandler,
-              translationService);
+              translationService,
+              stunnerPreferencesRegistry);
     }
 
     @Override

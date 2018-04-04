@@ -34,6 +34,7 @@ import org.kie.workbench.common.stunner.core.client.annotation.DiagramEditor;
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.error.DiagramClientErrorHandler;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.service.ClientRuntimeError;
 import org.kie.workbench.common.stunner.core.client.session.command.AbstractClientSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.command.ClientSessionCommand;
@@ -109,6 +110,7 @@ public class BPMNDiagramEditor extends AbstractProjectDiagramEditor<BPMNDiagramR
                              final ManagedInstance<GenerateSelectedFormsSessionCommand> generateSelectedFormsSessionCommands,
                              final BPMNDiagramEditorMenuItemsBuilder bpmnDiagramEditorMenuItemsBuilder,
                              final ClientTranslationService translationService,
+                             final StunnerPreferencesRegistry stunnerPreferencesRegistry,
                              final Event<BPMNMigrateDiagramEvent> migrateDiagramEvent,
                              final PopupUtil popupUtil) {
         super(view,
@@ -126,7 +128,8 @@ public class BPMNDiagramEditor extends AbstractProjectDiagramEditor<BPMNDiagramR
               onDiagramLostFocusEvent,
               projectMessagesListener,
               diagramClientErrorHandler,
-              translationService);
+              translationService,
+              stunnerPreferencesRegistry);
         this.generateProcessFormSessionCommands = generateProcessFormSessionCommands;
         this.generateDiagramFormsSessionCommands = generateDiagramFormsSessionCommands;
         this.generateSelectedFormsSessionCommands = generateSelectedFormsSessionCommands;

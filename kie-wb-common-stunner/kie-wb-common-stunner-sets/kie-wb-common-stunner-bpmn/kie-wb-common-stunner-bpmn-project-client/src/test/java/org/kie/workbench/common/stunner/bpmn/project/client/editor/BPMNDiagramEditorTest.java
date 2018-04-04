@@ -33,6 +33,7 @@ import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationServic
 import org.kie.workbench.common.stunner.core.client.service.ServiceCallback;
 import org.kie.workbench.common.stunner.core.client.session.command.ClientSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.ValidateSessionCommand;
+import org.kie.workbench.common.stunner.core.preferences.StunnerPreferences;
 import org.kie.workbench.common.stunner.forms.client.session.command.GenerateDiagramFormsSessionCommand;
 import org.kie.workbench.common.stunner.forms.client.session.command.GenerateProcessFormsSessionCommand;
 import org.kie.workbench.common.stunner.forms.client.session.command.GenerateSelectedFormsSessionCommand;
@@ -92,6 +93,8 @@ public class BPMNDiagramEditorTest extends AbstractProjectDiagramEditorTest {
     @Mock
     private ClientTranslationService translationService;
 
+    @Mock
+    private StunnerPreferences stunnerPreferences;
     @Mock
     private EventSourceMock<BPMNMigrateDiagramEvent> migrateDiagramEvent;
 
@@ -172,6 +175,7 @@ public class BPMNDiagramEditorTest extends AbstractProjectDiagramEditorTest {
                                                   generateSelectedFormsSessionCommands,
                                                   bpmnDiagramEditorMenuItemsBuilder,
                                                   translationService,
+                                                  stunnerPreferencesRegistry,
                                                   migrateDiagramEvent,
                                                   popupUtil) {
             {
