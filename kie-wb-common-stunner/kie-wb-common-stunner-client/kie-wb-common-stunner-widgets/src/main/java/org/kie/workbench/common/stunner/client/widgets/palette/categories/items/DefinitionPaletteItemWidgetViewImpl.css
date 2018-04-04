@@ -2,3 +2,7 @@
     padding-right: 1em;
     margin: auto;
 }
+
+.kie-palette-item-icon-spacer {
+    display: inline;
+}

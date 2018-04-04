@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.project.client.editor;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.gwtmockito.WithClassesToStub;
@@ -30,6 +31,7 @@ import org.kie.workbench.common.stunner.core.client.api.AbstractClientSessionMan
 import org.kie.workbench.common.stunner.core.client.canvas.AbstractCanvasHandler;
 import org.kie.workbench.common.stunner.core.client.error.DiagramClientErrorHandler;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.service.ClientRuntimeError;
 import org.kie.workbench.common.stunner.core.client.service.ServiceCallback;
 import org.kie.workbench.common.stunner.core.client.session.ClientFullSession;
@@ -48,6 +50,7 @@ import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientR
 import org.kie.workbench.common.stunner.core.client.session.impl.ClientFullSessionImpl;
 import org.kie.workbench.common.stunner.core.definition.exception.DefinitionNotFoundException;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
+import org.kie.workbench.common.stunner.core.preferences.StunnerPreferences;
 import org.kie.workbench.common.stunner.project.client.editor.event.OnDiagramFocusEvent;
 import org.kie.workbench.common.stunner.project.client.editor.event.OnDiagramLoseFocusEvent;
 import org.kie.workbench.common.stunner.project.client.resources.i18n.StunnerProjectClientConstants;
@@ -198,6 +201,9 @@ public class ProjectDiagramEditorTest {
     @Mock
     private ClientTranslationService translationService;
 
+    @Mock
+    private StunnerPreferencesRegistry stunnerPreferencesRegistry;
+
     @Captor
     private ArgumentCaptor<ServiceCallback<ProjectDiagram>> serviceCallbackCaptor;
 
@@ -236,6 +242,10 @@ public class ProjectDiagramEditorTest {
         when(presenter.withPalette(anyBoolean())).thenReturn(presenter);
         when(presenter.displayNotifications(any())).thenReturn(presenter);
         when(presenter.getView()).thenReturn(presenterView);
+        when(presenter.withToolbar(anyBoolean())).thenReturn(presenter);
+        when(presenter.withPalette(anyBoolean())).thenReturn(presenter);
+        when(presenter.displayNotifications(any(Predicate.class))).thenReturn(presenter);
+        when(presenter.withPreferences(any(StunnerPreferences.class))).thenReturn(presenter);
         when(diagram.getMetadata()).thenReturn(metadata);
         when(metadata.getTitle()).thenReturn("Title");
         when(fullSession.getCanvasHandler()).thenReturn(canvasHandler);
@@ -258,7 +268,8 @@ public class ProjectDiagramEditorTest {
                                                    onDiagramLostFocusEven,
                                                    projectMessagesListener,
                                                    diagramClientErrorHandler,
-                                                   translationService
+                                                   translationService,
+                                                   stunnerPreferencesRegistry
         ) {
             {
                 overviewWidget = overviewWidgetMock;
