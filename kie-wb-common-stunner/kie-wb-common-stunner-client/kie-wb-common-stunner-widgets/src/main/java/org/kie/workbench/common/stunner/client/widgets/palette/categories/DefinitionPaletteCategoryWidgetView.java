@@ -47,5 +47,7 @@ public interface DefinitionPaletteCategoryWidgetView extends UberElement<Definit
                          int y);
 
         void onClose();
+
+        void onOpen();
     }
 }

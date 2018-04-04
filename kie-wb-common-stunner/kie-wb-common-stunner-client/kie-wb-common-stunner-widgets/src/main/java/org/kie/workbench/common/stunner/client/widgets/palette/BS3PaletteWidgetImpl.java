@@ -190,14 +190,18 @@ public class BS3PaletteWidgetImpl
             paletteDefinition.getItems().forEach(item -> {
                 BS3PaletteWidgetPresenter widget;
                 if (item instanceof DefaultPaletteCategory) {
-                    widget = categoryWidgetInstances.get();
+                    DefinitionPaletteCategoryWidget categoryWidget = categoryWidgetInstances.get();
+                    categoryWidget.setOnOpenCallback(category -> onOpenCategory(category.getId()));
+                    categoryWidget.setOnCloseCallback(category -> onCloseCategory(category.getId()));
                     categoryWidgets.put(item.getId(),
-                                        (DefinitionPaletteCategoryWidget) widget);
+                                        categoryWidget);
+                    widget = categoryWidget;
                 } else {
                     widget = definitionPaletteItemWidgetInstances.get();
                 }
                 final Consumer<PaletteItemMouseEvent> itemMouseEventHandler =
-                        this::handleMouseDownEvent;
+                        event -> handleMouseDownEvent(item,
+                                                      event);
                 widget.initialize(item,
                                   getShapeFactory(),
                                   itemMouseEventHandler);
@@ -229,11 +233,15 @@ public class BS3PaletteWidgetImpl
         return getShapeFactory().getGlyph(definitionId);
     }
 
-    private void handleMouseDownEvent(final PaletteItemMouseEvent event) {
+    private void handleMouseDownEvent(final DefaultPaletteItem item,
+                                      final PaletteItemMouseEvent event) {
         PortablePreconditions.checkNotNull("event",
                                            event);
-        if (categoryWidgets.containsKey(event.getId())) {
-            showCategory(event.getId());
+        if (event.getId().equals(item.getId())) {
+            final String catDefId = item.getDefinitionId();
+            BS3PaletteWidgetImpl.this.onPaletteItemMouseDown(catDefId,
+                                                             event.getMouseX(),
+                                                             event.getMouseY());
         } else {
             final String defId = getItemDefinitionId(event.getId());
             BS3PaletteWidgetImpl.this.onPaletteItemMouseDown(defId,
@@ -247,12 +255,6 @@ public class BS3PaletteWidgetImpl
                                                               itemId);
     }
 
-    private void showCategory(final String categoryId) {
-        categoryWidgets.entrySet().stream().filter(entry -> !entry.getKey().equals(categoryId)).forEach(entry -> entry.getValue().setVisible(false));
-        DefinitionPaletteCategoryWidget widget = categoryWidgets.get(categoryId);
-        widget.setVisible(!widget.isVisible());
-    }
-
     private void onPaletteItemMouseDown(final String id,
                                         final double x,
                                         final double y) {
@@ -262,6 +264,17 @@ public class BS3PaletteWidgetImpl
                            y,
                            getIconSize(),
                            getIconSize());
+    }
+
+    private void onOpenCategory(String categoryId) {
+        categoryWidgets.entrySet().stream().filter(entry -> !entry.getKey().equals(categoryId)).forEach(entry -> entry.getValue().setVisible(false));
+        DefinitionPaletteCategoryWidget widget = categoryWidgets.get(categoryId);
+        widget.setVisible(true);
+    }
+
+    private void onCloseCategory(String categoryId) {
+        DefinitionPaletteCategoryWidget widget = categoryWidgets.get(categoryId);
+        widget.setVisible(false);
     }
 
     void onCanvasFocusedEvent(final @Observes CanvasFocusedEvent canvasFocusedEvent) {
