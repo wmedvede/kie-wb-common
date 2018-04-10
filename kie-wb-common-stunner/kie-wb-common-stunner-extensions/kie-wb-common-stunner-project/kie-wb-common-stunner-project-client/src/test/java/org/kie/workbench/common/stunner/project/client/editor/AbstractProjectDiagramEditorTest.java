@@ -31,6 +31,7 @@ import org.kie.workbench.common.stunner.client.widgets.presenters.session.Sessio
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.error.DiagramClientErrorHandler;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.ClearSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.ClearStatesSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.CopySelectionSessionCommand;
@@ -143,6 +144,10 @@ public class AbstractProjectDiagramEditorTest {
 
     @Mock
     protected ClientTranslationService translationService;
+
+    //TODO WM see if this tests needs adding
+    @Mock
+    protected StunnerPreferencesRegistry stunnerPreferencesRegistry;
 
     @Mock
     protected AlertsButtonMenuItemBuilder alertsButtonMenuItemBuilder;
@@ -272,7 +277,8 @@ public class AbstractProjectDiagramEditorTest {
                                                                         onDiagramLostFocusEvent,
                                                                         projectMessagesListener,
                                                                         diagramClientErrorHandler,
-                                                                        translationService) {
+                                                                        translationService,
+                                                                        stunnerPreferencesRegistry) {
             {
                 fileMenuBuilder = AbstractProjectDiagramEditorTest.this.fileMenuBuilder;
                 workbenchContext = AbstractProjectDiagramEditorTest.this.workbenchContext;

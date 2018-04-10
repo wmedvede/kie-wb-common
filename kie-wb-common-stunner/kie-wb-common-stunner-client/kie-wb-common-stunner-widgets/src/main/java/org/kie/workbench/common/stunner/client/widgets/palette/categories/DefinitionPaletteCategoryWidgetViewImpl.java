@@ -79,6 +79,8 @@ public class DefinitionPaletteCategoryWidgetViewImpl implements DefinitionPalett
 
     private boolean mouseDown = false;
 
+    private boolean autoHidePanel = false;
+
     @Override
     public void init(Presenter presenter) {
         this.presenter = presenter;
@@ -121,6 +123,16 @@ public class DefinitionPaletteCategoryWidgetViewImpl implements DefinitionPalett
             DOMUtil.removeCSSClass(listGroupItem,
                                    SHOW_FLYOUT_CSS);
         }
+    }
+
+    @Override
+    public void setAutoHidePanel(boolean autoHidePanel) {
+        this.autoHidePanel = autoHidePanel;
+        setCloseButtonVisible(!autoHidePanel);
+    }
+
+    public boolean isAutoHidePanel() {
+        return autoHidePanel;
     }
 
     @Override
@@ -183,15 +195,16 @@ public class DefinitionPaletteCategoryWidgetViewImpl implements DefinitionPalett
 
     @EventHandler("floatingPanel")
     public void onFloatingPanelOutEvent(MouseOutEvent event) {
-        if (isCloseOnCategoryOut()) {
+        if (isAutoHidePanel()) {
             presenter.onClose();
         }
     }
 
-    private boolean isCloseOnCategoryOut() {
-        //TODO take this value from a preference if we decide to have this behaviour. If not, just remove
-        //it and also the onFloatingPanelOutEvent
-        return "Start Events".equals(categoryIcon.getTitle()) || "Intermediate Events".equals(categoryIcon.getTitle()) || "End Events".equals(categoryIcon.getTitle());
+    private void setCloseButtonVisible(boolean visible) {
+        closeCategoryButton.getStyle().removeProperty("display");
+        if (!visible) {
+            closeCategoryButton.getStyle().setProperty("display", "none");
+        }
     }
 
     private boolean isDragged(int startX,

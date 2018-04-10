@@ -191,11 +191,19 @@ public class ExpandedPaletteDefinitionBuilder
                         .setDescription(description)
                         .build();
 
+        //TODO WM, remove this. This is just for testing the scrollbars on/off
+        boolean addMultipleTimes = "Intermediate Timer".equalsIgnoreCase(title) || "Intermediate Signal".equalsIgnoreCase(title);
+        int times = 10;
         if (null != group) {
             if (null != morphDefault && morphDefault.equals(id)) {
                 group.getItems().add(0, item);
             } else {
                 group.getItems().add(item);
+            }
+            if (addMultipleTimes) {
+                for (int i = 0; i < times; i++) {
+                    group.getItems().add(item);
+                }
             }
         } else {
             category.getItems().add(item);

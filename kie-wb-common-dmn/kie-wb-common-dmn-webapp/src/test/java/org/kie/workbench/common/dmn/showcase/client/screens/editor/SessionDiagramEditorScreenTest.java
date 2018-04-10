@@ -29,6 +29,7 @@ import org.kie.workbench.common.stunner.client.widgets.presenters.session.Sessio
 import org.kie.workbench.common.stunner.client.widgets.views.session.ScreenPanelView;
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.canvas.AbstractCanvasHandler;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.session.ClientFullSession;
 import org.kie.workbench.common.stunner.core.client.session.ClientSessionFactory;
 import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientFullSession;
@@ -78,6 +79,10 @@ public class SessionDiagramEditorScreenTest {
     @Captor
     private ArgumentCaptor<Consumer<ClientFullSession>> clientFullSessionConsumer;
 
+    //TODO WM, check this
+    @Mock
+    StunnerPreferencesRegistry stunnerPreferencesRegistry;
+
     private SessionDiagramEditorScreen editor;
 
     @Before
@@ -89,7 +94,7 @@ public class SessionDiagramEditorScreenTest {
         doReturn(presenter).when(presenter).displayNotifications(any());
         doNothing().when(presenter).open(any(), any(), any());
 
-        editor = spy(new SessionDiagramEditorScreen(null, null, null, sessionManager, null, sessionPresenterFactory, null, null, screenPanelView, null, expressionEditor, decisionNavigatorDock));
+        editor = spy(new SessionDiagramEditorScreen(null, null, null, sessionManager, null, sessionPresenterFactory, null, null, screenPanelView, null, expressionEditor, decisionNavigatorDock, stunnerPreferencesRegistry));
     }
 
     @Test

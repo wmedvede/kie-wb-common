@@ -30,10 +30,13 @@ import org.kie.workbench.common.stunner.core.client.annotation.DiagramEditor;
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.error.DiagramClientErrorHandler;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.SessionCommandFactory;
 import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientFullSession;
 import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientReadOnlySession;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
+import org.kie.workbench.common.stunner.core.preferences.StunnerDiagramEditorPreferences;
+import org.kie.workbench.common.stunner.core.preferences.StunnerPreferences;
 import org.kie.workbench.common.stunner.project.client.editor.AbstractProjectDiagramEditor;
 import org.kie.workbench.common.stunner.project.client.editor.ProjectDiagramEditorMenuItemsBuilder;
 import org.kie.workbench.common.stunner.project.client.editor.event.OnDiagramFocusEvent;
@@ -83,7 +86,8 @@ public class CaseManagementDiagramEditor extends AbstractProjectDiagramEditor<Ca
                                        final Event<OnDiagramLoseFocusEvent> onDiagramLostFocusEvent,
                                        final ProjectMessagesListener projectMessagesListener,
                                        final DiagramClientErrorHandler diagramClientErrorHandler,
-                                       final ClientTranslationService translationService) {
+                                       final ClientTranslationService translationService,
+                                       final StunnerPreferencesRegistry stunnerPreferencesRegistry) {
         super(view,
               placeManager,
               errorPopupPresenter,
@@ -99,7 +103,8 @@ public class CaseManagementDiagramEditor extends AbstractProjectDiagramEditor<Ca
               onDiagramLostFocusEvent,
               projectMessagesListener,
               diagramClientErrorHandler,
-              translationService);
+              translationService,
+              stunnerPreferencesRegistry);
     }
 
     @OnStartup
@@ -173,5 +178,13 @@ public class CaseManagementDiagramEditor extends AbstractProjectDiagramEditor<Ca
     @OnMayClose
     public boolean onMayClose() {
         return super.mayClose(getCurrentDiagramHash());
+    }
+
+    @Override
+    protected StunnerPreferences getStunnerPreferences() {
+        StunnerPreferences preferencesCopy = new StunnerPreferences();
+        preferencesCopy.setDiagramEditorPreferences(new StunnerDiagramEditorPreferences());
+        preferencesCopy.getDiagramEditorPreferences().setAutoHidePalettePanel(false);
+        return preferencesCopy;
     }
 }

@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.client.session;
+package org.kie.workbench.common.stunner.cm.client.session;
 
 import java.util.function.Consumer;
 
-import org.kie.workbench.common.stunner.bpmn.client.workitem.WorkItemDefinitionClientRegistry;
 import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
 import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientSessionFactory;
 import org.kie.workbench.common.stunner.core.diagram.Metadata;
 import org.kie.workbench.common.stunner.core.preferences.StunnerPreferences;
 
-public abstract class AbstractBPMNClientSessionFactory<S extends ClientSession>
+public abstract class AbstractCaseManagementClientSessionFactory<S extends ClientSession>
         extends AbstractClientSessionFactory<S> {
 
-    protected abstract WorkItemDefinitionClientRegistry getWorkItemDefinitionRegistry();
-
-    protected AbstractBPMNClientSessionFactory(final StunnerPreferences stunnerPreferences,
-                                               final StunnerPreferencesRegistry stunnerPreferencesRegistry) {
+    protected AbstractCaseManagementClientSessionFactory(final StunnerPreferences stunnerPreferences,
+                                                         final StunnerPreferencesRegistry stunnerPreferencesRegistry) {
         super(stunnerPreferences,
               stunnerPreferencesRegistry);
     }
@@ -40,9 +37,6 @@ public abstract class AbstractBPMNClientSessionFactory<S extends ClientSession>
     public void newSession(final Metadata metadata,
                            final Consumer<S> newSessionConsumer) {
         super.newSession(metadata,
-                         session -> getWorkItemDefinitionRegistry().load(session,
-                                                                         metadata,
-                                                                         () -> newSessionConsumer
-                                                                                 .accept(session)));
+                         newSessionConsumer::accept);
     }
 }

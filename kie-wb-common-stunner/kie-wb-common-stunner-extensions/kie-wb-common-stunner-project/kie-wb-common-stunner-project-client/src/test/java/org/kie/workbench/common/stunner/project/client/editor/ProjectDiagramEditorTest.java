@@ -30,6 +30,7 @@ import org.kie.workbench.common.stunner.core.client.api.AbstractClientSessionMan
 import org.kie.workbench.common.stunner.core.client.canvas.AbstractCanvasHandler;
 import org.kie.workbench.common.stunner.core.client.error.DiagramClientErrorHandler;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.service.ClientRuntimeError;
 import org.kie.workbench.common.stunner.core.client.service.ServiceCallback;
 import org.kie.workbench.common.stunner.core.client.session.ClientFullSession;
@@ -197,6 +198,9 @@ public class ProjectDiagramEditorTest {
 
     @Mock
     private ClientTranslationService translationService;
+    //TODO WM check if I need to do something with the preferences.
+    @Mock
+    private StunnerPreferencesRegistry stunnerPreferencesRegistry;
 
     @Captor
     private ArgumentCaptor<ServiceCallback<ProjectDiagram>> serviceCallbackCaptor;
@@ -258,7 +262,8 @@ public class ProjectDiagramEditorTest {
                                                    onDiagramLostFocusEven,
                                                    projectMessagesListener,
                                                    diagramClientErrorHandler,
-                                                   translationService
+                                                   translationService,
+                                                   stunnerPreferencesRegistry
         ) {
             {
                 overviewWidget = overviewWidgetMock;

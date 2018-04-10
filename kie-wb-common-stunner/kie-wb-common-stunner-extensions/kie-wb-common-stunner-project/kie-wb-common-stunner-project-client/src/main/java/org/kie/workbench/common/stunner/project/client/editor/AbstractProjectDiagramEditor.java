@@ -38,6 +38,7 @@ import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.canvas.CanvasHandler;
 import org.kie.workbench.common.stunner.core.client.error.DiagramClientErrorHandler;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.service.ClientRuntimeError;
 import org.kie.workbench.common.stunner.core.client.service.ServiceCallback;
 import org.kie.workbench.common.stunner.core.client.session.ClientFullSession;
@@ -66,6 +67,7 @@ import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientR
 import org.kie.workbench.common.stunner.core.client.shape.Shape;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
 import org.kie.workbench.common.stunner.core.diagram.Metadata;
+import org.kie.workbench.common.stunner.core.preferences.StunnerPreferences;
 import org.kie.workbench.common.stunner.core.rule.RuleViolation;
 import org.kie.workbench.common.stunner.core.util.HashUtil;
 import org.kie.workbench.common.stunner.core.validation.DiagramElementViolation;
@@ -131,6 +133,7 @@ public abstract class AbstractProjectDiagramEditor<R extends ClientResourceType>
     protected SessionPresenter<AbstractClientFullSession, ?, Diagram> presenter;
     private final DiagramClientErrorHandler diagramClientErrorHandler;
     private final ClientTranslationService translationService;
+    private StunnerPreferencesRegistry stunnerPreferencesRegistry;
 
     private String title = "Project Diagram Editor";
 
@@ -150,7 +153,8 @@ public abstract class AbstractProjectDiagramEditor<R extends ClientResourceType>
                                         final Event<OnDiagramLoseFocusEvent> onDiagramLostFocusEvent,
                                         final ProjectMessagesListener projectMessagesListener,
                                         final DiagramClientErrorHandler diagramClientErrorHandler,
-                                        final ClientTranslationService translationService) {
+                                        final ClientTranslationService translationService,
+                                        final StunnerPreferencesRegistry stunnerPreferencesRegistry) {
         super(view);
         this.placeManager = placeManager;
         this.errorPopupPresenter = errorPopupPresenter;
@@ -167,6 +171,7 @@ public abstract class AbstractProjectDiagramEditor<R extends ClientResourceType>
         this.onDiagramFocusEvent = onDiagramFocusEvent;
         this.onDiagramLostFocusEvent = onDiagramLostFocusEvent;
         this.translationService = translationService;
+        this.stunnerPreferencesRegistry = stunnerPreferencesRegistry;
         this.commands = new HashMap<>();
     }
 
@@ -222,6 +227,7 @@ public abstract class AbstractProjectDiagramEditor<R extends ClientResourceType>
                                         .withToolbar(false)
                                         .withPalette(true)
                                         .displayNotifications(type -> true)
+                                        .withPreferences(getStunnerPreferences())
                                         .open(diagram,
                                               session,
                                               new SessionPresenter.SessionPresenterCallback<AbstractClientFullSession, Diagram>() {
@@ -254,6 +260,10 @@ public abstract class AbstractProjectDiagramEditor<R extends ClientResourceType>
 
     protected void onDiagramLoad() {
         /* Override this method to trigger some action after a Diagram is loaded. */
+    }
+
+    protected StunnerPreferences getStunnerPreferences() {
+        return stunnerPreferencesRegistry.get();
     }
 
     @Override

@@ -47,6 +47,7 @@ import org.kie.workbench.common.stunner.core.client.service.ClientFactoryService
 import org.kie.workbench.common.stunner.core.client.shape.Shape;
 import org.kie.workbench.common.stunner.core.client.shape.factory.ShapeFactory;
 import org.kie.workbench.common.stunner.core.definition.shape.Glyph;
+import org.kie.workbench.common.stunner.core.preferences.StunnerPreferences;
 
 import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull;
 
@@ -67,6 +68,7 @@ public class BS3PaletteWidgetImpl
     private Consumer<PaletteIDefinitionItemEvent> itemDragStartCallback;
     private Consumer<PaletteIDefinitionItemEvent> itemDragUpdateCallback;
     private Map<String, DefinitionPaletteCategoryWidget> categoryWidgets = new HashMap<>();
+    private StunnerPreferences preferences;
 
     private BS3PaletteWidgetView view;
 
@@ -94,6 +96,22 @@ public class BS3PaletteWidgetImpl
         view.init(this);
         view.setShapeGlyphDragHandler(shapeGlyphDragHandler);
         view.showEmptyView(true);
+    }
+
+    @Override
+    public void setPreferences(StunnerPreferences preferences) {
+        this.preferences = preferences;
+        if (preferences != null) {
+            setHideCategoryPanel(isHideCategoryPanel());
+        }
+    }
+
+    private boolean isHideCategoryPanel() {
+        return preferences != null && preferences.getDiagramEditorPreferences().isAutoHidePalettePanel();
+    }
+
+    private void setHideCategoryPanel(boolean hide) {
+        categoryWidgets.values().forEach(widget -> widget.setAutoHidePanel(hide));
     }
 
     @Override
@@ -207,6 +225,7 @@ public class BS3PaletteWidgetImpl
                                   itemMouseEventHandler);
                 view.add(widget);
             });
+            setHideCategoryPanel(isHideCategoryPanel());
         }
         return this;
     }

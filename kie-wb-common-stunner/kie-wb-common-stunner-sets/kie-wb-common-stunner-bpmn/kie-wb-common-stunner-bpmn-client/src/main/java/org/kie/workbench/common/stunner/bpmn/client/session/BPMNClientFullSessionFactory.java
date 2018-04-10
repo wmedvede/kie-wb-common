@@ -22,8 +22,10 @@ import javax.inject.Inject;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.kie.workbench.common.stunner.bpmn.client.workitem.WorkItemDefinitionClientRegistry;
 import org.kie.workbench.common.stunner.bpmn.qualifiers.BPMN;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.session.ClientFullSession;
 import org.kie.workbench.common.stunner.core.client.session.impl.ClientFullSessionImpl;
+import org.kie.workbench.common.stunner.core.preferences.StunnerPreferences;
 
 @ApplicationScoped
 @BPMN
@@ -33,12 +35,16 @@ public class BPMNClientFullSessionFactory extends AbstractBPMNClientSessionFacto
     private final ManagedInstance<ClientFullSessionImpl> fullSessionInstances;
 
     protected BPMNClientFullSessionFactory() {
-        this(null, null);
+        this(null, null, null, null);
     }
 
     @Inject
     public BPMNClientFullSessionFactory(final WorkItemDefinitionClientRegistry workItemDefinitionRegistry,
-                                        final ManagedInstance<ClientFullSessionImpl> fullSessionInstances) {
+                                        final ManagedInstance<ClientFullSessionImpl> fullSessionInstances,
+                                        final StunnerPreferences stunnerPreferences,
+                                        final StunnerPreferencesRegistry stunnerPreferencesRegistry) {
+        super(stunnerPreferences,
+              stunnerPreferencesRegistry);
         this.workItemDefinitionRegistry = workItemDefinitionRegistry;
         this.fullSessionInstances = fullSessionInstances;
     }

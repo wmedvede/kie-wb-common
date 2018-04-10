@@ -97,6 +97,10 @@ public class DefinitionPaletteCategoryWidget implements DefinitionPaletteCategor
         return view.isVisible();
     }
 
+    public void setAutoHidePanel(boolean autoHidePanel) {
+        view.setAutoHidePanel(autoHidePanel);
+    }
+
     private void renderItems(final List<DefaultPaletteItem> items,
                              final ShapeFactory<?, ?> shapeFactory) {
         if (items != null && !items.isEmpty()) {

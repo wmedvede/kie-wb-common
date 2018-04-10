@@ -23,8 +23,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.stunner.bpmn.client.workitem.WorkItemDefinitionClientRegistry;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
 import org.kie.workbench.common.stunner.core.diagram.Metadata;
+import org.kie.workbench.common.stunner.core.preferences.StunnerPreferences;
 import org.mockito.Mock;
 import org.uberfire.mvp.Command;
 
@@ -47,6 +49,14 @@ public class BPMNClientSessionFactoryTest {
     @Mock
     private WorkItemDefinitionClientRegistry registry;
 
+    //TODO WM check this test
+    @Mock
+    private StunnerPreferences stunnerPreferences;
+
+    //TODO WM check this test
+    @Mock
+    private StunnerPreferencesRegistry stunnerPreferencesRegistry;
+
     private AbstractBPMNClientSessionFactory tested;
 
     @Before
@@ -59,7 +69,8 @@ public class BPMNClientSessionFactoryTest {
         }).when(registry).load(eq(session),
                                eq(metadata),
                                any(Command.class));
-        tested = new TestBPMNClientSession();
+        tested = new TestBPMNClientSession(stunnerPreferences,
+                                           stunnerPreferencesRegistry);
     }
 
     @Test
@@ -75,6 +86,12 @@ public class BPMNClientSessionFactoryTest {
     }
 
     private class TestBPMNClientSession extends AbstractBPMNClientSessionFactory {
+
+        public TestBPMNClientSession(StunnerPreferences stunnerPreferences,
+                                     StunnerPreferencesRegistry stunnerPreferencesRegistry) {
+            super(stunnerPreferences,
+                  stunnerPreferencesRegistry);
+        }
 
         @Override
         protected WorkItemDefinitionClientRegistry getWorkItemDefinitionRegistry() {

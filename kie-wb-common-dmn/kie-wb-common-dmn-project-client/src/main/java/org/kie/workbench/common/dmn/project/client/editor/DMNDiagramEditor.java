@@ -33,6 +33,7 @@ import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.canvas.CanvasHandler;
 import org.kie.workbench.common.stunner.core.client.error.DiagramClientErrorHandler;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
+import org.kie.workbench.common.stunner.core.client.preferences.StunnerPreferencesRegistry;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.SessionCommandFactory;
 import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientFullSession;
 import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientReadOnlySession;
@@ -89,6 +90,7 @@ public class DMNDiagramEditor extends AbstractProjectDiagramEditor<DMNDiagramRes
                             final ProjectMessagesListener projectMessagesListener,
                             final DiagramClientErrorHandler diagramClientErrorHandler,
                             final ClientTranslationService translationService,
+                            final StunnerPreferencesRegistry stunnerPreferencesRegistry,
                             final DecisionNavigatorDock decisionNavigatorDock) {
         super(view,
               placeManager,
@@ -105,8 +107,8 @@ public class DMNDiagramEditor extends AbstractProjectDiagramEditor<DMNDiagramRes
               onDiagramLostFocusEvent,
               projectMessagesListener,
               diagramClientErrorHandler,
-              translationService);
-
+              translationService,
+              stunnerPreferencesRegistry);
         this.decisionNavigatorDock = decisionNavigatorDock;
     }
 
