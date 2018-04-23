@@ -69,6 +69,8 @@ import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientR
 import org.kie.workbench.common.stunner.core.client.shape.Shape;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
 import org.kie.workbench.common.stunner.core.diagram.Metadata;
+import org.kie.workbench.common.stunner.core.graph.content.definition.DefinitionSet;
+import org.kie.workbench.common.stunner.core.graph.content.view.BoundsImpl;
 import org.kie.workbench.common.stunner.core.preferences.StunnerPreferences;
 import org.kie.workbench.common.stunner.core.rule.RuleViolation;
 import org.kie.workbench.common.stunner.core.util.HashUtil;
@@ -227,6 +229,9 @@ public abstract class AbstractProjectDiagramEditor<R extends ClientResourceType>
                                 final AbstractClientFullSession session = (AbstractClientFullSession) s;
                                 presenter = newSessionPresenter();
                                 getView().setWidget(presenter.getView());
+                                //note: this canvas size setting will be removed soon, when infinite canvases are introduced.
+                                setCanvasSize(diagram,
+                                              getStunnerPreferences());
                                 presenter.open(diagram,
                                                session,
                                                new SessionPresenter.SessionPresenterCallback<AbstractClientFullSession, Diagram>() {
@@ -781,5 +786,13 @@ public abstract class AbstractProjectDiagramEditor<R extends ClientResourceType>
 
     void setSessionPresenter(final SessionPresenter<AbstractClientFullSession, ?, Diagram> presenter) {
         this.presenter = presenter;
+    }
+
+    private void setCanvasSize(final ProjectDiagram diagram,
+                               final StunnerPreferences preferences) {
+        ((DefinitionSet) diagram.getGraph().getContent()).setBounds(BoundsImpl.build(0,
+                                                                                     0,
+                                                                                     preferences.getDiagramEditorPreferences().getCanvasWidth(),
+                                                                                     preferences.getDiagramEditorPreferences().getCanvasHeight()));
     }
 }
