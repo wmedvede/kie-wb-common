@@ -55,6 +55,10 @@ import org.kie.workbench.common.stunner.core.client.session.command.impl.UndoSes
 import org.kie.workbench.common.stunner.core.client.session.command.impl.ValidateSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.VisitGraphSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.impl.AbstractClientFullSession;
+import org.kie.workbench.common.stunner.core.graph.Graph;
+import org.kie.workbench.common.stunner.core.graph.content.Bounds;
+import org.kie.workbench.common.stunner.core.graph.content.definition.DefinitionSet;
+import org.kie.workbench.common.stunner.core.preferences.StunnerDiagramEditorPreferences;
 import org.kie.workbench.common.stunner.core.preferences.StunnerPreferences;
 import org.kie.workbench.common.stunner.project.client.editor.event.OnDiagramFocusEvent;
 import org.kie.workbench.common.stunner.project.client.editor.event.OnDiagramLoseFocusEvent;
@@ -252,6 +256,9 @@ public class AbstractProjectDiagramEditorTest {
     @Mock
     private StunnerPreferences stunnerPreferences;
 
+    @Mock
+    private StunnerDiagramEditorPreferences diagramEditorPreferences;
+
     abstract class ClientResourceTypeMock implements ClientResourceType {
 
     }
@@ -304,6 +311,7 @@ public class AbstractProjectDiagramEditorTest {
 
         when(alertsButtonMenuItemBuilder.build()).thenReturn(alertsButtonMenuItem);
         when(versionRecordManager.getPathToLatest()).thenReturn(filePath);
+        when(stunnerPreferences.getDiagramEditorPreferences()).thenReturn(diagramEditorPreferences);
         when(stunnerPreferencesRegistry.get()).thenReturn(stunnerPreferences);
 
         resourceType = mockResourceType();
@@ -418,13 +426,22 @@ public class AbstractProjectDiagramEditorTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testOpen() {
+        final int canvasWidth = 1234;
+        final int canvasHeight = 5678;
         final ProjectMetadata metadata = mock(ProjectMetadata.class);
+        final Graph graph = mock(Graph.class);
+        final DefinitionSet definitionSet = mock(DefinitionSet.class);
         final Overview overview = mock(Overview.class);
         final ClientSessionFactory clientSessionFactory = mock(ClientSessionFactory.class);
+        final ArgumentCaptor<Bounds> boundsCaptor = ArgumentCaptor.forClass(Bounds.class);
 
+        when(diagramEditorPreferences.getCanvasWidth()).thenReturn(canvasWidth);
+        when(diagramEditorPreferences.getCanvasHeight()).thenReturn(canvasHeight);
         when(diagram.getMetadata()).thenReturn(metadata);
         when(metadata.getTitle()).thenReturn(TITLE);
         when(metadata.getOverview()).thenReturn(overview);
+        when(diagram.getGraph()).thenReturn(graph);
+        when(graph.getContent()).thenReturn(definitionSet);
         when(sessionManager.getSessionFactory(eq(metadata), eq(ClientFullSession.class))).thenReturn(clientSessionFactory);
         when(sessionPresenterFactory.newPresenterEditor()).thenReturn(sessionPresenter);
 
@@ -450,6 +467,22 @@ public class AbstractProjectDiagramEditorTest {
         clientSessionPresenterCallback.onSuccess();
 
         verify(view).hideBusyIndicator();
+
+        verify(definitionSet,
+               times(1)).setBounds(boundsCaptor.capture());
+        assertEquals(0,
+                     boundsCaptor.getValue().getUpperLeft().getX(),
+                     0);
+        assertEquals(0,
+                     boundsCaptor.getValue().getUpperLeft().getY(),
+                     0);
+
+        assertEquals(canvasWidth,
+                     boundsCaptor.getValue().getLowerRight().getX(),
+                     0);
+        assertEquals(canvasHeight,
+                     boundsCaptor.getValue().getLowerRight().getY(),
+                     0);
 
         //Verify Overview widget was setup. It'd be nice to just verify(presenter).resetEditorPages(..) but it is protected
         verify(overviewWidget).setContent(eq(overview),
