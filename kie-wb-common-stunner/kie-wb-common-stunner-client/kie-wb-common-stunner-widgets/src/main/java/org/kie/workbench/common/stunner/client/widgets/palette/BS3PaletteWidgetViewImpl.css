@@ -18,7 +18,7 @@
     border-width: 0;
     display: inline-block;
     padding: 0;
-    position: unset;
+    position: static; /* IE11 */
 }
 
 .kie-palette .list-group-item > button {
@@ -50,7 +50,7 @@
 .kie-palette .list-group-item .list-group-item-value {
     display: block;
     line-height: 2em;
-    max-width: 10em;
+    max-width: 13em;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -110,8 +110,9 @@
     height: auto;
     padding: 0;
     text-decoration: none;
-    width: 200px;
+    width: 190px;
     white-space: nowrap;
+    display: inline-block; /* IE11 */
 }
 @supports (display: flex) {
     .kie-palette-flyout .list-group-item > a {
