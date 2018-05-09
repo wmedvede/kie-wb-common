@@ -28,7 +28,6 @@ import org.kie.workbench.common.stunner.bpmn.definition.IntermediateErrorEventCa
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateMessageEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateSignalEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateTimerEvent;
-import org.kie.workbench.common.stunner.core.client.shape.SvgDataUriGlyph;
 import org.kie.workbench.common.stunner.core.client.shape.view.HasTitle;
 import org.kie.workbench.common.stunner.core.client.shape.view.handler.CompositeShapeViewHandler;
 import org.kie.workbench.common.stunner.core.client.shape.view.handler.FontHandler;
@@ -36,6 +35,11 @@ import org.kie.workbench.common.stunner.core.client.shape.view.handler.SizeHandl
 import org.kie.workbench.common.stunner.core.definition.shape.Glyph;
 import org.kie.workbench.common.stunner.svg.client.shape.factory.SVGShapeViewResources;
 import org.kie.workbench.common.stunner.svg.client.shape.view.SVGShapeView;
+
+import static org.kie.workbench.common.stunner.bpmn.client.resources.BPMNSVGGlyphFactory.Glyphs.INTERMEDIATE_ERROR_EVENT_GLYPH;
+import static org.kie.workbench.common.stunner.bpmn.client.resources.BPMNSVGGlyphFactory.Glyphs.INTERMEDIATE_MESSAGE_EVENT_GLYPH;
+import static org.kie.workbench.common.stunner.bpmn.client.resources.BPMNSVGGlyphFactory.Glyphs.INTERMEDIATE_SIGNAL_EVENT_GLYPH;
+import static org.kie.workbench.common.stunner.bpmn.client.resources.BPMNSVGGlyphFactory.Glyphs.INTERMEDIATE_TIMER_EVENT_GLYPH;
 
 public class CatchingIntermediateEventShapeDef
         implements BPMNSvgShapeDef<BaseCatchingIntermediateEvent> {
@@ -54,13 +58,13 @@ public class CatchingIntermediateEventShapeDef
     public static final Map<Class<? extends BaseCatchingIntermediateEvent>, Glyph> GLYPHS =
             new HashMap<Class<? extends BaseCatchingIntermediateEvent>, Glyph>() {{
                 put(IntermediateTimerEvent.class,
-                    BPMNSVGGlyphFactory.INTERMEDIATE_TIMER_EVENT_GLYPH);
+                    BPMNSVGGlyphFactory.getGlyph(INTERMEDIATE_TIMER_EVENT_GLYPH));
                 put(IntermediateSignalEventCatching.class,
-                    BPMNSVGGlyphFactory.INTERMEDIATE_SIGNAL_EVENT_GLYPH);
+                    BPMNSVGGlyphFactory.getGlyph(INTERMEDIATE_SIGNAL_EVENT_GLYPH));
                 put(IntermediateErrorEventCatching.class,
-                    BPMNSVGGlyphFactory.INTERMEDIATE_ERROR_EVENT_GLYPH);
+                    BPMNSVGGlyphFactory.getGlyph(INTERMEDIATE_ERROR_EVENT_GLYPH));
                 put(IntermediateMessageEventCatching.class,
-                    BPMNSVGGlyphFactory.INTERMEDIATE_MESSAGE_EVENT_GLYPH);
+                    BPMNSVGGlyphFactory.getGlyph(INTERMEDIATE_MESSAGE_EVENT_GLYPH));
             }};
 
     @Override
