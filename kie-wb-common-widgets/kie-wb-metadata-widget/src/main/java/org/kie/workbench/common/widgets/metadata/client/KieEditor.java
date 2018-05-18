@@ -416,7 +416,7 @@ public abstract class KieEditor<T>
     @Override
     public boolean mayClose(Integer currentHash) {
         return !this.isDirty(currentHash) && !overviewWidget.isDirty();
-    }
+}
 
     @Override
     protected void save() {

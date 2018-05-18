@@ -41,6 +41,7 @@ import org.kie.workbench.common.stunner.project.service.ProjectDiagramService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uberfire.backend.vfs.Path;
+import org.uberfire.ext.editor.commons.service.RenameService;
 import org.uberfire.io.IOService;
 import org.uberfire.rpc.SessionInfo;
 import org.uberfire.workbench.events.ResourceOpenedEvent;
@@ -56,9 +57,11 @@ public class ProjectDiagramServiceImpl extends KieService<ProjectDiagram>
     private final Event<ResourceOpenedEvent> resourceOpenedEvent;
     private final CommentedOptionFactory commentedOptionFactory;
     private final ProjectDiagramServiceController controller;
+    private final RenameService renameService;
 
     protected ProjectDiagramServiceImpl() {
         this(null,
+             null,
              null,
              null,
              null,
@@ -80,11 +83,14 @@ public class ProjectDiagramServiceImpl extends KieService<ProjectDiagram>
                                      final Event<ResourceOpenedEvent> resourceOpenedEvent,
                                      final CommentedOptionFactory commentedOptionFactory,
                                      final KieModuleService moduleService,
-                                     final KieServiceOverviewLoader overviewLoader) {
+                                     final KieServiceOverviewLoader overviewLoader,
+                                     final RenameService renameService)
+    {
         this.ioService = ioService;
         this.sessionInfo = sessionInfo;
         this.resourceOpenedEvent = resourceOpenedEvent;
         this.commentedOptionFactory = commentedOptionFactory;
+        this.renameService = renameService;
         this.controller = buildController(definitionManager,
                                           factoryManager,
                                           definitionSetServiceInstances,
@@ -155,6 +161,26 @@ public class ProjectDiagramServiceImpl extends KieService<ProjectDiagram>
                                metadataService.setUpAttributes(path,
                                                                metadata),
                                commentedOptionFactory.makeCommentedOption(comment));
+    }
+
+    @Override
+    public Path saveAndRename(Path path,
+                              String newFileName,
+                              Metadata metadata,
+                              ProjectDiagram content,
+                              String comment) {
+        Path savedPath = this.save(path, content, metadata, comment);
+        Path renamedPath = this.rename(savedPath, newFileName, comment);
+        return renamedPath;
+    }
+
+    @Override
+    public Path rename(Path path,
+                       String newName,
+                       String comment) {
+        return renameService.rename(path,
+                                    newName,
+                                    comment);
     }
 
     @Override

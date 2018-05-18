@@ -30,6 +30,7 @@ import javax.inject.Inject;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.logging.client.LogConfiguration;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -80,6 +81,7 @@ import org.uberfire.client.workbench.events.PlaceGainFocusEvent;
 import org.uberfire.client.workbench.events.PlaceHiddenEvent;
 import org.uberfire.client.workbench.type.ClientResourceType;
 import org.uberfire.client.workbench.widgets.common.ErrorPopupPresenter;
+import org.uberfire.ext.editor.commons.client.file.CommandWithFileNameAndCommitMessage;
 import org.uberfire.ext.editor.commons.client.file.popups.SavePopUpPresenter;
 import org.uberfire.ext.widgets.common.client.ace.AceEditorMode;
 import org.uberfire.ext.widgets.common.client.common.popups.YesNoCancelPopup;
@@ -468,6 +470,58 @@ public abstract class AbstractProjectDiagramEditor<R extends ClientResourceType>
         };
     }
 
+    protected void rename() {
+            final boolean dirty = !super.mayClose(getCurrentDiagramHash());
+            renamePopUpPresenter.show(versionRecordManager.getPathToLatest(),
+                                      assetUpdateValidator,
+                                      dirty,
+                                      getRenameCommand(),
+                                      getSaveAndRenameCommand());
+    }
+
+    protected CommandWithFileNameAndCommitMessage getRenameCommand() {
+        return parameter -> {
+            projectDiagramServices.rename(versionRecordManager.getPathToLatest(),
+                                          parameter.getNewFileName(),
+                                          parameter.getCommitMessage(),
+                                          new ServiceCallback<Path>() {
+                                              @Override
+                                              public void onSuccess(final Path path) {
+                                                  renamePopUpPresenter.getView().hide();
+                                              }
+
+                                              @Override
+                                              public void onError(final ClientRuntimeError error) {
+                                                  renamePopUpPresenter.getView().hide();
+                                                  showError(error);
+                                              }
+                                          });
+        };
+    }
+
+    protected CommandWithFileNameAndCommitMessage getSaveAndRenameCommand() {
+        return parameter -> {
+            final Path diagramPath = versionRecordManager.getCurrentPath();
+            projectDiagramServices.saveAndRename(diagramPath,
+                                                 parameter.getNewFileName(),
+                                                 getDiagram(),
+                                                 metadata,
+                                                 parameter.getCommitMessage(),
+                                                 new ServiceCallback<ProjectDiagram>() {
+                                                     @Override
+                                                     public void onSuccess(final ProjectDiagram item) {
+                                                         renamePopUpPresenter.getView().hide();
+                                                     }
+
+                                                     @Override
+                                                     public void onError(final ClientRuntimeError error) {
+                                                         renamePopUpPresenter.getView().hide();
+                                                         showError(error);
+                                                     }
+                                                 });
+        };
+    }
+
     public void hideDiagramEditorDocks(@Observes PlaceHiddenEvent event) {
         if (verifyEventIdentifier(event)) {
             onDiagramLostFocusEvent.fire(new OnDiagramLoseFocusEvent());
@@ -490,8 +544,11 @@ public abstract class AbstractProjectDiagramEditor<R extends ClientResourceType>
                         .addSave(versionRecordManager.newSaveMenuItem(this::saveAction))
                         .addCopy(versionRecordManager.getCurrentPath(),
                                  assetUpdateValidator)
+                        /*
                         .addRename(versionRecordManager.getPathToLatest(),
                                    assetUpdateValidator)
+                                   */
+                        .addRename(this::rename)
                         .addDelete(versionRecordManager.getPathToLatest(),
                                    assetUpdateValidator);
             }

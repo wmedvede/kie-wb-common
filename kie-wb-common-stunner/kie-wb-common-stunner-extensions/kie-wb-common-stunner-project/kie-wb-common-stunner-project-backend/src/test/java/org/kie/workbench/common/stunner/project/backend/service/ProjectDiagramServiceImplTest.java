@@ -133,7 +133,8 @@ public class ProjectDiagramServiceImplTest {
                                                        moduleService,
                                                        new KieServiceOverviewLoader(metadataService,
                                                                                     moduleService,
-                                                                                    projectService)) {
+                                                                                    projectService),
+                                                       null) {
 
             {
                 metadataService = ProjectDiagramServiceImplTest.this.metadataService;

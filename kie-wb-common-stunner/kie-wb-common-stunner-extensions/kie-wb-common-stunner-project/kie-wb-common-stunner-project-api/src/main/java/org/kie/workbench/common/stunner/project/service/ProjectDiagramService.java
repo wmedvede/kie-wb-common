@@ -25,11 +25,13 @@ import org.kie.workbench.common.stunner.project.diagram.ProjectDiagram;
 import org.kie.workbench.common.stunner.project.diagram.ProjectMetadata;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
+import org.uberfire.ext.editor.commons.service.support.SupportsSaveAndRename;
 
 @Remote
 public interface ProjectDiagramService extends BaseDiagramService<ProjectMetadata, ProjectDiagram>,
-                                               SupportsUpdate<ProjectDiagram>,
-                                               SupportsDelete {
+                                               //SupportsUpdate<ProjectDiagram>,
+                                               SupportsDelete,
+                                               SupportsSaveAndRename<ProjectDiagram, Metadata> {
 
     Path create(final Path path,
                 final String name,

@@ -111,4 +111,38 @@ public class ClientProjectDiagramService extends ClientDiagramServiceImpl<Projec
                                                metadata,
                                                comment);
     }
+
+    public void saveAndRename(final Path path,
+                              final String newName,
+                              final ProjectDiagram diagram,
+                              final Metadata metadata,
+                              final String comment,
+                              final ServiceCallback<ProjectDiagram> callback) {
+        diagramServiceCaller.call(v -> {
+                                      updateClientMetadata(diagram);
+                                      callback.onSuccess(diagram);
+                                      fireSavedEvent(diagram);
+                                  },
+                                  (message, throwable) -> {
+                                      callback.onError(new ClientRuntimeError(throwable));
+                                      return false;
+                                  }).saveAndRename(path,
+                                                   newName,
+                                                   metadata,
+                                                   diagram,
+                                                   comment);
+    }
+
+    public void rename(final Path path,
+                       final String newName,
+                       final String comment,
+                       final ServiceCallback<Path> callback) {
+        diagramServiceCaller.call((RemoteCallback<Path>) callback::onSuccess,
+                                  ((message, throwable) -> {
+                                      callback.onError(new ClientRuntimeError(throwable));
+                                      return false;
+                                  })).rename(path,
+                                             newName,
+                                             comment);
+    }
 }
