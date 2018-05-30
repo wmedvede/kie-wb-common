@@ -40,6 +40,7 @@ public class LiveSearchListBoxFieldRenderer extends FieldRenderer<LiveSearchList
         DefaultFormGroup formGroup  = formGroupsInstance.get();
 
         formGroup.render(widget, field);
+        widget.setProvider(field.getProvider());
 
         return formGroup;
     }
@@ -56,8 +57,6 @@ public class LiveSearchListBoxFieldRenderer extends FieldRenderer<LiveSearchList
 
     @Override
     protected void setReadOnly(boolean readOnly) {
-        //TODO WB complete
-        //widget.setReadOnly(readOnly);
-
+        widget.setReadOnly(readOnly);
     }
 }

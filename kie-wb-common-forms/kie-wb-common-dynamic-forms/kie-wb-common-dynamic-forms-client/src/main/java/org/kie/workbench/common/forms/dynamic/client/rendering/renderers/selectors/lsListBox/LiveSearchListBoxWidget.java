@@ -49,7 +49,7 @@ public class LiveSearchListBoxWidget
         liveSearchDropDown.setSearchEnabled(true);
         liveSearchDropDown.init(searchService,
                                 selectionHandler);
-        selectionHandler.setLiveSearchSelectionCallback(this::onSelection);
+        liveSearchDropDown.setOnChange(this::onSelectionChange);
     }
 
     @Override
@@ -66,7 +66,10 @@ public class LiveSearchListBoxWidget
     @Override
     public void setValue(String value,
                          boolean fireEvents) {
-        selectionHandler.selectKey(value);
+        //TODO WM todavia no modela el caso donde guardamos el valor y luego al editar
+        //el valor seleccionado ya no existe. Ej. elegijos un subproceso, guardamos, se borrra el subproceso
+        //y a editar el proceso current resulta q el valor seleccionado ya no existe.
+        liveSearchDropDown.setSelectedItem(value);
         if (fireEvents) {
             notifyChange(lastValue,
                          value);
@@ -80,7 +83,11 @@ public class LiveSearchListBoxWidget
                    ValueChangeEvent.getType());
     }
 
-    private void onSelection() {
+    public void setReadOnly(boolean readOnly) {
+        this.liveSearchDropDown.setEnabled(!readOnly);
+    }
+
+    private void onSelectionChange() {
         String selectedValue = selectionHandler.getSelectedKey();
         notifyChange(lastValue,
                      selectedValue);
@@ -92,5 +99,9 @@ public class LiveSearchListBoxWidget
         ValueChangeEvent.fireIfNotEqual(this,
                                         oldValue,
                                         newValue);
+    }
+
+    public void setProvider(String provider) {
+
     }
 }
