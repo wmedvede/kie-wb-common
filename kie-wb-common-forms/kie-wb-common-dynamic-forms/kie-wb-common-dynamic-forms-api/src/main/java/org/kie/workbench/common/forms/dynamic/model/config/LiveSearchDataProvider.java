@@ -14,26 +14,16 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.forms.dynamic.client.rendering.renderers.selectors.lsListBox;
+package org.kie.workbench.common.forms.dynamic.model.config;
 
-import org.uberfire.client.mvp.UberElement;
+import org.kie.workbench.common.forms.dynamic.service.shared.FormRenderingContext;
 
-public interface LiveSearchEntryCreationEditorView extends UberElement<LiveSearchEntryCreationEditorView.Presenter> {
+public interface LiveSearchDataProvider extends DataProvider {
 
-    interface Presenter {
+    SelectorData search(String pattern,
+                        int maxResults,
+                        FormRenderingContext context);
 
-        String getFieldLabel();
-
-        void onAccept();
-
-        void onCancel();
-    }
-
-    void clear();
-
-    String getValue();
-
-    void showError(String errorMessage);
-
-    void clearErrors();
+    SelectorData searchEntry(String key,
+                             FormRenderingContext context);
 }

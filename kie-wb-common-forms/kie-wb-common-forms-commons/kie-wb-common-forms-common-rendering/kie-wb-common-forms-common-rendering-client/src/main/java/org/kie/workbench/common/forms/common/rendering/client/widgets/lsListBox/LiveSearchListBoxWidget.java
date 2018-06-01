@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.forms.dynamic.client.rendering.renderers.selectors.lsListBox;
+package org.kie.workbench.common.forms.common.rendering.client.widgets.lsListBox;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -24,6 +24,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasValue;
+import org.kie.workbench.common.forms.dynamic.service.shared.FormRenderingContext;
 import org.uberfire.ext.widgets.common.client.dropdown.LiveSearchDropDown;
 import org.uberfire.ext.widgets.common.client.dropdown.SingleLiveSearchSelectionHandler;
 
@@ -37,19 +38,25 @@ public class LiveSearchListBoxWidget
 
     @Inject
     public LiveSearchListBoxWidget(LiveSearchDropDown<String> liveSearchDropDown,
-                                          LiveSearchListBoxSearchService searchService) {
+                                   LiveSearchListBoxSearchService searchService) {
         this.liveSearchDropDown = liveSearchDropDown;
         this.searchService = searchService;
     }
 
     @PostConstruct
-    public void init() {
+    void init() {
         initWidget(liveSearchDropDown.asWidget());
         liveSearchDropDown.setEnabled(true);
         liveSearchDropDown.setSearchEnabled(true);
         liveSearchDropDown.init(searchService,
                                 selectionHandler);
         liveSearchDropDown.setOnChange(this::onSelectionChange);
+    }
+
+    public void init(String dataProvider,
+                     FormRenderingContext context) {
+        searchService.init(dataProvider,
+                           context);
     }
 
     @Override
@@ -66,9 +73,6 @@ public class LiveSearchListBoxWidget
     @Override
     public void setValue(String value,
                          boolean fireEvents) {
-        //TODO WM todavia no modela el caso donde guardamos el valor y luego al editar
-        //el valor seleccionado ya no existe. Ej. elegijos un subproceso, guardamos, se borrra el subproceso
-        //y a editar el proceso current resulta q el valor seleccionado ya no existe.
         liveSearchDropDown.setSelectedItem(value);
         if (fireEvents) {
             notifyChange(lastValue,
@@ -80,7 +84,7 @@ public class LiveSearchListBoxWidget
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
         return addHandler(handler,
-                   ValueChangeEvent.getType());
+                          ValueChangeEvent.getType());
     }
 
     public void setReadOnly(boolean readOnly) {
@@ -99,9 +103,5 @@ public class LiveSearchListBoxWidget
         ValueChangeEvent.fireIfNotEqual(this,
                                         oldValue,
                                         newValue);
-    }
-
-    public void setProvider(String provider) {
-
     }
 }

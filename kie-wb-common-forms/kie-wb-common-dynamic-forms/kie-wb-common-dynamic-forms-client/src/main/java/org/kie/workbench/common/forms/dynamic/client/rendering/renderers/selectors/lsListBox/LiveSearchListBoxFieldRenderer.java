@@ -19,6 +19,7 @@ package org.kie.workbench.common.forms.dynamic.client.rendering.renderers.select
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.kie.workbench.common.forms.common.rendering.client.widgets.lsListBox.LiveSearchListBoxWidget;
 import org.kie.workbench.common.forms.dynamic.client.rendering.FieldRenderer;
 import org.kie.workbench.common.forms.dynamic.client.rendering.formGroups.FormGroup;
 import org.kie.workbench.common.forms.dynamic.client.rendering.formGroups.impl.def.DefaultFormGroup;
@@ -37,10 +38,12 @@ public class LiveSearchListBoxFieldRenderer extends FieldRenderer<LiveSearchList
 
     @Override
     protected FormGroup getFormGroup(RenderMode renderMode) {
-        DefaultFormGroup formGroup  = formGroupsInstance.get();
+        DefaultFormGroup formGroup = formGroupsInstance.get();
 
-        formGroup.render(widget, field);
-        widget.setProvider(field.getProvider());
+        formGroup.render(widget,
+                         field);
+        widget.init(field.getDataProvider(),
+                    renderingContext);
 
         return formGroup;
     }

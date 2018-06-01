@@ -35,7 +35,7 @@ public class CalledElement implements BPMNProperty {
     private String value;
 
     public CalledElement() {
-        this("");
+        this(null);
     }
 
     public CalledElement(final String value) {

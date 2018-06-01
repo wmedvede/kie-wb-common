@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2018 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,15 @@
 package org.kie.workbench.common.forms.dynamic.service.shared;
 
 import org.kie.workbench.common.forms.dynamic.model.config.SelectorData;
-import org.kie.workbench.common.forms.dynamic.model.config.SelectorDataProvider;
 
-public abstract class AbstractSelectorDataProviderManager
-        extends AbstractDataProviderManager<SelectorDataProvider>
-        implements SelectorDataProviderManager {
+public interface LiveSearchDataProviderManager extends DataProviderManager {
 
-    @Override
-    public SelectorData getDataFromProvider(FormRenderingContext context,
-                                            String provider) {
-        SelectorDataProvider dataProvider = providers.get(provider);
-        if (dataProvider == null) {
-            return null;
-        }
-        return dataProvider.getSelectorData(context);
-    }
+    SelectorData searchFromProvider(String pattern,
+                                    int maxResults,
+                                    FormRenderingContext context,
+                                    String provider);
+
+    SelectorData searchEntryFromProvider(String key,
+                                         FormRenderingContext context,
+                                         String provider);
 }

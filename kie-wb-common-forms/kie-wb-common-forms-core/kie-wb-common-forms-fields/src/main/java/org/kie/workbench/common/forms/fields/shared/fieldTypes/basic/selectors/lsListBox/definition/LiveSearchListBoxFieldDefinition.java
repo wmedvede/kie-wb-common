@@ -40,18 +40,18 @@ public class LiveSearchListBoxFieldDefinition extends AbstractFieldDefinition {
         return FIELD_TYPE;
     }
 
-    public String getProvider() {
+    public String getDataProvider() {
         return provider;
     }
 
-    public void setProvider(String provider) {
+    public void setDataProvider(String provider) {
         this.provider = provider;
     }
 
     @Override
     protected void doCopyFrom(FieldDefinition other) {
         if (other instanceof LiveSearchListBoxFieldDefinition) {
-            setProvider(((LiveSearchListBoxFieldDefinition) other).getProvider());
+            setDataProvider(((LiveSearchListBoxFieldDefinition) other).getDataProvider());
         }
     }
 

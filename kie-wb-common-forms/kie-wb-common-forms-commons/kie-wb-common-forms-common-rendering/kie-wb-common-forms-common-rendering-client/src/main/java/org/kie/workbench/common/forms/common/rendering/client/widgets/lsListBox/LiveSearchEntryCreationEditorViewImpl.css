@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-.kie-wb-common-stunner-assignee-editor-table {
+.live-search-entry-creation-table {
     width: 100%;
     border: 0;
     margin: 0;
 }
 
-.kie-wb-common-stunner-assignee-editor-table-action-column {
+.live-search-entry-creation-table-action-column {
     width: 20px;
     text-align: center;
     vertical-align: bottom;
 }
 
-.kie-wb-common-stunner-assignee-editor-table-action {
+.live-search-entry-creation-table-action {
     cursor: pointer;
 }

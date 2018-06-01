@@ -59,7 +59,7 @@ public abstract class SelectorFieldRenderer<FIELD extends SelectorFieldBaseDefin
 
     public void refreshSelectorOptions() {
         if (field.getDataProvider() != null && !field.getDataProvider().isEmpty()) {
-            if (field.getDataProvider().startsWith(ClientSelectorDataProviderManager.PREFFIX)) {
+            if (field.getDataProvider().startsWith(ClientSelectorDataProviderManager.PREFIX)) {
                 refreshSelectorOptions(clientProviderManager.getDataFromProvider(
                         renderingContext,
                         field.getDataProvider()));

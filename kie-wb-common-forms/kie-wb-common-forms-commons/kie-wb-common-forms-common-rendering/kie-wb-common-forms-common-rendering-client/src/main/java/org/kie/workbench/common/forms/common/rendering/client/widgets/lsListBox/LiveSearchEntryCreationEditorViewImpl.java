@@ -14,42 +14,43 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.forms.dynamic.client.rendering.renderers.selectors.lsListBox;
+package org.kie.workbench.common.forms.common.rendering.client.widgets.lsListBox;
 
 import javax.inject.Inject;
 
-import com.google.gwt.event.dom.client.ClickEvent;
 import org.jboss.errai.common.client.dom.Anchor;
 import org.jboss.errai.common.client.dom.DOMUtil;
 import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.common.client.dom.Event;
 import org.jboss.errai.common.client.dom.Label;
 import org.jboss.errai.common.client.dom.Span;
 import org.jboss.errai.common.client.dom.TextInput;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
+import org.jboss.errai.ui.shared.api.annotations.ForEvent;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.uberfire.client.views.pfly.widgets.ValidationState;
 
 @Templated
-public class LiveSearchEntryCreationEditorViewImpl implements LiveSearchEntryCreationEditorView,
+public class LiveSearchEntryCreationEditorViewImpl implements LiveSearchEntryCreationEditor.View,
                                                               IsElement {
 
     @Inject
     @DataField
-    private Div assigneeInputFormGroup;
+    private Div newEntryInputForm;
 
     @Inject
     @DataField
-    private Label assigneeInputLabel;
+    private Label newEntryInputLabel;
 
     @Inject
     @DataField
-    private TextInput assigneeInput;
+    private TextInput newEntryInput;
 
     @Inject
     @DataField
-    private Span assigneeInputHelpBlock;
+    private Span newEntryInputHelpBlock;
 
     @Inject
     @DataField
@@ -59,46 +60,47 @@ public class LiveSearchEntryCreationEditorViewImpl implements LiveSearchEntryCre
     @DataField
     private Anchor cancelButton;
 
-    private Presenter presenter;
+    private LiveSearchEntryCreationEditor presenter;
 
     @Override
-    public void init(Presenter presenter) {
+    public void init(LiveSearchEntryCreationEditor presenter) {
         this.presenter = presenter;
-
-        assigneeInputLabel.setTextContent(presenter.getFieldLabel());
+        newEntryInputLabel.setTextContent(presenter.getFieldLabel());
     }
 
     @Override
     public void clear() {
-        assigneeInput.setValue("");
+        newEntryInput.setValue("");
         clearErrors();
     }
 
     @Override
     public String getValue() {
-        return assigneeInput.getValue();
+        return newEntryInput.getValue();
     }
 
     @Override
     public void showError(String errorMessage) {
-        DOMUtil.addCSSClass(assigneeInputFormGroup, ValidationState.ERROR.getCssName());
-        assigneeInputHelpBlock.setTextContent(errorMessage);
+        DOMUtil.addCSSClass(newEntryInputForm,
+                            ValidationState.ERROR.getCssName());
+        newEntryInputHelpBlock.setTextContent(errorMessage);
     }
 
     @Override
     public void clearErrors() {
-        DOMUtil.removeCSSClass(assigneeInputFormGroup, ValidationState.ERROR.getCssName());
-        assigneeInputHelpBlock.setTextContent("");
+        DOMUtil.removeCSSClass(newEntryInputForm,
+                               ValidationState.ERROR.getCssName());
+        newEntryInputHelpBlock.setTextContent("");
     }
 
     @EventHandler("acceptButton")
-    public void onAccept(ClickEvent event) {
+    public void onAccept(@ForEvent("click") Event event) {
         presenter.onAccept();
         event.stopPropagation();
     }
 
     @EventHandler("cancelButton")
-    public void onCancel(ClickEvent event) {
+    public void onCancel(@ForEvent("click") Event event) {
         presenter.onCancel();
         event.stopPropagation();
     }

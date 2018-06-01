@@ -16,14 +16,13 @@
 
 package org.kie.workbench.common.forms.common.rendering.client.resources.i18n;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.Messages;
+import org.jboss.errai.ui.shared.api.annotations.TranslationKey;
 
-public interface FormWidgetsConstants extends Messages {
+public interface FormWidgetsConstants {
 
-    public static final FormWidgetsConstants INSTANCE = GWT.create(FormWidgetsConstants.class);
+    @TranslationKey(defaultValue = "New Entry")
+    String LiveSearchEntryCreationEditor_newEntry = "LiveSearchEntryCreationEditor.newEntry";
 
-    public String takePicture();
-
-    public String newPicture();
+    @TranslationKey(defaultValue = "The new entry can not be empty")
+    String LiveSearchEntryCreationEditor_newEntryCanNotBeEmpty = "LiveSearchEntryCreationEditor.newEntryCanNotBeEmpty";
 }

@@ -16,16 +16,10 @@
 
 package org.kie.workbench.common.forms.dynamic.service.shared;
 
-import java.util.Map;
-
 import org.kie.workbench.common.forms.dynamic.model.config.SelectorData;
 
-public interface SelectorDataProviderManager {
+public interface SelectorDataProviderManager extends DataProviderManager {
 
-    public static final String SEPARATOR = ":";
-
-    public Map<String, String> availableProviders();
-
-    public SelectorData getDataFromProvider(FormRenderingContext context,
-                                            String provider);
+    SelectorData getDataFromProvider(FormRenderingContext context,
+                                     String provider);
 }

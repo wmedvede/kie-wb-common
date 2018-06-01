@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2018 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.forms.dynamic.model.config;
+package org.kie.workbench.common.forms.dynamic.service.shared;
 
-import org.kie.workbench.common.forms.dynamic.service.shared.FormRenderingContext;
+import org.jboss.errai.bus.server.annotations.Remote;
 
-public interface SelectorDataProvider extends DataProvider {
+@Remote
+public interface BackendLiveSearchDataProviderService extends LiveSearchDataProviderManager {
 
-    SelectorData getSelectorData(FormRenderingContext context);
 }

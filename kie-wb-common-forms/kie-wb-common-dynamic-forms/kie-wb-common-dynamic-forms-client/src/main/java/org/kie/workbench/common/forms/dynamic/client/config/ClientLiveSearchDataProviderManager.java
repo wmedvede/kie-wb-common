@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2018 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,19 +23,19 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
-import org.kie.workbench.common.forms.dynamic.model.config.SelectorDataProvider;
-import org.kie.workbench.common.forms.dynamic.service.shared.AbstractSelectorDataProviderManager;
+import org.kie.workbench.common.forms.dynamic.model.config.LiveSearchDataProvider;
+import org.kie.workbench.common.forms.dynamic.service.shared.AbstractLiveSearchDataProviderManager;
 
 @ApplicationScoped
-public class ClientSelectorDataProviderManager extends AbstractSelectorDataProviderManager {
+public class ClientLiveSearchDataProviderManager extends AbstractLiveSearchDataProviderManager {
 
     public static final String PREFIX = "local";
 
     @PostConstruct
     public void init() {
-        Collection<SyncBeanDef<SelectorDataProvider>> providers = IOC.getBeanManager().lookupBeans(SelectorDataProvider.class);
+        Collection<SyncBeanDef<LiveSearchDataProvider>> providers = IOC.getBeanManager().lookupBeans(LiveSearchDataProvider.class);
 
-        for (SyncBeanDef<SelectorDataProvider> provider : providers) {
+        for (SyncBeanDef<LiveSearchDataProvider> provider : providers) {
             registerProvider(provider.newInstance());
         }
     }

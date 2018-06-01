@@ -14,22 +14,34 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.forms.dynamic.client.rendering.renderers.selectors.lsListBox;
+package org.kie.workbench.common.forms.common.rendering.client.widgets.lsListBox;
 
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.kie.workbench.common.forms.common.rendering.client.resources.i18n.FormWidgetsConstants;
+import org.uberfire.client.mvp.UberElement;
 import org.uberfire.ext.widgets.common.client.dropdown.InlineCreationEditor;
 import org.uberfire.ext.widgets.common.client.dropdown.LiveSearchEntry;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.ParameterizedCommand;
 
-public class LiveSearchEntryCreationEditor implements InlineCreationEditor<String>,
-                                                      LiveSearchEntryCreationEditorView.Presenter {
+public class LiveSearchEntryCreationEditor implements InlineCreationEditor<String> {
+
+    public interface View extends UberElement<LiveSearchEntryCreationEditor> {
+
+        void clear();
+
+        String getValue();
+
+        void showError(String errorMessage);
+
+        void clearErrors();
+    }
 
     private TranslationService translationService;
-    private LiveSearchEntryCreationEditorView view;
+    private View view;
 
     private ParameterizedCommand<LiveSearchEntry<String>> okCommand;
     private Command cancelCommand;
@@ -37,7 +49,8 @@ public class LiveSearchEntryCreationEditor implements InlineCreationEditor<Strin
     private ParameterizedCommand<String> customEntryCommand;
 
     @Inject
-    public LiveSearchEntryCreationEditor(LiveSearchEntryCreationEditorView view, TranslationService translationService) {
+    public LiveSearchEntryCreationEditor(View view,
+                                         TranslationService translationService) {
         this.view = view;
         this.translationService = translationService;
 
@@ -49,7 +62,8 @@ public class LiveSearchEntryCreationEditor implements InlineCreationEditor<Strin
     }
 
     @Override
-    public void init(ParameterizedCommand<LiveSearchEntry<String>> okCommand, Command cancelCommand) {
+    public void init(ParameterizedCommand<LiveSearchEntry<String>> okCommand,
+                     Command cancelCommand) {
         this.okCommand = okCommand;
         this.cancelCommand = cancelCommand;
     }
@@ -60,15 +74,19 @@ public class LiveSearchEntryCreationEditor implements InlineCreationEditor<Strin
     }
 
     @Override
+    public HTMLElement getElement() {
+        return view.getElement();
+    }
+
     public void onAccept() {
         String value = view.getValue();
         if (isValid(value)) {
             customEntryCommand.execute(value);
-            okCommand.execute(new LiveSearchEntry<>(value, value));
+            okCommand.execute(new LiveSearchEntry<>(value,
+                                                    value));
         }
     }
 
-    @Override
     public void onCancel() {
         view.clear();
         cancelCommand.execute();
@@ -78,23 +96,15 @@ public class LiveSearchEntryCreationEditor implements InlineCreationEditor<Strin
         view.clearErrors();
 
         if (value == null || value.isEmpty()) {
-            //TODO WM se the proper constant here
-            view.showError(translationService.getTranslation("StunnerBPMNConstants.ASSIGNEE_CANNOT_BE_EMPTY"));
+            view.showError(translationService.getTranslation(FormWidgetsConstants.LiveSearchEntryCreationEditor_newEntryCanNotBeEmpty));
             return false;
         }
 
         return true;
     }
 
-    @Override
-    public HTMLElement getElement() {
-        return view.getElement();
-    }
-
-    @Override
     public String getFieldLabel() {
-        //TODO WM set the proper constant here
-        return translationService.getTranslation("StunnerBPMNConstants.ASSIGNEE_LABEL");
+        return translationService.getTranslation(FormWidgetsConstants.LiveSearchEntryCreationEditor_newEntry);
     }
 }
 
