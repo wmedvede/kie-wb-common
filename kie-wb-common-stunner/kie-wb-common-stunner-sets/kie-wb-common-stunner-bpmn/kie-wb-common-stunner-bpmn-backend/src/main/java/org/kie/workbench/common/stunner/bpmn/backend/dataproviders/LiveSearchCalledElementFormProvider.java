@@ -17,12 +17,36 @@
 package org.kie.workbench.common.stunner.bpmn.backend.dataproviders;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.kie.workbench.common.forms.dynamic.model.config.LiveSearchDataProvider;
 import org.kie.workbench.common.forms.dynamic.model.config.SelectorData;
 import org.kie.workbench.common.forms.dynamic.service.shared.FormRenderingContext;
+import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueIndexTerm;
+import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueResourceIndexTerm;
+import org.kie.workbench.common.services.refactoring.model.query.RefactoringPageRow;
+import org.kie.workbench.common.services.refactoring.service.RefactoringQueryService;
+import org.kie.workbench.common.services.refactoring.service.ResourceType;
+import org.kie.workbench.common.stunner.bpmn.backend.query.FindBpmnProcessIdsQuery;
+import org.uberfire.backend.vfs.Path;
 
 public class LiveSearchCalledElementFormProvider implements LiveSearchDataProvider {
+
+    protected RefactoringQueryService queryService;
+
+    public LiveSearchCalledElementFormProvider() {
+        //weld proxying
+    }
+
+    @Inject
+    public LiveSearchCalledElementFormProvider(RefactoringQueryService queryService) {
+        this.queryService = queryService;
+    }
 
     @Override
     public String getProviderName() {
@@ -33,33 +57,52 @@ public class LiveSearchCalledElementFormProvider implements LiveSearchDataProvid
     public SelectorData search(String pattern,
                                int maxResults,
                                FormRenderingContext renderingContext) {
-        HashMap<String, String> values = new HashMap<>();
-        values.put("uno",
-                   "UNO");
-        values.put("dos",
-                   "DOS");
-        values.put("tres",
-                   "TRES");
-        SelectorData<String> selectorData = new SelectorData<>();
-        selectorData.setValues(values);
-        return selectorData;
+        //String queryPattern = pattern != null && !pattern.trim().isEmpty() ? (pattern.trim() + "*") : "";
+        //String queryPattern = pattern != null ? "*" + pattern.trim() : "*";
+
+        //TODO, WM, Continue here, for some reason if I create a project1 and process Process1, Process2
+        //the search seems to not be working well project1.Process2
+        //Hay algun problema aca, la busqueda tendria que ir, pero *project1.Process2* no me retorna el puto valor
+        //es raro xq en la Library va bien...
+        
+        String queryPattern = pattern;
+        final Set<ValueIndexTerm> queryTerms = new HashSet<ValueIndexTerm>() {{
+            add(new ValueResourceIndexTerm(queryPattern,
+                                           ResourceType.BPMN2,
+                                           ValueIndexTerm.TermSearchType.WILDCARD));
+        }};
+        List<RefactoringPageRow> results = queryService.query(
+                FindBpmnProcessIdsQuery.NAME,
+                queryTerms);
+        return buildResult(results);
     }
 
     @Override
     public SelectorData searchEntry(String key,
                                     FormRenderingContext context) {
-        HashMap<String, String> values = new HashMap<>();
-        if ("uno".equals(key)) {
-            values.put("uno",
-                       "UNO");
-        } else if ("dos".equals(key)) {
-            values.put("dos",
-                       "DOS");
-        } else if ("tres".equals(key)) {
-            values.put("tres",
-                       "TRES");
+        if (key != null) {
+            final Set<ValueIndexTerm> queryTerms = new HashSet<ValueIndexTerm>() {{
+                add(new ValueResourceIndexTerm(key,
+                                               ResourceType.BPMN2,
+                                               ValueIndexTerm.TermSearchType.NORMAL));
+            }};
+            List<RefactoringPageRow> results = queryService.query(
+                    FindBpmnProcessIdsQuery.NAME,
+                    queryTerms);
+            return buildResult(results);
         } else {
-            values = null;
+            return new SelectorData();
+        }
+    }
+
+    private SelectorData buildResult(List<RefactoringPageRow> results) {
+        HashMap<String, String> values = new HashMap<>();
+        for (RefactoringPageRow row : results) {
+            Map<String, Path> mapRow = (Map<String, Path>) row.getValue();
+            for (String rKey : mapRow.keySet()) {
+                values.put(rKey,
+                           rKey);
+            }
         }
         SelectorData<String> selectorData = new SelectorData<>();
         selectorData.setValues(values);

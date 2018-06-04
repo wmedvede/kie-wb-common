@@ -43,6 +43,7 @@ public class LiveSearchListBoxFieldRenderer extends FieldRenderer<LiveSearchList
         formGroup.render(widget,
                          field);
         widget.init(field.getDataProvider(),
+                    field.getMaxResults(),
                     renderingContext);
 
         return formGroup;

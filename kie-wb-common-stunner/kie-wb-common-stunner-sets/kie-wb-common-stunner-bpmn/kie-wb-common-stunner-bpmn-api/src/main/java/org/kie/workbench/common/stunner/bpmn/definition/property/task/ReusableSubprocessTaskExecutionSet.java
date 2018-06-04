@@ -20,6 +20,7 @@ import javax.validation.Valid;
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.kie.workbench.common.forms.adf.definitions.annotations.FieldParam;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormDefinition;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormField;
 import org.kie.workbench.common.forms.adf.definitions.annotations.field.selector.SelectorDataProvider;
@@ -42,7 +43,8 @@ public class ReusableSubprocessTaskExecutionSet implements BPMNPropertySet {
             type = SelectorDataProvider.ProviderType.REMOTE,
             className = "org.kie.workbench.common.stunner.bpmn.backend.dataproviders.LiveSearchCalledElementFormProvider")
     @FormField(
-            type = LiveSearchListBoxFieldType.class
+            type = LiveSearchListBoxFieldType.class,
+            settings = {@FieldParam(name = "maxResults", value = "20")}
     )
     @Valid
     protected CalledElement calledElement;

@@ -54,7 +54,9 @@ public class LiveSearchListBoxWidget
     }
 
     public void init(String dataProvider,
+                     int maxResults,
                      FormRenderingContext context) {
+        liveSearchDropDown.setMaxItems(maxResults);
         searchService.init(dataProvider,
                            context);
     }

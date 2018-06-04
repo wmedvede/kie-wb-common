@@ -29,7 +29,11 @@ public class LiveSearchListBoxFieldDefinition extends AbstractFieldDefinition {
 
     public static final LiveSearchListBoxFieldType FIELD_TYPE = new LiveSearchListBoxFieldType();
 
-    private String provider;
+    public static final int MAX_RESULTS = 15;
+
+    private String dataProvider;
+
+    private int maxResults = MAX_RESULTS;
 
     public LiveSearchListBoxFieldDefinition() {
         super(String.class.getName());
@@ -41,11 +45,19 @@ public class LiveSearchListBoxFieldDefinition extends AbstractFieldDefinition {
     }
 
     public String getDataProvider() {
-        return provider;
+        return dataProvider;
     }
 
     public void setDataProvider(String provider) {
-        this.provider = provider;
+        this.dataProvider = provider;
+    }
+
+    public int getMaxResults() {
+        return maxResults;
+    }
+
+    public void setMaxResults(int maxResults) {
+        this.maxResults = maxResults;
     }
 
     @Override
@@ -69,13 +81,18 @@ public class LiveSearchListBoxFieldDefinition extends AbstractFieldDefinition {
 
         LiveSearchListBoxFieldDefinition that = (LiveSearchListBoxFieldDefinition) o;
 
-        return provider != null ? provider.equals(that.provider) : that.provider == null;
+        if (maxResults != that.maxResults) {
+            return false;
+        }
+        return dataProvider != null ? dataProvider.equals(that.dataProvider) : that.dataProvider == null;
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (provider != null ? provider.hashCode() : 0);
+        result = 31 * result + (dataProvider != null ? dataProvider.hashCode() : 0);
+        result = ~~result;
+        result = 31 * result + maxResults;
         result = ~~result;
         return result;
     }

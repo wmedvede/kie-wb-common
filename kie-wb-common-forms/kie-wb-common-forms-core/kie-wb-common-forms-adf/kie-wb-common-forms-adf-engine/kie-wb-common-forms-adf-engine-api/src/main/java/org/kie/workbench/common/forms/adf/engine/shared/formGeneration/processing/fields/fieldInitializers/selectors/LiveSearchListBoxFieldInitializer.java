@@ -38,9 +38,17 @@ public class LiveSearchListBoxFieldInitializer implements FieldInitializer<LiveS
                            FieldElement fieldElement,
                            FormGenerationContext context) {
         String dataProvider = fieldElement.getParams().get(SelectorDataProvider.class.getName());
-
+        String paramMaxResults = fieldElement.getParams().getOrDefault("maxResults", Integer.toString(LiveSearchListBoxFieldDefinition.MAX_RESULTS));
+        int maxResults = LiveSearchListBoxFieldDefinition.MAX_RESULTS;
         if (dataProvider != null && !dataProvider.isEmpty()) {
             fieldDefinition.setDataProvider(dataProvider);
         }
+
+        try {
+            maxResults = Integer.valueOf(paramMaxResults);
+        } catch (NumberFormatException e) {
+            //Wrong number, let the execution continue with the by default value.
+        }
+        fieldDefinition.setMaxResults(maxResults);
     }
 }
