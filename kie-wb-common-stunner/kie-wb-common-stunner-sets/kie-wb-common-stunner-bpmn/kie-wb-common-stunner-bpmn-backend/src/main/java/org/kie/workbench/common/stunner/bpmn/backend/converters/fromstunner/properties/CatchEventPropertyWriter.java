@@ -30,34 +30,36 @@ import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunn
 public class CatchEventPropertyWriter extends EventPropertyWriter {
 
     private final CatchEvent event;
-    private final OutputSet outputSet;
+    private OutputSet outputSet;
     private ElementParameters simulationParameters;
 
     public CatchEventPropertyWriter(CatchEvent event, VariableScope variableScope) {
         super(event, variableScope);
         this.event = event;
-        this.outputSet = bpmn2.createOutputSet();
-        event.setOutputSet(outputSet);
     }
 
     public void setAssignmentsInfo(AssignmentsInfo info) {
-        ParsedAssignmentsInfo assignmentsInfo = ParsedAssignmentsInfo.of(info);
-        assignmentsInfo.getAssociations()
-                .getOutputs()
-                .stream()
-                .map(declaration -> new OutputAssignmentWriter(
-                        flowElement.getId(),
-                        assignmentsInfo
-                                .getOutputs()
-                                .lookup(declaration.getSource()),
-                        variableScope.lookup(declaration.getTarget())
-                ))
-                .forEach(doa -> {
-                    this.addItemDefinition(doa.getItemDefinition());
-                    event.getDataOutputs().add(doa.getDataOutput());
-                    event.getDataOutputAssociation().add(doa.getAssociation());
-                    outputSet.getDataOutputRefs().add(doa.getDataOutput());
-                });
+        if (info.getValue() != null && !info.getValue().isEmpty()) {
+            this.outputSet = bpmn2.createOutputSet();
+            event.setOutputSet(outputSet);
+            ParsedAssignmentsInfo assignmentsInfo = ParsedAssignmentsInfo.of(info);
+            assignmentsInfo.getAssociations()
+                    .getOutputs()
+                    .stream()
+                    .map(declaration -> new OutputAssignmentWriter(
+                            flowElement.getId(),
+                            assignmentsInfo
+                                    .getOutputs()
+                                    .lookup(declaration.getSource()),
+                            variableScope.lookup(declaration.getTarget())
+                    ))
+                    .forEach(doa -> {
+                        this.addItemDefinition(doa.getItemDefinition());
+                        event.getDataOutputs().add(doa.getDataOutput());
+                        event.getDataOutputAssociation().add(doa.getAssociation());
+                        outputSet.getDataOutputRefs().add(doa.getDataOutput());
+                    });
+        }
     }
 
     public void setSimulationSet(SimulationAttributeSet simulationSet) {

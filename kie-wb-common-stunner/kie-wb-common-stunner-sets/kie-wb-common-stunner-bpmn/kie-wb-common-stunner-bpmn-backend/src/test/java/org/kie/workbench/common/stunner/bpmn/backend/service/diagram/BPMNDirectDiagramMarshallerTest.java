@@ -198,6 +198,8 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_ENDERROR_EVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/endErrorEvent.bpmn";
     private static final String BPMN_EVENT_DEFINITION_REF = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/eventDefinitionRef.bpmn";
     private static final String BPMN_SERVICE_TASKS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/serviceTasks.bpmn";
+    private static final String BPMN_CONDITIONAL_DOCKED = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DALE.bpmn2";
+
 
     private static final String NEW_LINE = System.lineSeparator();
 
@@ -294,6 +296,19 @@ public class BPMNDirectDiagramMarshallerTest {
     }
 
     // 4 nodes expected: BPMNDiagram, StartNode, Task and EndNode
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testConditionalDocked() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_CONDITIONAL_DOCKED);
+        assertDiagram(diagram,
+                      4);
+        assertEquals("Basic process",
+                     diagram.getMetadata().getTitle());
+        Node<? extends Definition, ?> task1 = diagram.getGraph().getNode("810797AB-7D09-4E1F-8A5B-96C424E4B031");
+        assertTrue(task1.getContent().getDefinition() instanceof NoneTask);
+    }
+
     @Test
     @SuppressWarnings("unchecked")
     public void testUnmarshallBasic() throws Exception {
