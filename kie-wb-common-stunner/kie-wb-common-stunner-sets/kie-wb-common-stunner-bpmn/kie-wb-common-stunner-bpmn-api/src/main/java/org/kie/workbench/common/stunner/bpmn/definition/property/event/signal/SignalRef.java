@@ -17,6 +17,7 @@ package org.kie.workbench.common.stunner.bpmn.definition.property.event.signal;
 
 import javax.validation.constraints.Pattern;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.forms.adf.definitions.annotations.metaModel.FieldDefinition;
@@ -41,7 +42,7 @@ public class SignalRef implements BPMNProperty {
         this("");
     }
 
-    public SignalRef(final String value) {
+    public SignalRef(final @MapsTo("value") String value) {
         this.value = value;
     }
 
