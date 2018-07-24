@@ -40,6 +40,30 @@
       }
     },
     {
+      "id": "eventGateway",
+      "name": "Gateway - Event",
+      "shape": {
+        "path": "shapes/",
+        "file": "gateway.svg"
+      },
+      "icon": {
+        "path": "icons/gateway/",
+        "file": "inclusive.svg"
+      }
+    },
+    {
+      "id": "complexGateway",
+      "name": "Gateway - Complex",
+      "shape": {
+        "path": "shapes/",
+        "file": "gateway.svg"
+      },
+      "icon": {
+        "path": "icons/gateway/",
+        "file": "inclusive.svg"
+      }
+    },
+    {
       "id": "lane",
       "name": "Lane",
       "shape": {

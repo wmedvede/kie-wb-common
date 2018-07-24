@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.definition;
 
 import java.util.Objects;
+
 import javax.validation.Valid;
 
 import org.jboss.errai.common.client.api.annotations.MapsTo;
@@ -29,6 +30,7 @@ import org.kie.workbench.common.forms.adf.definitions.settings.FieldPolicy;
 import org.kie.workbench.common.stunner.bpmn.definition.property.background.BackgroundSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DataIOSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.CircleDimensionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.Radius;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.escalation.InterruptingEscalationEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.font.FontSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
@@ -62,6 +64,16 @@ public class StartEscalationEvent extends BaseStartEvent {
     @FormField(afterElement = "executionSet")
     @Valid
     protected DataIOSet dataIOSet;
+
+    public StartEscalationEvent() {
+        this(new BPMNGeneralSet(""),
+             new BackgroundSet(),
+             new FontSet(),
+             new CircleDimensionSet(new Radius()),
+             new SimulationAttributeSet(),
+             new InterruptingEscalationEventExecutionSet(),
+             new DataIOSet());
+    }
 
     public StartEscalationEvent(final @MapsTo("general") BPMNGeneralSet general,
                                 final @MapsTo("backgroundSet") BackgroundSet backgroundSet,

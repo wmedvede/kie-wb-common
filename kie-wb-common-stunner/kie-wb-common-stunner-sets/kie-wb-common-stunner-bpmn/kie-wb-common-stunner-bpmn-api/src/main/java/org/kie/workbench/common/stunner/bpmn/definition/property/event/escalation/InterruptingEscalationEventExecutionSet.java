@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.definition.property.event.escalation;
 
 import java.util.Objects;
+
 import javax.validation.Valid;
 
 import org.jboss.errai.common.client.api.annotations.MapsTo;

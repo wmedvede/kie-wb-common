@@ -60,6 +60,36 @@
      fill: #ec7a08;
 }
 
+#eventGateway #gateway-background {
+    opacity: 1;
+    fill: #fef4ea;
+    filter: none;
+}
+
+#eventGateway #gateway {
+    opacity: 1;
+    fill: #ec7a08;
+}
+#eventGateway #event {
+    opacity: 1;
+    fill: #ec7a08;
+}
+
+#complexGateway #gateway-background {
+    opacity: 1;
+    fill: #fef4ea;
+    filter: none;
+}
+
+#complexGateway #gateway {
+    opacity: 1;
+    fill: #ec7a08;
+}
+#complexGateway #complex {
+    opacity: 1;
+    fill: #ec7a08;
+}
+
 #inclusiveGateway #gateway-background {
      opacity: 1;
      fill: #fef4ea;
