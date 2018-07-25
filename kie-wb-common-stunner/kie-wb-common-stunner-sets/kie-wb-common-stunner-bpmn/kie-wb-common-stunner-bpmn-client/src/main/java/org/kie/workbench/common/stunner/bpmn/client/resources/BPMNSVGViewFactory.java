@@ -79,6 +79,9 @@ public interface BPMNSVGViewFactory {
     SVGShapeViewResource startErrorEvent();
 
     @SVGSource(PATH_EVENT_ALL)
+    SVGShapeViewResource startEscalationEvent();
+
+    @SVGSource(PATH_EVENT_ALL)
     SVGShapeViewResource endNoneEvent();
 
     @SVGSource(PATH_EVENT_ALL)
@@ -106,7 +109,13 @@ public interface BPMNSVGViewFactory {
     SVGShapeViewResource intermediateMessageCatchingEvent();
 
     @SVGSource(PATH_EVENT_ALL)
+    SVGShapeViewResource intermediateEscalationCatchingEvent();
+
+    @SVGSource(PATH_EVENT_ALL)
     SVGShapeViewResource intermediateMessageThrowingEvent();
+
+    @SVGSource(PATH_EVENT_ALL)
+    SVGShapeViewResource intermediateEscalationThrowingEvent();
 
     @SVGSource(PATH_EVENT_ALL)
     SVGShapeViewResource intermediateTimerEvent();

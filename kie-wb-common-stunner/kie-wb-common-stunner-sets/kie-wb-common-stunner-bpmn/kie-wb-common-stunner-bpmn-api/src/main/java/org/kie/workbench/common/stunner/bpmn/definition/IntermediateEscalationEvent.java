@@ -31,10 +31,9 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.background.Back
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DataIOSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.CircleDimensionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.Radius;
-import org.kie.workbench.common.stunner.bpmn.definition.property.event.escalation.InterruptingEscalationEventExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.escalation.CancellingEscalationEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.font.FontSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationAttributeSet;
 import org.kie.workbench.common.stunner.core.definition.annotation.Definition;
 import org.kie.workbench.common.stunner.core.definition.annotation.PropertySet;
 import org.kie.workbench.common.stunner.core.definition.annotation.morph.Morph;
@@ -47,47 +46,60 @@ import static org.kie.workbench.common.forms.adf.engine.shared.formGeneration.pr
 @Portable
 @Bindable
 @Definition(graphFactory = NodeFactory.class)
-@Morph(base = BaseStartEvent.class)
+@Morph(base = BaseCatchingIntermediateEvent.class)
 @FormDefinition(
         startElement = "general",
         policy = FieldPolicy.ONLY_MARKED,
         defaultFieldSettings = {@FieldParam(name = FIELD_CONTAINER_PARAM, value = COLLAPSIBLE_CONTAINER)}
 )
-public class StartEscalationEvent extends BaseStartEvent {
+public class IntermediateEscalationEvent extends BaseCatchingIntermediateEvent {
 
     @PropertySet
     @FormField(afterElement = "general")
     @Valid
-    private InterruptingEscalationEventExecutionSet executionSet;
+    private CancellingEscalationEventExecutionSet executionSet;
 
     @PropertySet
     @FormField(afterElement = "executionSet")
     @Valid
     private DataIOSet dataIOSet;
 
-    public StartEscalationEvent() {
+    public IntermediateEscalationEvent() {
         this(new BPMNGeneralSet(""),
              new BackgroundSet(),
              new FontSet(),
              new CircleDimensionSet(new Radius()),
-             new SimulationAttributeSet(),
-             new InterruptingEscalationEventExecutionSet(),
+             new CancellingEscalationEventExecutionSet(),
              new DataIOSet());
     }
 
-    public StartEscalationEvent(final @MapsTo("general") BPMNGeneralSet general,
-                                final @MapsTo("backgroundSet") BackgroundSet backgroundSet,
-                                final @MapsTo("fontSet") FontSet fontSet,
-                                final @MapsTo("dimensionsSet") CircleDimensionSet dimensionsSet,
-                                final @MapsTo("simulationSet") SimulationAttributeSet simulationSet,
-                                final @MapsTo("executionSet") InterruptingEscalationEventExecutionSet executionSet,
-                                final @MapsTo("dataIOSet") DataIOSet dataIOSet) {
+    public IntermediateEscalationEvent(final @MapsTo("general") BPMNGeneralSet general,
+                                       final @MapsTo("backgroundSet") BackgroundSet backgroundSet,
+                                       final @MapsTo("fontSet") FontSet fontSet,
+                                       final @MapsTo("dimensionsSet") CircleDimensionSet dimensionsSet,
+                                       final @MapsTo("executionSet") CancellingEscalationEventExecutionSet executionSet,
+                                       final @MapsTo("dataIOSet") DataIOSet dataIOSet) {
         super(general,
               backgroundSet,
               fontSet,
-              dimensionsSet,
-              simulationSet);
+              dimensionsSet);
         this.executionSet = executionSet;
+        this.dataIOSet = dataIOSet;
+    }
+
+    public CancellingEscalationEventExecutionSet getExecutionSet() {
+        return executionSet;
+    }
+
+    public void setExecutionSet(CancellingEscalationEventExecutionSet executionSet) {
+        this.executionSet = executionSet;
+    }
+
+    public DataIOSet getDataIOSet() {
+        return dataIOSet;
+    }
+
+    public void setDataIOSet(DataIOSet dataIOSet) {
         this.dataIOSet = dataIOSet;
     }
 
@@ -101,23 +113,6 @@ public class StartEscalationEvent extends BaseStartEvent {
         return true;
     }
 
-    public InterruptingEscalationEventExecutionSet getExecutionSet() {
-        return executionSet;
-    }
-
-    public void setExecutionSet(InterruptingEscalationEventExecutionSet executionSet) {
-        this.executionSet = executionSet;
-    }
-
-    public DataIOSet getDataIOSet() {
-        return dataIOSet;
-    }
-
-    public void setDataIOSet(DataIOSet dataIOSet) {
-        this.dataIOSet = dataIOSet;
-    }
-
-
     @Override
     public int hashCode() {
         return HashUtil.combineHashCodes(super.hashCode(),
@@ -130,8 +125,8 @@ public class StartEscalationEvent extends BaseStartEvent {
         if (this == o) {
             return true;
         }
-        if (o instanceof StartEscalationEvent) {
-            StartEscalationEvent other = (StartEscalationEvent) o;
+        if (o instanceof IntermediateEscalationEvent) {
+            IntermediateEscalationEvent other = (IntermediateEscalationEvent) o;
             return super.equals(other) &&
                     Objects.equals(executionSet, other.executionSet) &&
                     Objects.equals(dataIOSet, other.dataIOSet);

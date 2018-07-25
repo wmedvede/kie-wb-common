@@ -25,6 +25,7 @@ import org.kie.workbench.common.stunner.bpmn.client.resources.BPMNSVGViewFactory
 import org.kie.workbench.common.stunner.bpmn.client.shape.view.handler.EventInterruptingViewHandler;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartErrorEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.StartEscalationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartMessageEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartNoneEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartSignalEvent;
@@ -52,7 +53,9 @@ public class StartEventShapeDef
                     .put(StartMessageEvent.class,
                          BPMNSVGViewFactory::startMessageEvent)
                     .put(StartErrorEvent.class,
-                         BPMNSVGViewFactory::startErrorEvent);
+                         BPMNSVGViewFactory::startErrorEvent)
+                    .put(StartEscalationEvent.class,
+                         BPMNSVGViewFactory::startEscalationEvent);
 
     public static final Map<Class<? extends BaseStartEvent>, Glyph> GLYPHS =
             new HashMap<Class<? extends BaseStartEvent>, Glyph>() {{
@@ -66,6 +69,8 @@ public class StartEventShapeDef
                     BPMNGlyphFactory.EVENT_START_MESSAGE);
                 put(StartErrorEvent.class,
                     BPMNGlyphFactory.EVENT_START_ERROR);
+                put(StartEscalationEvent.class,
+                    BPMNGlyphFactory.EVENT_START_ESCALATION);
             }};
 
     @Override

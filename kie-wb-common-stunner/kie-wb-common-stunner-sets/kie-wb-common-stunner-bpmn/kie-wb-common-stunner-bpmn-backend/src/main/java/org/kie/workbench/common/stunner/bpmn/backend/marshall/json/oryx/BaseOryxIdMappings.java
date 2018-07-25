@@ -37,6 +37,8 @@ import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.InclusiveGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateErrorEventCatching;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEventThrowing;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateMessageEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateMessageEventThrowing;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateSignalEventCatching;
@@ -47,6 +49,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.NoneTask;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ScriptTask;
 import org.kie.workbench.common.stunner.bpmn.definition.StartErrorEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.StartEscalationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartMessageEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartNoneEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartSignalEvent;
@@ -60,6 +63,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Process
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.CancelActivity;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.IsInterrupting;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.error.ErrorRef;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.escalation.EscalationRef;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.message.MessageRef;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.signal.SignalRef;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.signal.SignalScope;
@@ -205,6 +209,8 @@ public abstract class BaseOryxIdMappings implements OryxIdMappings {
                 "signalref");
             put(MessageRef.class,
                 "messageref");
+            put(EscalationRef.class,
+                "escalationcode");
             put(CancelActivity.class,
                 "boundarycancelactivity");
             put(SignalScope.class,
@@ -340,6 +346,12 @@ public abstract class BaseOryxIdMappings implements OryxIdMappings {
             startErrorEventPropertiesMap.put(AssignmentsInfo.class,
                                              "assignmentsinfo");
 
+            Map<Class<?>, String> startEscalationEventPropertiesMap = new HashMap<Class<?>, String>();
+            put(StartEscalationEvent.class,
+                startEscalationEventPropertiesMap);
+            startEscalationEventPropertiesMap.put(AssignmentsInfo.class,
+                                             "assignmentsinfo");
+
             Map<Class<?>, String> intermediateTimerEventPropertiesMap = new HashMap<Class<?>, String>();
             put(IntermediateTimerEvent.class,
                 intermediateTimerEventPropertiesMap);
@@ -363,6 +375,12 @@ public abstract class BaseOryxIdMappings implements OryxIdMappings {
             intermediateMessageEventCatchingPropertiesMap.put(AssignmentsInfo.class,
                                                               "assignmentsinfo");
 
+            Map<Class<?>, String> intermediateEscalationEventCatchingPropertiesMap = new HashMap<Class<?>, String>();
+            put(IntermediateEscalationEvent.class,
+                intermediateEscalationEventCatchingPropertiesMap);
+            intermediateEscalationEventCatchingPropertiesMap.put(AssignmentsInfo.class,
+                                                              "assignmentsinfo");
+
             Map<Class<?>, String> intermediateSignalEventThrowingPropertiesMap = new HashMap<Class<?>, String>();
             put(IntermediateSignalEventThrowing.class,
                 intermediateSignalEventThrowingPropertiesMap);
@@ -374,6 +392,12 @@ public abstract class BaseOryxIdMappings implements OryxIdMappings {
                 intermediateMessageEventThrowingPropertiesMap);
             intermediateMessageEventThrowingPropertiesMap.put(AssignmentsInfo.class,
                                                               "assignmentsinfo");
+
+            Map<Class<?>, String> intermediateEscalationEventThrowingPropertiesMap = new HashMap<Class<?>, String>();
+            put(IntermediateEscalationEventThrowing.class,
+                intermediateEscalationEventThrowingPropertiesMap);
+            intermediateEscalationEventThrowingPropertiesMap.put(AssignmentsInfo.class,
+                                                                 "assignmentsinfo");
 
             Map<Class<?>, String> endEventPropertiesMap = new HashMap<Class<?>, String>();
             put(EndNoneEvent.class,

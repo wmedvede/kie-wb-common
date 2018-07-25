@@ -26,9 +26,10 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormDefinition;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormField;
 import org.kie.workbench.common.forms.adf.definitions.annotations.field.selector.SelectorDataProvider;
-import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.checkBox.type.CheckBoxFieldType;
+import org.kie.workbench.common.forms.adf.definitions.settings.FieldPolicy;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNPropertySet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.event.IsInterrupting;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.CancelActivity;
+
 import org.kie.workbench.common.stunner.bpmn.forms.model.ComboBoxFieldType;
 import org.kie.workbench.common.stunner.core.definition.annotation.Property;
 import org.kie.workbench.common.stunner.core.definition.annotation.PropertySet;
@@ -37,41 +38,43 @@ import org.kie.workbench.common.stunner.core.util.HashUtil;
 @Portable
 @Bindable
 @PropertySet
-@FormDefinition(startElement = "isInterrupting")
-public class InterruptingEscalationEventExecutionSet implements BPMNPropertySet {
+@FormDefinition(startElement = "cancelActivity",
+        policy = FieldPolicy.ONLY_MARKED)
+public class CancellingEscalationEventExecutionSet implements BPMNPropertySet {
 
     @Property
-    @FormField(type = CheckBoxFieldType.class)
+    @FormField
     @Valid
-    private IsInterrupting isInterrupting;
+    private CancelActivity cancelActivity;
 
     @Property
-    @FormField(afterElement = "isInterrupting",
-            type = ComboBoxFieldType.class)
+    @FormField(type = ComboBoxFieldType.class,
+            afterElement = "cancelActivity"
+    )
     @SelectorDataProvider(
             type = SelectorDataProvider.ProviderType.CLIENT,
-            className = "org.kie.workbench.common.stunner.bpmn.client.dataproviders.ProcessSignalRefProvider"
+            className = "org.kie.workbench.common.stunner.bpmn.client.dataproviders.ProcessErrorRefProvider"
     )
     @Valid
     private EscalationRef escalationRef;
 
-    public InterruptingEscalationEventExecutionSet() {
-        this(new IsInterrupting(true),
+    public CancellingEscalationEventExecutionSet() {
+        this(new CancelActivity(true),
              new EscalationRef());
     }
 
-    public InterruptingEscalationEventExecutionSet(final @MapsTo("isInterrupting") IsInterrupting isInterrupting,
-                                                   final @MapsTo("escalationRef") EscalationRef escalationRef) {
-        this.isInterrupting = isInterrupting;
+    public CancellingEscalationEventExecutionSet(final @MapsTo("cancelActivity") CancelActivity cancelActivity,
+                                                 final @MapsTo("escalationRef") EscalationRef escalationRef) {
+        this.cancelActivity = cancelActivity;
         this.escalationRef = escalationRef;
     }
 
-    public IsInterrupting getIsInterrupting() {
-        return isInterrupting;
+    public CancelActivity getCancelActivity() {
+        return cancelActivity;
     }
 
-    public void setIsInterrupting(IsInterrupting isInterrupting) {
-        this.isInterrupting = isInterrupting;
+    public void setCancelActivity(CancelActivity cancelActivity) {
+        this.cancelActivity = cancelActivity;
     }
 
     public EscalationRef getEscalationRef() {
@@ -84,7 +87,7 @@ public class InterruptingEscalationEventExecutionSet implements BPMNPropertySet 
 
     @Override
     public int hashCode() {
-        return HashUtil.combineHashCodes(Objects.hashCode(isInterrupting),
+        return HashUtil.combineHashCodes(Objects.hashCode(cancelActivity),
                                          Objects.hashCode(escalationRef));
     }
 
@@ -93,9 +96,9 @@ public class InterruptingEscalationEventExecutionSet implements BPMNPropertySet 
         if (this == o) {
             return true;
         }
-        if (o instanceof InterruptingEscalationEventExecutionSet) {
-            InterruptingEscalationEventExecutionSet other = (InterruptingEscalationEventExecutionSet) o;
-            return Objects.equals(isInterrupting, other.isInterrupting) &&
+        if (o instanceof CancellingEscalationEventExecutionSet) {
+            CancellingEscalationEventExecutionSet other = (CancellingEscalationEventExecutionSet) o;
+            return Objects.equals(cancelActivity, other.cancelActivity) &&
                     Objects.equals(escalationRef, other.escalationRef);
         }
         return false;

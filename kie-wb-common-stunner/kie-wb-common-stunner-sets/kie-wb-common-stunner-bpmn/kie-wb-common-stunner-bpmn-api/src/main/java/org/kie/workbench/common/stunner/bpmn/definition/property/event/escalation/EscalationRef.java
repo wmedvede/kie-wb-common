@@ -62,6 +62,9 @@ public class EscalationRef implements BPMNProperty {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
         if (o instanceof EscalationRef) {
             EscalationRef other = (EscalationRef) o;
             return Objects.equals(value, other.value);
