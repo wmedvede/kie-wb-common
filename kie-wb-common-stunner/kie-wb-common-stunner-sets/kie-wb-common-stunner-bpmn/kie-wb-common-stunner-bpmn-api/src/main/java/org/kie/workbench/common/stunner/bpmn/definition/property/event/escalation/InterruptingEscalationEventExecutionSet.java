@@ -50,7 +50,7 @@ public class InterruptingEscalationEventExecutionSet implements BPMNPropertySet 
             type = ComboBoxFieldType.class)
     @SelectorDataProvider(
             type = SelectorDataProvider.ProviderType.CLIENT,
-            className = "org.kie.workbench.common.stunner.bpmn.client.dataproviders.ProcessSignalRefProvider"
+            className = "org.kie.workbench.common.stunner.bpmn.client.dataproviders.ProcessEscalationRefProvider"
     )
     @Valid
     private EscalationRef escalationRef;

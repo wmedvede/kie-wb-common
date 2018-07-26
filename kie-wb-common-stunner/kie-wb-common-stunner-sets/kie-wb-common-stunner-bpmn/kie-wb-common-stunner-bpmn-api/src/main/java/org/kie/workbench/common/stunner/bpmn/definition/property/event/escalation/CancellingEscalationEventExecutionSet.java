@@ -53,7 +53,7 @@ public class CancellingEscalationEventExecutionSet implements BPMNPropertySet {
     )
     @SelectorDataProvider(
             type = SelectorDataProvider.ProviderType.CLIENT,
-            className = "org.kie.workbench.common.stunner.bpmn.client.dataproviders.ProcessErrorRefProvider"
+            className = "org.kie.workbench.common.stunner.bpmn.client.dataproviders.ProcessEscalationRefProvider"
     )
     @Valid
     private EscalationRef escalationRef;
