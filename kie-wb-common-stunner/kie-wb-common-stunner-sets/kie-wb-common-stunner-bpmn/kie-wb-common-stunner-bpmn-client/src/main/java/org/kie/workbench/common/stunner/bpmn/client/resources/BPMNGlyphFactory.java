@@ -58,4 +58,5 @@ public interface BPMNGlyphFactory {
     ImageStripGlyph EVENT_START_ESCALATION = ImageStripGlyph.create(BPMNIconsStrip.class, 18);
     ImageStripGlyph EVENT_INTERMEDIATE_ESCALATION = ImageStripGlyph.create(BPMNIconsStrip.class, 18);
     ImageStripGlyph EVENT_INTERMEDIATE_THROWING_ESCALATION = ImageStripGlyph.create(BPMNIconsStrip.class, 18);
+    ImageStripGlyph EVENT_END_ESCALATION = ImageStripGlyph.create(BPMNIconsStrip.class, 18);
 }

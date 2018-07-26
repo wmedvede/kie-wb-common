@@ -97,6 +97,9 @@ public interface BPMNSVGViewFactory {
     SVGShapeViewResource endErrorEvent();
 
     @SVGSource(PATH_EVENT_ALL)
+    SVGShapeViewResource endEscalationEvent();
+
+    @SVGSource(PATH_EVENT_ALL)
     SVGShapeViewResource intermediateNoneEvent();
 
     @SVGSource(PATH_EVENT_ALL)

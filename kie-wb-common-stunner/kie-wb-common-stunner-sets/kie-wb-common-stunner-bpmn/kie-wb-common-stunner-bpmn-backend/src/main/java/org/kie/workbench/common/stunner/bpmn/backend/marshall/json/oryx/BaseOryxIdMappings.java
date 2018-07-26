@@ -29,6 +29,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EndErrorEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.EndEscalationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndMessageEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndNoneEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndSignalEvent;
@@ -414,6 +415,12 @@ public abstract class BaseOryxIdMappings implements OryxIdMappings {
                 endMessageEventPropertiesMap);
             endMessageEventPropertiesMap.put(AssignmentsInfo.class,
                                              "assignmentsinfo");
+
+            Map<Class<?>, String> endEscalationEventPropertiesMap = new HashMap<Class<?>, String>();
+            put(EndEscalationEvent.class,
+                endEscalationEventPropertiesMap);
+            endEscalationEventPropertiesMap.put(AssignmentsInfo.class,
+                                                "assignmentsinfo");
 
             Map<Class<?>, String> reusableSubprocessPropertiesMap = new HashMap<Class<?>, String>();
             put(ReusableSubprocess.class,
