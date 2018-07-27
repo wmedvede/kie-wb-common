@@ -27,11 +27,9 @@ import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEv
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEventThrowing;
 import org.kie.workbench.common.stunner.bpmn.definition.StartEscalationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.CancelActivity;
-import org.kie.workbench.common.stunner.bpmn.definition.property.event.IsInterrupting;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.escalation.CancellingEscalationEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.escalation.EscalationEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.escalation.EscalationRef;
-import org.kie.workbench.common.stunner.bpmn.definition.property.event.escalation.InterruptingEscalationEventExecutionSet;
 import org.kie.workbench.common.stunner.core.graph.Element;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -93,8 +91,10 @@ public class ProcessEscalationRefProviderTest extends AbstractProcessFilteredNod
 
     private Node mockStartEscalationEventNode(String escalationRefValue) {
         StartEscalationEvent event = new StartEscalationEvent();
+        /*
         event.setExecutionSet(new InterruptingEscalationEventExecutionSet(new IsInterrupting(true),
                                                                           new EscalationRef(escalationRefValue)));
+                                                                          */
         return mockNode(event);
     }
 

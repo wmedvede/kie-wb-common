@@ -29,6 +29,7 @@ import org.kie.workbench.common.forms.adf.definitions.annotations.field.selector
 import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.checkBox.type.CheckBoxFieldType;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNPropertySet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.IsInterrupting;
+import org.kie.workbench.common.stunner.bpmn.definition.property.general.Name;
 import org.kie.workbench.common.stunner.bpmn.forms.model.ComboBoxFieldType;
 import org.kie.workbench.common.stunner.core.definition.annotation.Property;
 import org.kie.workbench.common.stunner.core.definition.annotation.PropertySet;
@@ -55,15 +56,31 @@ public class InterruptingEscalationEventExecutionSet implements BPMNPropertySet 
     @Valid
     private EscalationRef escalationRef;
 
+    @Property
+    @FormField(afterElement = "escalationRef")
+    @Valid
+    private Name outputVariable;
+
+    @Property
+    @FormField(afterElement = "outputVariable")
+    @Valid
+    private Name outputName;
+
     public InterruptingEscalationEventExecutionSet() {
         this(new IsInterrupting(true),
-             new EscalationRef());
+             new EscalationRef(),
+             new Name(),
+             new Name());
     }
 
     public InterruptingEscalationEventExecutionSet(final @MapsTo("isInterrupting") IsInterrupting isInterrupting,
-                                                   final @MapsTo("escalationRef") EscalationRef escalationRef) {
+                                                   final @MapsTo("escalationRef") EscalationRef escalationRef,
+                                                   final @MapsTo("outputVariable") Name outputVariable,
+                                                   final @MapsTo("outputName") Name outputName) {
         this.isInterrupting = isInterrupting;
         this.escalationRef = escalationRef;
+        this.outputVariable = outputVariable;
+        this.outputName = outputName;
     }
 
     public IsInterrupting getIsInterrupting() {
@@ -80,6 +97,22 @@ public class InterruptingEscalationEventExecutionSet implements BPMNPropertySet 
 
     public void setEscalationRef(EscalationRef escalationRef) {
         this.escalationRef = escalationRef;
+    }
+
+    public Name getOutputVariable() {
+        return outputVariable;
+    }
+
+    public void setOutputVariable(Name outputVariable) {
+        this.outputVariable = outputVariable;
+    }
+
+    public Name getOutputName() {
+        return outputName;
+    }
+
+    public void setOutputName(Name outputName) {
+        this.outputName = outputName;
     }
 
     @Override
