@@ -22,6 +22,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.kie.workbench.common.stunner.bpmn.client.shape.def.AssociationConnectorDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.BPMNDiagramShapeDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.CatchingIntermediateEventShapeDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.EndEventShapeDef;
@@ -33,10 +34,12 @@ import org.kie.workbench.common.stunner.bpmn.client.shape.def.SubprocessShapeDef
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.TaskShapeDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.ThrowingIntermediateEventShapeDef;
 import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.Association;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.EndCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndEscalationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndMessageEvent;
@@ -46,6 +49,8 @@ import org.kie.workbench.common.stunner.bpmn.definition.EndTerminateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.InclusiveGateway;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEventThrowing;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateConditionalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateErrorEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEvent;
@@ -62,6 +67,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.ParallelGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ScriptTask;
 import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
+import org.kie.workbench.common.stunner.bpmn.definition.StartCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartConditionalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartEscalationEvent;
@@ -273,16 +279,36 @@ public class BPMNShapeFactoryTest {
                times(1)).delegate(eq(SequenceFlow.class),
                                   any(SequenceFlowConnectorDef.class),
                                   factoryArgumentCaptor.capture());
+        verify(delegateShapeFactory,
+               times(1)).delegate(eq(StartCompensationEvent.class),
+                                  any(StartEventShapeDef.class),
+                                  factoryArgumentCaptor.capture());
+        verify(delegateShapeFactory,
+               times(1)).delegate(eq(IntermediateCompensationEvent.class),
+                                  any(CatchingIntermediateEventShapeDef.class),
+                                  factoryArgumentCaptor.capture());
+        verify(delegateShapeFactory,
+               times(1)).delegate(eq(IntermediateCompensationEventThrowing.class),
+                                  any(ThrowingIntermediateEventShapeDef.class),
+                                  factoryArgumentCaptor.capture());
+        verify(delegateShapeFactory,
+               times(1)).delegate(eq(EndCompensationEvent.class),
+                                  any(EndEventShapeDef.class),
+                                  factoryArgumentCaptor.capture());
+        verify(delegateShapeFactory,
+               times(1)).delegate(eq(Association.class),
+                                  any(AssociationConnectorDef.class),
+                                  factoryArgumentCaptor.capture());
         final long svgFactoryCallCount = factoryArgumentCaptor.getAllValues().stream()
                 .filter(this::isSvgShapeFactory)
                 .count();
         final long basicFactoryCallCount = factoryArgumentCaptor.getAllValues().stream()
                 .filter(this::isBasicShapeFactory)
                 .count();
-        assertEquals(36,
+        assertEquals(40,
                      svgFactoryCallCount,
                      0);
-        assertEquals(1,
+        assertEquals(2,
                      basicFactoryCallCount,
                      0);
     }

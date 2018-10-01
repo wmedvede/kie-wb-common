@@ -43,6 +43,7 @@ import org.junit.runner.RunWith;
 import org.kie.workbench.common.stunner.client.lienzo.canvas.wires.WiresUtils;
 import org.kie.workbench.common.stunner.core.client.shape.view.HasControlPoints;
 import org.kie.workbench.common.stunner.core.graph.content.view.ControlPoint;
+import org.kie.workbench.common.stunner.core.graph.content.view.DashArray;
 import org.kie.workbench.common.stunner.core.graph.content.view.MagnetConnection;
 import org.kie.workbench.common.stunner.core.graph.content.view.Point2DConnection;
 import org.mockito.ArgumentCaptor;
@@ -466,5 +467,14 @@ public class WiresConnectorViewTest {
     public void testRemoveShadow() {
         tested.removeShadow();
         verify(line, times(1)).setShadow((Shadow) isNull());
+    }
+
+    @Test
+    public void testSetDashArray() {
+        double dash = 1234;
+        double[] dashes = {1, 2, 3, 4};
+        DashArray dashArray = DashArray.create(dash, dashes);
+        tested.setDashArray(dashArray);
+        verify(line).setDashArray(dash, dashes);
     }
 }
