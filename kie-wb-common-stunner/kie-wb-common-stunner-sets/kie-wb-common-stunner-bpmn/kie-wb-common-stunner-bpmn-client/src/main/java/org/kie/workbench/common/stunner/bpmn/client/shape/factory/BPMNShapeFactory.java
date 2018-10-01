@@ -64,6 +64,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.ParallelGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ScriptTask;
 import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
+import org.kie.workbench.common.stunner.bpmn.definition.StartCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartConditionalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartEscalationEvent;
@@ -160,6 +161,9 @@ public class BPMNShapeFactory
                           new StartEventShapeDef(),
                           () -> svgShapeFactory)
                 .delegate(StartEscalationEvent.class,
+                          new StartEventShapeDef(),
+                          () -> svgShapeFactory)
+                .delegate(StartCompensationEvent.class,
                           new StartEventShapeDef(),
                           () -> svgShapeFactory)
                 .delegate(ParallelGateway.class,

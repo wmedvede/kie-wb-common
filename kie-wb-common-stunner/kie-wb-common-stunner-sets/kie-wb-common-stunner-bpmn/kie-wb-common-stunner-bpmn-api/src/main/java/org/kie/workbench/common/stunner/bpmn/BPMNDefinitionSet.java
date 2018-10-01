@@ -49,6 +49,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.ParallelGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ScriptTask;
 import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
+import org.kie.workbench.common.stunner.bpmn.definition.StartCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartConditionalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartEscalationEvent;
@@ -84,6 +85,7 @@ import org.kie.workbench.common.stunner.core.rule.annotation.Occurrences;
                 StartErrorEvent.class,
                 StartConditionalEvent.class,
                 StartEscalationEvent.class,
+                StartCompensationEvent.class,
                 EndNoneEvent.class,
                 EndSignalEvent.class,
                 EndMessageEvent.class,

@@ -64,6 +64,10 @@ class ProcessConverterDelegate {
                 .map(Result::value)
                 .forEach(p::addChildElement);
 
+        //WM this could be a good place for executing the post-processing for the nodes
+        //see that lanes are processed after all the nodes has been properly processed.
+
+
         convertLanes(context, processed, p);
     }
 

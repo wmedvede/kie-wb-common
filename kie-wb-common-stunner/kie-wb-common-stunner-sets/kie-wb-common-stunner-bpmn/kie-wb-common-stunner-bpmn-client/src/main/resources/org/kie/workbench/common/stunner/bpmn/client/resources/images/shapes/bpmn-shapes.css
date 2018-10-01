@@ -282,6 +282,25 @@
     fill: #4aa241;
 }
 
+#startCompensationEvent #event-background {
+    opacity: 1;
+    fill: #e8fae6;
+}
+#startCompensationEvent #start {
+    opacity: 1;
+    fill-opacity: 1;
+    fill: #4aa241;
+    stroke-opacity: 0;
+    stroke-dasharray: 15, 15;
+    stroke-width: 5px;
+    stroke: #4aa241;
+
+}
+#startCompensationEvent #compensation-catching {
+    opacity: 1;
+    fill: #4aa241;
+}
+
 #intermediateTimerEvent #event-background {
     opacity: 1;
     fill: #fbefcf;
