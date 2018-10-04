@@ -47,7 +47,7 @@ public class RootProcessConverter {
 
         delegate.convertChildNodes(processRoot, context);
         delegate.convertEdges(processRoot, context);
-
+        delegate.postProcessChildNodes(processRoot, context);
         return processRoot;
     }
 

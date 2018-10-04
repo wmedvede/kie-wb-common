@@ -56,6 +56,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.EndCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndEscalationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndMessageEvent;
@@ -65,6 +66,8 @@ import org.kie.workbench.common.stunner.bpmn.definition.EndTerminateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.InclusiveGateway;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEventThrowing;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateConditionalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateErrorEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEvent;
@@ -79,6 +82,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.NoneTask;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ScriptTask;
 import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
+import org.kie.workbench.common.stunner.bpmn.definition.StartCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartConditionalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartEscalationEvent;
@@ -175,6 +179,7 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_STARTERROREVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/startErrorEvent.bpmn";
     private static final String BPMN_STARTCONDITIONALEVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/startConditionalEvent.bpmn";
     private static final String BPMN_STARTESCALATIONEVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/startEscalationEvent.bpmn";
+    private static final String BPMN_STARTCOMPENSATIONEVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/startCompensationEvent.bpmn";
     private static final String BPMN_INTERMEDIATE_SIGNAL_EVENTCATCHING = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateSignalEventCatching.bpmn";
     private static final String BPMN_INTERMEDIATE_ERROR_EVENTCATCHING = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateErrorEventCatching.bpmn";
     private static final String BPMN_INTERMEDIATE_SIGNAL_EVENTTHROWING = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateSignalEventThrowing.bpmn";
@@ -183,12 +188,15 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_INTERMEDIATE_TIMER_EVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateTimerEvent.bpmn";
     private static final String BPMN_INTERMEDIATE_CONDITIONAL_EVENTS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateConditionalEvents.bpmn";
     private static final String BPMN_INTERMEDIATE_ESCALATION_EVENTS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateEscalationEvents.bpmn";
+    private static final String BPMN_INTERMEDIATE_COMPENSATION_EVENTS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateCompensationEvents.bpmn";
     private static final String BPMN_INTERMEDIATE_ESCALATION_EVENTTHROWING = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateEscalationEventThrowing.bpmn";
+    private static final String BPMN_INTERMEDIATE_COMPENSATION_EVENTTHROWING = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateCompensationEventThrowing.bpmn";
     private static final String BPMN_ENDSIGNALEVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/endSignalEvent.bpmn";
     private static final String BPMN_ENDMESSAGEEVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/endMessageEvent.bpmn";
     private static final String BPMN_ENDNONEEVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/endNoneEvent.bpmn";
     private static final String BPMN_ENDTERMINATEEVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/endTerminateEvent.bpmn";
     private static final String BPMN_ENDESCALATIONEVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/endEscalationEvent.bpmn";
+    private static final String BPMN_ENDCOMPENSATIONEVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/endCompensationEvent.bpmn";
     private static final String BPMN_PROCESSPROPERTIES = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/processProperties.bpmn";
     private static final String BPMN_BUSINESSRULETASKRULEFLOWGROUP = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/businessRuleTask.bpmn";
     private static final String BPMN_EVENT_SUBPROCESS_STARTERROREVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/isInterruptingStartErrorEvent.bpmn";
@@ -613,6 +621,26 @@ public class BPMNDirectDiagramMarshallerTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    public void testUnmarshallStartCompensationEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_STARTCOMPENSATIONEVENT);
+        assertDiagram(diagram,
+                      2);
+        assertEquals("StartCompensationEvent",
+                     diagram.getMetadata().getTitle());
+        Node<? extends Definition, ?> startEventNode = diagram.getGraph().getNode("_19C23644-6CF0-4508-81B2-4CA2179137AB");
+        assertNotNull(startEventNode);
+        StartCompensationEvent startCompensationEvent = (StartCompensationEvent) startEventNode.getContent().getDefinition();
+
+        assertNotNull(startCompensationEvent.getGeneral());
+        assertEquals("StartCompensationEventName",
+                     startCompensationEvent.getGeneral().getName().getValue());
+        assertEquals("StartCompensationEventDocumentation",
+                     startCompensationEvent.getGeneral().getDocumentation().getValue());
+        assertFalse(startCompensationEvent.getIsInterrupting().getValue());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     public void testUnmarshallIntermediateTimerEvent() throws Exception {
         Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_TIMER_EVENT);
         assertDiagram(diagram,
@@ -704,6 +732,25 @@ public class BPMNDirectDiagramMarshallerTest {
         AssignmentsInfo assignmentsInfo = dataIOSet.getAssignmentsinfo();
         assertEquals("||escalationOutput:String||[dout]escalationOutput->processVar1",
                      assignmentsInfo.getValue());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testUnmarshallIntermediateCompensationEvents() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_COMPENSATION_EVENTS);
+        assertDiagram(diagram,
+                      3);
+        assertEquals("IntermediateCompensationEvents",
+                     diagram.getMetadata().getTitle());
+        Node<? extends Definition, ?> catchingEventNode = diagram.getGraph().getNode("_8CE8AB54-7E8B-4032-B340-2DBEBAB5080F");
+        assertNotNull(catchingEventNode);
+        IntermediateCompensationEvent intermediateCompensationEvent = (IntermediateCompensationEvent) catchingEventNode.getContent().getDefinition();
+
+        assertNotNull(intermediateCompensationEvent.getGeneral());
+        assertEquals("IntermediateCompensationEventName",
+                     intermediateCompensationEvent.getGeneral().getName().getValue());
+        assertEquals("IntermediateCompensationEventDocumentation",
+                     intermediateCompensationEvent.getGeneral().getDocumentation().getValue());
     }
 
     @Test
@@ -811,6 +858,28 @@ public class BPMNDirectDiagramMarshallerTest {
         AssignmentsInfo assignmentsInfo = dataIOSet.getAssignmentsinfo();
         assertEquals("escalationOutput:String||||[din]processVar1->escalationOutput",
                      assignmentsInfo.getValue());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testUnmarshallIntermediateCompensationEventThrowing() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_COMPENSATION_EVENTTHROWING);
+        assertDiagram(diagram,
+                      3);
+        assertEquals("IntermediateCompensationEventThrowing",
+                     diagram.getMetadata().getTitle());
+        Node<? extends Definition, ?> throwingEventNode = diagram.getGraph().getNode("_F1D87D25-4D73-4DC5-A0C2-C627CED773BA");
+        assertNotNull(throwingEventNode);
+        IntermediateCompensationEventThrowing throwingCompensationEvent = (IntermediateCompensationEventThrowing) throwingEventNode.getContent().getDefinition();
+
+        assertNotNull(throwingCompensationEvent.getGeneral());
+        assertEquals("ThrowingCompensationEventName",
+                     throwingCompensationEvent.getGeneral().getName().getValue());
+        assertEquals("ThrowingCompensationEventDocumentation",
+                     throwingCompensationEvent.getGeneral().getDocumentation().getValue());
+        assertNotNull(throwingCompensationEvent.getExecutionSet());
+        assertEquals("_E318295E-B0B6-4FB2-B5EB-A43BFD44FCBD",
+                     throwingCompensationEvent.getExecutionSet().getActivityRef().getValue());
     }
 
     @Test
@@ -1024,6 +1093,28 @@ public class BPMNDirectDiagramMarshallerTest {
         AssignmentsInfo assignmentsInfo = dataIOSet.getAssignmentsinfo();
         assertEquals("escalationInput:String||||[din]processVar1->escalationInput",
                      assignmentsInfo.getValue());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testUnmarshallEndCompensationEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ENDCOMPENSATIONEVENT);
+        assertDiagram(diagram,
+                      3);
+        assertEquals("EndCompensationEvent",
+                     diagram.getMetadata().getTitle());
+        Node<? extends Definition, ?> endEventNode = diagram.getGraph().getNode("_2AEA503B-26E5-4F11-A54D-3E275F8BFA6A");
+        assertNotNull(endEventNode);
+        EndCompensationEvent endCompensationEvent = (EndCompensationEvent) endEventNode.getContent().getDefinition();
+
+        assertNotNull(endCompensationEvent.getGeneral());
+        assertEquals("EndCompensationEventName",
+                     endCompensationEvent.getGeneral().getName().getValue());
+        assertEquals("EndCompensationEventDocumentation",
+                     endCompensationEvent.getGeneral().getDocumentation().getValue());
+        assertNotNull(endCompensationEvent.getExecutionSet());
+        assertEquals("_7795AFA7-E602-4D90-B4B6-249639C4D965",
+                     endCompensationEvent.getExecutionSet().getActivityRef().getValue());
     }
 
     @Test
@@ -2121,6 +2212,23 @@ public class BPMNDirectDiagramMarshallerTest {
     }
 
     @Test
+    public void testMarshallStartCompensationEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_STARTCOMPENSATIONEVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+
+        assertTrue(result.contains("<bpmn2:startEvent id=\"_19C23644-6CF0-4508-81B2-4CA2179137AB\""));
+        assertTrue(result.contains(" name=\"StartCompensationEvent\""));
+        assertTrue(result.contains("isInterrupting=\"false\""));
+        assertTrue(result.contains("<drools:metaValue><![CDATA[StartCompensationEventName]]></drools:metaValue>"));
+        assertTrue(result.contains("<![CDATA[StartCompensationEventDocumentation]]></bpmn2:documentation>"));
+        assertTrue(result.contains("<bpmn2:compensateEventDefinition"));
+    }
+
+    @Test
     public void testMarshallStartErrorEventEvent() throws Exception {
         Diagram<Graph, Metadata> diagram = unmarshall(BPMN_STARTERROREVENT);
         String result = tested.marshall(diagram);
@@ -2293,6 +2401,23 @@ public class BPMNDirectDiagramMarshallerTest {
     }
 
     @Test
+    public void testMarshallIntermediateCompensationEventThrowing() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_COMPENSATION_EVENTTHROWING);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      2,
+                      0);
+
+        assertTrue(result.contains("<bpmn2:intermediateThrowEvent id=\"_F1D87D25-4D73-4DC5-A0C2-C627CED773BA\""));
+        assertTrue(result.contains(" name=\"IntermediateCompensationEventThrowing\""));
+        assertTrue(result.contains("<drools:metaValue><![CDATA[ThrowingCompensationEventName]]></drools:metaValue>"));
+        assertTrue(result.contains("<![CDATA[ThrowingCompensationEventDocumentation]]></bpmn2:documentation>"));
+        assertTrue(result.contains("<bpmn2:compensateEventDefinition"));
+        assertTrue(result.contains("activityRef=\"_E318295E-B0B6-4FB2-B5EB-A43BFD44FCBD\""));
+    }
+
+    @Test
     public void testMarshallIntermediateMessageEventCatching() throws Exception {
         Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_MESSAGE_EVENTCATCHING);
         String result = tested.marshall(diagram);
@@ -2376,6 +2501,23 @@ public class BPMNDirectDiagramMarshallerTest {
         assertTrue(result.contains("drools:esccode=\"EscalationCode\""));
         assertTrue(result.contains("<bpmn2:escalation"));
         assertTrue(result.contains("escalationCode=\"EscalationCode\""));
+    }
+
+    @Test
+    public void testMarshallEndCompensationEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ENDCOMPENSATIONEVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      2,
+                      0);
+
+        assertTrue(result.contains("<bpmn2:endEvent id=\"_2AEA503B-26E5-4F11-A54D-3E275F8BFA6A\""));
+        assertTrue(result.contains(" name=\"EndCompensationEventName\""));
+        assertTrue(result.contains("<drools:metaValue><![CDATA[EndCompensationEventName]]></drools:metaValue>"));
+        assertTrue(result.contains("<![CDATA[EndCompensationEventDocumentation]]></bpmn2:documentation>"));
+        assertTrue(result.contains("<bpmn2:compensateEventDefinition"));
+        assertTrue(result.contains("activityRef=\"_7795AFA7-E602-4D90-B4B6-249639C4D965\""));
     }
 
     @Test
@@ -2788,6 +2930,23 @@ public class BPMNDirectDiagramMarshallerTest {
         assertTrue(result.contains("drools:esccode=\"EscalationCode\""));
         assertTrue(result.contains("<bpmn2:escalation"));
         assertTrue(result.contains("escalationCode=\"EscalationCode\""));
+    }
+
+    @Test
+    public void testMarshallIntermediateCompensationEvents() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_COMPENSATION_EVENTS);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      2,
+                      0);
+
+        assertTrue(result.contains("<bpmn2:boundaryEvent id=\"_8CE8AB54-7E8B-4032-B340-2DBEBAB5080F\""));
+        assertTrue(result.contains(" name=\"IntermediateCompensationEventName\""));
+        assertTrue(result.contains("attachedToRef=\"_0D213C4C-5B7F-4319-A69A-9F840345F330\""));
+        assertTrue(result.contains("<drools:metaValue><![CDATA[IntermediateCompensationEventName]]></drools:metaValue>"));
+        assertTrue(result.contains("<![CDATA[IntermediateCompensationEventDocumentation]]></bpmn2:documentation>"));
+        assertTrue(result.contains("<bpmn2:compensateEventDefinition"));
     }
 
     @Test

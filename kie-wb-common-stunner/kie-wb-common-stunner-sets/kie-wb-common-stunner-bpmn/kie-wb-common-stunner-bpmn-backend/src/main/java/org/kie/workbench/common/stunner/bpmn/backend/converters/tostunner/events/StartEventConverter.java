@@ -327,7 +327,7 @@ public class StartEventConverter {
         ));
 
         definition.setSimulationSet(p.getSimulationSet());
-        definition.setIsInterrupting(new IsInterrupting(event.isIsInterrupting()));
+        definition.setIsInterrupting(new IsInterrupting(false));
 
         node.getContent().setBounds(p.getBounds());
 

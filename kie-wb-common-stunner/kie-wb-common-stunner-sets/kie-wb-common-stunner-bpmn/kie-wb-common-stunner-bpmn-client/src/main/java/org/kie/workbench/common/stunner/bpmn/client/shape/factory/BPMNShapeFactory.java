@@ -39,6 +39,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.BPMNDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.EndCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndEscalationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndMessageEvent;
@@ -48,6 +49,8 @@ import org.kie.workbench.common.stunner.bpmn.definition.EndTerminateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.InclusiveGateway;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEventThrowing;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateConditionalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateErrorEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEvent;
@@ -211,6 +214,9 @@ public class BPMNShapeFactory
                 .delegate(EndEscalationEvent.class,
                           new EndEventShapeDef(),
                           () -> svgShapeFactory)
+                .delegate(EndCompensationEvent.class,
+                          new EndEventShapeDef(),
+                          () -> svgShapeFactory)
                 .delegate(IntermediateTimerEvent.class,
                           new CatchingIntermediateEventShapeDef(),
                           () -> svgShapeFactory)
@@ -229,6 +235,9 @@ public class BPMNShapeFactory
                 .delegate(IntermediateEscalationEvent.class,
                           new CatchingIntermediateEventShapeDef(),
                           () -> svgShapeFactory)
+                .delegate(IntermediateCompensationEvent.class,
+                          new CatchingIntermediateEventShapeDef(),
+                          () -> svgShapeFactory)
                 .delegate(IntermediateSignalEventThrowing.class,
                           new ThrowingIntermediateEventShapeDef(),
                           () -> svgShapeFactory)
@@ -236,6 +245,9 @@ public class BPMNShapeFactory
                           new ThrowingIntermediateEventShapeDef(),
                           () -> svgShapeFactory)
                 .delegate(IntermediateEscalationEventThrowing.class,
+                          new ThrowingIntermediateEventShapeDef(),
+                          () -> svgShapeFactory)
+                .delegate(IntermediateCompensationEventThrowing.class,
                           new ThrowingIntermediateEventShapeDef(),
                           () -> svgShapeFactory)
                 .delegate(SequenceFlow.class,

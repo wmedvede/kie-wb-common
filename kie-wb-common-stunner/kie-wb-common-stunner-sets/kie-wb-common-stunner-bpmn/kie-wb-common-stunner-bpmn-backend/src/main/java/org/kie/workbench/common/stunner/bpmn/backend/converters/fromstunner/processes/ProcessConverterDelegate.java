@@ -17,18 +17,27 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.processes;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.ConverterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.DefinitionsBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.ElementContainer;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.PostConverterProcessor;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.PostConverterRegistry;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.lanes.LaneConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.ActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.BasePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.BoundaryEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.LanePropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.ProcessPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.SubProcessPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
+import org.kie.workbench.common.stunner.core.graph.Node;
+import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -37,8 +46,11 @@ class ProcessConverterDelegate {
 
     private final ConverterFactory converterFactory;
 
+    private final PostConverterRegistry postConverterRegistry;
+
     ProcessConverterDelegate(ConverterFactory converterFactory) {
         this.converterFactory = converterFactory;
+        this.postConverterRegistry = new PostConverterRegistry();
     }
 
     void convertChildNodes(
@@ -63,10 +75,6 @@ class ProcessConverterDelegate {
                 .filter(Result::notIgnored)
                 .map(Result::value)
                 .forEach(p::addChildElement);
-
-        //WM this could be a good place for executing the post-processing for the nodes
-        //see that lanes are processed after all the nodes has been properly processed.
-
 
         convertLanes(context, processed, p);
     }
@@ -110,4 +118,67 @@ class ProcessConverterDelegate {
                 .map(Result::value)
                 .forEach(p::addChildElement);
     }
+
+    void postProcessChildNodes(ProcessPropertyWriter propertyWriter,
+                               DefinitionsBuildingContext context) {
+        final Map<String, BasePropertyWriter> propertyWriters = collectPropertyWriters(propertyWriter);
+        context.nodes().forEach(node -> postProcessNode(propertyWriter,
+                                                    propertyWriters.get(node.getUUID()),
+                                                    node));
+    }
+
+
+    //WM Darle una repasada a esto...
+    private void postProcessNode(ProcessPropertyWriter processPropertyWriter,
+                             BasePropertyWriter propertyWriter,
+                             Node<View<? extends BPMNViewDefinition>, ?> node) {
+
+        System.out.println("Haciendo post process de: " + node.getUUID() + " pWriter: " + processPropertyWriter + " nodeWriter: " + propertyWriter);
+
+        Optional<PostConverterProcessor> postConverter = postConverterRegistry.getPostConverter(node);
+        if (postConverter.isPresent()) {
+            postConverter.get().postProcessNode(processPropertyWriter, propertyWriter, node);
+        }
+    }
+
+    private Map<String, BasePropertyWriter> collectPropertyWriters(ElementContainer container) {
+
+        final Map<String, BasePropertyWriter> result = container.getChildElements()
+                .stream()
+                .collect(Collectors.toMap(BasePropertyWriter::getId,
+                                          p -> p));
+
+        container.getChildElements()
+                .stream()
+                .filter(e -> e instanceof ElementContainer)
+                .map(e -> (ElementContainer) e)
+                .map(this::collectPropertyWriters)
+                .collect(Collectors.toList())
+                .forEach(result::putAll);
+
+        return result;
+    }
+
+
+
+
+    /*
+    BasePropertyWriter findPropertyWriter(ElementContainer container,
+                                                    String uuid) {
+        Optional<BasePropertyWriter> value = Optional.ofNullable(container.getChildElement(uuid));
+        if (value != .isPresent()) {
+            return value;
+        } else {
+            return container.getChildElements()
+                    .stream()
+                    .filter(element -> element instanceof ElementContainer)
+                    .map(element -> (ElementContainer) element)
+                    .map(childContainer -> findPropertyWriter(childContainer,
+                                                              uuid))
+                    .filter(result -> result.isPresent())
+                    .findFirst().orElse();
+        }
+    }
+    */
+
 }

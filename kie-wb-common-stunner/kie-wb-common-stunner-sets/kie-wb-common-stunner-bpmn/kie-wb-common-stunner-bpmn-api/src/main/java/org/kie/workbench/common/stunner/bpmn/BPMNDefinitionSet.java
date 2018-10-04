@@ -24,6 +24,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.EndCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndEscalationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndMessageEvent;
@@ -33,6 +34,8 @@ import org.kie.workbench.common.stunner.bpmn.definition.EndTerminateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.InclusiveGateway;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEventThrowing;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateConditionalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateErrorEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEvent;
@@ -92,15 +95,18 @@ import org.kie.workbench.common.stunner.core.rule.annotation.Occurrences;
                 EndTerminateEvent.class,
                 EndErrorEvent.class,
                 EndEscalationEvent.class,
+                EndCompensationEvent.class,
                 IntermediateTimerEvent.class,
                 IntermediateMessageEventCatching.class,
                 IntermediateSignalEventCatching.class,
                 IntermediateSignalEventThrowing.class,
                 IntermediateErrorEventCatching.class,
                 IntermediateEscalationEvent.class,
+                IntermediateCompensationEvent.class,
                 IntermediateMessageEventThrowing.class,
                 IntermediateConditionalEvent.class,
                 IntermediateEscalationEventThrowing.class,
+                IntermediateCompensationEventThrowing.class,
                 ParallelGateway.class,
                 ExclusiveGateway.class,
                 InclusiveGateway.class,
