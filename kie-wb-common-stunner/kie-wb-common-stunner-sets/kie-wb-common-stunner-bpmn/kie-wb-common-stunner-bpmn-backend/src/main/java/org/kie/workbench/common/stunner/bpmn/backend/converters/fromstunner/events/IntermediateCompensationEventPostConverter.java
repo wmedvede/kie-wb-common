@@ -16,7 +16,6 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.events;
 
-import org.eclipse.bpmn2.CompensateEventDefinition;
 import org.eclipse.bpmn2.ThrowEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.BasePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.ProcessPropertyWriter;
@@ -29,17 +28,13 @@ public class IntermediateCompensationEventPostConverter
         extends AbstractCompensationEventPostConverter {
 
     @Override
-    public void postProcessNode(ProcessPropertyWriter processWriter,
-                                BasePropertyWriter nodeWriter,
-                                Node<View<? extends BPMNViewDefinition>, ?> node) {
-        //TODO WM sacar estos prints
-        System.out.println("IntermediateCompensationEventPostConverter Post process node: " + node);
-
+    public void process(ProcessPropertyWriter processWriter,
+                        BasePropertyWriter nodeWriter,
+                        Node<View<? extends BPMNViewDefinition>, ?> node) {
         final ThrowEvent throwEvent = (ThrowEvent) nodeWriter.getElement();
-        final CompensateEventDefinition compensateEvent = (CompensateEventDefinition) throwEvent.getEventDefinitions().get(0);
         final String activityRef = ((IntermediateCompensationEventThrowing) node.getContent().getDefinition()).getExecutionSet().getActivityRef().getValue();
         linkActivityRef(processWriter.getProcess(),
-                        compensateEvent,
+                        throwEvent,
                         activityRef);
     }
 }

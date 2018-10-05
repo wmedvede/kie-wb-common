@@ -35,9 +35,6 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.prop
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.LanePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.ProcessPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.SubProcessPropertyWriter;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
-import org.kie.workbench.common.stunner.core.graph.Node;
-import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -119,26 +116,17 @@ class ProcessConverterDelegate {
                 .forEach(p::addChildElement);
     }
 
-    void postProcessChildNodes(ProcessPropertyWriter propertyWriter,
+    void postConvertChildNodes(ProcessPropertyWriter propertyWriter,
                                DefinitionsBuildingContext context) {
         final Map<String, BasePropertyWriter> propertyWriters = collectPropertyWriters(propertyWriter);
-        context.nodes().forEach(node -> postProcessNode(propertyWriter,
-                                                    propertyWriters.get(node.getUUID()),
-                                                    node));
-    }
-
-
-    //WM Darle una repasada a esto...
-    private void postProcessNode(ProcessPropertyWriter processPropertyWriter,
-                             BasePropertyWriter propertyWriter,
-                             Node<View<? extends BPMNViewDefinition>, ?> node) {
-
-        System.out.println("Haciendo post process de: " + node.getUUID() + " pWriter: " + processPropertyWriter + " nodeWriter: " + propertyWriter);
-
-        Optional<PostConverterProcessor> postConverter = postConverterRegistry.getPostConverter(node);
-        if (postConverter.isPresent()) {
-            postConverter.get().postProcessNode(processPropertyWriter, propertyWriter, node);
-        }
+        context.nodes().forEach(node -> {
+            Optional<PostConverterProcessor> postConverter = postConverterRegistry.get(node);
+            if (postConverter.isPresent()) {
+                postConverter.get().process(propertyWriter,
+                                            propertyWriters.get(node.getUUID()),
+                                            node);
+            }
+        });
     }
 
     private Map<String, BasePropertyWriter> collectPropertyWriters(ElementContainer container) {
@@ -158,27 +146,4 @@ class ProcessConverterDelegate {
 
         return result;
     }
-
-
-
-
-    /*
-    BasePropertyWriter findPropertyWriter(ElementContainer container,
-                                                    String uuid) {
-        Optional<BasePropertyWriter> value = Optional.ofNullable(container.getChildElement(uuid));
-        if (value != .isPresent()) {
-            return value;
-        } else {
-            return container.getChildElements()
-                    .stream()
-                    .filter(element -> element instanceof ElementContainer)
-                    .map(element -> (ElementContainer) element)
-                    .map(childContainer -> findPropertyWriter(childContainer,
-                                                              uuid))
-                    .filter(result -> result.isPresent())
-                    .findFirst().orElse();
-        }
-    }
-    */
-
 }

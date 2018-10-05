@@ -23,19 +23,19 @@ import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
 /**
- * Contract for a component that implements post conversion operations on a node. Typically for implementing edge cases
- * of nodes that needs a second pass after the full nodes tree has been completed.
+ * Contract for a component that implements post conversion operations on a node. Ideally all conversion operations
+ * must be resolved within the converters, but there are some edge cases were a node needs a second pass after the full
+ * nodes tree has been completed.
  */
 public interface PostConverterProcessor {
 
-
     /**
      * Executes the node post processing.
-     * @param processPropertyWriter the top level process property writer.
-     * @param nodePropertyWriter current node property writer.
+     * @param processWriter the top level process property writer.
+     * @param nodeWriter current node property writer.
      * @param node the node to be post processed.
      */
-    void postProcessNode(ProcessPropertyWriter processPropertyWriter,
-                         BasePropertyWriter nodePropertyWriter,
-                         Node<View<? extends BPMNViewDefinition>, ?> node);
+    void process(ProcessPropertyWriter processWriter,
+                 BasePropertyWriter nodeWriter,
+                 Node<View<? extends BPMNViewDefinition>, ?> node);
 }

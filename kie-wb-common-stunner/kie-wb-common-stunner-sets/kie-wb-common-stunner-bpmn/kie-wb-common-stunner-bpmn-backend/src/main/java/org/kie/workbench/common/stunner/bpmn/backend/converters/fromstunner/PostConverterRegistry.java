@@ -28,7 +28,6 @@ import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensation
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-//TODO WM terminar de ver esto, si sigo con la regitry o paso a un enfoque parecido al de Eduardo
 public class PostConverterRegistry {
 
     private Map<Class<? extends BPMNViewDefinition>, PostConverterProcessor> postConverters = new HashMap<>();
@@ -40,7 +39,7 @@ public class PostConverterRegistry {
                            new EndCompensationEventPostConverter());
     }
 
-    public Optional<PostConverterProcessor> getPostConverter(Node<View<? extends BPMNViewDefinition>, ?> node) {
+    public Optional<PostConverterProcessor> get(Node<View<? extends BPMNViewDefinition>, ?> node) {
         return Optional.ofNullable(postConverters.get(node.getContent().getDefinition().getClass()));
     }
 }

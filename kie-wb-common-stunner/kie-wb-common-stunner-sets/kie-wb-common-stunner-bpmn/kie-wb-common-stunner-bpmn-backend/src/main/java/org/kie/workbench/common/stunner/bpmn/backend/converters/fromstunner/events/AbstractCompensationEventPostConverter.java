@@ -21,21 +21,33 @@ import java.util.Optional;
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.CompensateEventDefinition;
 import org.eclipse.bpmn2.Process;
+import org.eclipse.bpmn2.ThrowEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.PostConverterProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
 
 public abstract class AbstractCompensationEventPostConverter implements PostConverterProcessor {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractCompensationEventPostConverter.class);
+
     protected void linkActivityRef(Process process,
-                                   CompensateEventDefinition compensateEvent,
+                                   ThrowEvent throwEvent,
                                    String activityRef) {
-        final Optional<Activity> activity = process.getFlowElements().stream()
-                .filter(e -> e instanceof Activity)
-                .map(e -> (Activity) e)
-                .filter(a -> a.getId().equals(activityRef))
-                .findFirst();
-        if (activity.isPresent()) {
-            compensateEvent.setActivityRef(activity.get());
-            activity.get().setIsForCompensation(true);
+        if (!isEmpty(activityRef)) {
+            final CompensateEventDefinition compensateEvent = (CompensateEventDefinition) throwEvent.getEventDefinitions().get(0);
+            final Optional<Activity> activity = process.getFlowElements().stream()
+                    .filter(e -> e instanceof Activity)
+                    .map(e -> (Activity) e)
+                    .filter(a -> a.getId().equals(activityRef))
+                    .findFirst();
+            if (activity.isPresent()) {
+                compensateEvent.setActivityRef(activity.get());
+                activity.get().setIsForCompensation(true);
+            } else {
+                LOG.warn("Referred activity: " + activityRef + " was not found for event: id: " + throwEvent.getId() + ", name: " + throwEvent.getName());
+            }
         }
     }
 }
