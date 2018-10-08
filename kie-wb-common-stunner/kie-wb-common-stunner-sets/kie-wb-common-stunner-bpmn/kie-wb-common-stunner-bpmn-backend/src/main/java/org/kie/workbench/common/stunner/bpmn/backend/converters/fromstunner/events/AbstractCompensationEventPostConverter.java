@@ -16,11 +16,15 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.events;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.CompensateEventDefinition;
+import org.eclipse.bpmn2.FlowElement;
+import org.eclipse.bpmn2.FlowElementsContainer;
 import org.eclipse.bpmn2.Process;
+import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.bpmn2.ThrowEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.PostConverterProcessor;
 import org.slf4j.Logger;
@@ -37,17 +41,37 @@ public abstract class AbstractCompensationEventPostConverter implements PostConv
                                    String activityRef) {
         if (!isEmpty(activityRef)) {
             final CompensateEventDefinition compensateEvent = (CompensateEventDefinition) throwEvent.getEventDefinitions().get(0);
-            final Optional<Activity> activity = process.getFlowElements().stream()
-                    .filter(e -> e instanceof Activity)
-                    .map(e -> (Activity) e)
-                    .filter(a -> a.getId().equals(activityRef))
-                    .findFirst();
-            if (activity.isPresent()) {
-                compensateEvent.setActivityRef(activity.get());
-                activity.get().setIsForCompensation(true);
+            final Activity activity = findActivity(process,
+                                                   activityRef);
+            if (activity != null) {
+                compensateEvent.setActivityRef(activity);
+                activity.setIsForCompensation(true);
             } else {
                 LOG.warn("Referred activity: " + activityRef + " was not found for event: id: " + throwEvent.getId() + ", name: " + throwEvent.getName());
             }
         }
+    }
+
+    protected Activity findActivity(FlowElementsContainer container,
+                                    String uuid) {
+        final List<FlowElementsContainer> subContainers = new ArrayList<>();
+        for (FlowElement flowElement : container.getFlowElements()) {
+            if (flowElement instanceof Activity) {
+                if (flowElement.getId().equals(uuid)) {
+                    return (Activity) flowElement;
+                } else if (flowElement instanceof SubProcess) {
+                    subContainers.add((SubProcess) flowElement);
+                }
+            }
+        }
+        Activity result;
+        for (FlowElementsContainer subContainer : subContainers) {
+            result = findActivity(subContainer,
+                                  uuid);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
     }
 }

@@ -26,7 +26,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormDefinition;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormField;
 import org.kie.workbench.common.forms.adf.definitions.annotations.field.selector.SelectorDataProvider;
-import org.kie.workbench.common.stunner.bpmn.forms.model.ComboBoxFieldType;
+import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.selectors.listBox.type.ListBoxFieldType;
 import org.kie.workbench.common.stunner.core.definition.annotation.Property;
 import org.kie.workbench.common.stunner.core.definition.annotation.PropertySet;
 import org.kie.workbench.common.stunner.core.util.HashUtil;
@@ -38,10 +38,10 @@ import org.kie.workbench.common.stunner.core.util.HashUtil;
 public class CompensationEventExecutionSet {
 
     @Property
-    @FormField(type = ComboBoxFieldType.class)
+    @FormField(type = ListBoxFieldType.class)
     @SelectorDataProvider(
             type = SelectorDataProvider.ProviderType.CLIENT,
-            className = "org.kie.workbench.common.stunner.bpmn.client.dataproviders.ProcessEscalationRefProvider"
+            className = "org.kie.workbench.common.stunner.bpmn.client.dataproviders.ProcessCompensationRefProvider"
     )
     @Valid
     private ActivityRef activityRef;

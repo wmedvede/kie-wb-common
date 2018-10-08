@@ -50,6 +50,6 @@ public class EventDefinitionReader {
     public static String activityRefOf(CompensateEventDefinition e) {
         return Optional.ofNullable(e.getActivityRef())
                 .map(Activity::getId)
-                .orElse("");
+                .orElse(null);
     }
 }
