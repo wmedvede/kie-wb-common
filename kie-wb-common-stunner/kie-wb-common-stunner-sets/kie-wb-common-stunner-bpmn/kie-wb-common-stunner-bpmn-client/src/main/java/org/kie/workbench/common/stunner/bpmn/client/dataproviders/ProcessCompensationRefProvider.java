@@ -31,6 +31,8 @@ import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensation
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.compensation.ActivityRef;
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
+import org.kie.workbench.common.stunner.core.graph.Edge;
+import org.kie.workbench.common.stunner.core.graph.Graph;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
@@ -48,36 +50,55 @@ public class ProcessCompensationRefProvider extends AbstractProcessFilteredNodeP
     @SuppressWarnings("unchecked")
     @Override
     public Predicate<Node> getFilter() {
-        final Map<String, Node> referredNodes = new HashMap<>();
+        final Map<String, Node> candidates = new HashMap<>();
         final Diagram diagram = sessionManager.getCurrentSession().getCanvasHandler().getDiagram();
-        final Iterable<Node> it = diagram.getGraph().nodes();
-        //collect the nodes that:
-        // 1) a compensation event referring to.
-        // 2) has a boundary compensation event on
-        // 3) or is an event sub-processes
-        it.forEach(node -> {
-            ActivityRef activityRef = null;
-            Node nodeTarget = null;
-            if (((View) node.getContent()).getDefinition() instanceof EndCompensationEvent) {
-                activityRef = ((EndCompensationEvent) ((View) node.getContent()).getDefinition()).getExecutionSet().getActivityRef();
-            } else if (((View) node.getContent()).getDefinition() instanceof IntermediateCompensationEventThrowing) {
-                activityRef = ((IntermediateCompensationEventThrowing) ((View) node.getContent()).getDefinition()).getExecutionSet().getActivityRef();
-            } else if ((((View) node.getContent()).getDefinition() instanceof IntermediateCompensationEvent) && GraphUtils.isDockedNode(node)) {
-                nodeTarget = (Node) GraphUtils.getDockParent(node).orElse(null);
-            } else if (((View) node.getContent()).getDefinition() instanceof EventSubprocess) {
-                nodeTarget = node;
-            }
+        final String rootUUID = diagram.getMetadata().getCanvasRootUUID();
+        final Graph graph = diagram.getGraph();
+        final Iterable<Node> it = graph.nodes();
 
-            if (activityRef != null && !isEmpty(activityRef.getValue())) {
-                referredNodes.put(activityRef.getValue(),
-                                  node);
-            } else if (nodeTarget != null) {
-                referredNodes.put(nodeTarget.getUUID(),
-                                  node);
+        it.forEach(node -> {
+            if (((View) node.getContent()).getDefinition() instanceof EndCompensationEvent) {
+                ActivityRef activityRef = ((EndCompensationEvent) ((View) node.getContent()).getDefinition()).getExecutionSet().getActivityRef();
+                if (isValid(activityRef)) {
+                    Node targetNode = graph.getNode(activityRef.getValue());
+                    candidates.put(activityRef.getValue(),
+                                   targetNode);
+                }
+            } else if (((View) node.getContent()).getDefinition() instanceof IntermediateCompensationEventThrowing) {
+                ActivityRef activityRef = ((IntermediateCompensationEventThrowing) ((View) node.getContent()).getDefinition()).getExecutionSet().getActivityRef();
+                if (isValid(activityRef)) {
+                    Node targetNode = graph.getNode(activityRef.getValue());
+                    candidates.put(activityRef.getValue(),
+                                   targetNode);
+                }
+            } else if (isDescendantFrom(rootUUID,
+                                        node)) {
+                Node nodeTarget = null;
+                if ((((View) node.getContent()).getDefinition() instanceof IntermediateCompensationEvent) && GraphUtils.isDockedNode(node)) {
+                    nodeTarget = (Node) GraphUtils.getDockParent(node).orElse(null);
+                } else if (((View) node.getContent()).getDefinition() instanceof EventSubprocess) {
+                    nodeTarget = node;
+                }
+                if (nodeTarget != null) {
+                    candidates.put(nodeTarget.getUUID(),
+                                   nodeTarget);
+                }
             }
         });
 
-        return node -> referredNodes.containsKey(node.getUUID());
+        return node -> candidates.containsKey(node.getUUID());
+    }
+
+    private boolean isDescendantFrom(final String parent,
+                                     final Node<?, ? extends Edge> node) {
+        return node.getInEdges().stream()
+                .filter(edge -> edge.getSourceNode().getUUID().equals(parent))
+                .findFirst()
+                .isPresent();
+    }
+
+    private boolean isValid(ActivityRef activityRef) {
+        return activityRef != null && !isEmpty(activityRef.getValue());
     }
 
     @Override
