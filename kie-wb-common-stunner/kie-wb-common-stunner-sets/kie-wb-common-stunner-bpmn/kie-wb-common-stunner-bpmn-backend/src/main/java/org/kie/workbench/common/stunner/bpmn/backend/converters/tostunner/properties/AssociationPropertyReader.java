@@ -18,54 +18,34 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.prope
 
 import java.util.List;
 
-import org.eclipse.bpmn2.FormalExpression;
-import org.eclipse.bpmn2.SequenceFlow;
+import org.eclipse.bpmn2.Association;
 import org.eclipse.bpmn2.di.BPMNPlane;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomAttribute;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.DefinitionResolver;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 import org.kie.workbench.common.stunner.core.graph.content.view.Connection;
 import org.kie.workbench.common.stunner.core.graph.content.view.MagnetConnection;
 import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
 
-public class SequenceFlowPropertyReader extends BasePropertyReader {
+public class AssociationPropertyReader extends BasePropertyReader {
 
-    final FormalExpression conditionExpression;
     private final DefinitionResolver definitionResolver;
-    private final SequenceFlow seq;
+    private final Association association;
 
-    public SequenceFlowPropertyReader(SequenceFlow seq,
-                                      BPMNPlane plane,
-                                      DefinitionResolver definitionResolver) {
-        super(seq,
+    public AssociationPropertyReader(Association association,
+                                     BPMNPlane plane,
+                                     DefinitionResolver definitionResolver) {
+        super(association,
               plane,
-              definitionResolver.getShape(seq.getId()));
-        this.seq = seq;
-        conditionExpression = (FormalExpression) seq.getConditionExpression();
+              definitionResolver.getShape(association.getId()));
+        this.association = association;
         this.definitionResolver = definitionResolver;
     }
 
-    public String getPriority() {
-        return CustomAttribute.priority.of(element).get();
-    }
-
-    public ScriptTypeValue getConditionExpression() {
-        if (conditionExpression == null) {
-            return new ScriptTypeValue("java",
-                                       "");
-        } else {
-            return new ScriptTypeValue(
-                    Scripts.scriptLanguageFromUri(conditionExpression.getLanguage()),
-                    conditionExpression.getBody());
-        }
-    }
-
     public String getSourceId() {
-        return seq.getSourceRef().getId();
+        return association.getSourceRef().getId();
     }
 
     public String getTargetId() {
-        return seq.getTargetRef().getId();
+        return association.getTargetRef().getId();
     }
 
     public Connection getSourceConnection() {

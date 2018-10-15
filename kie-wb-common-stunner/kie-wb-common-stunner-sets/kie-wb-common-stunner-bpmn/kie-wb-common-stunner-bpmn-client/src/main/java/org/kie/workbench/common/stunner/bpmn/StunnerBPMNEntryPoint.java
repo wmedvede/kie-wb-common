@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
+import org.kie.workbench.common.stunner.bpmn.client.forms.filters.AssociationFilterProvider;
 import org.kie.workbench.common.stunner.bpmn.client.forms.filters.CatchingIntermediateEventFilterProvider;
 import org.kie.workbench.common.stunner.bpmn.client.forms.filters.StartEventFilterProvider;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateConditionalEvent;
@@ -61,5 +62,6 @@ public class StunnerBPMNEntryPoint {
         FormFiltersProviderFactory.registerProvider(new CatchingIntermediateEventFilterProvider(sessionManager, IntermediateConditionalEvent.class));
         FormFiltersProviderFactory.registerProvider(new CatchingIntermediateEventFilterProvider(sessionManager, IntermediateMessageEventCatching.class));
         FormFiltersProviderFactory.registerProvider(new CatchingIntermediateEventFilterProvider(sessionManager, IntermediateEscalationEvent.class));
+        FormFiltersProviderFactory.registerProvider(new AssociationFilterProvider());
     }
 }

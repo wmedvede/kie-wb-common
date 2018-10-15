@@ -113,8 +113,12 @@ public class FlowActionsToolboxFactoryTest {
         when(metadata.getDefinitionSetId()).thenReturn(DS_ID);
         when(element.getUUID()).thenReturn(E_UUID);
         when(element.asNode()).thenReturn(element);
+        //TODO WM fix this tests
+        /*
         when(definitionUtils.getDefaultConnectorId(eq(DS_ID)))
                 .thenReturn(EDGE_ID);
+                */
+
         when(toolboxLookups.get(anyString())).thenReturn(domainLookups);
         when(domainLookups.lookupTargetConnectors(eq(element)))
                 .thenReturn(Collections.singleton(EDGE_ID));

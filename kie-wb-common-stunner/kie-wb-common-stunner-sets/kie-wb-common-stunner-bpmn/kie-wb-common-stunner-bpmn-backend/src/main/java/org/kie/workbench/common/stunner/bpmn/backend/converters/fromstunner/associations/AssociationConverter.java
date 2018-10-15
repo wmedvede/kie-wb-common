@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.sequenceflows;
+package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.associations;
 
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.ElementContainer;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.AssociationPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.BasePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.SequenceFlowPropertyWriter;
-import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
-import org.kie.workbench.common.stunner.bpmn.definition.property.connectors.SequenceFlowExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.Association;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
@@ -31,29 +30,32 @@ import org.slf4j.LoggerFactory;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 
-public class SequenceFlowConverter {
+public class AssociationConverter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SequenceFlowConverter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AssociationConverter.class);
 
     private final PropertyWriterFactory propertyWriterFactory;
 
-    public SequenceFlowConverter(PropertyWriterFactory propertyWriterFactory) {
+    public AssociationConverter(PropertyWriterFactory propertyWriterFactory) {
         this.propertyWriterFactory = propertyWriterFactory;
     }
 
-    public Result<BasePropertyWriter> toFlowElement(Edge<?, ?> edge, ElementContainer process) {
-        ViewConnector<SequenceFlow> connector = (ViewConnector<SequenceFlow>) edge.getContent();
-        SequenceFlow definition = connector.getDefinition();
-        org.eclipse.bpmn2.SequenceFlow seq = bpmn2.createSequenceFlow();
-        SequenceFlowPropertyWriter p = propertyWriterFactory.of(seq);
+    public Result<BasePropertyWriter> toFlowElement(Edge<?, ?> edge,
+                                                    ElementContainer process) {
+        ViewConnector<Association> connector = (ViewConnector<Association>) edge.getContent();
+        Association definition = connector.getDefinition();
+        org.eclipse.bpmn2.Association association = bpmn2.createAssociation();
+        AssociationPropertyWriter p = propertyWriterFactory.of(association);
 
-        seq.setId(edge.getUUID());
+        association.setId(edge.getUUID());
 
         BasePropertyWriter pSrc = process.getChildElement(edge.getSourceNode().getUUID());
         BasePropertyWriter pTgt = process.getChildElement(edge.getTargetNode().getUUID());
 
         if (pSrc == null || pTgt == null) {
-            String msg = String.format("pSrc = %s, pTgt = %s", pSrc, pTgt);
+            String msg = String.format("pSrc = %s, pTgt = %s",
+                                       pSrc,
+                                       pTgt);
             LOG.debug(msg);
             return Result.failure(msg);
         }
@@ -64,12 +66,8 @@ public class SequenceFlowConverter {
         p.setConnection(connector);
 
         BPMNGeneralSet general = definition.getGeneral();
-        p.setName(general.getName().getValue());
         p.setDocumentation(general.getDocumentation().getValue());
-
-        SequenceFlowExecutionSet executionSet = definition.getExecutionSet();
-        p.setPriority(executionSet.getPriority().getValue());
-        p.setConditionExpression(executionSet.getConditionExpression().getValue());
+        p.setOneDirectionAssociation();
 
         return Result.of(p);
     }

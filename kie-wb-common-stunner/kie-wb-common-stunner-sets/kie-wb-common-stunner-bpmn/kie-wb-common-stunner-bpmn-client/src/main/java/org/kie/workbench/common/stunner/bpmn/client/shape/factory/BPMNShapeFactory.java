@@ -23,6 +23,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.ManagedInstance;
+import org.kie.workbench.common.stunner.bpmn.client.shape.def.AssociationConnectorDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.BPMNDiagramShapeDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.CatchingIntermediateEventShapeDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.EndEventShapeDef;
@@ -35,6 +36,7 @@ import org.kie.workbench.common.stunner.bpmn.client.shape.def.SubprocessShapeDef
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.TaskShapeDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.ThrowingIntermediateEventShapeDef;
 import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.Association;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
@@ -252,6 +254,9 @@ public class BPMNShapeFactory
                           () -> svgShapeFactory)
                 .delegate(SequenceFlow.class,
                           new SequenceFlowConnectorDef(),
+                          () -> basicShapesFactory)
+                .delegate(Association.class,
+                          new AssociationConnectorDef(),
                           () -> basicShapesFactory);
     }
 

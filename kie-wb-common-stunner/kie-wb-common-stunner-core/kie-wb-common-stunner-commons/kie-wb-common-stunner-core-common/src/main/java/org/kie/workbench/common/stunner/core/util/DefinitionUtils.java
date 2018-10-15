@@ -195,24 +195,39 @@ public class DefinitionUtils {
         return new String[]{definitionId, baseId};
     }
 
-    public String getDefaultConnectorId(final String definitionSetId) {
-        final Object defSet = getDefinitionManager().definitionSets().getDefinitionSetById(definitionSetId);
-        if (null != defSet) {
-            final Set<String> definitions = definitionManager.adapters().forDefinitionSet().getDefinitions(defSet);
-            if (null != definitions && !definitions.isEmpty()) {
-                for (final String defId : definitions) {
-                    final Object def = definitionsRegistry.getDefinitionById(defId);
-                    if (null != def) {
-                        final Class<? extends ElementFactory> graphElement = definitionManager.adapters().forDefinition().getGraphFactoryType(def);
-                        if (isEdgeFactory(graphElement,
-                                          factoryManager.registry())) {
-                            return defId;
+    public String getElementDefinitionId(final Element<?> element) {
+        if (element.getContent() instanceof Definition) {
+            final Object definition = ((Definition) element.getContent()).getDefinition();
+            return definitionManager.adapters().forDefinition().getId(definition);
+        }
+        return null;
+    }
+
+    public String getDefaultConnectorId(final String definitionSetId,
+                                        final String elementDefId) {
+        //TODO WM check this with Roger
+        if (elementDefId.endsWith("IntermediateCompensationEvent")) {
+            return "org.kie.workbench.common.stunner.bpmn.definition.Association";
+        } else {
+            final Object defSet = getDefinitionManager().definitionSets().getDefinitionSetById(definitionSetId);
+            if (null != defSet) {
+                final Set<String> definitions = definitionManager.adapters().forDefinitionSet().getDefinitions(defSet);
+                if (null != definitions && !definitions.isEmpty()) {
+                    for (final String defId : definitions) {
+                        final Object def = definitionsRegistry.getDefinitionById(defId);
+                        if (null != def) {
+                            final Class<? extends ElementFactory> graphElement = definitionManager.adapters().forDefinition().getGraphFactoryType(def);
+                            if (isEdgeFactory(graphElement,
+                                              factoryManager.registry())) {
+                                return defId;
+                            }
                         }
                     }
                 }
             }
+            return null;
         }
-        return null;
+
     }
 
     public boolean isAllPolicy(final MorphDefinition definition) {

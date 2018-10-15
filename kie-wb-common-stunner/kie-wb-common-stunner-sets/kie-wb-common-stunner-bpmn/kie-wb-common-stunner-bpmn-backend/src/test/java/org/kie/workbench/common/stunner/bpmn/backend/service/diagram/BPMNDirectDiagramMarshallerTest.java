@@ -52,6 +52,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.BPMNDirectDiagramMarshaller
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.DefinitionsConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.workitem.service.WorkItemDefinitionBackendService;
 import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.Association;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
@@ -139,6 +140,7 @@ import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnectorImpl;
 import org.kie.workbench.common.stunner.core.graph.impl.NodeImpl;
+import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 import org.kie.workbench.common.stunner.core.registry.definition.AdapterRegistry;
 import org.kie.workbench.common.stunner.core.rule.RuleEvaluationContext;
 import org.kie.workbench.common.stunner.core.rule.RuleManager;
@@ -189,6 +191,7 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_INTERMEDIATE_CONDITIONAL_EVENTS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateConditionalEvents.bpmn";
     private static final String BPMN_INTERMEDIATE_ESCALATION_EVENTS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateEscalationEvents.bpmn";
     private static final String BPMN_INTERMEDIATE_COMPENSATION_EVENTS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateCompensationEvents.bpmn";
+    private static final String BPMN_INTERMEDIATE_COMPENSATION_EVENTS_WITH_ASSOCIATION = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateCompensationEventsWithAssociation.bpmn";
     private static final String BPMN_INTERMEDIATE_ESCALATION_EVENTTHROWING = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateEscalationEventThrowing.bpmn";
     private static final String BPMN_INTERMEDIATE_COMPENSATION_EVENTTHROWING = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/intermediateCompensationEventThrowing.bpmn";
     private static final String BPMN_ENDSIGNALEVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/endSignalEvent.bpmn";
@@ -751,6 +754,59 @@ public class BPMNDirectDiagramMarshallerTest {
                      intermediateCompensationEvent.getGeneral().getName().getValue());
         assertEquals("IntermediateCompensationEventDocumentation",
                      intermediateCompensationEvent.getGeneral().getDocumentation().getValue());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testUnmarshallIntermediateCompensationEventsWithAssociations() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_COMPENSATION_EVENTS_WITH_ASSOCIATION);
+        assertDiagram(diagram,
+                      6);
+        assertEquals("IntermediateCompensationEventsWithAssociation",
+                     diagram.getMetadata().getTitle());
+        Node<? extends Definition, ?> catchingEventNode = diagram.getGraph().getNode("_DF70C614-A641-4109-8A8D-506B15E3F31B");
+        assertNotNull(catchingEventNode);
+        IntermediateCompensationEvent intermediateCompensationEvent = (IntermediateCompensationEvent) catchingEventNode.getContent().getDefinition();
+
+        assertTrue(GraphUtils.isDockedNode(catchingEventNode));
+        assertNotNull(intermediateCompensationEvent.getGeneral());
+        assertEquals("IntermediateCompensationEventName",
+                     intermediateCompensationEvent.getGeneral().getName().getValue());
+        assertEquals("IntermediateCompensationEventDocumentation",
+                     intermediateCompensationEvent.getGeneral().getDocumentation().getValue());
+
+        Node<? extends Definition, ?> userTask1Node = diagram.getGraph().getNode("_C18CC8D2-D7CA-457D-9258-01D1E6973A86");
+        assertNotNull(userTask1Node);
+        UserTask userTask1 = (UserTask) userTask1Node.getContent().getDefinition();
+        assertEquals("Task1",
+                     userTask1.getGeneral().getName().getValue());
+        assertEquals("Task1Documentation",
+                     userTask1.getGeneral().getDocumentation().getValue());
+        assertEquals(userTask1Node,
+                     GraphUtils.getDockParent(catchingEventNode).orElse(null));
+
+        Node<? extends Definition, ?> userTask2Node = diagram.getGraph().getNode("_7EF24042-BD4E-4843-9874-8AC3F7AFF3CD");
+        assertNotNull(userTask2Node);
+        UserTask userTask2 = (UserTask) userTask2Node.getContent().getDefinition();
+        assertEquals("Task2",
+                     userTask2.getGeneral().getName().getValue());
+        assertEquals("Task2Documentation",
+                     userTask2.getGeneral().getDocumentation().getValue());
+
+        Edge associationEdge = userTask2Node.getInEdges().stream()
+                .filter(edge -> edge.getUUID().equals("_B41D28D1-FC39-40E8-BF89-C57649989014"))
+                .map(Element::asEdge)
+                .findFirst().orElse(null);
+        assertNotNull(associationEdge);
+        assertNotNull(associationEdge.getContent());
+        Association association = (Association) ((View) associationEdge.getContent()).getDefinition();
+        assertEquals("AssociationDocumentation",
+                     association.getGeneral().getDocumentation().getValue());
+
+        assertEquals(associationEdge.getSourceNode(),
+                     catchingEventNode);
+        assertEquals(associationEdge.getTargetNode(),
+                     userTask2Node);
     }
 
     @Test
@@ -2947,6 +3003,30 @@ public class BPMNDirectDiagramMarshallerTest {
         assertTrue(result.contains("<drools:metaValue><![CDATA[IntermediateCompensationEventName]]></drools:metaValue>"));
         assertTrue(result.contains("<![CDATA[IntermediateCompensationEventDocumentation]]></bpmn2:documentation>"));
         assertTrue(result.contains("<bpmn2:compensateEventDefinition"));
+    }
+
+    @Test
+    public void testMarshallIntermediateCompensationEventsWithAssociations() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_COMPENSATION_EVENTS_WITH_ASSOCIATION);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      5,
+                      3);
+
+        assertTrue(result.contains("<bpmn2:boundaryEvent id=\"_DF70C614-A641-4109-8A8D-506B15E3F31B\""));
+        assertTrue(result.contains(" name=\"IntermediateCompensationEventName\""));
+        assertTrue(result.contains("attachedToRef=\"_C18CC8D2-D7CA-457D-9258-01D1E6973A86\""));
+        assertTrue(result.contains("<drools:metaValue><![CDATA[IntermediateCompensationEventName]]></drools:metaValue>"));
+        assertTrue(result.contains("<![CDATA[IntermediateCompensationEventDocumentation]]></bpmn2:documentation>"));
+        assertTrue(result.contains("<bpmn2:compensateEventDefinition"));
+
+        assertTrue(result.contains("<bpmn2:association id=\"_B41D28D1-FC39-40E8-BF89-C57649989014\""));
+        assertTrue(result.contains("associationDirection=\"One\""));
+        assertTrue(result.contains("sourceRef=\"_DF70C614-A641-4109-8A8D-506B15E3F31B\""));
+        assertTrue(result.contains("targetRef=\"_7EF24042-BD4E-4843-9874-8AC3F7AFF3CD\""));
+        assertTrue(result.contains("<![CDATA[AssociationDocumentation]]></bpmn2:documentation>"));
+        assertTrue(result.contains("</bpmn2:association>"));
     }
 
     @Test

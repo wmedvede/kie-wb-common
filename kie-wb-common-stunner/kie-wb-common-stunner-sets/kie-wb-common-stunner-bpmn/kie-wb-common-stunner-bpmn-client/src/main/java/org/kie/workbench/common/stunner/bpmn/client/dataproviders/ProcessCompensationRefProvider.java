@@ -24,8 +24,9 @@ import java.util.function.Predicate;
 import javax.inject.Inject;
 
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDefinition;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
 import org.kie.workbench.common.stunner.bpmn.definition.EndCompensationEvent;
-import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEventThrowing;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.compensation.ActivityRef;
@@ -35,7 +36,6 @@ import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Graph;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
-import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 import org.uberfire.commons.data.Pair;
 
 import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
@@ -50,6 +50,8 @@ public class ProcessCompensationRefProvider extends AbstractProcessFilteredNodeP
     @SuppressWarnings("unchecked")
     @Override
     public Predicate<Node> getFilter() {
+        //TODO WM igual aqui podria quedar algun retoque pendiente, porque por ej. un event-subproces de compensacion
+        //podria compensar acciones del proceso padre...
         final Map<String, Node> candidates = new HashMap<>();
         final Diagram diagram = sessionManager.getCurrentSession().getCanvasHandler().getDiagram();
         final String rootUUID = diagram.getMetadata().getCanvasRootUUID();
@@ -72,17 +74,9 @@ public class ProcessCompensationRefProvider extends AbstractProcessFilteredNodeP
                                    targetNode);
                 }
             } else if (isDescendantFrom(rootUUID,
-                                        node)) {
-                Node nodeTarget = null;
-                if ((((View) node.getContent()).getDefinition() instanceof IntermediateCompensationEvent) && GraphUtils.isDockedNode(node)) {
-                    nodeTarget = (Node) GraphUtils.getDockParent(node).orElse(null);
-                } else if (((View) node.getContent()).getDefinition() instanceof EventSubprocess) {
-                    nodeTarget = node;
-                }
-                if (nodeTarget != null) {
-                    candidates.put(nodeTarget.getUUID(),
-                                   nodeTarget);
-                }
+                                        node) && isCompensable(node) && !isCatchingCompensationORCompensationTarget(node)) {
+                candidates.put(node.getUUID(),
+                               node);
             }
         });
 
@@ -99,6 +93,21 @@ public class ProcessCompensationRefProvider extends AbstractProcessFilteredNodeP
 
     private boolean isValid(ActivityRef activityRef) {
         return activityRef != null && !isEmpty(activityRef.getValue());
+    }
+
+    private boolean isCatchingCompensationORCompensationTarget(final Node<?, ? extends Edge> node) {
+        return (((View) node.getContent()).getDefinition() instanceof IntermediateCompensationEvent) ||
+                node.getInEdges().stream()
+                        .filter(edge -> edge.getSourceNode().getContent() instanceof View &&
+                                ((View) edge.getSourceNode().getContent()).getDefinition() instanceof IntermediateCompensationEvent)
+                        .findFirst()
+                        .isPresent();
+    }
+
+    private boolean isCompensable(final Node<?, ? extends Edge> node) {
+        return node.getContent() instanceof View &&
+                (((View) node.getContent()).getDefinition() instanceof BaseTask ||
+                        (((View) node.getContent()).getDefinition() instanceof BaseSubprocess));
     }
 
     @Override

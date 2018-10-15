@@ -110,7 +110,7 @@ class ProcessConverterDelegate {
                 });
 
         context.edges()
-                .map(e -> converterFactory.sequenceFlowConverter().toFlowElement(e, p))
+                .map(e -> converterFactory.edgeElementConverter().toFlowElement(e, p))
                 .filter(Result::isSuccess)
                 .map(Result::value)
                 .forEach(p::addChildElement);

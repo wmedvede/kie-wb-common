@@ -45,7 +45,6 @@ public abstract class AbstractCompensationEventPostConverter implements PostConv
                                                    activityRef);
             if (activity != null) {
                 compensateEvent.setActivityRef(activity);
-                activity.setIsForCompensation(true);
             } else {
                 LOG.warn("Referred activity: " + activityRef + " was not found for event: id: " + throwEvent.getId() + ", name: " + throwEvent.getName());
             }

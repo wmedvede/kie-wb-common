@@ -22,8 +22,12 @@ import java.util.Optional;
 
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.events.EndCompensationEventPostConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.events.IntermediateCompensationEventPostConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.events.IntermediateThrowCompensationEventPostConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.processes.EventSubProcessPostConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.EndCompensationEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateCompensationEventThrowing;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
@@ -33,10 +37,14 @@ public class PostConverterRegistry {
     private Map<Class<? extends BPMNViewDefinition>, PostConverterProcessor> postConverters = new HashMap<>();
 
     public PostConverterRegistry() {
-        postConverters.put(IntermediateCompensationEventThrowing.class,
+        postConverters.put(IntermediateCompensationEvent.class,
                            new IntermediateCompensationEventPostConverter());
+        postConverters.put(IntermediateCompensationEventThrowing.class,
+                           new IntermediateThrowCompensationEventPostConverter());
         postConverters.put(EndCompensationEvent.class,
                            new EndCompensationEventPostConverter());
+        postConverters.put(EventSubprocess.class,
+                           new EventSubProcessPostConverter());
     }
 
     public Optional<PostConverterProcessor> get(Node<View<? extends BPMNViewDefinition>, ?> node) {

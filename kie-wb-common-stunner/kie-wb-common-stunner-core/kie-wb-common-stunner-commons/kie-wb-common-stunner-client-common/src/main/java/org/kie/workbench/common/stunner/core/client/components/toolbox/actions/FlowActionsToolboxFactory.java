@@ -120,9 +120,12 @@ public class FlowActionsToolboxFactory
 
         // It uses the default connector's identifier, for the actual definition set,
         // to check the resulting nodes that can be created.
-        // It also groups the resuling nodes to be created by it's morph base type, and just
+        // It also groups the resulting nodes to be created by it's morph base type, and just
         // create an action for each morph target.
-        final String defaultConnectorId = definitionUtils.getDefaultConnectorId(defSetId);
+        final String elementDefId = definitionUtils.getElementDefinitionId(element);
+        final String defaultConnectorId = definitionUtils.getDefaultConnectorId(defSetId,
+                                                                                elementDefId);
+
         if (null != defaultConnectorId) {
             final Set<String> targets = lookup.lookupTargetNodes(diagram.getGraph(),
                                                                  node,

@@ -21,6 +21,7 @@ import javax.enterprise.context.ApplicationScoped;
 import org.jboss.errai.common.client.api.annotations.NonPortable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.Association;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
@@ -115,7 +116,8 @@ import org.kie.workbench.common.stunner.core.rule.annotation.Occurrences;
                 EventSubprocess.class,
                 AdHocSubprocess.class,
                 MultipleInstanceSubprocess.class,
-                SequenceFlow.class
+                SequenceFlow.class,
+                Association.class
         },
         builder = BPMNDefinitionSet.BPMNDefinitionSetBuilder.class
 )
