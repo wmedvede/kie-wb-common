@@ -49,6 +49,7 @@ import org.kie.workbench.common.stunner.core.client.shape.view.ShapeView;
 import org.kie.workbench.common.stunner.core.client.util.ShapeUtils;
 import org.kie.workbench.common.stunner.core.graph.content.view.Connection;
 import org.kie.workbench.common.stunner.core.graph.content.view.ControlPoint;
+import org.kie.workbench.common.stunner.core.graph.content.view.DashArray;
 import org.kie.workbench.common.stunner.core.graph.content.view.DiscreteConnection;
 import org.kie.workbench.common.stunner.core.graph.content.view.MagnetConnection;
 import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
@@ -560,6 +561,13 @@ public class WiresConnectorView<T> extends WiresConnector
     @Override
     public T removeShadow() {
         getDirectionalLine().setShadow(null);
+        return cast();
+    }
+
+    public T setDashArray(DashArray dashArray) {
+        if (dashArray != null) {
+            getDirectionalLine().setDashArray(dashArray.getDash(), dashArray.getDashes());
+        }
         return cast();
     }
 

@@ -128,7 +128,8 @@ public class FlowActionsToolboxFactoryTest {
                 .thenReturn(Collections.singleton(NODE_ID));
         when(domainLookups.lookupMorphBaseDefinitions(anySet()))
                 .thenReturn(Collections.singleton(NODE_ID));
-        this.tested = new FlowActionsToolboxFactory(definitionUtils,
+        //TODO WM fix this test
+        this.tested = new FlowActionsToolboxFactory(/*definitionUtils,*/
                                                     toolboxLookups,
                                                     () -> createConnectorAction,
                                                     createConnectorActionDestroyer,

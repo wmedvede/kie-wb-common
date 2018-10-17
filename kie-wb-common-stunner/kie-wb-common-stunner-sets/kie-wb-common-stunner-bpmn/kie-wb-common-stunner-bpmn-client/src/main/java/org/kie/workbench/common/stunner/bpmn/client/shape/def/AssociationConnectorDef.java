@@ -21,17 +21,14 @@ import org.kie.workbench.common.stunner.bpmn.definition.Association;
 import org.kie.workbench.common.stunner.core.client.shape.view.ShapeView;
 import org.kie.workbench.common.stunner.core.client.shape.view.handler.FontHandler;
 import org.kie.workbench.common.stunner.core.definition.shape.Glyph;
+import org.kie.workbench.common.stunner.core.graph.content.view.DashArray;
 import org.kie.workbench.common.stunner.shapes.def.ConnectorShapeDef;
 
-//TODO WM check si esta clase esta correcto que extienda connector shape def
-public class AssociationConnectorDef implements BPMNShapeDef<Association, ShapeView>,
-                                                ConnectorShapeDef<Association, ShapeView> {
+public class AssociationConnectorDef
+        implements BPMNShapeDef<Association, ShapeView>,
+                   ConnectorShapeDef<Association, ShapeView> {
 
-    private static final String FONT_FAMILY = "Open Sans";
-    private static final String FONT_COLOR = "#000000";
-    private static final String FONT_STROKE_COLOR = "#393f44";
-    private static final double FONT_SIZE = 10d;
-    private static final double STROKE_SIZE = 0.5d;
+    private static final DashArray DASH_ARRAY = DashArray.create(2, 6);
 
     @Override
     public FontHandler<Association, ShapeView> newFontHandler() {
@@ -49,5 +46,10 @@ public class AssociationConnectorDef implements BPMNShapeDef<Association, ShapeV
                           final String defId) {
         //TODO WM aqui si se puede seria interesante tener un icono para el association
         return BPMNGlyphFactory.SEQUENCE_FLOW;
+    }
+
+    @Override
+    public DashArray getDashArray(final Association element) {
+        return DASH_ARRAY;
     }
 }

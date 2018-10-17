@@ -27,12 +27,6 @@ public final class SequenceFlowConnectorDef
         implements BPMNShapeDef<SequenceFlow, ShapeView>,
                    ConnectorShapeDef<SequenceFlow, ShapeView> {
 
-    private static final String FONT_FAMILY = "Open Sans";
-    private static final String FONT_COLOR = "#000000";
-    private static final String FONT_STROKE_COLOR = "#393f44";
-    private static final double FONT_SIZE = 10d;
-    private static final double STROKE_SIZE = 0.5d;
-
     @Override
     public FontHandler<SequenceFlow, ShapeView> newFontHandler() {
         return newFontHandlerBuilder()
