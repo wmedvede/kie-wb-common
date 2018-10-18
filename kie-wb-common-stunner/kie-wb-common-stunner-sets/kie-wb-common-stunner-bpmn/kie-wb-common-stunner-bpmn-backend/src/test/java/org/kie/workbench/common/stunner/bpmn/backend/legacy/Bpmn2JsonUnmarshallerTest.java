@@ -88,6 +88,7 @@ public class Bpmn2JsonUnmarshallerTest {
 
         final String propertyName = "case";
         final String propertyValue = "true";
+        final String resultValue = "<![CDATA[" + propertyValue + "]]>";
 
         final Map<String, String> properties = new HashMap<>();
         properties.put(propertyName, propertyValue);
@@ -101,7 +102,7 @@ public class Bpmn2JsonUnmarshallerTest {
                 .filter(v -> propertyName.equals(((MetaDataType) v.getValue()).getName()))
                 .map(v -> ((MetaDataType) v.getValue()).getMetaValue()).findAny();
 
-        assertTrue(value.isPresent() && propertyValue.equals(value.get()));
+        assertTrue(value.isPresent() && resultValue.equals(value.get()));
     }
 
     private static final class Value<T> {

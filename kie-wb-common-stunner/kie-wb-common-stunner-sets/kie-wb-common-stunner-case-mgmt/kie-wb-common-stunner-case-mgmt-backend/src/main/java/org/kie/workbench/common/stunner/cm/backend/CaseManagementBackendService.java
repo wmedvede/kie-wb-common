@@ -19,25 +19,32 @@ package org.kie.workbench.common.stunner.cm.backend;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.kie.workbench.common.stunner.bpmn.backend.BaseBackendService;
 import org.kie.workbench.common.stunner.cm.qualifiers.CaseManagementEditor;
 import org.kie.workbench.common.stunner.cm.resource.CaseManagementDefinitionSetResourceType;
-import org.kie.workbench.common.stunner.core.backend.service.AbstractDefinitionSetService;
 import org.kie.workbench.common.stunner.core.definition.DefinitionSetResourceType;
 
 @ApplicationScoped
-public class CaseManagementBackendService extends AbstractDefinitionSetService {
+public class CaseManagementBackendService extends BaseBackendService {
+
+    private static final String MARSHALLER_LEGACY_PROPERTY = "cm.marshaller.legacy";
 
     private CaseManagementDefinitionSetResourceType cmResourceType;
 
     protected CaseManagementBackendService() {
         this(null,
+             null,
              null);
     }
 
     @Inject
     public CaseManagementBackendService(final @CaseManagementEditor CaseManagementDiagramMarshaller cmDiagramMarshaller,
+                                        final @CaseManagementEditor CaseManagementDirectDiagramMarshaller cmDirectDiagramMarshaller,
                                         final CaseManagementDefinitionSetResourceType cmResourceType) {
-        super(cmDiagramMarshaller);
+        super(chooseMarshaller(
+                cmDiagramMarshaller,
+                cmDirectDiagramMarshaller,
+                MARSHALLER_LEGACY_PROPERTY));
         this.cmResourceType = cmResourceType;
     }
 

@@ -5543,7 +5543,7 @@ public class Bpmn2JsonUnmarshaller {
         if (properties.get("case") != null) {
             Utils.setMetaDataExtensionValue(callActivity,
                                             "case",
-                                            properties.get("case"));
+                                            wrapInCDATABlock(properties.get("case")));
         }
 
         if (properties.get("independent") != null && properties.get("independent").length() > 0) {

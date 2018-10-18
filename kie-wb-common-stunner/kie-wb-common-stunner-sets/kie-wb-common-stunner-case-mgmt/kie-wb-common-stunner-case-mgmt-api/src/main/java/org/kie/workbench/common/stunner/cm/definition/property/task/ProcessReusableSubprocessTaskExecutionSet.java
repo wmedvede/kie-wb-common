@@ -25,7 +25,6 @@ import org.kie.workbench.common.forms.adf.definitions.annotations.FormDefinition
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormField;
 import org.kie.workbench.common.forms.adf.definitions.annotations.field.selector.SelectorDataProvider;
 import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.selectors.listBox.type.ListBoxFieldType;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNPropertySet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.CalledElement;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.Independent;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsAsync;
@@ -45,7 +44,8 @@ import org.kie.workbench.common.stunner.core.util.HashUtil;
 @FormDefinition(
         startElement = "calledElement"
 )
-public class ProcessReusableSubprocessTaskExecutionSet implements BPMNPropertySet {
+public class ProcessReusableSubprocessTaskExecutionSet
+        implements BaseCaseManagementReusableSubprocessTaskExecutionSet {
 
     @Property
     @SelectorDataProvider(
@@ -126,58 +126,72 @@ public class ProcessReusableSubprocessTaskExecutionSet implements BPMNPropertySe
         this.onExitAction = onExitAction;
     }
 
+    @Override
     public CalledElement getCalledElement() {
         return calledElement;
     }
 
+    @Override
     public void setCalledElement(final CalledElement calledElement) {
         this.calledElement = calledElement;
     }
 
+    @Override
     public Case getCaze() {
         return caze;
     }
 
-    public void setCaze(Case caze) {
+    @Override
+    public void setCaze(final Case caze) {
         this.caze = caze;
     }
 
+    @Override
     public Independent getIndependent() {
         return independent;
     }
 
+    @Override
     public WaitForCompletion getWaitForCompletion() {
         return waitForCompletion;
     }
 
+    @Override
     public void setIndependent(final Independent independent) {
         this.independent = independent;
     }
 
+    @Override
     public void setWaitForCompletion(final WaitForCompletion waitForCompletion) {
         this.waitForCompletion = waitForCompletion;
     }
 
+    @Override
     public IsAsync getIsAsync() {
         return isAsync;
     }
 
+    @Override
     public void setIsAsync(IsAsync isAsync) {
         this.isAsync = isAsync;
     }
 
+    @Override
     public OnEntryAction getOnEntryAction() {
         return onEntryAction;
     }
 
+    @Override
     public void setOnEntryAction(final OnEntryAction onEntryAction) {
         this.onEntryAction = onEntryAction;
     }
 
+    @Override
     public OnExitAction getOnExitAction() {
         return onExitAction;
     }
 
+    @Override
     public void setOnExitAction(final OnExitAction onExitAction) {
         this.onExitAction = onExitAction;
     }

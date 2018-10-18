@@ -15,6 +15,8 @@
  */
 package org.kie.workbench.common.stunner.cm.definition.property.subprocess;
 
+import javax.validation.constraints.NotNull;
+
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.forms.adf.definitions.annotations.metaModel.FieldDefinition;
@@ -31,6 +33,7 @@ import org.kie.workbench.common.stunner.core.definition.annotation.property.Valu
 public class Case implements BPMNProperty {
 
     @Value
+    @NotNull
     @FieldValue
     private Boolean value;
 
