@@ -21,16 +21,16 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.dom.Event;
-import org.jboss.errai.common.client.dom.Option;
 import org.jboss.errai.common.client.dom.Select;
 import org.jboss.errai.common.client.dom.TextArea;
-import org.jboss.errai.common.client.dom.Window;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.ForEvent;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.uberfire.commons.data.Pair;
+
+import static org.kie.workbench.common.stunner.bpmn.client.forms.util.SelectUtils.setOptions;
 
 @Templated
 public class ScriptTypeFieldEditorView
@@ -74,31 +74,13 @@ public class ScriptTypeFieldEditorView
 
     @Override
     public void setLanguageOptions(List<Pair<String, String>> options) {
-        clearSelect(language);
-        options.forEach(option ->
-                                language.add(newOption(option.getK1(),
-                                                       option.getK2())));
+        setOptions(language, options);
     }
 
     @Override
     public void setReadOnly(boolean readOnly) {
         language.setDisabled(readOnly);
         script.setDisabled(readOnly);
-    }
-
-    private Option newOption(final String text,
-                             final String value) {
-        final Option option = (Option) Window.getDocument().createElement("option");
-        option.setTextContent(text);
-        option.setValue(value);
-        return option;
-    }
-
-    private void clearSelect(Select select) {
-        int options = select.getOptions().getLength();
-        for (int i = 0; i < options; i++) {
-            select.remove(0);
-        }
     }
 
     @EventHandler("language")
