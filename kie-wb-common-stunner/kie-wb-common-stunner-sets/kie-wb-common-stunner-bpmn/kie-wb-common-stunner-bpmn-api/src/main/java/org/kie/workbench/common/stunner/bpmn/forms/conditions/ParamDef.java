@@ -27,10 +27,10 @@ public class ParamDef {
 
     private String name;
 
-    private Class type;
+    private Class<?> type;
 
     public ParamDef(final @MapsTo("name") String name,
-                    final @MapsTo("type") Class type) {
+                    final @MapsTo("type") Class<?> type) {
         this.name = name;
         this.type = type;
     }
@@ -43,11 +43,11 @@ public class ParamDef {
         this.name = name;
     }
 
-    public Class getType() {
+    public Class<?> getType() {
         return type;
     }
 
-    public void setType(Class type) {
+    public void setType(Class<?> type) {
         this.type = type;
     }
 

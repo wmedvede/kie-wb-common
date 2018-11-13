@@ -18,8 +18,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionExpression;
@@ -29,8 +28,6 @@ import org.kie.workbench.common.stunner.bpmn.forms.conditions.ParamDef;
 public class ConditionParser {
 
     public static final String KIE_FUNCTIONS = "KieFunctions.";
-
-    private static Map<String, FunctionDef> functionsRegistry = new TreeMap<>();
 
     private int parseIndex = 0;
 
@@ -64,133 +61,9 @@ public class ConditionParser {
 
     public static final String METHOD_NOT_PROPERLY_CLOSED_ERROR = "Method \"{0}\" invocation is not properly closed, character \")\" is expected.";
 
-    private static String functionNames = null;
+    private static String functionNames = buildFunctionNames();
 
     private static final String RETURN_SENTENCE = "return";
-
-    static {
-
-        //Operators for all types:
-
-        FunctionDef isNull = new FunctionDef(Condition.IS_NULL);
-        isNull.addParam("param1",
-                        Object.class);
-        functionsRegistry.put(isNull.getName(),
-                              isNull);
-
-        //Global operators:
-
-        FunctionDef equalsTo = new FunctionDef(Condition.EQUALS_TO);
-        equalsTo.addParam("param1",
-                          Object.class);
-        equalsTo.addParam("param2",
-                          String.class);
-        functionsRegistry.put(equalsTo.getName(),
-                              equalsTo);
-
-        //Operators for String type:
-
-        FunctionDef isEmpty = new FunctionDef(Condition.IS_EMPTY);
-        isEmpty.addParam("param1",
-                         Object.class);
-        functionsRegistry.put(isEmpty.getName(),
-                              isEmpty);
-
-        FunctionDef contains = new FunctionDef(Condition.CONTAINS);
-        contains.addParam("param1",
-                          Object.class);
-        contains.addParam("param2",
-                          String.class);
-        functionsRegistry.put(contains.getName(),
-                              contains);
-
-        FunctionDef startsWith = new FunctionDef(Condition.STARTS_WITH);
-        startsWith.addParam("param1",
-                            Object.class);
-        startsWith.addParam("param2",
-                            String.class);
-        functionsRegistry.put(startsWith.getName(),
-                              startsWith);
-
-        FunctionDef endsWith = new FunctionDef(Condition.ENDS_WITH);
-        endsWith.addParam("param1",
-                          Object.class);
-        endsWith.addParam("param2",
-                          String.class);
-        functionsRegistry.put(endsWith.getName(),
-                              endsWith);
-
-        // Operators for Numeric types:
-
-        FunctionDef greaterThan = new FunctionDef(Condition.GREATER_THAN);
-        greaterThan.addParam("param1",
-                             Object.class);
-        greaterThan.addParam("param2",
-                             String.class);
-        functionsRegistry.put(greaterThan.getName(),
-                              greaterThan);
-
-        FunctionDef greaterOrEqualThan = new FunctionDef(Condition.GREATER_OR_EQUAL_THAN);
-        greaterOrEqualThan.addParam("param1",
-                                    Object.class);
-        greaterOrEqualThan.addParam("param2",
-                                    String.class);
-        functionsRegistry.put(greaterOrEqualThan.getName(),
-                              greaterOrEqualThan);
-
-        FunctionDef lessThan = new FunctionDef(Condition.LESS_THAN);
-        lessThan.addParam("param1",
-                          Object.class);
-        lessThan.addParam("param2",
-                          String.class);
-        functionsRegistry.put(lessThan.getName(),
-                              lessThan);
-
-        FunctionDef lessOrEqualThan = new FunctionDef(Condition.LESS_OR_EQUAL_THAN);
-        lessOrEqualThan.addParam("param1",
-                                 Object.class);
-        lessOrEqualThan.addParam("param2",
-                                 String.class);
-        functionsRegistry.put(lessOrEqualThan.getName(),
-                              lessOrEqualThan);
-
-        FunctionDef between = new FunctionDef(Condition.BETWEEN);
-        between.addParam("param1",
-                         Object.class);
-        between.addParam("param2",
-                         String.class);
-        between.addParam("param3",
-                         String.class);
-        functionsRegistry.put(between.getName(),
-                              between);
-
-        // Operators for Boolean type:
-
-        FunctionDef isTrue = new FunctionDef(Condition.IS_TRUE);
-        isTrue.addParam("param1",
-                        Object.class);
-        functionsRegistry.put(isTrue.getName(),
-                              isTrue);
-
-        FunctionDef isFalse = new FunctionDef(Condition.IS_FALSE);
-        isFalse.addParam("param1",
-                         Object.class);
-        functionsRegistry.put(isFalse.getName(),
-                              isFalse);
-
-        StringBuilder functionNamesBuilder = new StringBuilder();
-        functionNamesBuilder.append("{");
-        boolean first = true;
-        for (String functionName : functionsRegistry.keySet()) {
-            if (!first) {
-                functionNamesBuilder.append(", ");
-            }
-            functionNamesBuilder.append(functionName);
-            first = false;
-        }
-        functionNamesBuilder.append("}");
-        functionNames = functionNamesBuilder.toString();
-    }
 
     public ConditionParser(String expression) {
         this.expression = expression;
@@ -206,7 +79,7 @@ public class ConditionParser {
 
         functionName = parseFunctionName();
         functionName = functionName.substring(KIE_FUNCTIONS.length(), functionName.length());
-        functionDef = functionsRegistry.get(functionName);
+        functionDef = FunctionsRegistry.getInstance().getFunction(functionName);
 
         if (functionDef == null) {
             throw new ParseException(errorMessage(FUNCTION_NAME_NOT_RECOGNIZED_ERROR, functionName), parseIndex);
@@ -260,7 +133,7 @@ public class ConditionParser {
             throw new ParseException(errorMessage(FUNCTION_CALL_NOT_FOUND_ERROR), parseIndex);
         }
 
-        for (FunctionDef functionDef : functionsRegistry.values()) {
+        for (FunctionDef functionDef : FunctionsRegistry.getInstance().getFunctions()) {
             if (expression.startsWith(KIE_FUNCTIONS + functionDef.getName() + "(", index)) {
                 functionName = KIE_FUNCTIONS + functionDef.getName();
                 break;
@@ -433,5 +306,12 @@ public class ConditionParser {
 
     private String functionNames() {
         return functionNames;
+    }
+
+    private static String buildFunctionNames() {
+        String functionNames = FunctionsRegistry.getInstance().getFunctions().stream()
+                .map(FunctionDef::getName)
+                .collect(Collectors.joining(", "));
+        return "{" + functionNames + "}";
     }
 }

@@ -21,17 +21,22 @@ import javax.inject.Inject;
 import org.kie.workbench.common.forms.dynamic.client.rendering.FieldRenderer;
 import org.kie.workbench.common.forms.dynamic.client.rendering.formGroups.FormGroup;
 import org.kie.workbench.common.forms.dynamic.client.rendering.formGroups.impl.def.DefaultFormGroup;
+import org.kie.workbench.common.forms.dynamic.service.shared.FormRenderingContext;
 import org.kie.workbench.common.forms.dynamic.service.shared.RenderMode;
 import org.kie.workbench.common.stunner.bpmn.forms.model.ConditionEditorFieldDefinition;
+import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 
 public class ConditionEditorFieldEditorRenderer
         extends FieldRenderer<ConditionEditorFieldDefinition, DefaultFormGroup> {
 
     private final ConditionEditorFieldEditorWidget widget;
+    private final SessionManager sessionManager;
 
     @Inject
-    public ConditionEditorFieldEditorRenderer(final ConditionEditorFieldEditorWidget widget) {
+    public ConditionEditorFieldEditorRenderer(final ConditionEditorFieldEditorWidget widget,
+                                              final SessionManager sessionManager) {
         this.widget = widget;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -50,6 +55,14 @@ public class ConditionEditorFieldEditorRenderer
     @Override
     public String getSupportedCode() {
         return ConditionEditorFieldDefinition.FIELD_TYPE.getTypeName();
+    }
+
+    @Override
+    public void init(FormRenderingContext renderingContext,
+                     ConditionEditorFieldDefinition field) {
+        super.init(renderingContext,
+                   field);
+        widget.init(sessionManager.getCurrentSession());
     }
 
     @Override
