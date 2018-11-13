@@ -20,6 +20,7 @@ import javax.inject.Inject;
 
 import org.kie.workbench.common.stunner.bpmn.client.forms.util.FieldEditorEditorWidget;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
+import org.kie.workbench.common.stunner.core.client.session.ClientSession;
 
 public class ConditionEditorFieldEditorWidget
         extends FieldEditorEditorWidget<ScriptTypeValue, ConditionEditorFieldEditorPresenter> {
@@ -29,4 +30,7 @@ public class ConditionEditorFieldEditorWidget
         super(editor);
     }
 
+    public void init(ClientSession session) {
+        editor.init(session);
+    }
 }

@@ -23,7 +23,7 @@ import org.drools.core.util.KieFunctions;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionExpression;
 
-public class ConditionScriptGenerator {
+public class ConditionGenerator {
 
     public String generateScript(ConditionExpression expression, List<String> errors) {
         StringBuilder script = new StringBuilder();

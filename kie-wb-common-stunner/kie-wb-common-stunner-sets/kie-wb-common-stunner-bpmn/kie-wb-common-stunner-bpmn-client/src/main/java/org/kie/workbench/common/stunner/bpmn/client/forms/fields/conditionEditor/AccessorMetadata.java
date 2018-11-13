@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.forms.conditions;
+package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor;
 
-import java.util.List;
+public class AccessorMetadata {
 
-import org.jboss.errai.bus.server.annotations.Remote;
-import org.uberfire.backend.vfs.Path;
+    private String name;
 
-@Remote
-public interface ConditionEditorService {
+    private String type;
 
-    List<FunctionDef> getAvailableFunctions(Path path, String clazz);
+    public AccessorMetadata(String name,
+                            String type) {
+        this.name = name;
+        this.type = type;
+    }
 
-    ParseConditionResult parseCondition(String conditionStr);
-
-    GenerateConditionResult generateCondition(Condition condition);
+    public String getName() {
+        return name;
+    }
 }

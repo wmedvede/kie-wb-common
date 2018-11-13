@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.jboss.errai.common.client.api.annotations.MapsTo;
+import org.jboss.errai.common.client.api.annotations.NonPortable;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.kie.workbench.common.stunner.core.util.HashUtil;
 
@@ -57,12 +58,6 @@ public class FunctionDef {
         this.params = params;
     }
 
-    public void addParam(String name,
-                         Class type) {
-        params.add(new ParamDef(name,
-                                type));
-    }
-
     @Override
     public int hashCode() {
         return HashUtil.combineHashCodes(Objects.hashCode(name),
@@ -82,5 +77,30 @@ public class FunctionDef {
                                    other.params);
         }
         return false;
+    }
+
+    @NonPortable
+    public static class FunctionDefBuilder {
+
+        private String functionName;
+
+        private List<ParamDef> params = new ArrayList<>();
+
+        private FunctionDefBuilder(String functionName) {
+            this.functionName = functionName;
+        }
+
+        public static FunctionDefBuilder newFunction(String functionName) {
+            return new FunctionDefBuilder(functionName);
+        }
+
+        public FunctionDefBuilder withParam(String paramName, Class<?> type) {
+            params.add(new ParamDef(paramName, type));
+            return this;
+        }
+
+        public FunctionDef build() {
+            return new FunctionDef(functionName, params);
+        }
     }
 }

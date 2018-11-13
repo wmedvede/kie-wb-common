@@ -18,7 +18,6 @@ package org.kie.workbench.common.stunner.bpmn.forms.model;
 
 import org.kie.workbench.common.forms.fields.shared.AbstractFieldDefinition;
 import org.kie.workbench.common.forms.model.FieldDefinition;
-import org.kie.workbench.common.forms.model.FieldType;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 
 public class ConditionEditorFieldDefinition extends AbstractFieldDefinition {
@@ -30,7 +29,7 @@ public class ConditionEditorFieldDefinition extends AbstractFieldDefinition {
     }
 
     @Override
-    public FieldType getFieldType() {
+    public ConditionEditorFieldType getFieldType() {
         return FIELD_TYPE;
     }
 

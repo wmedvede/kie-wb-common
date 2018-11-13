@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <!--
   ~ Copyright 2018 Red Hat, Inc. and/or its affiliates.
   ~
@@ -15,8 +14,27 @@
   ~ limitations under the License.
   -->
 
-<div id="conditionEditorWidget">
+<div id="conditionEditorWidget" class="row">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12">
+                <span style="margin-left: 20px;">
+                    <label class="radio-inline radio-inline-option"><input type="radio" name="edition-mode" data-field="simple-condition-radio"><span data-i18n-key="SimpleCondition">Simple Condition</span></label>
+                    <label class="radio-inline radio-inline-option" style="float: right;"><input type="radio" name="edition-mode" data-field="expression-condition-radio"><span data-i18n-key="ExpressionCondition">Expression</span></label>
+                </span>
+            </div>
+        </div>
 
-    <h1>Condition editor Widget</h1>
-    <div data-field="functions"></div>
+        <div class="row">
+            <div class="col-md-12" data-field="editor-container">
+                Editor Container
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div data-field="error-container" class="help-block">Global Errors area</div>
+            </div>
+        </div>
+    </div>
 </div>
