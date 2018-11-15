@@ -41,7 +41,7 @@ public class Condition {
 
     private String function;
 
-    private List<String> parameters = new ArrayList<String>();
+    private List<String> parameters = new ArrayList<>();
 
     public Condition() {
     }
@@ -69,4 +69,6 @@ public class Condition {
     public void addParam(String param) {
         parameters.add(param);
     }
+
+    //TODO WM, hashCode and equals please
 }

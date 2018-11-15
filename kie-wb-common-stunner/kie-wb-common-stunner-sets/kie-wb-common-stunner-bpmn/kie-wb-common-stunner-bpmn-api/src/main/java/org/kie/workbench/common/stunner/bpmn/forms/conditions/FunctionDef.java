@@ -94,7 +94,7 @@ public class FunctionDef {
             return new FunctionDefBuilder(functionName);
         }
 
-        public FunctionDefBuilder withParam(String paramName, Class<?> type) {
+        public FunctionDefBuilder withParam(String paramName, String type) {
             params.add(new ParamDef(paramName, type));
             return this;
         }
