@@ -20,7 +20,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -77,13 +76,23 @@ public class ConditionEditorServiceImpl implements ConditionEditorService {
             resolvedClazz = Object.class;
             LOGGER.warn("Class: " + clazz + " was not properly resolved for module: " + module + " only java.lang.Object functions will be returned instead");
         }
-        return getAvailableFunctions(resolvedClazz);
+        return getAvailableFunctions(resolvedClazz, classLoader);
     }
 
-    private List<FunctionDef> getAvailableFunctions(Class<?> clazz) {
-        return FunctionsRegistry.getInstance().getFunctions().stream()
-                .filter(functionDef -> functionDef.getParams().get(0).getType().isAssignableFrom(clazz))
-                .collect(Collectors.toList());
+    private List<FunctionDef> getAvailableFunctions(Class<?> clazz, ClassLoader classLoader) {
+        List<FunctionDef> result = new ArrayList<>();
+        Class<?> paramClass;
+        for (FunctionDef functionDef : FunctionsRegistry.getInstance().getFunctions()) {
+            try {
+                paramClass = classLoader.loadClass(functionDef.getParams().get(0).getType());
+                if (paramClass.isAssignableFrom(clazz)) {
+                    result.add(functionDef);
+                }
+            } catch (ClassNotFoundException e) {
+                LOGGER.warn("Uncommon error, internal function param type was not resolved: " + functionDef.getParams().get(0).getType());
+            }
+        }
+        return result;
     }
 
     @Override

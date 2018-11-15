@@ -65,6 +65,15 @@ public class ConditionParser {
 
     private static final String RETURN_SENTENCE = "return";
 
+    public String getValue(Object o, String s) {
+        return null;
+    }
+
+    public String getValue(Object o, Integer i) {
+        return null;
+    }
+
+
     public ConditionParser(String expression) {
         this.expression = expression;
         this.parseIndex = expression != null ? 0 : -1;

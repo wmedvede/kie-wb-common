@@ -40,8 +40,8 @@ public class ConditionEditorFieldEditorView
     private RadioInput simpleCondition;
 
     @Inject
-    @DataField("expression-condition-radio")
-    private RadioInput expressionCondition;
+    @DataField("script-condition-radio")
+    private RadioInput scriptCondition;
 
     @Inject
     @DataField("editor-container")
@@ -64,18 +64,18 @@ public class ConditionEditorFieldEditorView
     }
 
     @Override
-    public void addFunction(String function) {
-        editorContainer.setTextContent(editorContainer.getTextContent() + ", " + function);
-    }
-
-    @Override
     public void setSimpleConditionChecked(boolean checked) {
         simpleCondition.setChecked(checked);
     }
 
     @Override
-    public void setExpressionConditionChecked(boolean checked) {
-        expressionCondition.setChecked(checked);
+    public void setSimpleConditionEnabled(boolean enabled) {
+        simpleCondition.setDisabled(!enabled);
+    }
+
+    @Override
+    public void setScriptConditionChecked(boolean checked) {
+        scriptCondition.setChecked(checked);
     }
 
     @Override
@@ -84,13 +84,24 @@ public class ConditionEditorFieldEditorView
         editorContainer.appendChild(content);
     }
 
+    @Override
+    public void showError(String error) {
+        //TODO, WM improve this
+        errorContainer.setTextContent(error);
+    }
+
+    @Override
+    public void clearError() {
+        errorContainer.setTextContent("");
+    }
+
     @EventHandler("simple-condition-radio")
     private void onSimpleConditionChange(@ForEvent("change") final Event event) {
         presenter.onSimpleConditionSelected();
     }
 
-    @EventHandler("expression-condition-radio")
-    private void onExpressionConditionChange(@ForEvent("change") final Event event) {
-        presenter.onExpressionConditionSelected();
+    @EventHandler("script-condition-radio")
+    private void onScriptConditionChange(@ForEvent("change") final Event event) {
+        presenter.onScriptEditorSelected();
     }
 }

@@ -54,7 +54,7 @@ public class FunctionsRegistry {
         //Operators for all types:
 
         FunctionDef isNull = FunctionDef.FunctionDefBuilder.newFunction(Condition.IS_NULL)
-                .withParam("param1", Object.class)
+                .withParam("param1", Object.class.getName())
                 .build();
         registry.put(isNull.getName(),
                      isNull);
@@ -62,78 +62,78 @@ public class FunctionsRegistry {
         //Global operators:
 
         FunctionDef equalsTo = FunctionDef.FunctionDefBuilder.newFunction(Condition.EQUALS_TO)
-                .withParam("param1", Object.class)
-                .withParam("param2", String.class)
+                .withParam("param1", Object.class.getName())
+                .withParam("param2", String.class.getName())
                 .build();
         registry.put(equalsTo.getName(), equalsTo);
 
         //Operators for String type:
 
         FunctionDef isEmpty = FunctionDef.FunctionDefBuilder.newFunction(Condition.IS_EMPTY)
-                .withParam("param1", String.class)
+                .withParam("param1", String.class.getName())
                 .build();
         registry.put(isEmpty.getName(), isEmpty);
 
         FunctionDef contains = FunctionDef.FunctionDefBuilder.newFunction(Condition.CONTAINS)
-                .withParam("param1", String.class)
-                .withParam("param2", String.class)
+                .withParam("param1", String.class.getName())
+                .withParam("param2", String.class.getName())
                 .build();
         registry.put(contains.getName(), contains);
 
         FunctionDef startsWith = FunctionDef.FunctionDefBuilder.newFunction(Condition.STARTS_WITH)
-                .withParam("param1", String.class)
-                .withParam("param2", String.class)
+                .withParam("param1", String.class.getName())
+                .withParam("param2", String.class.getName())
                 .build();
         registry.put(startsWith.getName(), startsWith);
 
         FunctionDef endsWith = FunctionDef.FunctionDefBuilder.newFunction(Condition.ENDS_WITH)
-                .withParam("param1", String.class)
-                .withParam("param2", String.class)
+                .withParam("param1", String.class.getName())
+                .withParam("param2", String.class.getName())
                 .build();
         registry.put(endsWith.getName(), endsWith);
 
         // Operators for Numeric types:
 
         FunctionDef greaterThan = FunctionDef.FunctionDefBuilder.newFunction(Condition.GREATER_THAN)
-                .withParam("param1", Number.class)
-                .withParam("param2", String.class)
+                .withParam("param1", Number.class.getName())
+                .withParam("param2", String.class.getName())
                 .build();
         registry.put(greaterThan.getName(), greaterThan);
 
         FunctionDef greaterOrEqualThan = FunctionDef.FunctionDefBuilder.newFunction(Condition.GREATER_OR_EQUAL_THAN)
-                .withParam("param1", Number.class)
-                .withParam("param2", String.class)
+                .withParam("param1", Number.class.getName())
+                .withParam("param2", String.class.getName())
                 .build();
         registry.put(greaterOrEqualThan.getName(), greaterOrEqualThan);
 
         FunctionDef lessThan = FunctionDef.FunctionDefBuilder.newFunction(Condition.LESS_THAN)
-                .withParam("param1", Number.class)
-                .withParam("param2", String.class)
+                .withParam("param1", Number.class.getName())
+                .withParam("param2", String.class.getName())
                 .build();
         registry.put(lessThan.getName(), lessThan);
 
         FunctionDef lessOrEqualThan = FunctionDef.FunctionDefBuilder.newFunction(Condition.LESS_OR_EQUAL_THAN)
-                .withParam("param1", Number.class)
-                .withParam("param2", String.class)
+                .withParam("param1", Number.class.getName())
+                .withParam("param2", String.class.getName())
                 .build();
         registry.put(lessOrEqualThan.getName(), lessOrEqualThan);
 
         FunctionDef between = FunctionDef.FunctionDefBuilder.newFunction(Condition.BETWEEN)
-                .withParam("param1", Number.class)
-                .withParam("param2", String.class)
-                .withParam("param3", String.class)
+                .withParam("param1", Number.class.getName())
+                .withParam("param2", String.class.getName())
+                .withParam("param3", String.class.getName())
                 .build();
         registry.put(between.getName(), between);
 
         // Operators for Boolean type:
 
         FunctionDef isTrue = FunctionDef.FunctionDefBuilder.newFunction(Condition.IS_TRUE)
-                .withParam("param1", Boolean.class)
+                .withParam("param1", Boolean.class.getName())
                 .build();
         registry.put(isTrue.getName(), isTrue);
 
         FunctionDef isFalse = FunctionDef.FunctionDefBuilder.newFunction(Condition.IS_FALSE)
-                .withParam("param1", Boolean.class)
+                .withParam("param1", Boolean.class.getName())
                 .build();
         registry.put(isFalse.getName(), isFalse);
     }

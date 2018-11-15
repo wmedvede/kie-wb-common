@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor;
 
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.dom.Event;
@@ -76,11 +77,16 @@ public class SimpleConditionEditorView
 
     @Override
     public String getCondition() {
-        return null;
+        return conditionSelector.getValue();
     }
 
     @EventHandler("variable-selector")
     private void onVariableChange(@ForEvent("change") final Event event) {
         presenter.onVariableChange();
+    }
+
+    @EventHandler("condition-selector")
+    private void onConditionChange(@ForEvent("change") final Event event) {
+        presenter.onConditionChange();
     }
 }
