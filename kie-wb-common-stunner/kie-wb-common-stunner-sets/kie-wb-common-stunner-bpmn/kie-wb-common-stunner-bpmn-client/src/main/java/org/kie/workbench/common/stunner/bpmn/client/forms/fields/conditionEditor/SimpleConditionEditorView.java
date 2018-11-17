@@ -20,9 +20,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.jboss.errai.common.client.dom.DOMUtil;
+import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.common.client.dom.Event;
+import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.dom.Select;
-import org.jboss.errai.common.client.dom.TextInput;
+import org.jboss.errai.common.client.dom.Span;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -44,16 +47,20 @@ public class SimpleConditionEditorView
     private Select variableSelector;
 
     @Inject
+    @DataField("variable-selector-error")
+    private Span variableSelectorError;
+
+    @Inject
     @DataField("condition-selector")
     private Select conditionSelector;
 
     @Inject
-    @DataField("condition-param1")
-    private TextInput conditionParam1;
+    @DataField("condition-selector-error")
+    private Span conditionSelectorError;
 
     @Inject
-    @DataField("condition-param2")
-    private TextInput conditionParam2;
+    @DataField("condition-params")
+    private Div conditionParams;
 
     @Override
     public void init(SimpleConditionEditorPresenter presenter) {
@@ -71,6 +78,21 @@ public class SimpleConditionEditorView
     }
 
     @Override
+    public void setVariable(String variable) {
+        variableSelector.setValue(variable);
+    }
+
+    @Override
+    public void setVariableError(String error) {
+        variableSelectorError.setTextContent(error);
+    }
+
+    @Override
+    public void clearVariableError() {
+        variableSelectorError.setTextContent(null);
+    }
+
+    @Override
     public void setConditionOptions(List<Pair<String, String>> options) {
         setOptions(conditionSelector, options);
     }
@@ -78,6 +100,31 @@ public class SimpleConditionEditorView
     @Override
     public String getCondition() {
         return conditionSelector.getValue();
+    }
+
+    @Override
+    public void setCondition(String condition) {
+        conditionSelector.setValue(condition);
+    }
+
+    @Override
+    public void setConditionError(String error) {
+        conditionSelectorError.setTextContent(error);
+    }
+
+    @Override
+    public void clearConditionError() {
+        conditionSelectorError.setTextContent(null);
+    }
+
+    @Override
+    public void removeParams() {
+        DOMUtil.removeAllChildren(conditionParams);
+    }
+
+    @Override
+    public void addParam(HTMLElement param) {
+        conditionParams.appendChild(param);
     }
 
     @EventHandler("variable-selector")

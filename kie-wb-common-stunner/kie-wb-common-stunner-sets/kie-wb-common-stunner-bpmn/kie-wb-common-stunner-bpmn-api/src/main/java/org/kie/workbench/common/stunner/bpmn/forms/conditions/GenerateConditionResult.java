@@ -44,6 +44,10 @@ public class GenerateConditionResult {
         this.expression = expression;
     }
 
+    public boolean hasError() {
+        return error != null;
+    }
+
     public String getError() {
         return error;
     }
@@ -51,4 +55,6 @@ public class GenerateConditionResult {
     public void setError(String error) {
         this.error = error;
     }
+
+    //TODO, WM, haschode and equals
 }
