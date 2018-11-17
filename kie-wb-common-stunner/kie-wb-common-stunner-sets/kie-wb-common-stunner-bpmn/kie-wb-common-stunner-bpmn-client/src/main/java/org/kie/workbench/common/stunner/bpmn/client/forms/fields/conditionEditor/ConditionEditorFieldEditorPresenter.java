@@ -24,7 +24,6 @@ import javax.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.IsElement;
-import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.kie.workbench.common.stunner.bpmn.client.forms.fields.scriptEditor.ScriptTypeFieldEditorPresenter;
 import org.kie.workbench.common.stunner.bpmn.client.forms.util.FieldEditorPresenter;
@@ -46,6 +45,8 @@ public class ConditionEditorFieldEditorPresenter
         extends FieldEditorPresenter<ScriptTypeValue> {
 
     private static final String DEFAULT_LANGUAGE = "java";
+
+    private static final String SCRIPT_PARSING_ERROR = "It was not possible to parse current script into a condition";
 
     public interface View extends UberElement<ConditionEditorFieldEditorPresenter> {
 
@@ -73,8 +74,6 @@ public class ConditionEditorFieldEditorPresenter
     private ClientSession session;
 
     private List<VariableMetadata> variables = new ArrayList<>();
-
-    private boolean conditionParsed = false;
 
     @Inject
     public ConditionEditorFieldEditorPresenter(View view,
@@ -116,18 +115,19 @@ public class ConditionEditorFieldEditorPresenter
     @Override
     public void setValue(ScriptTypeValue value) {
         super.setValue(value);
-        conditionParsed = false;
+        scriptEditor.setValue(value);
         clearError();
         if (value != null) {
             if (isInDefaultLanguage(value)) {
                 if (!isEmpty(value.getScript())) {
-                    //TODO WM check unexpected error management case
-                    service.call(result -> onSetValue((ParseConditionResult) result)).parseCondition(value.getScript());
+                    //TODO WM check unexpected error case
+                    service.call(result -> onSetValue((ParseConditionResult)result)).parseCondition(value.getScript());
                 } else {
+                    //aqui ver bien como queda... el simple condition editor deberia quedar con nada seleccionado...
+                    //simpleConditionEditor.clear maybe...
                     showSimpleConditionEditor();
                 }
             } else {
-                scriptEditor.setValue(value);
                 showScriptEditor();
             }
         } else {
@@ -137,7 +137,8 @@ public class ConditionEditorFieldEditorPresenter
     }
 
     public void onSimpleConditionSelected() {
-        if (value != null) {
+        clearError();
+        if (value != null && !isEmpty(value.getScript())) {
             service.call(result -> onSimpleConditionSelected((ParseConditionResult) result)).parseCondition(value.getScript());
         } else {
             showSimpleConditionEditor();
@@ -149,31 +150,29 @@ public class ConditionEditorFieldEditorPresenter
         showScriptEditor();
     }
 
-    private void onSimpleConditionChange(ConditionExpression oldValue,
-                                         ConditionExpression newValue) {
-        service.call((RemoteCallback<GenerateConditionResult>) this::onSimpleConditionChange).generateCondition(newValue.getConditions().get(0));
+    private void onSimpleConditionChange(ConditionExpression oldValue, ConditionExpression newValue) {
+        service.call(result -> onSimpleConditionChange((GenerateConditionResult) result)).generateCondition(newValue.getConditions().get(0));
     }
 
     private void onSimpleConditionChange(GenerateConditionResult result) {
-        //TODO WM, manage the eventual error....
-        ScriptTypeValue oldValue = value;
-        value = new ScriptTypeValue(DEFAULT_LANGUAGE, result.getExpression());
-        notifyChange(oldValue, value);
+        clearError();
+        if (!result.hasError()) {
+            ScriptTypeValue oldValue = value;
+            value = new ScriptTypeValue(DEFAULT_LANGUAGE, result.getExpression());
+            notifyChange(oldValue, value);
+        } else {
+            showError(result.getError());
+        }
     }
 
-
-    private void onScriptChange(ScriptTypeValue oldValue,
-                                ScriptTypeValue newValue) {
+    private void onScriptChange(ScriptTypeValue oldValue, ScriptTypeValue newValue) {
         value = newValue;
         notifyChange(oldValue, newValue);
         enableSimpleConditionEditor(isInDefaultLanguage(newValue));
-        conditionParsed = false;
     }
 
-
     private void onSetValue(ParseConditionResult result) {
-        conditionParsed = !result.hasError();
-        if (conditionParsed) {
+        if (!result.hasError()) {
             ConditionExpression conditionExpression = new ConditionExpression();
             conditionExpression.getConditions().add(result.getCondition());
             simpleConditionEditor.setValue(conditionExpression);
@@ -185,15 +184,13 @@ public class ConditionEditorFieldEditorPresenter
     }
 
     private void onSimpleConditionSelected(ParseConditionResult result) {
-        clearError();
-        conditionParsed = !result.hasError();
-        if (conditionParsed) {
+        if (!result.hasError()) {
             ConditionExpression conditionExpression = new ConditionExpression();
             conditionExpression.getConditions().add(result.getCondition());
             simpleConditionEditor.setValue(conditionExpression);
         } else {
-            //user is trying to go form the script editor to the condition editor
-            showError(result.getError());
+            showError(SCRIPT_PARSING_ERROR + ": " + result.getError());
+            simpleConditionEditor.setValue(null);
         }
         showSimpleConditionEditor();
     }
