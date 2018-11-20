@@ -116,6 +116,7 @@ public class ConditionEditorFieldEditorPresenter
     public void setValue(ScriptTypeValue value) {
         super.setValue(value);
         scriptEditor.setValue(value);
+        simpleConditionEditor.clear();
         clearError();
         if (value != null) {
             if (isInDefaultLanguage(value)) {
@@ -123,8 +124,6 @@ public class ConditionEditorFieldEditorPresenter
                     //TODO WM check unexpected error case
                     service.call(result -> onSetValue((ParseConditionResult)result)).parseCondition(value.getScript());
                 } else {
-                    //aqui ver bien como queda... el simple condition editor deberia quedar con nada seleccionado...
-                    //simpleConditionEditor.clear maybe...
                     showSimpleConditionEditor();
                 }
             } else {

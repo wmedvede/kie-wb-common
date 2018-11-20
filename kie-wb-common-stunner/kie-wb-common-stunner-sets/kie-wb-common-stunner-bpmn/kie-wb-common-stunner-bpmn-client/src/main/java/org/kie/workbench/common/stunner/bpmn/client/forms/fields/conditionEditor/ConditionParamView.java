@@ -18,6 +18,8 @@ package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEdito
 
 import javax.inject.Inject;
 
+import org.jboss.errai.common.client.dom.DOMUtil;
+import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.common.client.dom.Event;
 import org.jboss.errai.common.client.dom.Label;
 import org.jboss.errai.common.client.dom.Span;
@@ -32,6 +34,10 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 public class ConditionParamView
         implements IsElement,
                    ConditionParamPresenter.View {
+
+    @Inject
+    @DataField("param-group")
+    private Div paramGroup;
 
     @Inject
     @DataField("param-label")
@@ -75,11 +81,13 @@ public class ConditionParamView
 
     @Override
     public void clearError() {
+        DOMUtil.removeCSSClass(paramGroup, "has-error");
         paramError.setTextContent(null);
     }
 
     @Override
     public void setError(String error) {
+        DOMUtil.addCSSClass(paramGroup, "has-error");
         paramError.setTextContent(error);
     }
 

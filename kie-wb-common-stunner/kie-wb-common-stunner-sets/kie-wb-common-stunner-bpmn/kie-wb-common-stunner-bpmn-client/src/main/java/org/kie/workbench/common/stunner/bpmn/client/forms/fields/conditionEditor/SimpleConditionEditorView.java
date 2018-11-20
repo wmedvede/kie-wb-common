@@ -43,12 +43,20 @@ public class SimpleConditionEditorView
     private SimpleConditionEditorPresenter presenter;
 
     @Inject
+    @DataField("variable-selector-form")
+    private Div variableSelectorForm;
+
+    @Inject
     @DataField("variable-selector")
     private Select variableSelector;
 
     @Inject
     @DataField("variable-selector-error")
     private Span variableSelectorError;
+
+    @Inject
+    @DataField("condition-selector-form")
+    private Div conditionSelectorForm;
 
     @Inject
     @DataField("condition-selector")
@@ -68,8 +76,8 @@ public class SimpleConditionEditorView
     }
 
     @Override
-    public void setVariableOptions(List<Pair<String, String>> options) {
-        setOptions(variableSelector, options);
+    public void setVariableOptions(List<Pair<String, String>> options, Pair<String, String> defaultOption) {
+        setOptions(variableSelector, options, defaultOption);
     }
 
     @Override
@@ -84,17 +92,19 @@ public class SimpleConditionEditorView
 
     @Override
     public void setVariableError(String error) {
+        DOMUtil.addCSSClass(variableSelectorForm, "has-error");
         variableSelectorError.setTextContent(error);
     }
 
     @Override
     public void clearVariableError() {
+        DOMUtil.removeCSSClass(variableSelectorForm, "has-error");
         variableSelectorError.setTextContent(null);
     }
 
     @Override
-    public void setConditionOptions(List<Pair<String, String>> options) {
-        setOptions(conditionSelector, options);
+    public void setConditionOptions(List<Pair<String, String>> options, Pair<String, String> defaultOption) {
+        setOptions(conditionSelector, options, defaultOption);
     }
 
     @Override
@@ -109,11 +119,13 @@ public class SimpleConditionEditorView
 
     @Override
     public void setConditionError(String error) {
+        DOMUtil.addCSSClass(conditionSelectorForm, "has-error");
         conditionSelectorError.setTextContent(error);
     }
 
     @Override
     public void clearConditionError() {
+        DOMUtil.removeCSSClass(conditionSelectorForm, "has-error");
         conditionSelectorError.setTextContent(null);
     }
 

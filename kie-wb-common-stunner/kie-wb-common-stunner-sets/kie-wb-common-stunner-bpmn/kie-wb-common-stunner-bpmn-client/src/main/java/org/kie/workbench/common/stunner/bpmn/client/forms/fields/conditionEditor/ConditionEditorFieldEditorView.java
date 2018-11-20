@@ -16,7 +16,6 @@
 
 package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.dom.DOMUtil;
@@ -24,6 +23,7 @@ import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.common.client.dom.Event;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.dom.RadioInput;
+import org.jboss.errai.common.client.dom.Span;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -48,19 +48,18 @@ public class ConditionEditorFieldEditorView
     private Div editorContainer;
 
     @Inject
-    @DataField("error-container")
-    private Div errorContainer;
+    @DataField("editor-error-form")
+    private Div editorErrorForm;
+
+    @Inject
+    @DataField("editor-error")
+    private Span editorError;
 
     private ConditionEditorFieldEditorPresenter presenter;
 
     @Override
     public void init(ConditionEditorFieldEditorPresenter presenter) {
         this.presenter = presenter;
-    }
-
-    @PostConstruct
-    public void init() {
-        //TODO WM, do something
     }
 
     @Override
@@ -86,13 +85,14 @@ public class ConditionEditorFieldEditorView
 
     @Override
     public void showError(String error) {
-        //TODO, WM improve this
-        errorContainer.setTextContent(error);
+        DOMUtil.addCSSClass(editorErrorForm, "has-error");
+        editorError.setTextContent(error);
     }
 
     @Override
     public void clearError() {
-        errorContainer.setTextContent("");
+        DOMUtil.removeCSSClass(editorErrorForm, "has-error");
+        editorError.setTextContent(null);
     }
 
     @EventHandler("simple-condition-radio")
