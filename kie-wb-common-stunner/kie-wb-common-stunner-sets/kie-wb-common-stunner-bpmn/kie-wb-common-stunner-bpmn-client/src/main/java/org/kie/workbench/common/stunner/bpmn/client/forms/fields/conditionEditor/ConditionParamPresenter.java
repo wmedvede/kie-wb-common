@@ -16,12 +16,11 @@
 
 package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor;
 
-import java.util.function.Consumer;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.uberfire.client.mvp.UberElement;
+import org.uberfire.mvp.Command;
 
 public class ConditionParamPresenter {
 
@@ -40,7 +39,7 @@ public class ConditionParamPresenter {
         void setError(String error);
     }
 
-    private Consumer<String> onChangeHandler;
+    private Command onChangeCommand;
 
     private View view;
 
@@ -82,13 +81,13 @@ public class ConditionParamPresenter {
         view.setError(error);
     }
 
-    public void setOnChangeHandler(Consumer<String> onChangeHandler) {
-        this.onChangeHandler = onChangeHandler;
+    public void setOnChangeCommand(Command onChangeCommand) {
+        this.onChangeCommand = onChangeCommand;
     }
 
     public void onValueChange() {
-        if (onChangeHandler != null) {
-            onChangeHandler.accept(view.getValue());
+        if (onChangeCommand != null) {
+            onChangeCommand.execute();
         }
     }
 }

@@ -25,18 +25,28 @@ import org.uberfire.commons.data.Pair;
 
 public class SelectUtils {
 
-    public static Option newOption(final String text,
-                                   final String value) {
+    public static Option newOption(final String text, final String value) {
         final Option option = (Option) Window.getDocument().createElement("option");
         option.setTextContent(text);
         option.setValue(value);
         return option;
     }
 
+    public static Option newDisabledOption(final String text, final String value) {
+        final Option option = newOption(text, value);
+        option.setAttribute("disabled", "");
+        return option;
+    }
+
     public static void setOptions(final Select select, final List<Pair<String, String>> options) {
         clear(select);
-        options.forEach(option -> select.add(newOption(option.getK1(),
-                                                       option.getK2())));
+        options.forEach(option -> select.add(newOption(option.getK1(), option.getK2())));
+    }
+
+    public static void setOptions(final Select select, final List<Pair<String, String>> options, final Pair<String, String> defaultOption) {
+        clear(select);
+        select.add(newDisabledOption(defaultOption.getK1(), defaultOption.getK2()));
+        options.forEach(option -> select.add(newOption(option.getK1(), option.getK2())));
     }
 
     public static void clear(final Select select) {

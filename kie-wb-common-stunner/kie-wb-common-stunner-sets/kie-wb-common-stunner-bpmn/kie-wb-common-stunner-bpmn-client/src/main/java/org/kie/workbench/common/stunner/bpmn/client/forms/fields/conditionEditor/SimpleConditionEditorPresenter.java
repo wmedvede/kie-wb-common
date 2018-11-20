@@ -52,9 +52,15 @@ public class SimpleConditionEditorPresenter
 
     private static final String NO_APPLICABLE_FUNCTIONS_WERE_FOUND_ERROR = "No applicable functions were found for selected variable or variable field.";
 
+    private static final String PARAM_MUST_BE_COMPLETED_ERROR = "Param must be completed";
+
+    private static final Pair<String, String> DEFAULT_VARIABLE_OPTION = new Pair<>("-- Select a process variable --", "");
+
+    private static final Pair<String, String> DEFAULT_FUNCTION_OPTION = new Pair<>("-- Select a condition --", "");
+
     public interface View extends UberElement<SimpleConditionEditorPresenter> {
 
-        void setVariableOptions(List<Pair<String, String>> options);
+        void setVariableOptions(List<Pair<String, String>> options, Pair<String, String> defaultOption);
 
         String getVariable();
 
@@ -64,7 +70,7 @@ public class SimpleConditionEditorPresenter
 
         void clearVariableError();
 
-        void setConditionOptions(List<Pair<String, String>> options);
+        void setConditionOptions(List<Pair<String, String>> options, Pair<String, String> defaultOption);
 
         String getCondition();
 
@@ -105,6 +111,8 @@ public class SimpleConditionEditorPresenter
     @PostConstruct
     public void init() {
         view.init(this);
+        view.setVariableOptions(Collections.emptyList(), DEFAULT_VARIABLE_OPTION);
+        view.setConditionOptions(Collections.emptyList(), DEFAULT_FUNCTION_OPTION);
     }
 
     public View getView() {
@@ -143,8 +151,8 @@ public class SimpleConditionEditorPresenter
     }
 
     public void clear() {
-        view.setCondition(null);
-        view.setVariable(null);
+        view.setVariable(DEFAULT_VARIABLE_OPTION.getK2());
+        view.setCondition(DEFAULT_FUNCTION_OPTION.getK2());
         removeParams();
         clearErrors();
     }
@@ -172,18 +180,31 @@ public class SimpleConditionEditorPresenter
     }
 
     private void validateAndApplyCondition() {
-        //1) all fields must be completed with valid values
-        //2) mark the error for each invalid field if there are any
-
         Condition condition = new Condition();
         condition.setFunction(view.getCondition());
         condition.addParam(view.getVariable());
-        currentParams.forEach(param -> condition.getParameters().add(param.getValue()));
 
-        ConditionExpression oldValue = value;
-        value = new ConditionExpression();
-        value.setConditions(Collections.singletonList(condition));
-        notifyChange(oldValue, value);
+        boolean isValid = true;
+        for (ConditionParamPresenter param : currentParams) {
+            param.clearError();
+            if (isValid(param)) {
+                condition.getParameters().add(param.getValue());
+            } else {
+                param.setError(PARAM_MUST_BE_COMPLETED_ERROR);
+                isValid = false;
+            }
+        }
+
+        if (isValid) {
+            ConditionExpression oldValue = value;
+            value = new ConditionExpression();
+            value.setConditions(Collections.singletonList(condition));
+            notifyChange(oldValue, value);
+        }
+    }
+
+    private boolean isValid(ConditionParamPresenter param) {
+        return !isEmpty(param.getValue());
     }
 
     private void onSetValue(ConditionExpression value, List<FunctionDef> functions) {
@@ -224,13 +245,11 @@ public class SimpleConditionEditorPresenter
             param.setName(paramDef.getName());
             param.setValue(paramValue.get(i));
             view.addParam(param.getView().getElement());
-            param.setOnChangeHandler(newValue -> onParamChanged(param, newValue));
+            param.setOnChangeCommand(() -> onParamChange(param));
         }
     }
 
-    private void onParamChanged(ConditionParamPresenter param, String newValue) {
-        //TODO, WM, revisar esto... igual no es necesario poner tanto parametro....
-        //si dejo la validacion en manos de este presenter.
+    private void onParamChange(ConditionParamPresenter param) {
         validateAndApplyCondition();
     }
 
@@ -239,17 +258,16 @@ public class SimpleConditionEditorPresenter
                 map(functionDef -> new Pair<>(functionDef.getName(), functionDef.getName()))
                 .collect(Collectors.toList());
         currentFunctions = functions.stream().collect(Collectors.toMap(FunctionDef::getName, Function.identity()));
-        view.setConditionOptions(functionOptions);
+        view.setConditionOptions(functionOptions, DEFAULT_FUNCTION_OPTION);
     }
 
     private void setVariablesMetadata(List<VariableMetadata> variablesMetadata) {
         List<Pair<String, String>> variableOptions = new ArrayList<>();
-        variableOptions.add(new Pair<>("Select a process variable", ""));
         variablesMetadata.forEach(variableMetadata -> {
             variableMetadataMap.put(variableMetadata.getName(), variableMetadata);
             variableOptions.add(new Pair<>(variableMetadata.getName(), variableMetadata.getName()));
         });
-        view.setVariableOptions(variableOptions);
+        view.setVariableOptions(variableOptions, DEFAULT_VARIABLE_OPTION);
     }
 
     private void clearErrors() {
