@@ -31,6 +31,7 @@ import org.kie.workbench.common.services.shared.project.KieModuleService;
 import org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser.ConditionGenerator;
 import org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser.ConditionParser;
 import org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser.FunctionsRegistry;
+import org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser.GenerateConditionException;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionExpression;
@@ -99,8 +100,7 @@ public class ConditionEditorServiceImpl implements ConditionEditorService {
     public ParseConditionResult parseCondition(String conditionStr) {
         try {
             ConditionParser parser = new ConditionParser(conditionStr);
-            //TODO, WM, revisar esto si al final no parseo multiples condiciones
-            return new ParseConditionResult(parser.parse().getConditions().get(0));
+            return new ParseConditionResult(parser.parse());
         } catch (ParseException e) {
             return new ParseConditionResult(e.getMessage());
         }
@@ -108,9 +108,11 @@ public class ConditionEditorServiceImpl implements ConditionEditorService {
 
     @Override
     public GenerateConditionResult generateCondition(Condition condition) {
-        ConditionExpression conditionExpression = new ConditionExpression();
-        conditionExpression.setConditions(Collections.singletonList(condition));
         ConditionGenerator generator = new ConditionGenerator();
-        return new GenerateConditionResult(generator.generateScript(conditionExpression, new ArrayList<>()));
+        try {
+            return new GenerateConditionResult(generator.generateScript(condition));
+        } catch (GenerateConditionException e) {
+            return new GenerateConditionResult(null, e.getMessage());
+        }
     }
 }

@@ -150,7 +150,11 @@ public class ConditionEditorFieldEditorPresenter
     }
 
     private void onSimpleConditionChange(ConditionExpression oldValue, ConditionExpression newValue) {
-        service.call(result -> onSimpleConditionChange((GenerateConditionResult) result)).generateCondition(newValue.getConditions().get(0));
+        if (simpleConditionEditor.isValid()) {
+            service.call(result -> onSimpleConditionChange((GenerateConditionResult) result)).generateCondition(newValue.getConditions().get(0));
+        } else {
+            clearError();
+        }
     }
 
     private void onSimpleConditionChange(GenerateConditionResult result) {

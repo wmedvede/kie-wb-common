@@ -17,63 +17,23 @@
 package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser;
 
 import java.lang.reflect.Method;
-import java.util.List;
 
 import org.drools.core.util.KieFunctions;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
-import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionExpression;
 
 public class ConditionGenerator {
 
-    public String generateScript(ConditionExpression expression, List<String> errors) {
-        StringBuilder script = new StringBuilder();
-        String operator = null;
-        int validTerms = 0;
+    public String generateScript(Condition condition) throws GenerateConditionException {
+        final StringBuilder script = new StringBuilder();
 
-        if ("OR".equals(expression.getOperator())) {
-            operator = "||";
-        } else if ("AND".equals(expression.getOperator())) {
-            operator = "&&";
-        } else if (expression.getConditions().size() > 1) {
-            operator = "&&";
-        }
-
-        for (Condition condition : expression.getConditions()) {
-            if (addConditionToScript(condition,
-                                     script,
-                                     operator,
-                                     validTerms,
-                                     errors) > 0) {
-                validTerms++;
-            } else {
-                //we have an invalid condition.
-                //at the moment the approach is that all the generation fails.
-                return null;
-            }
-        }
-
-        return "return " + script.toString() + ";";
-    }
-
-    private int addConditionToScript(final Condition condition,
-                                     final StringBuilder script,
-                                     final String operator,
-                                     final int validTerms,
-                                     final List<String> errors) {
         if (condition == null) {
-            errors.add(ConditonEditorErrors.INVALID_CONDITION_ERROR);
-            return 0;
+            throw new GenerateConditionException(ConditionEditorErrors.MISSING_FUNCTION_ERROR);
         }
+
         if (!isValidFunction(condition.getFunction())) {
-            errors.add("Invalid function: " + condition.getFunction());
-            return 0;
+            throw new GenerateConditionException("Invalid function: " + condition.getFunction());
         }
-        //TODO evaluate if we put more validations.
-        if (validTerms > 0) {
-            script.append(" " + operator + " ");
-        } else {
-            script.append(" ");
-        }
+
         String function = condition.getFunction().trim();
         script.append(ConditionParser.KIE_FUNCTIONS + function);
         script.append("(");
@@ -85,17 +45,16 @@ public class ConditionGenerator {
                 first = false;
             } else {
                 //the other parameters are always string parameters.
-                //TODO escape " and line break charactrers.
                 script.append(", ");
                 script.append("\"" + escapeStringParam(param) + "\"");
             }
             if (param == null || param.isEmpty()) {
-                errors.add(ConditonEditorErrors.PARAMETER_NULL_EMPTY);
-                return 0;
+                //WM TODO ver si hago esto en realidad dejo poner null...
+                throw new GenerateConditionException(ConditionEditorErrors.PARAMETER_NULL_EMPTY);
             }
         }
         script.append(")");
-        return 1;
+        return script.toString();
     }
 
     private String escapeStringParam(String param) {

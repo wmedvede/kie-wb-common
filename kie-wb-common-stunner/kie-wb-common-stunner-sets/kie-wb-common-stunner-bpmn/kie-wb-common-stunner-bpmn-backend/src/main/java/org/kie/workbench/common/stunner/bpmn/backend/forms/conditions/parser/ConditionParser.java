@@ -21,7 +21,6 @@ import java.text.ParseException;
 import java.util.stream.Collectors;
 
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
-import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionExpression;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.FunctionDef;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ParamDef;
 
@@ -79,8 +78,7 @@ public class ConditionParser {
         this.parseIndex = expression != null ? 0 : -1;
     }
 
-    public ConditionExpression parse() throws ParseException {
-        ConditionExpression conditionExpression = new ConditionExpression();
+    public Condition parse() throws ParseException {
         Condition condition;
         FunctionDef functionDef;
 
@@ -94,9 +92,7 @@ public class ConditionParser {
             throw new ParseException(errorMessage(FUNCTION_NAME_NOT_RECOGNIZED_ERROR, functionName), parseIndex);
         }
 
-        conditionExpression.setOperator(ConditionExpression.AND_OPERATOR);
         condition = new Condition(functionName);
-        conditionExpression.getConditions().add(condition);
 
         String param;
         String[] variableParam;
@@ -118,7 +114,7 @@ public class ConditionParser {
         parseFunctionClose();
         parseSentenceClose();
 
-        return conditionExpression;
+        return condition;
     }
 
     private String parseReturnSentence() throws ParseException {
