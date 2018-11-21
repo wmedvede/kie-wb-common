@@ -22,15 +22,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
-import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionExpression;
+import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 
 import static org.junit.Assert.assertEquals;
 
 public class ConditionParserTest {
-
-    int _emroe;
-    int $asdfs;
-    int äwsome;
 
     private static final List<String> unaryFunctions = Arrays.asList("isNull",
                                                                      "isEmpty",
@@ -47,7 +43,6 @@ public class ConditionParserTest {
                                                                       "lessOrEqualThan");
 
     private static final List<String> ternaryFunctions = Arrays.asList("between");
-
 
     private static final List<String> variableParams = Arrays.asList("_a",
                                                                      "_a.getA()",
@@ -70,7 +65,6 @@ public class ConditionParserTest {
             return value;
         }
     }).collect(Collectors.toList());
-
 
     private static final List<String> stringParams = Arrays.asList("_a",
                                                                    "_a.getA()",
@@ -114,11 +108,10 @@ public class ConditionParserTest {
 
         for (int i = 0; i < conditions.size(); i++) {
             ConditionParser parser = new ConditionParser(conditions.get(i));
-            ConditionExpression conditionExpression = parser.parse();
-            assertEquals(function, conditionExpression.getConditions().get(0).getFunction());
-            assertEquals(1, conditionExpression.getConditions().size());
-            assertEquals(1, conditionExpression.getConditions().get(0).getParameters().size());
-            assertEquals(variableExpectedValues.get(i), conditionExpression.getConditions().get(0).getParameters().get(0));
+            Condition condition = parser.parse();
+            assertEquals(function, condition.getFunction());
+            assertEquals(1, condition.getParameters().size());
+            assertEquals(variableExpectedValues.get(i), condition.getParameters().get(0));
         }
     }
 
@@ -130,13 +123,11 @@ public class ConditionParserTest {
 
         for (int i = 0; i < conditions.size(); i++) {
             ConditionParser parser = new ConditionParser(conditions.get(i));
-            ConditionExpression conditionExpression = parser.parse();
-            assertEquals(function, conditionExpression.getConditions().get(0).getFunction());
-            assertEquals(1, conditionExpression.getConditions().size());
-            assertEquals(2, conditionExpression.getConditions().get(0).getParameters().size());
-            assertEquals(variableExpectedValues.get(i), conditionExpression.getConditions().get(0).getParameters().get(0));
-            assertEquals(stringParams.get(i), conditionExpression.getConditions().get(0).getParameters().get(1));
-
+            Condition condition = parser.parse();
+            assertEquals(function, condition.getFunction());
+            assertEquals(2, condition.getParameters().size());
+            assertEquals(variableExpectedValues.get(i), condition.getParameters().get(0));
+            assertEquals(stringParams.get(i), condition.getParameters().get(1));
         }
     }
 
@@ -148,13 +139,12 @@ public class ConditionParserTest {
 
         for (int i = 0; i < conditions.size(); i++) {
             ConditionParser parser = new ConditionParser(conditions.get(i));
-            ConditionExpression conditionExpression = parser.parse();
-            assertEquals(function, conditionExpression.getConditions().get(0).getFunction());
-            assertEquals(1, conditionExpression.getConditions().size());
-            assertEquals(3, conditionExpression.getConditions().get(0).getParameters().size());
-            assertEquals(variableExpectedValues.get(i), conditionExpression.getConditions().get(0).getParameters().get(0));
-            assertEquals(stringParams.get(i), conditionExpression.getConditions().get(0).getParameters().get(1));
-            assertEquals(stringParams.get(i), conditionExpression.getConditions().get(0).getParameters().get(2));
+            Condition condition = parser.parse();
+            assertEquals(function, condition.getFunction());
+            assertEquals(3, condition.getParameters().size());
+            assertEquals(variableExpectedValues.get(i), condition.getParameters().get(0));
+            assertEquals(stringParams.get(i), condition.getParameters().get(1));
+            assertEquals(stringParams.get(i), condition.getParameters().get(2));
         }
     }
 }

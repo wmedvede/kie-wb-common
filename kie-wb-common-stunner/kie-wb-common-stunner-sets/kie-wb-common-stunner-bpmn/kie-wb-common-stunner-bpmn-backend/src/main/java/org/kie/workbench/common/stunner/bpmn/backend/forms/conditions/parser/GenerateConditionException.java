@@ -16,15 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser;
 
-public interface ConditonEditorErrors {
+public class GenerateConditionException extends Exception {
 
-    static final String INVALID_MESSAGE_ERROR = "INVALID_MESSAGE_ERROR";
-
-    static final String INVALID_CONDITION_ERROR = "INVALID_CONDITION_ERROR";
-
-    static final String SCRIPT_PARSING_ERROR = "SCRIPT_PARSING_ERROR";
-
-    static final String SCRIPT_GENERATION_ERROR = "SCRIPT_GENERATION_ERROR";
-
-    public static final String PARAMETER_NULL_EMPTY = "Parameter can not be null nor empty";
+    public GenerateConditionException(String message) {
+        super(message);
+    }
 }

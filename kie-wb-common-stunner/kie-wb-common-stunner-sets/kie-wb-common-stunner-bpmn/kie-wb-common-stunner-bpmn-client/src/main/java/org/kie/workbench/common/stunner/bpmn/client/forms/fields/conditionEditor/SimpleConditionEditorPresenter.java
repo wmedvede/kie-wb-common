@@ -99,6 +99,8 @@ public class SimpleConditionEditorPresenter
 
     private List<ConditionParamPresenter> currentParams = new ArrayList<>();
 
+    private boolean valid = false;
+
     @Inject
     public SimpleConditionEditorPresenter(View view,
                                           ManagedInstance<ConditionParamPresenter> paramInstance,
@@ -179,28 +181,30 @@ public class SimpleConditionEditorPresenter
         }
     }
 
+    public boolean isValid() {
+        return valid;
+    }
+
     private void validateAndApplyCondition() {
         Condition condition = new Condition();
         condition.setFunction(view.getCondition());
         condition.addParam(view.getVariable());
 
-        boolean isValid = true;
+        valid = true;
         for (ConditionParamPresenter param : currentParams) {
             param.clearError();
             if (isValid(param)) {
                 condition.getParameters().add(param.getValue());
             } else {
                 param.setError(PARAM_MUST_BE_COMPLETED_ERROR);
-                isValid = false;
+                valid = false;
             }
         }
 
-        if (isValid) {
-            ConditionExpression oldValue = value;
-            value = new ConditionExpression();
-            value.setConditions(Collections.singletonList(condition));
-            notifyChange(oldValue, value);
-        }
+        ConditionExpression oldValue = value;
+        value = new ConditionExpression();
+        value.setConditions(Collections.singletonList(condition));
+        notifyChange(oldValue, value);
     }
 
     private boolean isValid(ConditionParamPresenter param) {
@@ -213,6 +217,7 @@ public class SimpleConditionEditorPresenter
         initParams(condition.getFunction(), condition.getParameters());
         view.setVariable(condition.getParameters().get(0));
         view.setCondition(condition.getFunction());
+        valid = true;
     }
 
     private void onLoadFunctionsSuccess(List<FunctionDef> functions) {
