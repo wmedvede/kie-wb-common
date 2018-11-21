@@ -20,7 +20,7 @@ public interface ConditionEditorErrors {
 
     static final String INVALID_MESSAGE_ERROR = "INVALID_MESSAGE_ERROR";
 
-    static final String MISSING_FUNCTION_ERROR = "MISSING_FUNCTION_ERROR";
+    static final String MISSING_CONDITION_ERROR = "MISSING_CONDITION_ERROR";
 
     static final String SCRIPT_PARSING_ERROR = "SCRIPT_PARSING_ERROR";
 

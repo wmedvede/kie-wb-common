@@ -18,7 +18,6 @@ package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -34,7 +33,6 @@ import org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser.Fun
 import org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser.GenerateConditionException;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
-import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionExpression;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.FunctionDef;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.GenerateConditionResult;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ParseConditionResult;

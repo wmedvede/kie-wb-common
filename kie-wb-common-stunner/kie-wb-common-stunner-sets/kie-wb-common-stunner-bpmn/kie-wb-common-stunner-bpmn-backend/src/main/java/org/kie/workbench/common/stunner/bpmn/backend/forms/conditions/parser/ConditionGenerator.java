@@ -16,10 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser;
 
-import java.lang.reflect.Method;
-
-import org.drools.core.util.KieFunctions;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
+
+import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
 
 public class ConditionGenerator {
 
@@ -27,7 +26,7 @@ public class ConditionGenerator {
         final StringBuilder script = new StringBuilder();
 
         if (condition == null) {
-            throw new GenerateConditionException(ConditionEditorErrors.MISSING_FUNCTION_ERROR);
+            throw new GenerateConditionException(ConditionEditorErrors.MISSING_CONDITION_ERROR);
         }
 
         if (!isValidFunction(condition.getFunction())) {
@@ -46,7 +45,7 @@ public class ConditionGenerator {
             } else {
                 //the other parameters are always string parameters.
                 script.append(", ");
-                script.append("\"" + escapeStringParam(param) + "\"");
+                script.append("\"" + escapeJava(param) + "\"");
             }
             if (param == null || param.isEmpty()) {
                 //WM TODO ver si hago esto en realidad dejo poner null...
@@ -57,51 +56,7 @@ public class ConditionGenerator {
         return script.toString();
     }
 
-    private String escapeStringParam(String param) {
-        if (param == null) {
-            return null;
-        }
-        StringBuilder escapedParam = new StringBuilder(param.length() * 2);
-        char c;
-        for (int i = 0; i < param.length(); i++) {
-            c = param.charAt(i);
-            switch (c) {
-                case '"':
-                    escapedParam.append('\\');
-                    escapedParam.append('"');
-                    break;
-                case '\n':
-                    escapedParam.append('\\');
-                    escapedParam.append('n');
-                    break;
-                case '\\':
-                    escapedParam.append('\\');
-                    escapedParam.append('\\');
-                    break;
-                default:
-                    escapedParam.append(c);
-            }
-        }
-        return escapedParam.toString();
-    }
-
     private boolean isValidFunction(String function) {
-        if (function == null) {
-            return false;
-        }
-
-        if (function.trim().isEmpty()) {
-            return false;
-        }
-
-        function = function.trim();
-
-        for (Method method : KieFunctions.class.getMethods()) {
-            if (function.equals(method.getName())) {
-                return true;
-            }
-        }
-
-        return false;
+        return FunctionsRegistry.getInstance().getFunction(function) != null;
     }
 }
