@@ -16,8 +16,11 @@
 
 package org.kie.workbench.common.stunner.bpmn.forms.conditions;
 
+import java.util.Objects;
+
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.kie.workbench.common.stunner.core.util.HashUtil;
 
 @Portable
 public class GenerateConditionResult {
@@ -56,5 +59,22 @@ public class GenerateConditionResult {
         this.error = error;
     }
 
-    //TODO, WM, haschode and equals
+    @Override
+    public int hashCode() {
+        return HashUtil.combineHashCodes(Objects.hashCode(expression),
+                                         Objects.hashCode(error));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o instanceof GenerateConditionResult) {
+            GenerateConditionResult other = (GenerateConditionResult) o;
+            return Objects.equals(expression, other.expression) &&
+                    Objects.equals(error, other.error);
+        }
+        return false;
+    }
 }

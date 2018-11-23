@@ -34,10 +34,12 @@ public class ConditionGenerator {
         }
 
         String function = condition.getFunction().trim();
-        script.append(ConditionParser.KIE_FUNCTIONS + function);
+        script.append("return ");
+        script.append(ConditionParser.KIE_FUNCTIONS);
+        script.append(function);
         script.append("(");
         boolean first = true;
-        for (String param : condition.getParameters()) {
+        for (String param : condition.getParams()) {
             if (first) {
                 //first parameter is always a process variable name.
                 script.append(param);
@@ -45,18 +47,20 @@ public class ConditionGenerator {
             } else {
                 //the other parameters are always string parameters.
                 script.append(", ");
-                script.append("\"" + escapeJava(param) + "\"");
+                script.append("\"");
+                script.append(escapeJava(param));
+                script.append("\"");
             }
             if (param == null || param.isEmpty()) {
                 //WM TODO ver si hago esto en realidad dejo poner null...
                 throw new GenerateConditionException(ConditionEditorErrors.PARAMETER_NULL_EMPTY);
             }
         }
-        script.append(")");
+        script.append(");");
         return script.toString();
     }
 
     private boolean isValidFunction(String function) {
-        return FunctionsRegistry.getInstance().getFunction(function) != null;
+        return !FunctionsRegistry.getInstance().getFunctions(function).isEmpty();
     }
 }

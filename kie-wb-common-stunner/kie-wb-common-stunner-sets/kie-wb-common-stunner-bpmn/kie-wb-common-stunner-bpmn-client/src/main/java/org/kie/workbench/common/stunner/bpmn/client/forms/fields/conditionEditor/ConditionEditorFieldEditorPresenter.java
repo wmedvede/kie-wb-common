@@ -30,8 +30,8 @@ import org.kie.workbench.common.stunner.bpmn.client.forms.util.FieldEditorPresen
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
+import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
-import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionExpression;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.GenerateConditionResult;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ParseConditionResult;
 import org.kie.workbench.common.stunner.bpmn.forms.model.ScriptTypeMode;
@@ -122,7 +122,7 @@ public class ConditionEditorFieldEditorPresenter
             if (isInDefaultLanguage(value)) {
                 if (!isEmpty(value.getScript())) {
                     //TODO WM check unexpected error case
-                    service.call(result -> onSetValue((ParseConditionResult)result)).parseCondition(value.getScript());
+                    service.call(result -> onSetValue((ParseConditionResult) result)).parseCondition(value.getScript());
                 } else {
                     showSimpleConditionEditor();
                 }
@@ -149,9 +149,9 @@ public class ConditionEditorFieldEditorPresenter
         showScriptEditor();
     }
 
-    private void onSimpleConditionChange(ConditionExpression oldValue, ConditionExpression newValue) {
+    private void onSimpleConditionChange(Condition oldValue, Condition newValue) {
         if (simpleConditionEditor.isValid()) {
-            service.call(result -> onSimpleConditionChange((GenerateConditionResult) result)).generateCondition(newValue.getConditions().get(0));
+            service.call(result -> onSimpleConditionChange((GenerateConditionResult) result)).generateCondition(newValue);
         } else {
             clearError();
         }
@@ -176,9 +176,7 @@ public class ConditionEditorFieldEditorPresenter
 
     private void onSetValue(ParseConditionResult result) {
         if (!result.hasError()) {
-            ConditionExpression conditionExpression = new ConditionExpression();
-            conditionExpression.getConditions().add(result.getCondition());
-            simpleConditionEditor.setValue(conditionExpression);
+            simpleConditionEditor.setValue(result.getCondition());
             showSimpleConditionEditor();
         } else {
             scriptEditor.setValue(value);
@@ -188,9 +186,7 @@ public class ConditionEditorFieldEditorPresenter
 
     private void onSimpleConditionSelected(ParseConditionResult result) {
         if (!result.hasError()) {
-            ConditionExpression conditionExpression = new ConditionExpression();
-            conditionExpression.getConditions().add(result.getCondition());
-            simpleConditionEditor.setValue(conditionExpression);
+            simpleConditionEditor.setValue(result.getCondition());
         } else {
             showError(SCRIPT_PARSING_ERROR + ": " + result.getError());
             simpleConditionEditor.setValue(null);

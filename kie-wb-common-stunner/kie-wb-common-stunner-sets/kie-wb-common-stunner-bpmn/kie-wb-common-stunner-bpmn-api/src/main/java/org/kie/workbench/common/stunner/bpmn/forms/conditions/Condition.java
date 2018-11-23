@@ -18,36 +18,29 @@ package org.kie.workbench.common.stunner.bpmn.forms.conditions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.kie.workbench.common.stunner.core.util.HashUtil;
 
 @Portable
 public class Condition {
 
-    //TODO WM estas constantes se van
-    public static final String BETWEEN = "between";
-    public static final String IS_NULL = "isNull";
-    public static final String EQUALS_TO = "equalsTo";
-    public static final String IS_EMPTY = "isEmpty";
-    public static final String CONTAINS = "contains";
-    public static final String STARTS_WITH = "startsWith";
-    public static final String ENDS_WITH = "endsWith";
-    public static final String GREATER_THAN = "greaterThan";
-    public static final String GREATER_OR_EQUAL_THAN = "greaterOrEqualThan";
-    public static final String LESS_THAN = "lessThan";
-    public static final String LESS_OR_EQUAL_THAN = "lessOrEqualThan";
-    public static final String IS_TRUE = "isTrue";
-    public static final String IS_FALSE = "isFalse";
-
     private String function;
 
-    private List<String> parameters = new ArrayList<>();
+    private List<String> params = new ArrayList<>();
 
     public Condition() {
     }
 
     public Condition(String function) {
         this.function = function;
+    }
+
+    public Condition(final @MapsTo("function") String function, final @MapsTo("params") List<String> params) {
+        this.function = function;
+        this.params = params;
     }
 
     public String getFunction() {
@@ -58,17 +51,34 @@ public class Condition {
         this.function = function;
     }
 
-    public List<String> getParameters() {
-        return parameters;
+    public List<String> getParams() {
+        return params;
     }
 
-    public void setParameters(List<String> parameters) {
-        this.parameters = parameters;
+    public void setParams(List<String> params) {
+        this.params = params;
     }
 
     public void addParam(String param) {
-        parameters.add(param);
+        params.add(param);
     }
 
-    //TODO WM, hashCode and equals please
+    @Override
+    public int hashCode() {
+        return HashUtil.combineHashCodes(Objects.hashCode(function),
+                                         Objects.hashCode(params));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o instanceof Condition) {
+            Condition other = (Condition) o;
+            return Objects.equals(function, other.function) &&
+                    Objects.equals(params, other.params);
+        }
+        return false;
+    }
 }

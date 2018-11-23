@@ -18,8 +18,10 @@ package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEdito
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jboss.errai.common.client.dom.Anchor;
 import org.jboss.errai.common.client.dom.DOMUtil;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.common.client.dom.Event;
@@ -31,6 +33,9 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.ForEvent;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
+import org.uberfire.client.views.pfly.widgets.JQueryProducer;
+import org.uberfire.client.views.pfly.widgets.Popover;
 import org.uberfire.commons.data.Pair;
 
 import static org.kie.workbench.common.stunner.bpmn.client.forms.util.SelectUtils.setOptions;
@@ -39,6 +44,10 @@ import static org.kie.workbench.common.stunner.bpmn.client.forms.util.SelectUtil
 public class SimpleConditionEditorView
         implements IsElement,
                    SimpleConditionEditorPresenter.View {
+
+    private static final String VARIABLE_SELECTOR_HELP = "SimpleConditionEditorView.VariableSelectorHelp";
+    private static final String CONDITION_SELECTOR_HELP = "SimpleConditionEditorView.ConditionSelectorHelp";
+    private static final String DATA_CONTENT_ATTR = "data-content";
 
     private SimpleConditionEditorPresenter presenter;
 
@@ -49,6 +58,13 @@ public class SimpleConditionEditorView
     @Inject
     @DataField("variable-selector")
     private Select variableSelector;
+
+    @Inject
+    @DataField("variable-selector-help")
+    private Anchor variableSelectorHelp;
+
+    @Inject
+    private JQueryProducer.JQuery<Popover> variableSelectorHelpPopover;
 
     @Inject
     @DataField("variable-selector-error")
@@ -67,12 +83,30 @@ public class SimpleConditionEditorView
     private Span conditionSelectorError;
 
     @Inject
+    @DataField("condition-selector-help")
+    private Anchor conditionSelectorHelp;
+
+    @Inject
+    private JQueryProducer.JQuery<Popover> conditionSelectorHelpPopover;
+
+    @Inject
     @DataField("condition-params")
     private Div conditionParams;
+
+    @Inject
+    private ClientTranslationService translationService;
 
     @Override
     public void init(SimpleConditionEditorPresenter presenter) {
         this.presenter = presenter;
+    }
+
+    @PostConstruct
+    public void init() {
+        variableSelectorHelp.setAttribute(DATA_CONTENT_ATTR, translationService.getValue(VARIABLE_SELECTOR_HELP));
+        variableSelectorHelpPopover.wrap(variableSelectorHelp).popover();
+        conditionSelectorHelp.setAttribute(DATA_CONTENT_ATTR, translationService.getValue(CONDITION_SELECTOR_HELP));
+        conditionSelectorHelpPopover.wrap(conditionSelectorHelp).popover();
     }
 
     @Override

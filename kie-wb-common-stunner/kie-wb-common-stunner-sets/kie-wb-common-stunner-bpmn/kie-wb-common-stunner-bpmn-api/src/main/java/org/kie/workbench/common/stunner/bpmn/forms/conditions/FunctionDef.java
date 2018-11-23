@@ -71,10 +71,8 @@ public class FunctionDef {
         }
         if (o instanceof FunctionDef) {
             FunctionDef other = (FunctionDef) o;
-            return Objects.equals(name,
-                                  other.name) &&
-                    Objects.equals(params,
-                                   other.params);
+            return Objects.equals(name, other.name) &&
+                    Objects.equals(params, other.params);
         }
         return false;
     }
