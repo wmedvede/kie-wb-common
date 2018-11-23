@@ -110,8 +110,8 @@ public class ConditionParserTest {
             ConditionParser parser = new ConditionParser(conditions.get(i));
             Condition condition = parser.parse();
             assertEquals(function, condition.getFunction());
-            assertEquals(1, condition.getParameters().size());
-            assertEquals(variableExpectedValues.get(i), condition.getParameters().get(0));
+            assertEquals(1, condition.getParams().size());
+            assertEquals(variableExpectedValues.get(i), condition.getParams().get(0));
         }
     }
 
@@ -125,9 +125,9 @@ public class ConditionParserTest {
             ConditionParser parser = new ConditionParser(conditions.get(i));
             Condition condition = parser.parse();
             assertEquals(function, condition.getFunction());
-            assertEquals(2, condition.getParameters().size());
-            assertEquals(variableExpectedValues.get(i), condition.getParameters().get(0));
-            assertEquals(stringParams.get(i), condition.getParameters().get(1));
+            assertEquals(2, condition.getParams().size());
+            assertEquals(variableExpectedValues.get(i), condition.getParams().get(0));
+            assertEquals(stringParams.get(i), condition.getParams().get(1));
         }
     }
 
@@ -141,10 +141,10 @@ public class ConditionParserTest {
             ConditionParser parser = new ConditionParser(conditions.get(i));
             Condition condition = parser.parse();
             assertEquals(function, condition.getFunction());
-            assertEquals(3, condition.getParameters().size());
-            assertEquals(variableExpectedValues.get(i), condition.getParameters().get(0));
-            assertEquals(stringParams.get(i), condition.getParameters().get(1));
-            assertEquals(stringParams.get(i), condition.getParameters().get(2));
+            assertEquals(3, condition.getParams().size());
+            assertEquals(variableExpectedValues.get(i), condition.getParams().get(0));
+            assertEquals(stringParams.get(i), condition.getParams().get(1));
+            assertEquals(stringParams.get(i), condition.getParams().get(2));
         }
     }
 }

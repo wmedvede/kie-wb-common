@@ -64,10 +64,8 @@ public class ParamDef {
         }
         if (o instanceof ParamDef) {
             ParamDef other = (ParamDef) o;
-            return Objects.equals(name,
-                                  other.name) &&
-                    Objects.equals(type,
-                                   other.type);
+            return Objects.equals(name, other.name) &&
+                    Objects.equals(type, other.type);
         }
         return false;
     }

@@ -18,6 +18,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
@@ -64,36 +65,40 @@ public class ConditionParser {
 
     private static final String RETURN_SENTENCE = "return";
 
-    public String getValue(Object o, String s) {
-        return null;
-    }
-
-    public String getValue(Object o, Integer i) {
-        return null;
-    }
-
-
     public ConditionParser(String expression) {
         this.expression = expression;
         this.parseIndex = expression != null ? 0 : -1;
     }
 
     public Condition parse() throws ParseException {
-        Condition condition;
-        FunctionDef functionDef;
+        parseReturnSentence();
+        functionName = parseFunctionName();
+        functionName = functionName.substring(KIE_FUNCTIONS.length(), functionName.length());
+        List<FunctionDef> functionDefs = FunctionsRegistry.getInstance().getFunctions(functionName);
 
+        if (functionDefs.isEmpty()) {
+            throw new ParseException(errorMessage(FUNCTION_NAME_NOT_RECOGNIZED_ERROR, functionName), parseIndex);
+        }
+
+        ParseException lastTryException = null;
+        for (FunctionDef functionDef : functionDefs) {
+            try {
+                reset();
+                return parse(functionDef);
+            } catch (ParseException e) {
+                lastTryException = e;
+            }
+        }
+        throw lastTryException;
+    }
+
+    private Condition parse(FunctionDef functionDef) throws ParseException {
         parseReturnSentence();
 
         functionName = parseFunctionName();
         functionName = functionName.substring(KIE_FUNCTIONS.length(), functionName.length());
-        functionDef = FunctionsRegistry.getInstance().getFunction(functionName);
 
-        if (functionDef == null) {
-            throw new ParseException(errorMessage(FUNCTION_NAME_NOT_RECOGNIZED_ERROR, functionName), parseIndex);
-        }
-
-        condition = new Condition(functionName);
-
+        Condition condition = new Condition(functionName);
         String param;
         String[] variableParam;
         boolean first = true;
@@ -115,6 +120,11 @@ public class ConditionParser {
         parseSentenceClose();
 
         return condition;
+    }
+
+    private void reset() {
+        parseIndex = 0;
+        functionName = null;
     }
 
     private String parseReturnSentence() throws ParseException {

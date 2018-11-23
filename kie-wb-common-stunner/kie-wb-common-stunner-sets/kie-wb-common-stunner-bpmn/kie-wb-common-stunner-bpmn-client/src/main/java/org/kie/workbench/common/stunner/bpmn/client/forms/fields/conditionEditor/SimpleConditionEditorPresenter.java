@@ -35,9 +35,9 @@ import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.kie.workbench.common.stunner.bpmn.client.forms.util.FieldEditorPresenter;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
-import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionExpression;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.FunctionDef;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ParamDef;
+import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.mvp.UberElement;
@@ -46,7 +46,9 @@ import org.uberfire.commons.data.Pair;
 import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
 
 public class SimpleConditionEditorPresenter
-        extends FieldEditorPresenter<ConditionExpression> {
+        extends FieldEditorPresenter<Condition> {
+
+    private String FUNCTIONS_DOMAIN = "KieFunctions.";
 
     private static final String VARIABLE_NOT_SELECTED_ERROR = "A process variable, or variable field must be selected";
 
@@ -54,9 +56,13 @@ public class SimpleConditionEditorPresenter
 
     private static final String PARAM_MUST_BE_COMPLETED_ERROR = "Param must be completed";
 
-    private static final Pair<String, String> DEFAULT_VARIABLE_OPTION = new Pair<>("-- Select a process variable --", "");
+    private static final String DEFAULT_VARIABLE_OPTION_LABEL = "SimpleConditionEditorView.DefaultVariableOptionLabel";
 
-    private static final Pair<String, String> DEFAULT_FUNCTION_OPTION = new Pair<>("-- Select a condition --", "");
+    private static final String DEFAULT_FUNCTION_OPTION_LABEL = "SimpleConditionEditorView.DefaultFunctionOptionLabel";
+
+    private static Pair<String, String> DEFAULT_VARIABLE_OPTION = new Pair<>("-- Select a process variable --", "");
+
+    private static Pair<String, String> DEFAULT_FUNCTION_OPTION = new Pair<>("-- Select a condition --", "");
 
     public interface View extends UberElement<SimpleConditionEditorPresenter> {
 
@@ -93,6 +99,8 @@ public class SimpleConditionEditorPresenter
 
     private Caller<ConditionEditorService> service;
 
+    private ClientTranslationService translationService;
+
     private Map<String, VariableMetadata> variableMetadataMap = new HashMap<>();
 
     private Map<String, FunctionDef> currentFunctions = Collections.EMPTY_MAP;
@@ -104,15 +112,19 @@ public class SimpleConditionEditorPresenter
     @Inject
     public SimpleConditionEditorPresenter(View view,
                                           ManagedInstance<ConditionParamPresenter> paramInstance,
-                                          Caller<ConditionEditorService> service) {
+                                          Caller<ConditionEditorService> service,
+                                          ClientTranslationService translationService) {
         this.view = view;
         this.paramInstance = paramInstance;
         this.service = service;
+        this.translationService = translationService;
     }
 
     @PostConstruct
     public void init() {
         view.init(this);
+        DEFAULT_VARIABLE_OPTION = new Pair<>(translationService.getValue(DEFAULT_VARIABLE_OPTION_LABEL), "");
+        DEFAULT_FUNCTION_OPTION = new Pair<>(translationService.getValue(DEFAULT_FUNCTION_OPTION_LABEL), "");
         view.setVariableOptions(Collections.emptyList(), DEFAULT_VARIABLE_OPTION);
         view.setConditionOptions(Collections.emptyList(), DEFAULT_FUNCTION_OPTION);
     }
@@ -127,14 +139,13 @@ public class SimpleConditionEditorPresenter
     }
 
     @Override
-    public void setValue(ConditionExpression value) {
+    public void setValue(Condition value) {
         super.setValue(value);
         clear();
-        if (value != null && value.getConditions().size() > 0) {
-            Condition condition = value.getConditions().get(0);
-            if (condition.getParameters().size() >= 1) {
+        if (value != null) {
+            if (value.getParams().size() >= 1) {
                 Path path = session.getCanvasHandler().getDiagram().getMetadata().getPath();
-                VariableMetadata variable = variableMetadataMap.get(condition.getParameters().get(0));
+                VariableMetadata variable = variableMetadataMap.get(value.getParams().get(0));
                 if (variable != null) {
                     service.call(result -> onSetValue(value, ((List<FunctionDef>) result))).getAvailableFunctions(path, variable.getType());
                 } else {
@@ -194,16 +205,15 @@ public class SimpleConditionEditorPresenter
         for (ConditionParamPresenter param : currentParams) {
             param.clearError();
             if (isValid(param)) {
-                condition.getParameters().add(param.getValue());
+                condition.getParams().add(param.getValue());
             } else {
                 param.setError(PARAM_MUST_BE_COMPLETED_ERROR);
                 valid = false;
             }
         }
 
-        ConditionExpression oldValue = value;
-        value = new ConditionExpression();
-        value.setConditions(Collections.singletonList(condition));
+        Condition oldValue = value;
+        value = condition;
         notifyChange(oldValue, value);
     }
 
@@ -211,12 +221,11 @@ public class SimpleConditionEditorPresenter
         return !isEmpty(param.getValue());
     }
 
-    private void onSetValue(ConditionExpression value, List<FunctionDef> functions) {
+    private void onSetValue(Condition value, List<FunctionDef> functions) {
         setFunctions(functions);
-        Condition condition = value.getConditions().get(0);
-        initParams(condition.getFunction(), condition.getParameters());
-        view.setVariable(condition.getParameters().get(0));
-        view.setCondition(condition.getFunction());
+        initParams(value.getFunction(), value.getParams());
+        view.setVariable(value.getParams().get(0));
+        view.setCondition(value.getFunction());
         valid = true;
     }
 
@@ -260,10 +269,15 @@ public class SimpleConditionEditorPresenter
 
     private void setFunctions(List<FunctionDef> functions) {
         List<Pair<String, String>> functionOptions = functions.stream().
-                map(functionDef -> new Pair<>(functionDef.getName(), functionDef.getName()))
+                map(functionDef -> new Pair<>(translateFunctionName(functionDef.getName()), functionDef.getName()))
                 .collect(Collectors.toList());
         currentFunctions = functions.stream().collect(Collectors.toMap(FunctionDef::getName, Function.identity()));
         view.setConditionOptions(functionOptions, DEFAULT_FUNCTION_OPTION);
+    }
+
+    private String translateFunctionName(String function) {
+        String result = translationService.getValue(FUNCTIONS_DOMAIN + function);
+        return result != null ? result : function;
     }
 
     private void setVariablesMetadata(List<VariableMetadata> variablesMetadata) {

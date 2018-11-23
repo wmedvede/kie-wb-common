@@ -16,8 +16,11 @@
 
 package org.kie.workbench.common.stunner.bpmn.forms.conditions;
 
+import java.util.Objects;
+
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.kie.workbench.common.stunner.core.util.HashUtil;
 
 @Portable
 public class ParseConditionResult {
@@ -58,5 +61,24 @@ public class ParseConditionResult {
 
     public boolean hasError() {
         return error != null;
+    }
+
+    @Override
+    public int hashCode() {
+        return HashUtil.combineHashCodes(Objects.hashCode(condition),
+                                         Objects.hashCode(error));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o instanceof ParseConditionResult) {
+            ParseConditionResult other = (ParseConditionResult) o;
+            return Objects.equals(condition, other.condition) &&
+                    Objects.equals(error, other.error);
+        }
+        return false;
     }
 }

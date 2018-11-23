@@ -28,24 +28,23 @@ public class ParsingUtils {
         if (startIndex < 0 || startIndex > token.length()) {
             throw new IndexOutOfBoundsException("startIndex: " + startIndex + " exceeds token bounds: " + token);
         }
-
         final StringBuilder javaName = new StringBuilder();
         char currentChar;
         int currentIndex = startIndex;
-        while(currentIndex < token.length()) {
+        while (currentIndex < token.length()) {
             currentChar = token.charAt(currentIndex);
             if (ArrayUtils.contains(stopCharacters, currentChar)) {
                 break;
-            } else  {
+            } else {
                 javaName.append(currentChar);
-                if (!SourceVersion.isName(javaName)) {
-                    throw new ParseException("Unexpected character: " + currentChar + " at position: " + currentIndex, currentIndex);
-                }
             }
             currentIndex++;
         }
+
         if (javaName.length() == 0) {
             throw new ParseException("Expected java name was not found at position: " + startIndex, startIndex);
+        } else if (!SourceVersion.isName(javaName)) {
+            throw new ParseException("Invalid java name was found at positon: " + startIndex, startIndex);
         }
         return javaName.toString();
     }
