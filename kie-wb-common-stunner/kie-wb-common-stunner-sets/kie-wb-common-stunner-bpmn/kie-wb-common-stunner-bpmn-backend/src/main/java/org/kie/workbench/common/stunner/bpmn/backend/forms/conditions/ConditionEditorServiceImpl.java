@@ -17,35 +17,24 @@
 package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.kie.workbench.common.services.backend.project.ModuleClassLoaderHelper;
-import org.kie.workbench.common.services.shared.project.KieModule;
-import org.kie.workbench.common.services.shared.project.KieModuleService;
+
+import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
 import org.uberfire.backend.vfs.Path;
 
 @Service
 @ApplicationScoped
-public class ConditionEditorServiceImpl extends BaseConditionEditorServiceImpl {
+public class ConditionEditorServiceImpl
+        extends BaseConditionEditorServiceImpl
+        implements ConditionEditorService {
 
-    private KieModuleService moduleService;
-
-    private ModuleClassLoaderHelper moduleClassLoaderHelper;
-
-    private ConditionEditorServiceImpl() {
+    public ConditionEditorServiceImpl() {
         //Empty constructor for proxying
     }
 
-    @Inject
-    public ConditionEditorServiceImpl(KieModuleService moduleService,
-                                      ModuleClassLoaderHelper moduleClassLoaderHelper) {
-        this.moduleService = moduleService;
-        this.moduleClassLoaderHelper = moduleClassLoaderHelper;
-    }
-
+    @Override
     protected ClassLoader resolveClassLoader(Path path) {
-        KieModule module = moduleService.resolveModule(path);
-        return moduleClassLoaderHelper.getModuleClassLoader(module);
+        return ClassLoader.getSystemClassLoader();
     }
 }

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,7 @@ import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.FunctionDef;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ParamDef;
+import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadata;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadataQuery;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadataQueryResult;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
@@ -106,15 +108,17 @@ public class SimpleConditionEditorPresenter
 
     private ClientTranslationService translationService;
 
-    private Map<String, VariableMetadata> variableMetadataMap = new HashMap<>();
+    private Map<String, VariableMetadata> variablesMetadata = new HashMap<>();
+
+    private Map<String, TypeMetadata> typesMetadata = new HashMap<>();
+
+    private Map<String, String> optionType = new HashMap<>();
 
     private Map<String, FunctionDef> currentFunctions = Collections.EMPTY_MAP;
 
     private List<ConditionParamPresenter> currentParams = new ArrayList<>();
 
     private boolean valid = false;
-
-    private List<VariableMetadata> variables = new ArrayList<>();
 
     @Inject
     public SimpleConditionEditorPresenter(View view,
@@ -140,9 +144,9 @@ public class SimpleConditionEditorPresenter
         return view;
     }
 
-    public void init(ClientSession session, List<VariableMetadata> variablesMetadata) {
+    public void init(ClientSession session) {
         this.session = session;
-        setVariablesMetadata(variablesMetadata);
+        initVariables();
     }
 
     @Override
@@ -152,9 +156,9 @@ public class SimpleConditionEditorPresenter
         if (value != null) {
             if (value.getParams().size() >= 1) {
                 Path path = session.getCanvasHandler().getDiagram().getMetadata().getPath();
-                VariableMetadata variable = variableMetadataMap.get(value.getParams().get(0));
-                if (variable != null) {
-                    service.call(result -> onSetValue(value, ((List<FunctionDef>) result))).findAvailableFunctions(path, variable.getType());
+                String type = optionType.get(value.getParams().get(0));
+                if (type != null) {
+                    service.call(result -> onSetValue(value, ((List<FunctionDef>) result))).findAvailableFunctions(path, type);
                 } else {
                     //TODO WM, acá tenemos q ver que hacemos
                     //si la variable no esta en la lista, pues podemos
@@ -181,9 +185,9 @@ public class SimpleConditionEditorPresenter
         view.clearVariableError();
         if (!isEmpty(view.getVariable())) {
             Path path = session.getCanvasHandler().getDiagram().getMetadata().getPath();
-            VariableMetadata variable = variableMetadataMap.get(view.getVariable());
+            String type = optionType.get(view.getVariable());
             service.call(result -> onLoadFunctionsSuccess((List<FunctionDef>) result),
-                         (message, throwable) -> onLoadFunctionsError((Message) message, throwable)).findAvailableFunctions(path, variable.getType());
+                         (message, throwable) -> onLoadFunctionsError((Message) message, throwable)).findAvailableFunctions(path, type);
         } else {
             view.setVariableError(VARIABLE_NOT_SELECTED_ERROR);
         }
@@ -287,7 +291,7 @@ public class SimpleConditionEditorPresenter
         return result != null ? result : function;
     }
 
-    private void initializeVariables() {
+    private void initVariables() {
         //TODO WM, review this initialization.
         //It should include parent process variables in case of a subprocess?
         String canvasRootUUID = session.getCanvasHandler().getDiagram().getMetadata().getCanvasRootUUID();
@@ -315,22 +319,38 @@ public class SimpleConditionEditorPresenter
                 }
                 Path path = session.getCanvasHandler().getDiagram().getMetadata().getPath();
                 TypeMetadataQuery query = new TypeMetadataQuery(path, types);
-                service.call(result -> onInitializeVariables(variables, ((TypeMetadataQueryResult) result))).findMetadata(query);
+                service.call(result -> initVariables(variables, ((TypeMetadataQueryResult) result))).findMetadata(query);
             }
         }
     }
 
-    private void onInitializeVariables(List<VariableMetadata> variables, TypeMetadataQueryResult result) {
-
-    }
-
-    private void setVariablesMetadata(List<VariableMetadata> variablesMetadata) {
+    private void initVariables(List<VariableMetadata> variables, TypeMetadataQueryResult result) {
+        variablesMetadata.clear();
+        optionType.clear();
         List<Pair<String, String>> variableOptions = new ArrayList<>();
-        variablesMetadata.forEach(variableMetadata -> {
-            variableMetadataMap.put(variableMetadata.getName(), variableMetadata);
-            variableOptions.add(new Pair<>(variableMetadata.getName(), variableMetadata.getName()));
+        typesMetadata = result.getTypeMetadatas().stream().collect(Collectors.toMap(TypeMetadata::getType, Function.identity()));
+        variables.forEach(variableMetadata -> {
+            TypeMetadata typeMetadata = Optional.ofNullable(typesMetadata.get(variableMetadata.getType())).orElse(new TypeMetadata(Object.class.getName()));
+            variableMetadata.setMetadata(typeMetadata);
+            variablesMetadata.put(variableMetadata.getName(), variableMetadata);
+            addVariableOptions(variableMetadata, variableOptions);
         });
         view.setVariableOptions(variableOptions, DEFAULT_VARIABLE_OPTION);
+    }
+
+    private void addVariableOptions(VariableMetadata variableMetadata, List<Pair<String, String>> variableOptions) {
+        Pair<String, String> option = new Pair<>(variableMetadata.getName(), variableMetadata.getName());
+        variableOptions.add(option);
+        optionType.put(option.getK2(), unboxDefaultType(variableMetadata.getType()));
+        TypeMetadata typeMetadata = variableMetadata.getMetadata();
+        typeMetadata.getFieldMetadata().stream()
+                .filter(fieldMetadata -> fieldMetadata.getAccessor() != null)
+                .forEach(fieldMetadata -> {
+                    Pair<String, String> fieldOption = new Pair<>(variableMetadata.getName() + "." + fieldMetadata.getName(),
+                                                                  variableMetadata.getName() + "." + fieldMetadata.getAccessor() + "()");
+                    variableOptions.add(fieldOption);
+                    optionType.put(fieldOption.getK2(), unboxDefaultType(fieldMetadata.getType()));
+                });
     }
 
     private void clearErrors() {
@@ -345,17 +365,30 @@ public class SimpleConditionEditorPresenter
     }
 
     private String unboxDefaultType(String type) {
-        if ("Boolean".equals(type)) {
-            return Boolean.class.getName();
-        } else if ("Float".equals(type)) {
-            return Float.class.getName();
-        } else if ("Integer".equals(type)) {
-            return Integer.class.getName();
-        } else if ("String".equals(type)) {
-            return String.class.getName();
-        } else if ("Object".equals(type)) {
-            return Object.class.getName();
+        switch (type) {
+            case "Short":
+            case "short":
+                return Short.class.getName();
+            case "Integer":
+            case "int":
+                return Integer.class.getName();
+            case "Long":
+            case "long":
+                return Long.class.getName();
+            case "Float":
+            case "float":
+                return Float.class.getName();
+            case "Dobule":
+            case "double":
+                return Double.class.getName();
+            case "Boolean":
+            case "boolean":
+                return Boolean.class.getName();
+            case "Character":
+            case "char":
+                return Character.class.getName();
+            default:
+                return type;
         }
-        return type;
     }
 }

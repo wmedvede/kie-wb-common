@@ -102,8 +102,8 @@ public class ConditionEditorFieldEditorPresenter
 
     public void init(ClientSession session) {
         this.session = session;
-        initializeVariables();
-        simpleConditionEditor.init(session, variables);
+        //initializeVariables();
+        simpleConditionEditor.init(session);
     }
 
     @Override

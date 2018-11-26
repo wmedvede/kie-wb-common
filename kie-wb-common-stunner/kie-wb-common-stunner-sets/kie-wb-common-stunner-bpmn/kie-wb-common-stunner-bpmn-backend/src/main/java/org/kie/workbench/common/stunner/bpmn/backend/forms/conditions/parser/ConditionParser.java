@@ -223,7 +223,7 @@ public class ConditionParser {
             throw new ParseException(errorMessage(METHOD_NOT_PROPERLY_CLOSED_ERROR, result), parseIndex);
         }
         setParseIndex(parseIndex + 1);
-        return result;
+        return result + "()";
     }
 
     private String parseParamDelimiter() throws ParseException {

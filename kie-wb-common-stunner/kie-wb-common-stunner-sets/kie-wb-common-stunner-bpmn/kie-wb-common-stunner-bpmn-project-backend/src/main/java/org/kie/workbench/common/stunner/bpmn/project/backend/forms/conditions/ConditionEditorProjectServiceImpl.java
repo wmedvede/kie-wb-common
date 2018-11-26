@@ -17,21 +17,38 @@
 package org.kie.workbench.common.stunner.bpmn.project.backend.forms.conditions;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Specializes;
+import javax.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.BaseConditionEditorServiceImpl;
+import org.kie.workbench.common.services.backend.project.ModuleClassLoaderHelper;
+import org.kie.workbench.common.services.shared.project.KieModule;
+import org.kie.workbench.common.services.shared.project.KieModuleService;
+import org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.ConditionEditorServiceImpl;
 import org.uberfire.backend.vfs.Path;
 
 @Service
+@Specializes
 @ApplicationScoped
-public class ConditionEditorProjectServiceImpl extends BaseConditionEditorServiceImpl {
+public class ConditionEditorProjectServiceImpl extends ConditionEditorServiceImpl {
 
-    public ConditionEditorProjectServiceImpl() {
+    private KieModuleService moduleService;
+
+    private ModuleClassLoaderHelper moduleClassLoaderHelper;
+
+    private ConditionEditorProjectServiceImpl() {
         //Empty constructor for proxying
     }
 
-    @Override
+    @Inject
+    public ConditionEditorProjectServiceImpl(KieModuleService moduleService,
+                                             ModuleClassLoaderHelper moduleClassLoaderHelper) {
+        this.moduleService = moduleService;
+        this.moduleClassLoaderHelper = moduleClassLoaderHelper;
+    }
+
     protected ClassLoader resolveClassLoader(Path path) {
-        return ClassLoader.getSystemClassLoader();
+        KieModule module = moduleService.resolveModule(path);
+        return moduleClassLoaderHelper.getModuleClassLoader(module);
     }
 }

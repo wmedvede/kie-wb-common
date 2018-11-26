@@ -23,7 +23,7 @@ public class ConditionEditorServiceImplTest {
 
     @Test
     public void testBuildTypeMetadata() throws Exception {
-        ConditionEditorServiceImpl service = new ConditionEditorServiceImpl(null, null);
+        ConditionEditorServiceImpl service = new ConditionEditorServiceImpl();
         TypeMetadata typeMetadata = service.buildTypeMetadata(Bean1.class.getName(), ClassLoader.getSystemClassLoader());
 
         TypeMetadata typeMetadata2 = service.buildTypeMetadata(Bean2.class.getName(), ClassLoader.getSystemClassLoader());

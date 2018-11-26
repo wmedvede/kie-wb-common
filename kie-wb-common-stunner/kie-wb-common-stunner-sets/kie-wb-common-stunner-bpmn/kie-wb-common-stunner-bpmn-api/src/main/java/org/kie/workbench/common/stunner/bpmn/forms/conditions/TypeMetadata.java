@@ -37,6 +37,26 @@ public class TypeMetadata {
         this.fieldMetadata = fieldMetadata;
     }
 
+    public TypeMetadata(String type) {
+        this.type = type;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public List<FieldMetadata> getFieldMetadata() {
+        return fieldMetadata;
+    }
+
+    public void setFieldMetadata(List<FieldMetadata> fieldMetadata) {
+        this.fieldMetadata = fieldMetadata;
+    }
+
     @Override
     public int hashCode() {
         return HashUtil.combineHashCodes(Objects.hashCode(type),
