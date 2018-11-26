@@ -23,51 +23,41 @@ import java.util.Objects;
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.kie.workbench.common.stunner.core.util.HashUtil;
+import org.uberfire.backend.vfs.Path;
 
 @Portable
-public class Condition {
+public class TypeMetadataQuery {
 
-    private String function;
+    private Path path;
 
-    private List<String> params = new ArrayList<>();
+    private List<String> types = new ArrayList<>();
 
-    public Condition() {
+    public TypeMetadataQuery(final @MapsTo("path") Path path,
+                             final @MapsTo("types") List<String> types) {
+        this.path = path;
+        this.types = types;
     }
 
-    public Condition(String function) {
-        this.function = function;
+    public Path getPath() {
+        return path;
     }
 
-    public Condition(final @MapsTo("function") String function,
-                     final @MapsTo("params") List<String> params) {
-        this.function = function;
-        this.params = params;
+    public void setPath(Path path) {
+        this.path = path;
     }
 
-    public String getFunction() {
-        return function;
+    public void setTypes(List<String> types) {
+        this.types = types;
     }
 
-    public void setFunction(String function) {
-        this.function = function;
-    }
-
-    public List<String> getParams() {
-        return params;
-    }
-
-    public void setParams(List<String> params) {
-        this.params = params;
-    }
-
-    public void addParam(String param) {
-        params.add(param);
+    public List<String> getTypes() {
+        return types;
     }
 
     @Override
     public int hashCode() {
-        return HashUtil.combineHashCodes(Objects.hashCode(function),
-                                         Objects.hashCode(params));
+        return HashUtil.combineHashCodes(Objects.hashCode(path),
+                                         Objects.hashCode(types));
     }
 
     @Override
@@ -75,10 +65,10 @@ public class Condition {
         if (this == o) {
             return true;
         }
-        if (o instanceof Condition) {
-            Condition other = (Condition) o;
-            return Objects.equals(function, other.function) &&
-                    Objects.equals(params, other.params);
+        if (o instanceof TypeMetadataQuery) {
+            TypeMetadataQuery other = (TypeMetadataQuery) o;
+            return Objects.equals(path, other.path) &&
+                    Objects.equals(types, other.types);
         }
         return false;
     }

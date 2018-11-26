@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.forms.conditions;
+package org.kie.workbench.common.stunner.bpmn.project.backend.forms.conditions;
 
-import java.util.List;
+import javax.enterprise.context.ApplicationScoped;
 
-import org.jboss.errai.bus.server.annotations.Remote;
+import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.BaseConditionEditorServiceImpl;
 import org.uberfire.backend.vfs.Path;
 
-@Remote
-public interface ConditionEditorService {
+@Service
+@ApplicationScoped
+public class ConditionEditorProjectServiceImpl extends BaseConditionEditorServiceImpl {
 
-    List<FunctionDef> findAvailableFunctions(Path path, String clazz);
+    public ConditionEditorProjectServiceImpl() {
+        //Empty constructor for proxying
+    }
 
-    ParseConditionResult parseCondition(String conditionStr);
-
-    GenerateConditionResult generateCondition(Condition condition);
-
-    TypeMetadataQueryResult findMetadata(TypeMetadataQuery query);
-
+    @Override
+    protected ClassLoader resolveClassLoader(Path path) {
+        return ClassLoader.getSystemClassLoader();
+    }
 }

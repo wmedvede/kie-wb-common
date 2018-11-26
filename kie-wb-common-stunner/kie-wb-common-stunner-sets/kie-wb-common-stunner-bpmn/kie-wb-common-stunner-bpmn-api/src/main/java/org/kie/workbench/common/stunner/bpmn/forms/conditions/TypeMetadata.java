@@ -25,49 +25,22 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.kie.workbench.common.stunner.core.util.HashUtil;
 
 @Portable
-public class Condition {
+public class TypeMetadata {
 
-    private String function;
+    private String type;
 
-    private List<String> params = new ArrayList<>();
+    private List<FieldMetadata> fieldMetadata = new ArrayList<>();
 
-    public Condition() {
-    }
-
-    public Condition(String function) {
-        this.function = function;
-    }
-
-    public Condition(final @MapsTo("function") String function,
-                     final @MapsTo("params") List<String> params) {
-        this.function = function;
-        this.params = params;
-    }
-
-    public String getFunction() {
-        return function;
-    }
-
-    public void setFunction(String function) {
-        this.function = function;
-    }
-
-    public List<String> getParams() {
-        return params;
-    }
-
-    public void setParams(List<String> params) {
-        this.params = params;
-    }
-
-    public void addParam(String param) {
-        params.add(param);
+    public TypeMetadata(final @MapsTo("type") String type,
+                        final @MapsTo("fieldMetadata") List<FieldMetadata> fieldMetadata) {
+        this.type = type;
+        this.fieldMetadata = fieldMetadata;
     }
 
     @Override
     public int hashCode() {
-        return HashUtil.combineHashCodes(Objects.hashCode(function),
-                                         Objects.hashCode(params));
+        return HashUtil.combineHashCodes(Objects.hashCode(type),
+                                         Objects.hashCode(fieldMetadata));
     }
 
     @Override
@@ -75,10 +48,10 @@ public class Condition {
         if (this == o) {
             return true;
         }
-        if (o instanceof Condition) {
-            Condition other = (Condition) o;
-            return Objects.equals(function, other.function) &&
-                    Objects.equals(params, other.params);
+        if (o instanceof TypeMetadata) {
+            TypeMetadata other = (TypeMetadata) o;
+            return Objects.equals(type, other.type) &&
+                    Objects.equals(fieldMetadata, other.fieldMetadata);
         }
         return false;
     }

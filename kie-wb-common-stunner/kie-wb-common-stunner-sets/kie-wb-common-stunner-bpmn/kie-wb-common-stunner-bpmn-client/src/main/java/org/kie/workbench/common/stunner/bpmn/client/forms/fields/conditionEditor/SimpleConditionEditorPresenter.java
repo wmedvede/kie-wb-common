@@ -33,12 +33,17 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.kie.workbench.common.stunner.bpmn.client.forms.util.FieldEditorPresenter;
+import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
+import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.FunctionDef;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ParamDef;
+import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadataQuery;
+import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadataQueryResult;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
+import org.kie.workbench.common.stunner.core.graph.Node;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.commons.data.Pair;
@@ -109,6 +114,8 @@ public class SimpleConditionEditorPresenter
 
     private boolean valid = false;
 
+    private List<VariableMetadata> variables = new ArrayList<>();
+
     @Inject
     public SimpleConditionEditorPresenter(View view,
                                           ManagedInstance<ConditionParamPresenter> paramInstance,
@@ -147,7 +154,7 @@ public class SimpleConditionEditorPresenter
                 Path path = session.getCanvasHandler().getDiagram().getMetadata().getPath();
                 VariableMetadata variable = variableMetadataMap.get(value.getParams().get(0));
                 if (variable != null) {
-                    service.call(result -> onSetValue(value, ((List<FunctionDef>) result))).getAvailableFunctions(path, variable.getType());
+                    service.call(result -> onSetValue(value, ((List<FunctionDef>) result))).findAvailableFunctions(path, variable.getType());
                 } else {
                     //TODO WM, acá tenemos q ver que hacemos
                     //si la variable no esta en la lista, pues podemos
@@ -176,7 +183,7 @@ public class SimpleConditionEditorPresenter
             Path path = session.getCanvasHandler().getDiagram().getMetadata().getPath();
             VariableMetadata variable = variableMetadataMap.get(view.getVariable());
             service.call(result -> onLoadFunctionsSuccess((List<FunctionDef>) result),
-                         (message, throwable) -> onLoadFunctionsError((Message) message, throwable)).getAvailableFunctions(path, variable.getType());
+                         (message, throwable) -> onLoadFunctionsError((Message) message, throwable)).findAvailableFunctions(path, variable.getType());
         } else {
             view.setVariableError(VARIABLE_NOT_SELECTED_ERROR);
         }
@@ -280,6 +287,43 @@ public class SimpleConditionEditorPresenter
         return result != null ? result : function;
     }
 
+    private void initializeVariables() {
+        //TODO WM, review this initialization.
+        //It should include parent process variables in case of a subprocess?
+        String canvasRootUUID = session.getCanvasHandler().getDiagram().getMetadata().getCanvasRootUUID();
+        if (canvasRootUUID != null) {
+            Node node = session.getCanvasHandler().getDiagram().getGraph().getNode(canvasRootUUID);
+            Object definition = ((org.kie.workbench.common.stunner.core.graph.content.view.View) node.getContent()).getDefinition();
+            if (definition instanceof BPMNDiagram) {
+                BPMNDiagramImpl bpmnDiagram = (BPMNDiagramImpl) definition;
+                String processVars = bpmnDiagram.getProcessData().getProcessVariables().getValue();
+                String[] variableDefs = processVars.split(",");
+                List<String> types = new ArrayList<>();
+                List<VariableMetadata> variables = new ArrayList<>();
+                VariableMetadata variableMetadata;
+                for (String variableDefItem : variableDefs) {
+                    if (!variableDefItem.isEmpty()) {
+                        String[] variableDef = variableDefItem.split(":");
+                        if (variableDef.length == 1) {
+                            variableMetadata = new VariableMetadata(variableDef[0], Object.class.getName());
+                        } else {
+                            variableMetadata = new VariableMetadata(variableDef[0], unboxDefaultType(variableDef[1]));
+                        }
+                        variables.add(variableMetadata);
+                        types.add(variableMetadata.getType());
+                    }
+                }
+                Path path = session.getCanvasHandler().getDiagram().getMetadata().getPath();
+                TypeMetadataQuery query = new TypeMetadataQuery(path, types);
+                service.call(result -> onInitializeVariables(variables, ((TypeMetadataQueryResult) result))).findMetadata(query);
+            }
+        }
+    }
+
+    private void onInitializeVariables(List<VariableMetadata> variables, TypeMetadataQueryResult result) {
+
+    }
+
     private void setVariablesMetadata(List<VariableMetadata> variablesMetadata) {
         List<Pair<String, String>> variableOptions = new ArrayList<>();
         variablesMetadata.forEach(variableMetadata -> {
@@ -298,5 +342,20 @@ public class SimpleConditionEditorPresenter
         currentParams.forEach(paramInstance::destroy);
         currentParams.clear();
         view.removeParams();
+    }
+
+    private String unboxDefaultType(String type) {
+        if ("Boolean".equals(type)) {
+            return Boolean.class.getName();
+        } else if ("Float".equals(type)) {
+            return Float.class.getName();
+        } else if ("Integer".equals(type)) {
+            return Integer.class.getName();
+        } else if ("String".equals(type)) {
+            return String.class.getName();
+        } else if ("Object".equals(type)) {
+            return Object.class.getName();
+        }
+        return type;
     }
 }

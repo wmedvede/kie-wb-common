@@ -16,8 +16,7 @@
 
 package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadata;
 
 public class VariableMetadata {
 
@@ -25,7 +24,19 @@ public class VariableMetadata {
 
     private String type;
 
-    private List<AccessorMetadata> accessors = new ArrayList<>();
+    private TypeMetadata metadata;
+
+    public VariableMetadata() {
+
+    }
+
+    public VariableMetadata(String name,
+                            String type,
+                            TypeMetadata metadata) {
+        this.name = name;
+        this.type = type;
+        this.metadata = metadata;
+    }
 
     public VariableMetadata(String name,
                             String type) {
@@ -33,23 +44,27 @@ public class VariableMetadata {
         this.type = type;
     }
 
-    public VariableMetadata(String name,
-                            String type,
-                            List<AccessorMetadata> accessors) {
-        this.name = name;
-        this.type = type;
-        this.accessors = accessors;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getType() {
         return type;
     }
 
-    public List<AccessorMetadata> getAccessors() {
-        return accessors;
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public TypeMetadata getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(TypeMetadata metadata) {
+        this.metadata = metadata;
     }
 }
