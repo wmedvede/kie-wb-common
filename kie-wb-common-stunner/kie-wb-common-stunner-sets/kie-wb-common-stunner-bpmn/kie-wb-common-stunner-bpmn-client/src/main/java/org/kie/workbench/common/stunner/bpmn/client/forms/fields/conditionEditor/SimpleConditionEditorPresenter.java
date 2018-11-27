@@ -49,6 +49,8 @@ import org.kie.workbench.common.stunner.core.graph.Node;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.commons.data.Pair;
+import org.uberfire.ext.widgets.common.client.dropdown.LiveSearchDropDown;
+import org.uberfire.ext.widgets.common.client.dropdown.SingleLiveSearchSelectionHandler;
 
 import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
 
@@ -96,6 +98,9 @@ public class SimpleConditionEditorPresenter
         void removeParams();
 
         void addParam(HTMLElement param);
+
+        LiveSearchDropDown<String> getVariableSelectorDropDown();
+
     }
 
     private View view;
@@ -105,6 +110,10 @@ public class SimpleConditionEditorPresenter
     private ClientSession session;
 
     private Caller<ConditionEditorService> service;
+
+    private SimpleConditionEditorSearchService searchService;
+
+    private SingleLiveSearchSelectionHandler<String> searchSelectionHandler = new SingleLiveSearchSelectionHandler<>();
 
     private ClientTranslationService translationService;
 
@@ -124,10 +133,12 @@ public class SimpleConditionEditorPresenter
     public SimpleConditionEditorPresenter(View view,
                                           ManagedInstance<ConditionParamPresenter> paramInstance,
                                           Caller<ConditionEditorService> service,
+                                          SimpleConditionEditorSearchService searchService,
                                           ClientTranslationService translationService) {
         this.view = view;
         this.paramInstance = paramInstance;
         this.service = service;
+        this.searchService = searchService;
         this.translationService = translationService;
     }
 
@@ -138,6 +149,8 @@ public class SimpleConditionEditorPresenter
         DEFAULT_FUNCTION_OPTION = new Pair<>(translationService.getValue(DEFAULT_FUNCTION_OPTION_LABEL), "");
         view.setVariableOptions(Collections.emptyList(), DEFAULT_VARIABLE_OPTION);
         view.setConditionOptions(Collections.emptyList(), DEFAULT_FUNCTION_OPTION);
+        view.getVariableSelectorDropDown().init(searchService, searchSelectionHandler);
+        view.getVariableSelectorDropDown().setOnChange(this::onVariableChange);
     }
 
     public View getView() {
@@ -146,7 +159,7 @@ public class SimpleConditionEditorPresenter
 
     public void init(ClientSession session) {
         this.session = session;
-        initVariables();
+        searchService.init(session);
     }
 
     @Override
@@ -156,7 +169,7 @@ public class SimpleConditionEditorPresenter
         if (value != null) {
             if (value.getParams().size() >= 1) {
                 Path path = session.getCanvasHandler().getDiagram().getMetadata().getPath();
-                String type = optionType.get(value.getParams().get(0));
+                String type = searchService.getOptionType(value.getParams().get(0));
                 if (type != null) {
                     service.call(result -> onSetValue(value, ((List<FunctionDef>) result))).findAvailableFunctions(path, type);
                 } else {
@@ -181,7 +194,7 @@ public class SimpleConditionEditorPresenter
         clearErrors();
     }
 
-    public void onVariableChange() {
+    public void onVariableChangeOLD() {
         view.clearVariableError();
         if (!isEmpty(view.getVariable())) {
             Path path = session.getCanvasHandler().getDiagram().getMetadata().getPath();
@@ -192,6 +205,20 @@ public class SimpleConditionEditorPresenter
             view.setVariableError(VARIABLE_NOT_SELECTED_ERROR);
         }
     }
+
+    public void onVariableChange() {
+        view.clearVariableError();
+        String variable = searchSelectionHandler.getSelectedKey();
+        if (!isEmpty(variable)) {
+            Path path = session.getCanvasHandler().getDiagram().getMetadata().getPath();
+            String type = searchService.getOptionType(variable);
+            service.call(result -> onLoadFunctionsSuccess((List<FunctionDef>) result),
+                         (message, throwable) -> onLoadFunctionsError((Message) message, throwable)).findAvailableFunctions(path, type);
+        } else {
+            view.setVariableError(VARIABLE_NOT_SELECTED_ERROR);
+        }
+    }
+
 
     public void onConditionChange() {
         removeParams();
@@ -207,7 +234,7 @@ public class SimpleConditionEditorPresenter
         return valid;
     }
 
-    private void validateAndApplyCondition() {
+    private void validateAndApplyConditionOLD() {
         Condition condition = new Condition();
         condition.setFunction(view.getCondition());
         condition.addParam(view.getVariable());
@@ -228,6 +255,29 @@ public class SimpleConditionEditorPresenter
         notifyChange(oldValue, value);
     }
 
+    private void validateAndApplyCondition() {
+        String variable = searchSelectionHandler.getSelectedKey();
+        Condition condition = new Condition();
+        condition.setFunction(view.getCondition());
+        condition.addParam(variable);
+
+        valid = true;
+        for (ConditionParamPresenter param : currentParams) {
+            param.clearError();
+            if (isValid(param)) {
+                condition.getParams().add(param.getValue());
+            } else {
+                param.setError(PARAM_MUST_BE_COMPLETED_ERROR);
+                valid = false;
+            }
+        }
+
+        Condition oldValue = value;
+        value = condition;
+        notifyChange(oldValue, value);
+    }
+
+
     private boolean isValid(ConditionParamPresenter param) {
         return !isEmpty(param.getValue());
     }
@@ -237,6 +287,7 @@ public class SimpleConditionEditorPresenter
         initParams(value.getFunction(), value.getParams());
         view.setVariable(value.getParams().get(0));
         view.setCondition(value.getFunction());
+        view.getVariableSelectorDropDown().setSelectedItem(value.getParams().get(0));
         valid = true;
     }
 
@@ -364,7 +415,7 @@ public class SimpleConditionEditorPresenter
         view.removeParams();
     }
 
-    private String unboxDefaultType(String type) {
+    public static String unboxDefaultType(String type) {
         switch (type) {
             case "Short":
             case "short":

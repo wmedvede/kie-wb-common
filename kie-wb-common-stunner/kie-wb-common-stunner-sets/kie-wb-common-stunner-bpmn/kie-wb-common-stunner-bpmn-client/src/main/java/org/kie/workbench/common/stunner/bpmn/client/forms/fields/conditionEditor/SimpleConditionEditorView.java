@@ -37,6 +37,7 @@ import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationServic
 import org.uberfire.client.views.pfly.widgets.JQueryProducer;
 import org.uberfire.client.views.pfly.widgets.Popover;
 import org.uberfire.commons.data.Pair;
+import org.uberfire.ext.widgets.common.client.dropdown.LiveSearchDropDown;
 
 import static org.kie.workbench.common.stunner.bpmn.client.forms.util.SelectUtils.setOptions;
 
@@ -69,6 +70,10 @@ public class SimpleConditionEditorView
     @Inject
     @DataField("variable-selector-error")
     private Span variableSelectorError;
+
+    @Inject
+    @DataField("variable-selector-drop-down")
+    private LiveSearchDropDown<String> variableSelectorDropDown;
 
     @Inject
     @DataField("condition-selector-form")
@@ -107,6 +112,11 @@ public class SimpleConditionEditorView
         variableSelectorHelpPopover.wrap(variableSelectorHelp).popover();
         conditionSelectorHelp.setAttribute(DATA_CONTENT_ATTR, translationService.getValue(CONDITION_SELECTOR_HELP));
         conditionSelectorHelpPopover.wrap(conditionSelectorHelp).popover();
+    }
+
+    @Override
+    public LiveSearchDropDown<String> getVariableSelectorDropDown() {
+        return variableSelectorDropDown;
     }
 
     @Override
