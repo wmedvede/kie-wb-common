@@ -64,6 +64,11 @@ public class ConditionParamView
     }
 
     @Override
+    public String getName() {
+        return paramLabel.getTextContent();
+    }
+
+    @Override
     public void clear() {
         setValue(null);
         clearError();

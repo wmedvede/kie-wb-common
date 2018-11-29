@@ -19,6 +19,7 @@ package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEdito
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,8 +40,6 @@ public class FunctionSearchService implements LiveSearchService<String> {
 
     private String FUNCTIONS_DOMAIN = "KieFunctions.";
 
-    private ClientSession session;
-
     private Path path;
 
     private Map<String, String> options = new HashMap<>();
@@ -58,7 +57,6 @@ public class FunctionSearchService implements LiveSearchService<String> {
     }
 
     public void init(ClientSession session) {
-        this.session = session;
         this.path = session.getCanvasHandler().getDiagram().getMetadata().getPath();
     }
 
@@ -78,7 +76,7 @@ public class FunctionSearchService implements LiveSearchService<String> {
     public void search(String pattern, int maxResults, LiveSearchCallback<String> callback) {
         LiveSearchResults<String> results = new LiveSearchResults<>(maxResults);
         options.entrySet().stream()
-                .filter(entry -> entry.getValue().toLowerCase().startsWith(pattern.toLowerCase()))
+                .filter(entry -> entry.getValue().toLowerCase().contains(pattern.toLowerCase()))
                 .forEach(entry -> results.add(entry.getKey(), entry.getValue()));
         callback.afterSearch(results);
     }
@@ -102,7 +100,6 @@ public class FunctionSearchService implements LiveSearchService<String> {
     }
 
     private String translateFunctionName(String function) {
-        String result = translationService.getValue(FUNCTIONS_DOMAIN + function);
-        return result != null ? result : function;
+        return Optional.ofNullable(translationService.getValue(FUNCTIONS_DOMAIN + function)).orElse(function);
     }
 }

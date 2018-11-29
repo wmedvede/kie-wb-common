@@ -25,8 +25,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
-import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.kie.workbench.common.stunner.bpmn.client.forms.util.FieldEditorPresenter;
@@ -48,7 +46,9 @@ public class SimpleConditionEditorPresenter
 
     private static final String FUNCTION_NOT_SELECTED_ERROR = "SimpleConditionEditorView.FunctionNotSelectedErrorMessage";
 
-    private static final String PARAM_MUST_BE_COMPLETED_ERROR = "Param must be completed";
+    private static final String VARIABLE_NOT_FOUND_ERROR = "SimpleConditionEditorView.VariableNotFoundError";
+
+    private static final String PARAM_MUST_BE_COMPLETED_ERROR = "SimpleConditionEditorView.ParamMustBeCompletedErrorMessage";
 
     public interface View extends UberElement<SimpleConditionEditorPresenter> {
 
@@ -129,8 +129,7 @@ public class SimpleConditionEditorPresenter
                 if (type != null) {
                     functionSearchService.reload(type, () -> onSetValue(value));
                 } else {
-                    //TODO WM, ver si acá simplemente no hago nada o muestro un mensaje tipo
-                    //It seems like variable: "var" was removed form process
+                    view.setVariableError(translationService.getValue(VARIABLE_NOT_FOUND_ERROR, value.getParams().get(0)));
                 }
             }
         }
@@ -159,6 +158,7 @@ public class SimpleConditionEditorPresenter
             functionSearchService.reload(type, () -> {
                 functionSearchSelectionHandler.clearSelection();
                 view.getConditionSelectorDropDown().clear();
+                onConditionChange();
             });
         } else {
             functionSearchService.clear();
@@ -198,7 +198,7 @@ public class SimpleConditionEditorPresenter
             if (isValid(param)) {
                 condition.getParams().add(param.getValue());
             } else {
-                param.setError(PARAM_MUST_BE_COMPLETED_ERROR);
+                param.setError(translationService.getValue(PARAM_MUST_BE_COMPLETED_ERROR));
                 valid = false;
             }
         }
@@ -219,13 +219,6 @@ public class SimpleConditionEditorPresenter
         valid = true;
     }
 
-    private boolean onLoadFunctionsError(Message error, Throwable throwable) {
-        //TODO review this.
-        Window.alert("Un expected error was produced while loading available conditions: " + throwable.getMessage());
-        clear();
-        return false;
-    }
-
     private void initParams(String function, List<String> paramValues) {
         removeParams();
         Map<Integer, String> paramValue = new HashMap<>();
@@ -243,7 +236,7 @@ public class SimpleConditionEditorPresenter
             param.setName(paramDef.getName());
             param.setValue(paramValue.get(i));
             view.addParam(param.getView().getElement());
-            param.setOnChangeCommand(() -> onParamChange());
+            param.setOnChangeCommand(this::onParamChange);
         }
     }
 
@@ -260,33 +253,5 @@ public class SimpleConditionEditorPresenter
         currentParams.forEach(paramInstance::destroy);
         currentParams.clear();
         view.removeParams();
-    }
-
-    public static String unboxDefaultType(String type) {
-        switch (type) {
-            case "Short":
-            case "short":
-                return Short.class.getName();
-            case "Integer":
-            case "int":
-                return Integer.class.getName();
-            case "Long":
-            case "long":
-                return Long.class.getName();
-            case "Float":
-            case "float":
-                return Float.class.getName();
-            case "Dobule":
-            case "double":
-                return Double.class.getName();
-            case "Boolean":
-            case "boolean":
-                return Boolean.class.getName();
-            case "Character":
-            case "char":
-                return Character.class.getName();
-            default:
-                return type;
-        }
     }
 }

@@ -36,12 +36,9 @@ import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadataQueryR
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.uberfire.backend.vfs.Path;
-import org.uberfire.commons.data.Pair;
 import org.uberfire.ext.widgets.common.client.dropdown.LiveSearchCallback;
 import org.uberfire.ext.widgets.common.client.dropdown.LiveSearchResults;
 import org.uberfire.ext.widgets.common.client.dropdown.LiveSearchService;
-
-import static org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor.SimpleConditionEditorPresenter.unboxDefaultType;
 
 public class VariableSearchService implements LiveSearchService<String> {
 
@@ -95,7 +92,7 @@ public class VariableSearchService implements LiveSearchService<String> {
     public void search(String pattern, int maxResults, LiveSearchCallback<String> callback) {
         LiveSearchResults<String> results = new LiveSearchResults<>(maxResults);
         options.entrySet().stream()
-                .filter(entry -> entry.getValue().toLowerCase().startsWith(pattern.toLowerCase()))
+                .filter(entry -> entry.getValue().toLowerCase().contains(pattern.toLowerCase()))
                 .forEach(entry -> results.add(entry.getKey(), entry.getValue()));
         callback.afterSearch(results);
     }
@@ -120,30 +117,63 @@ public class VariableSearchService implements LiveSearchService<String> {
         optionType.clear();
     }
 
+    public static String unboxDefaultType(String type) {
+        switch (type) {
+            case "Short":
+            case "short":
+                return Short.class.getName();
+            case "Integer":
+            case "int":
+                return Integer.class.getName();
+            case "Long":
+            case "long":
+                return Long.class.getName();
+            case "Float":
+            case "float":
+                return Float.class.getName();
+            case "Dobule":
+            case "double":
+                return Double.class.getName();
+            case "Boolean":
+            case "boolean":
+                return Boolean.class.getName();
+            case "Character":
+            case "char":
+                return Character.class.getName();
+            case "String":
+                return String.class.getName();
+            case "Object":
+                return Object.class.getName();
+            default:
+                return type;
+        }
+    }
+
     private void initVariables(List<VariableMetadata> variables, TypeMetadataQueryResult result) {
         variablesMetadata.clear();
         optionType.clear();
         typesMetadata = result.getTypeMetadatas().stream().collect(Collectors.toMap(TypeMetadata::getType, Function.identity()));
         variables.forEach(variableMetadata -> {
             TypeMetadata typeMetadata = Optional.ofNullable(typesMetadata.get(variableMetadata.getType())).orElse(new TypeMetadata(Object.class.getName()));
-            variableMetadata.setMetadata(typeMetadata);
+            variableMetadata.setTypeMetadata(typeMetadata);
             variablesMetadata.put(variableMetadata.getName(), variableMetadata);
             addVariableOptions(variableMetadata);
         });
     }
 
     private void addVariableOptions(VariableMetadata variableMetadata) {
-        Pair<String, String> variableOption = new Pair<>(variableMetadata.getName(), variableMetadata.getName());
-        options.put(variableOption.getK1(), variableOption.getK2());
-        optionType.put(variableOption.getK1(), unboxDefaultType(variableMetadata.getType()));
-        TypeMetadata typeMetadata = variableMetadata.getMetadata();
+        String option = variableMetadata.getName();
+        String optionLabel = variableMetadata.getName();
+        options.put(option, optionLabel);
+        optionType.put(option, unboxDefaultType(variableMetadata.getType()));
+        TypeMetadata typeMetadata = variableMetadata.getTypeMetadata();
         typeMetadata.getFieldMetadata().stream()
                 .filter(fieldMetadata -> fieldMetadata.getAccessor() != null)
                 .forEach(fieldMetadata -> {
-                    Pair<String, String> fieldOption = new Pair<>(variableMetadata.getName() + "." + fieldMetadata.getAccessor() + "()",
-                                                                  variableMetadata.getName() + "." + fieldMetadata.getName());
-                    options.put(fieldOption.getK1(), fieldOption.getK2());
-                    optionType.put(fieldOption.getK1(), unboxDefaultType(fieldMetadata.getType()));
+                    String fieldOption = variableMetadata.getName() + "." + fieldMetadata.getAccessor() + "()";
+                    String fieldOptionLabel = variableMetadata.getName() + "." + fieldMetadata.getName();
+                    options.put(fieldOption, fieldOptionLabel);
+                    optionType.put(fieldOption, unboxDefaultType(fieldMetadata.getType()));
                 });
     }
 }

@@ -16,7 +16,10 @@
 
 package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor;
 
+import java.util.Objects;
+
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadata;
+import org.kie.workbench.common.stunner.core.util.HashUtil;
 
 public class VariableMetadata {
 
@@ -24,7 +27,7 @@ public class VariableMetadata {
 
     private String type;
 
-    private TypeMetadata metadata;
+    private TypeMetadata typeMetadata;
 
     public VariableMetadata() {
 
@@ -32,10 +35,10 @@ public class VariableMetadata {
 
     public VariableMetadata(String name,
                             String type,
-                            TypeMetadata metadata) {
+                            TypeMetadata typeMetadata) {
         this.name = name;
         this.type = type;
-        this.metadata = metadata;
+        this.typeMetadata = typeMetadata;
     }
 
     public VariableMetadata(String name,
@@ -60,11 +63,32 @@ public class VariableMetadata {
         this.type = type;
     }
 
-    public TypeMetadata getMetadata() {
-        return metadata;
+    public TypeMetadata getTypeMetadata() {
+        return typeMetadata;
     }
 
-    public void setMetadata(TypeMetadata metadata) {
-        this.metadata = metadata;
+    public void setTypeMetadata(TypeMetadata typeMetadata) {
+        this.typeMetadata = typeMetadata;
+    }
+
+    @Override
+    public int hashCode() {
+        return HashUtil.combineHashCodes(Objects.hashCode(name),
+                                         Objects.hashCode(type),
+                                         Objects.hashCode(typeMetadata));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o instanceof VariableMetadata) {
+            VariableMetadata other = (VariableMetadata) o;
+            return Objects.equals(name, other.name) &&
+                    Objects.equals(type, other.type) &&
+                    Objects.equals(typeMetadata, other.typeMetadata);
+        }
+        return false;
     }
 }

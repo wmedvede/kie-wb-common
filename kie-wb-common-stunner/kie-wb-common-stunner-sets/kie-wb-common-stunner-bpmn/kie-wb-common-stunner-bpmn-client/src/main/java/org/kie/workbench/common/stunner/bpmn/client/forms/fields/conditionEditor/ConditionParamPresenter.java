@@ -28,6 +28,8 @@ public class ConditionParamPresenter {
 
         void setName(String name);
 
+        String getName();
+
         String getValue();
 
         void setValue(String value);
@@ -61,6 +63,10 @@ public class ConditionParamPresenter {
 
     public void setName(String name) {
         view.setName(name);
+    }
+
+    public String getName() {
+        return view.getName();
     }
 
     public String getValue() {
