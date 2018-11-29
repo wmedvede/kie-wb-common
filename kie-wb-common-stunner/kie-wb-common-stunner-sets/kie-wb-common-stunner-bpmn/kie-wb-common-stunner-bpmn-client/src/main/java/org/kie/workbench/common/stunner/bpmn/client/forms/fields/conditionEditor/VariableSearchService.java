@@ -43,7 +43,7 @@ import org.uberfire.ext.widgets.common.client.dropdown.LiveSearchService;
 
 import static org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor.SimpleConditionEditorPresenter.unboxDefaultType;
 
-public class SimpleConditionEditorSearchService implements LiveSearchService<String> {
+public class VariableSearchService implements LiveSearchService<String> {
 
     private Caller<ConditionEditorService> service;
 
@@ -56,25 +56,8 @@ public class SimpleConditionEditorSearchService implements LiveSearchService<Str
     private Map<String, String> optionType = new HashMap<>();
 
     @Inject
-    public SimpleConditionEditorSearchService(Caller<ConditionEditorService> service) {
+    public VariableSearchService(Caller<ConditionEditorService> service) {
         this.service = service;
-    }
-
-    @Override
-    public void search(String pattern, int maxResults, LiveSearchCallback<String> callback) {
-        LiveSearchResults<String> results = new LiveSearchResults<>(maxResults);
-        options.entrySet().stream()
-                .filter(entry -> entry.getValue().toLowerCase().startsWith(pattern.toLowerCase()))
-                .forEach(entry -> results.add(entry.getKey(), entry.getValue()));
-        callback.afterSearch(results);
-    }
-
-    @Override
-    public void searchEntry(String key, LiveSearchCallback<String> callback) {
-        LiveSearchResults<String> results = new LiveSearchResults<>();
-        //TODO check what happens here when the option is not present.
-        results.add(key, options.get(key));
-        callback.afterSearch(results);
     }
 
     public void init(ClientSession session) {
@@ -108,8 +91,33 @@ public class SimpleConditionEditorSearchService implements LiveSearchService<Str
         }
     }
 
+    @Override
+    public void search(String pattern, int maxResults, LiveSearchCallback<String> callback) {
+        LiveSearchResults<String> results = new LiveSearchResults<>(maxResults);
+        options.entrySet().stream()
+                .filter(entry -> entry.getValue().toLowerCase().startsWith(pattern.toLowerCase()))
+                .forEach(entry -> results.add(entry.getKey(), entry.getValue()));
+        callback.afterSearch(results);
+    }
+
+    @Override
+    public void searchEntry(String key, LiveSearchCallback<String> callback) {
+        LiveSearchResults<String> results = new LiveSearchResults<>();
+        if (options.containsKey(key)) {
+            results.add(key, options.get(key));
+        }
+        callback.afterSearch(results);
+    }
+
     public String getOptionType(String key) {
         return optionType.get(key);
+    }
+
+    public void clear() {
+        options.clear();
+        variablesMetadata.clear();
+        typesMetadata.clear();
+        optionType.clear();
     }
 
     private void initVariables(List<VariableMetadata> variables, TypeMetadataQueryResult result) {

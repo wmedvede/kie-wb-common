@@ -16,30 +16,21 @@
 
 package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor;
 
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.jboss.errai.common.client.dom.Anchor;
 import org.jboss.errai.common.client.dom.DOMUtil;
 import org.jboss.errai.common.client.dom.Div;
-import org.jboss.errai.common.client.dom.Event;
 import org.jboss.errai.common.client.dom.HTMLElement;
-import org.jboss.errai.common.client.dom.Select;
 import org.jboss.errai.common.client.dom.Span;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.EventHandler;
-import org.jboss.errai.ui.shared.api.annotations.ForEvent;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
 import org.uberfire.client.views.pfly.widgets.JQueryProducer;
 import org.uberfire.client.views.pfly.widgets.Popover;
-import org.uberfire.commons.data.Pair;
 import org.uberfire.ext.widgets.common.client.dropdown.LiveSearchDropDown;
-
-import static org.kie.workbench.common.stunner.bpmn.client.forms.util.SelectUtils.setOptions;
 
 @Templated
 public class SimpleConditionEditorView
@@ -58,7 +49,7 @@ public class SimpleConditionEditorView
 
     @Inject
     @DataField("variable-selector")
-    private Select variableSelector;
+    private LiveSearchDropDown<String> variableSelectorDropDown;
 
     @Inject
     @DataField("variable-selector-help")
@@ -72,16 +63,12 @@ public class SimpleConditionEditorView
     private Span variableSelectorError;
 
     @Inject
-    @DataField("variable-selector-drop-down")
-    private LiveSearchDropDown<String> variableSelectorDropDown;
-
-    @Inject
     @DataField("condition-selector-form")
     private Div conditionSelectorForm;
 
     @Inject
     @DataField("condition-selector")
-    private Select conditionSelector;
+    private LiveSearchDropDown<String> conditionSelectorDropDown;
 
     @Inject
     @DataField("condition-selector-error")
@@ -120,18 +107,8 @@ public class SimpleConditionEditorView
     }
 
     @Override
-    public void setVariableOptions(List<Pair<String, String>> options, Pair<String, String> defaultOption) {
-        setOptions(variableSelector, options, defaultOption);
-    }
-
-    @Override
-    public String getVariable() {
-        return variableSelector.getValue();
-    }
-
-    @Override
-    public void setVariable(String variable) {
-        variableSelector.setValue(variable);
+    public LiveSearchDropDown<String> getConditionSelectorDropDown() {
+        return conditionSelectorDropDown;
     }
 
     @Override
@@ -144,21 +121,6 @@ public class SimpleConditionEditorView
     public void clearVariableError() {
         DOMUtil.removeCSSClass(variableSelectorForm, "has-error");
         variableSelectorError.setTextContent(null);
-    }
-
-    @Override
-    public void setConditionOptions(List<Pair<String, String>> options, Pair<String, String> defaultOption) {
-        setOptions(conditionSelector, options, defaultOption);
-    }
-
-    @Override
-    public String getCondition() {
-        return conditionSelector.getValue();
-    }
-
-    @Override
-    public void setCondition(String condition) {
-        conditionSelector.setValue(condition);
     }
 
     @Override
@@ -181,15 +143,5 @@ public class SimpleConditionEditorView
     @Override
     public void addParam(HTMLElement param) {
         conditionParams.appendChild(param);
-    }
-
-    @EventHandler("variable-selector")
-    private void onVariableChange(@ForEvent("change") final Event event) {
-        presenter.onVariableChange();
-    }
-
-    @EventHandler("condition-selector")
-    private void onConditionChange(@ForEvent("change") final Event event) {
-        presenter.onConditionChange();
     }
 }

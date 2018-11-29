@@ -47,6 +47,7 @@ public class SelectUtils {
         clear(select);
         select.add(newDisabledOption(defaultOption.getK1(), defaultOption.getK2()));
         options.forEach(option -> select.add(newOption(option.getK1(), option.getK2())));
+        select.setValue(defaultOption.getK2());
     }
 
     public static void clear(final Select select) {

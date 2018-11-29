@@ -37,6 +37,8 @@ public class ConditionParamPresenter {
         void clearError();
 
         void setError(String error);
+
+        void setReadonly(boolean readonly);
     }
 
     private Command onChangeCommand;
@@ -79,6 +81,10 @@ public class ConditionParamPresenter {
 
     public void setError(String error) {
         view.setError(error);
+    }
+
+    public void setReadonly(boolean readonly) {
+        view.setReadonly(readonly);
     }
 
     public void setOnChangeCommand(Command onChangeCommand) {

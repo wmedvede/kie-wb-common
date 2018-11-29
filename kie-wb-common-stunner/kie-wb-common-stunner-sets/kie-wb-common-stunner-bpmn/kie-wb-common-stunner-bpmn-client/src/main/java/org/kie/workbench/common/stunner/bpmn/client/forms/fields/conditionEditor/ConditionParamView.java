@@ -91,6 +91,11 @@ public class ConditionParamView
         paramError.setTextContent(error);
     }
 
+    @Override
+    public void setReadonly(boolean readonly) {
+        paramInput.setReadOnly(readonly);
+    }
+
     @EventHandler("param-input")
     private void onValueChange(@ForEvent("change") final Event event) {
         presenter.onValueChange();

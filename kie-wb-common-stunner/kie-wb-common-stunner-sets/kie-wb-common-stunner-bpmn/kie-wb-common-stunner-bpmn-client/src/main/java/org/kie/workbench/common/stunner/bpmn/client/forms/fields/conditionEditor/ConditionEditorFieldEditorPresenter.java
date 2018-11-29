@@ -16,9 +16,6 @@
 
 package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -27,8 +24,6 @@ import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.kie.workbench.common.stunner.bpmn.client.forms.fields.scriptEditor.ScriptTypeFieldEditorPresenter;
 import org.kie.workbench.common.stunner.bpmn.client.forms.util.FieldEditorPresenter;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
@@ -36,7 +31,6 @@ import org.kie.workbench.common.stunner.bpmn.forms.conditions.GenerateConditionR
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ParseConditionResult;
 import org.kie.workbench.common.stunner.bpmn.forms.model.ScriptTypeMode;
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
-import org.kie.workbench.common.stunner.core.graph.Node;
 import org.uberfire.client.mvp.UberElement;
 
 import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
@@ -71,10 +65,6 @@ public class ConditionEditorFieldEditorPresenter
 
     private Caller<ConditionEditorService> service;
 
-    private ClientSession session;
-
-    private List<VariableMetadata> variables = new ArrayList<>();
-
     @Inject
     public ConditionEditorFieldEditorPresenter(View view,
                                                SimpleConditionEditorPresenter simpleConditionEditor,
@@ -101,8 +91,6 @@ public class ConditionEditorFieldEditorPresenter
     }
 
     public void init(ClientSession session) {
-        this.session = session;
-        //initializeVariables();
         simpleConditionEditor.init(session);
     }
 
@@ -188,50 +176,10 @@ public class ConditionEditorFieldEditorPresenter
         if (!result.hasError()) {
             simpleConditionEditor.setValue(result.getCondition());
         } else {
-            showError(SCRIPT_PARSING_ERROR + ": " + result.getError());
             simpleConditionEditor.setValue(null);
+            showError(SCRIPT_PARSING_ERROR + ": " + result.getError());
         }
         showSimpleConditionEditor();
-    }
-
-    private void initializeVariables() {
-        //TODO WM, review this initialization.
-        //It should include parent process variables in case of a subprocess?
-        String canvasRootUUID = session.getCanvasHandler().getDiagram().getMetadata().getCanvasRootUUID();
-        if (canvasRootUUID != null) {
-            Node node = session.getCanvasHandler().getDiagram().getGraph().getNode(canvasRootUUID);
-            Object definition = ((org.kie.workbench.common.stunner.core.graph.content.view.View) node.getContent()).getDefinition();
-            if (definition instanceof BPMNDiagram) {
-                BPMNDiagramImpl bpmnDiagram = (BPMNDiagramImpl) definition;
-                String processVars = bpmnDiagram.getProcessData().getProcessVariables().getValue();
-                String[] variableDefs = processVars.split(",");
-                for (String variableDefItem : variableDefs) {
-                    if (!variableDefItem.isEmpty()) {
-                        String[] variableDef = variableDefItem.split(":");
-                        if (variableDef.length == 1) {
-                            variables.add(new VariableMetadata(variableDef[0], Object.class.getName()));
-                        } else {
-                            variables.add(new VariableMetadata(variableDef[0], unboxDefaultType(variableDef[1])));
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private String unboxDefaultType(String type) {
-        if ("Boolean".equals(type)) {
-            return Boolean.class.getName();
-        } else if ("Float".equals(type)) {
-            return Float.class.getName();
-        } else if ("Integer".equals(type)) {
-            return Integer.class.getName();
-        } else if ("String".equals(type)) {
-            return String.class.getName();
-        } else if ("Object".equals(type)) {
-            return Object.class.getName();
-        }
-        return type;
     }
 
     private void enableSimpleConditionEditor(boolean enable) {
