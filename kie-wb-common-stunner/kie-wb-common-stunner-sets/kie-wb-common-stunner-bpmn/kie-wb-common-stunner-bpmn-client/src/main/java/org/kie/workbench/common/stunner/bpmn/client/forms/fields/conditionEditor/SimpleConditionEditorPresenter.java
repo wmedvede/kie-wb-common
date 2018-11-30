@@ -48,8 +48,6 @@ public class SimpleConditionEditorPresenter
 
     private static final String VARIABLE_NOT_FOUND_ERROR = "SimpleConditionEditorView.VariableNotFoundError";
 
-    private static final String PARAM_MUST_BE_COMPLETED_ERROR = "SimpleConditionEditorView.ParamMustBeCompletedErrorMessage";
-
     public interface View extends UberElement<SimpleConditionEditorPresenter> {
 
         void setVariableError(String error);
@@ -81,6 +79,8 @@ public class SimpleConditionEditorPresenter
 
     private SingleLiveSearchSelectionHandler<String> functionSearchSelectionHandler = new SingleLiveSearchSelectionHandler<>();
 
+    private FunctionNamingService functionNamingService;
+
     private ClientTranslationService translationService;
 
     private List<ConditionParamPresenter> currentParams = new ArrayList<>();
@@ -92,11 +92,13 @@ public class SimpleConditionEditorPresenter
                                           ManagedInstance<ConditionParamPresenter> paramInstance,
                                           VariableSearchService variableSearchService,
                                           FunctionSearchService functionSearchService,
+                                          FunctionNamingService functionNamingService,
                                           ClientTranslationService translationService) {
         this.view = view;
         this.paramInstance = paramInstance;
         this.variableSearchService = variableSearchService;
         this.functionSearchService = functionSearchService;
+        this.functionNamingService = functionNamingService;
         this.translationService = translationService;
     }
 
@@ -187,29 +189,23 @@ public class SimpleConditionEditorPresenter
 
     private void applyChange() {
         String variable = variableSearchSelectionHandler.getSelectedKey();
+        String type = variableSearchService.getOptionType(variable);
         String function = functionSearchSelectionHandler.getSelectedKey();
         Condition condition = new Condition();
         condition.setFunction(function);
         condition.addParam(variable);
 
-        valid = !isEmpty(variable) && !isEmpty(function);
+        valid = !isEmpty(variable) && !isEmpty(function) && !isEmpty(type);
         for (ConditionParamPresenter param : currentParams) {
-            param.clearError();
-            if (isValid(param)) {
-                condition.getParams().add(param.getValue());
-            } else {
-                param.setError(translationService.getValue(PARAM_MUST_BE_COMPLETED_ERROR));
+            if (!param.validateParam(type)) {
                 valid = false;
             }
+            condition.getParams().add(param.getValue());
         }
 
         Condition oldValue = value;
         value = condition;
         notifyChange(oldValue, value);
-    }
-
-    private boolean isValid(ConditionParamPresenter param) {
-        return !isEmpty(param.getValue());
     }
 
     private void onSetValue(Condition value) {
@@ -233,7 +229,8 @@ public class SimpleConditionEditorPresenter
             paramDef = functionDef.getParams().get(i);
             ConditionParamPresenter param = paramInstance.get();
             currentParams.add(param);
-            param.setName(paramDef.getName());
+            param.setName(functionNamingService.getParamName(functionDef.getName(), paramDef.getName()));
+            param.setHelp(functionNamingService.getParamHelp(functionDef.getName(), paramDef.getName()));
             param.setValue(paramValue.get(i));
             view.addParam(param.getView().getElement());
             param.setOnChangeCommand(this::onParamChange);

@@ -22,11 +22,14 @@ import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
 
 public class ConditionGenerator {
 
+    public static final String PARAMETER_NULL_EMPTY = "Parameter can not be null nor empty";
+    public static final String MISSING_CONDITION_ERROR = "A condition must be provided";
+
     public String generateScript(Condition condition) throws GenerateConditionException {
         final StringBuilder script = new StringBuilder();
 
         if (condition == null) {
-            throw new GenerateConditionException(ConditionEditorErrors.MISSING_CONDITION_ERROR);
+            throw new GenerateConditionException(MISSING_CONDITION_ERROR);
         }
 
         if (!isValidFunction(condition.getFunction())) {
@@ -52,8 +55,7 @@ public class ConditionGenerator {
                 script.append("\"");
             }
             if (param == null || param.isEmpty()) {
-                //WM TODO ver si hago esto en realidad dejo poner null...
-                throw new GenerateConditionException(ConditionEditorErrors.PARAMETER_NULL_EMPTY);
+                throw new GenerateConditionException(PARAMETER_NULL_EMPTY);
             }
         }
         script.append(");");

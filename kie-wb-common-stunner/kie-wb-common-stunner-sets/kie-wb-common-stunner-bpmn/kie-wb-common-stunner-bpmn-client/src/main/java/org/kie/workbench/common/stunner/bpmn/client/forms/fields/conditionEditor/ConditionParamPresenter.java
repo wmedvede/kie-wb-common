@@ -16,19 +16,43 @@
 
 package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.mvp.Command;
 
+import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
+
 public class ConditionParamPresenter {
+
+    private static final String PARAM_MUST_BE_COMPLETED_ERROR = "ConditionParamPresenter.ParamMustBeCompletedErrorMessage";
+
+    private static final String SHORT_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.ShortNumericValueExpectedErrorMessage";
+
+    private static final String INTEGER_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.IntegerNumericValueExpectedErrorMessage";
+
+    private static final String LONG_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.LongNumericValueExpectedErrorMessage";
+
+    private static final String FLOAT_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.FloatNumericValueExpectedErrorMessage";
+
+    private static final String DOUBLE_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.DoubleNumericValueExpectedErrorMessage";
+
+    private static final String BIG_DECIMAL_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.BigDecimalNumericValueExpectedErrorMessage";
+
+    private static final String BIG_INTEGER_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.BigIntegerNumericValueExpectedErrorMessage";
 
     public interface View extends UberElement<ConditionParamPresenter> {
 
         void setName(String name);
 
         String getName();
+
+        void setHelp(String help);
 
         String getValue();
 
@@ -47,9 +71,12 @@ public class ConditionParamPresenter {
 
     private View view;
 
+    private ClientTranslationService translationService;
+
     @Inject
-    public ConditionParamPresenter(View view) {
+    public ConditionParamPresenter(View view, ClientTranslationService translationService) {
         this.view = view;
+        this.translationService = translationService;
     }
 
     @PostConstruct
@@ -63,6 +90,10 @@ public class ConditionParamPresenter {
 
     public void setName(String name) {
         view.setName(name);
+    }
+
+    public void setHelp(String help) {
+        view.setHelp(help);
     }
 
     public String getName() {
@@ -95,6 +126,79 @@ public class ConditionParamPresenter {
 
     public void setOnChangeCommand(Command onChangeCommand) {
         this.onChangeCommand = onChangeCommand;
+    }
+
+    public boolean validateParam(String expectedType) {
+        clearError();
+        String value = view.getValue();
+        if (isEmpty(value)) {
+            setError(translationService.getValue(PARAM_MUST_BE_COMPLETED_ERROR));
+            return false;
+        }
+
+        if (Short.class.getName().equals(expectedType)) {
+            try {
+                Short.parseShort(value);
+            } catch (NumberFormatException e) {
+                setError(translationService.getValue(SHORT_NUMERIC_VALUE_EXPECTED_ERROR));
+                return false;
+            }
+        }
+
+        if (Integer.class.getName().equals(expectedType)) {
+            try {
+                Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                setError(translationService.getValue(INTEGER_NUMERIC_VALUE_EXPECTED_ERROR));
+                return false;
+            }
+        }
+
+        if (Long.class.getName().equals(expectedType)) {
+            try {
+                Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                setError(translationService.getValue(LONG_NUMERIC_VALUE_EXPECTED_ERROR));
+                return false;
+            }
+        }
+
+        if (Float.class.getName().equals(expectedType)) {
+            try {
+                Float.parseFloat(value);
+            } catch (NumberFormatException e) {
+                setError(translationService.getValue(FLOAT_NUMERIC_VALUE_EXPECTED_ERROR));
+                return false;
+            }
+        }
+
+        if (Double.class.getName().equals(expectedType)) {
+            try {
+                Double.parseDouble(value);
+            } catch (NumberFormatException e) {
+                setError(translationService.getValue(DOUBLE_NUMERIC_VALUE_EXPECTED_ERROR));
+                return false;
+            }
+        }
+
+        if (BigDecimal.class.getName().equals(expectedType)) {
+            try {
+                new BigDecimal(value);
+            } catch (NumberFormatException e) {
+                setError(translationService.getValue(BIG_DECIMAL_NUMERIC_VALUE_EXPECTED_ERROR));
+                return false;
+            }
+        }
+
+        if (BigInteger.class.getName().equals(expectedType)) {
+            try {
+                new BigInteger(value);
+            } catch (NumberFormatException e) {
+                setError(translationService.getValue(BIG_INTEGER_NUMERIC_VALUE_EXPECTED_ERROR));
+                return false;
+            }
+        }
+        return true;
     }
 
     public void onValueChange() {

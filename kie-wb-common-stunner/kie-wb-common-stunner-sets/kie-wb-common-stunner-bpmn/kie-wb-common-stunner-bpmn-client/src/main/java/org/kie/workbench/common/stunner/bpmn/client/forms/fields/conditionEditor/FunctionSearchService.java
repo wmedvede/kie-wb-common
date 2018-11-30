@@ -19,7 +19,6 @@ package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEdito
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,7 +27,6 @@ import javax.inject.Inject;
 import org.jboss.errai.common.client.api.Caller;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.FunctionDef;
-import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.ext.widgets.common.client.dropdown.LiveSearchCallback;
@@ -38,8 +36,6 @@ import org.uberfire.mvp.Command;
 
 public class FunctionSearchService implements LiveSearchService<String> {
 
-    private String FUNCTIONS_DOMAIN = "KieFunctions.";
-
     private Path path;
 
     private Map<String, String> options = new HashMap<>();
@@ -48,12 +44,12 @@ public class FunctionSearchService implements LiveSearchService<String> {
 
     private Caller<ConditionEditorService> service;
 
-    private ClientTranslationService translationService;
+    private FunctionNamingService functionNamingService;
 
     @Inject
-    public FunctionSearchService(Caller<ConditionEditorService> service, ClientTranslationService translationService) {
+    public FunctionSearchService(Caller<ConditionEditorService> service, FunctionNamingService functionNamingService) {
         this.service = service;
-        this.translationService = translationService;
+        this.functionNamingService = functionNamingService;
     }
 
     public void init(ClientSession session) {
@@ -96,10 +92,6 @@ public class FunctionSearchService implements LiveSearchService<String> {
 
     private void setFunctions(List<FunctionDef> functions) {
         currentFunctions = functions.stream().collect(Collectors.toMap(FunctionDef::getName, Function.identity()));
-        options = functions.stream().collect(Collectors.toMap(FunctionDef::getName, functionDef -> translateFunctionName(functionDef.getName())));
-    }
-
-    private String translateFunctionName(String function) {
-        return Optional.ofNullable(translationService.getValue(FUNCTIONS_DOMAIN + function)).orElse(function);
+        options = functions.stream().collect(Collectors.toMap(FunctionDef::getName, functionDef -> functionNamingService.getFunctionName(functionDef.getName())));
     }
 }

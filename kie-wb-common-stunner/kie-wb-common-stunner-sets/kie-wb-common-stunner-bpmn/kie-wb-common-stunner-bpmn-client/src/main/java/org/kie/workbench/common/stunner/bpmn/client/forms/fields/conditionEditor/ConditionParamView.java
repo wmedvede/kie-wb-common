@@ -16,8 +16,10 @@
 
 package org.kie.workbench.common.stunner.bpmn.client.forms.fields.conditionEditor;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jboss.errai.common.client.dom.Anchor;
 import org.jboss.errai.common.client.dom.DOMUtil;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.common.client.dom.Event;
@@ -29,11 +31,17 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.ForEvent;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.uberfire.client.views.pfly.widgets.JQueryProducer;
+import org.uberfire.client.views.pfly.widgets.Popover;
+
+import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
 
 @Templated
 public class ConditionParamView
         implements IsElement,
                    ConditionParamPresenter.View {
+
+    private static final String DATA_CONTENT_ATTR = "data-content";
 
     @Inject
     @DataField("param-group")
@@ -48,10 +56,22 @@ public class ConditionParamView
     private TextInput paramInput;
 
     @Inject
+    @DataField("param-input-help")
+    private Anchor paramInputHelp;
+
+    @Inject
+    private JQueryProducer.JQuery<Popover> paramInputHelpPopover;
+
+    @Inject
     @DataField("param-error")
     private Span paramError;
 
     private ConditionParamPresenter presenter;
+
+    @PostConstruct
+    public void  init() {
+        paramInputHelpPopover.wrap(paramInputHelp).popover();
+    }
 
     @Override
     public void init(ConditionParamPresenter presenter) {
@@ -66,6 +86,14 @@ public class ConditionParamView
     @Override
     public String getName() {
         return paramLabel.getTextContent();
+    }
+
+    @Override
+    public void setHelp(String help) {
+        if (!isEmpty(help)) {
+            paramInputHelp.setAttribute(DATA_CONTENT_ATTR, help);
+            paramInputHelp.getStyle().removeProperty("display");
+        }
     }
 
     @Override
