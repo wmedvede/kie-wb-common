@@ -144,6 +144,7 @@ public class ConditionEditorFieldEditorPresenter
             editorService.call(result -> onSimpleConditionSelected((ParseConditionResult) result),
                                (message, throwable) -> onSimpleConditionSelectedError((Message) message, throwable)).parseCondition(value.getScript());
         } else {
+            simpleConditionEditor.setValue(null);
             showSimpleConditionEditor();
         }
     }

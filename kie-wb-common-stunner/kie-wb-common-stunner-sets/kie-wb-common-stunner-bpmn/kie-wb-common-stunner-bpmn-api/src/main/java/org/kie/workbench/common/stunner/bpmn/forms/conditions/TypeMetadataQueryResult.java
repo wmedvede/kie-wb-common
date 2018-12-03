@@ -16,9 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.forms.conditions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -27,29 +27,29 @@ import org.kie.workbench.common.stunner.core.util.HashUtil;
 @Portable
 public class TypeMetadataQueryResult {
 
-    private List<TypeMetadata> typeMetadatas = new ArrayList<>();
+    private Set<TypeMetadata> typeMetadatas = new HashSet<>();
 
-    private List<String> missingTypes = new ArrayList<>();
+    private Set<String> missingTypes = new HashSet<>();
 
-    public TypeMetadataQueryResult(final @MapsTo("typeMetadatas") List<TypeMetadata> typeMetadatas,
-                                   final @MapsTo("missingTypes") List<String> missingTypes) {
+    public TypeMetadataQueryResult(final @MapsTo("typeMetadatas") Set<TypeMetadata> typeMetadatas,
+                                   final @MapsTo("missingTypes") Set<String> missingTypes) {
         this.typeMetadatas = typeMetadatas;
         this.missingTypes = missingTypes;
     }
 
-    public List<String> getMissingTypes() {
+    public Set<String> getMissingTypes() {
         return missingTypes;
     }
 
-    public void setMissingTypes(List<String> missingTypes) {
+    public void setMissingTypes(Set<String> missingTypes) {
         this.missingTypes = missingTypes;
     }
 
-    public List<TypeMetadata> getTypeMetadatas() {
+    public Set<TypeMetadata> getTypeMetadatas() {
         return typeMetadatas;
     }
 
-    public void setTypeMetadatas(List<TypeMetadata> typeMetadatas) {
+    public void setTypeMetadatas(Set<TypeMetadata> typeMetadatas) {
         this.typeMetadatas = typeMetadatas;
     }
 

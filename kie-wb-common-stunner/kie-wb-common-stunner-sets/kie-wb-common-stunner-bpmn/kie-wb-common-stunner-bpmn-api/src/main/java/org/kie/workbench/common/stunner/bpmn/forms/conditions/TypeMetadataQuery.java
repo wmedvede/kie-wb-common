@@ -16,9 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.forms.conditions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -30,10 +30,10 @@ public class TypeMetadataQuery {
 
     private Path path;
 
-    private List<String> types = new ArrayList<>();
+    private Set<String> types = new HashSet<>();
 
     public TypeMetadataQuery(final @MapsTo("path") Path path,
-                             final @MapsTo("types") List<String> types) {
+                             final @MapsTo("types") Set<String> types) {
         this.path = path;
         this.types = types;
     }
@@ -46,11 +46,11 @@ public class TypeMetadataQuery {
         this.path = path;
     }
 
-    public void setTypes(List<String> types) {
+    public void setTypes(Set<String> types) {
         this.types = types;
     }
 
-    public List<String> getTypes() {
+    public Set<String> getTypes() {
         return types;
     }
 

@@ -18,9 +18,9 @@ package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.kie.soup.project.datamodel.oracle.FieldAccessorsAndMutators;
 import org.kie.workbench.common.services.datamodel.backend.server.builder.projects.ClassFieldInspector;
@@ -103,18 +103,14 @@ public abstract class BaseConditionEditorServiceImpl implements ConditionEditorS
     }
 
     protected TypeMetadataQueryResult findMetadata(TypeMetadataQuery query, ClassLoader classLoader) {
-        List<TypeMetadata> typeMetadatas = new ArrayList<>();
-        List<String> missingTypes = new ArrayList<>();
-        Map<String, String> alreadyProcessed = new HashMap<>();
+        Set<TypeMetadata> typeMetadatas = new HashSet<>();
+        Set<String> missingTypes = new HashSet<>();
         for (String type : query.getTypes()) {
-            if (!alreadyProcessed.containsKey(type)) {
-                try {
-                    TypeMetadata typeMetadata = buildTypeMetadata(type, classLoader);
-                    typeMetadatas.add(typeMetadata);
-                    alreadyProcessed.put(type, type);
-                } catch (ClassNotFoundException e) {
-                    missingTypes.add(type);
-                }
+            try {
+                TypeMetadata typeMetadata = buildTypeMetadata(type, classLoader);
+                typeMetadatas.add(typeMetadata);
+            } catch (ClassNotFoundException e) {
+                missingTypes.add(type);
             }
         }
         return new TypeMetadataQueryResult(typeMetadatas, missingTypes);
