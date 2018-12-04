@@ -25,7 +25,7 @@ import org.apache.commons.lang3.ArrayUtils;
 public class ParsingUtils {
 
     public static String parseJavaName(final String token, final int startIndex, final char[] stopCharacters) throws ParseException {
-        if (startIndex < 0 || startIndex > token.length()) {
+        if (startIndex < 0 || startIndex >= token.length()) {
             throw new IndexOutOfBoundsException("startIndex: " + startIndex + " exceeds token bounds: " + token);
         }
         final StringBuilder javaName = new StringBuilder();
@@ -44,7 +44,7 @@ public class ParsingUtils {
         if (javaName.length() == 0) {
             throw new ParseException("Expected java name was not found at position: " + startIndex, startIndex);
         } else if (!SourceVersion.isName(javaName)) {
-            throw new ParseException("Invalid java name was found at positon: " + startIndex, startIndex);
+            throw new ParseException("Invalid java name was found at position: " + startIndex, startIndex);
         }
         return javaName.toString();
     }

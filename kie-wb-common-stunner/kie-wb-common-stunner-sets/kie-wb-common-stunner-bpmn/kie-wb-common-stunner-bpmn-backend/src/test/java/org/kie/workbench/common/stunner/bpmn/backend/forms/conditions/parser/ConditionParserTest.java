@@ -16,94 +16,129 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser.ConditionTestCommons.binaryFunctions;
+import static org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser.ConditionTestCommons.ternaryFunctions;
+import static org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser.ConditionTestCommons.unaryFunctions;
+import static org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser.ConditionTestCommons.variableParams;
 
 public class ConditionParserTest {
 
-    private static final List<String> unaryFunctions = Arrays.asList("isNull",
-                                                                     "isEmpty",
-                                                                     "isTrue",
-                                                                     "isFalse");
+    private static final List<String> failingUnaryFunctionExpressions = Arrays.asList("",
+                                                                                      "   ",
+                                                                                      "return",
+                                                                                      "return " + "%s",
+                                                                                      "return " + "%s(",
+                                                                                      "return " + "%s(variable",
+                                                                                      "return " + "%s(variable)",
+                                                                                      "return " + "%s(variable.getValue",
+                                                                                      "return " + "%s(variable.getValue(",
+                                                                                      "return " + "%s(variable.getValue()",
+                                                                                      "return " + "%s(variable.getValue())",
+                                                                                      "return " + "%s(1wrongVariable));",
+                                                                                      "return " + "%s(variable.1wrongMethod());");
 
-    private static final List<String> binaryFunctions = Arrays.asList("equalsTo",
-                                                                      "contains",
-                                                                      "startsWith",
-                                                                      "endsWith",
-                                                                      "greaterThan",
-                                                                      "greaterOrEqualThan",
-                                                                      "lessThan",
-                                                                      "lessOrEqualThan");
+    private static final List<String> failingBinaryFunctionExpressions = Arrays.asList("",
+                                                                                       "   ",
+                                                                                       "return",
+                                                                                       "return " + "%s",
+                                                                                       "return " + "%s(",
+                                                                                       "return " + "%s(variable",
+                                                                                       "return " + "%s(variable)",
+                                                                                       "return " + "%s(variable.getValue",
+                                                                                       "return " + "%s(variable.getValue(",
+                                                                                       "return " + "%s(variable.getValue()",
+                                                                                       "return " + "%s(variable.getValue(),",
+                                                                                       "return " + "%s(1wrongVariable1,);",
+                                                                                       "return " + "%s(variable.1wrongMethod1(),);",
+                                                                                       "return " + "%s(variable, value1\")",
+                                                                                       "return " + "%s(variable, \"value1)",
+                                                                                       "return " + "%s(variable, \"value1\")",
+                                                                                       "return " + "%s(variable.getValue(), value1\"",
+                                                                                       "return " + "%s(variable.getValue(), \"value1",
+                                                                                       "return " + "%s(variable.getValue(), \"value1\")");
 
-    private static final List<String> ternaryFunctions = Arrays.asList("between");
-
-    private static final List<String> variableParams = Arrays.asList("_a",
-                                                                     "_a.getA()",
-                                                                     "_ä",
-                                                                     "_ä.getÄ()",
-                                                                     "$a",
-                                                                     "$a.getA()",
-                                                                     "_someVar",
-                                                                     "_someVar.getValue()",
-                                                                     "_äwsomeVar1",
-                                                                     "_äwsomeVar1.anotherMethod()",
-                                                                     "$asdfs",
-                                                                     "$asdfs.isMember()");
-
-    private static final List<String> variableExpectedValues = variableParams.stream().map(value -> {
-        if (value.endsWith("()")) {
-            return value.substring(0,
-                                   value.length() - 2);
-        } else {
-            return value;
-        }
-    }).collect(Collectors.toList());
-
-    private static final List<String> stringParams = Arrays.asList("_a",
-                                                                   "_a.getA()",
-                                                                   "_ä",
-                                                                   "_ä.getÄ()",
-                                                                   "$a",
-                                                                   "$a.getA()",
-                                                                   "_someVar",
-                                                                   "_someVar.getValue()",
-                                                                   "_äwsomeVar1",
-                                                                   "_äwsomeVar1.anotherMethod()",
-                                                                   "$asdfs",
-                                                                   "$asdfs.isMember()");
+    private static final List<String> failingTernaryFunctionExpressions = Arrays.asList("",
+                                                                                        "   ",
+                                                                                        "return",
+                                                                                        "return " + "%s",
+                                                                                        "return " + "%s(",
+                                                                                        "return " + "%s(variable",
+                                                                                        "return " + "%s(variable)",
+                                                                                        "return " + "%s(variable.getValue",
+                                                                                        "return " + "%s(variable.getValue(",
+                                                                                        "return " + "%s(variable.getValue()",
+                                                                                        "return " + "%s(variable.getValue(),",
+                                                                                        "return " + "%s(1wrongVariable1,);",
+                                                                                        "return " + "%s(variable.1wrongMethod1(),);",
+                                                                                        "return " + "%s(variable, value1\")",
+                                                                                        "return " + "%s(variable, \"value1)",
+                                                                                        "return " + "%s(variable, \"value1\")",
+                                                                                        "return " + "%s(variable.getValue(), value1\"",
+                                                                                        "return " + "%s(variable.getValue(), \"value1",
+                                                                                        "return " + "%s(variable.getValue(), \"value1\")",
+                                                                                        "return " + "%s(variable, \"value1\", value2\")",
+                                                                                        "return " + "%s(variable, \"value1\", \"value2)",
+                                                                                        "return " + "%s(variable, \"value1\", \"value2\")",
+                                                                                        "return " + "%s(variable.getValue(), \"value1\", value2\")",
+                                                                                        "return " + "%s(variable.getValue(), \"value1\", \"value2)",
+                                                                                        "return " + "%s(variable.getValue(), \"value1\", \"value2\")");
 
     @Test
-    public void testUnaryFunctionsParsing() throws Exception {
+    public void testUnaryFunctionsParsingSuccessful() throws Exception {
         for (String function : unaryFunctions) {
-            testUnaryFunctionParsing(function);
+            testUnaryFunctionParsingSuccesful(function);
         }
     }
 
     @Test
-    public void testBinaryFunctionsParsing() throws Exception {
+    public void testBinaryFunctionsParsingSuccessful() throws Exception {
         for (String function : binaryFunctions) {
-            testBinaryFunctionParsing(function);
+            testBinaryFunctionParsingSucessful(function);
         }
     }
 
     @Test
-    public void testTernaryFunctionsParsing() throws Exception {
+    public void testTernaryFunctionsParsingSuccessful() throws Exception {
         for (String function : ternaryFunctions) {
-            testTernaryFunctionParsing(function);
+            testTernaryFunctionParsingSuccessful(function);
         }
     }
 
-    private void testUnaryFunctionParsing(String function) throws Exception {
+    @Test
+    public void testUnaryFunctionsParsingUnsuccessful() throws Exception {
+        for (String function : unaryFunctions) {
+            testFunctionParsingUnsuccessful(function, failingUnaryFunctionExpressions);
+        }
+    }
+
+    @Test
+    public void testBinaryFunctionsParsingUnsuccessful() throws Exception {
+        for (String function : binaryFunctions) {
+            testFunctionParsingUnsuccessful(function, failingBinaryFunctionExpressions);
+        }
+    }
+
+    @Test
+    public void testTernaryFunctionsParsingUnsuccessful() throws Exception {
+        for (String function : ternaryFunctions) {
+            testFunctionParsingUnsuccessful(function, failingTernaryFunctionExpressions);
+        }
+    }
+
+    private void testUnaryFunctionParsingSuccesful(String function) throws Exception {
         List<String> conditions = new ArrayList<>();
         for (String variableParam : variableParams) {
-            conditions.add("return KieFunctions." + function + "(" + variableParam + ");");
+            conditions.add(String.format("return KieFunctions.%s(%s);", function, variableParam));
         }
 
         for (int i = 0; i < conditions.size(); i++) {
@@ -111,14 +146,14 @@ public class ConditionParserTest {
             Condition condition = parser.parse();
             assertEquals(function, condition.getFunction());
             assertEquals(1, condition.getParams().size());
-            assertEquals(variableExpectedValues.get(i), condition.getParams().get(0));
+            assertEquals(variableParams.get(i), condition.getParams().get(0));
         }
     }
 
-    private void testBinaryFunctionParsing(String function) throws Exception {
+    private void testBinaryFunctionParsingSucessful(String function) throws Exception {
         List<String> conditions = new ArrayList<>();
         for (int i = 0; i < variableParams.size(); i++) {
-            conditions.add("return KieFunctions." + function + "(" + variableParams.get(i) + ",\"" + stringParams.get(i) + "\");");
+            conditions.add(String.format("return KieFunctions.%s(%s,\"%s\");", function, variableParams.get(i), ConditionTestCommons.stringParams.get(i)));
         }
 
         for (int i = 0; i < conditions.size(); i++) {
@@ -126,15 +161,15 @@ public class ConditionParserTest {
             Condition condition = parser.parse();
             assertEquals(function, condition.getFunction());
             assertEquals(2, condition.getParams().size());
-            assertEquals(variableExpectedValues.get(i), condition.getParams().get(0));
-            assertEquals(stringParams.get(i), condition.getParams().get(1));
+            assertEquals(variableParams.get(i), condition.getParams().get(0));
+            assertEquals(ConditionTestCommons.stringParams.get(i), condition.getParams().get(1));
         }
     }
 
-    private void testTernaryFunctionParsing(String function) throws Exception {
+    private void testTernaryFunctionParsingSuccessful(String function) throws Exception {
         List<String> conditions = new ArrayList<>();
         for (int i = 0; i < variableParams.size(); i++) {
-            conditions.add("return KieFunctions." + function + "(" + variableParams.get(i) + ",\"" + stringParams.get(i) + "\",\"" + stringParams.get(i) + "\");");
+            conditions.add(String.format("return KieFunctions.%s(%s,\"%s\",\"%s\");", function, variableParams.get(i), ConditionTestCommons.stringParams.get(i), ConditionTestCommons.stringParams.get(i)));
         }
 
         for (int i = 0; i < conditions.size(); i++) {
@@ -142,9 +177,21 @@ public class ConditionParserTest {
             Condition condition = parser.parse();
             assertEquals(function, condition.getFunction());
             assertEquals(3, condition.getParams().size());
-            assertEquals(variableExpectedValues.get(i), condition.getParams().get(0));
-            assertEquals(stringParams.get(i), condition.getParams().get(1));
-            assertEquals(stringParams.get(i), condition.getParams().get(2));
+            assertEquals(variableParams.get(i), condition.getParams().get(0));
+            assertEquals(ConditionTestCommons.stringParams.get(i), condition.getParams().get(1));
+            assertEquals(ConditionTestCommons.stringParams.get(i), condition.getParams().get(2));
+        }
+    }
+
+    private void testFunctionParsingUnsuccessful(String function, List<String> expressionsSet) {
+        for (int i = 0; i < expressionsSet.size(); i++) {
+            String expression = String.format(expressionsSet.get(i), "KieFunctions." + function);
+            ConditionParser parser = new ConditionParser(expression);
+            try {
+                parser.parse();
+                fail("A parsing error was expected for expression at position " + i + ": " + expression);
+            } catch (ParseException e) {
+            }
         }
     }
 }

@@ -18,12 +18,12 @@ package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser;
 
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 
-import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
+import static org.kie.workbench.common.services.datamodeller.util.StringEscapeUtils.escapeJavaNonUTFChars;
 
 public class ConditionGenerator {
 
-    public static final String PARAMETER_NULL_EMPTY = "Parameter can not be null nor empty";
-    public static final String MISSING_CONDITION_ERROR = "A condition must be provided";
+    private static final String PARAMETER_NULL_EMPTY = "Parameter can not be null nor empty";
+    private static final String MISSING_CONDITION_ERROR = "A condition must be provided";
 
     public String generateScript(Condition condition) throws GenerateConditionException {
         final StringBuilder script = new StringBuilder();
@@ -51,7 +51,7 @@ public class ConditionGenerator {
                 //the other parameters are always string parameters.
                 script.append(", ");
                 script.append("\"");
-                script.append(escapeJava(param));
+                script.append(escapeJavaNonUTFChars(param));
                 script.append("\"");
             }
             if (param == null || param.isEmpty()) {

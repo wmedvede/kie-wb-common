@@ -25,6 +25,8 @@ import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.FunctionDef;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ParamDef;
 
+import static org.kie.workbench.common.services.datamodeller.util.StringEscapeUtils.unescapeJava;
+
 public class ConditionParser {
 
     public static final String KIE_FUNCTIONS = "KieFunctions.";
@@ -35,31 +37,31 @@ public class ConditionParser {
 
     private String functionName;
 
-    public static final String FUNCTION_NAME_NOT_RECOGNIZED_ERROR = "The function name \"{0}\" is not recognized by system.";
+    private static final String FUNCTION_NAME_NOT_RECOGNIZED_ERROR = "The function name \"{0}\" is not recognized by system.";
 
-    public static final String FUNCTION_CALL_NOT_FOUND_ERROR = "Function call was not found, a token like \"" + KIE_FUNCTIONS + "functionName(variable, params)\" is expected.";
+    private static final String FUNCTION_CALL_NOT_FOUND_ERROR = "Function call was not found, a token like \"" + KIE_FUNCTIONS + "functionName(variable, params)\" is expected.";
 
-    public static final String VALID_FUNCTION_CALL_NOT_FOUND_ERROR = "The \"" + KIE_FUNCTIONS + "\" keyword must be followed by one of the following function names: \"{0}\"";
+    private static final String VALID_FUNCTION_CALL_NOT_FOUND_ERROR = "The \"" + KIE_FUNCTIONS + "\" keyword must be followed by one of the following function names: \"{0}\"";
 
-    public static final String CONDITION_OUT_OF_BOUNDS_ERROR = "Out of bounds error, condition has missing parameters or is not properly configured.";
+    private static final String CONDITION_OUT_OF_BOUNDS_ERROR = "Out of bounds error, condition has missing parameters or is not properly configured.";
 
-    public static final String FUNCTION_CALL_NOT_CLOSED_PROPERLY_ERROR = "Function call \"{0}\" is not closed properly, character \")\" is expected.";
+    private static final String FUNCTION_CALL_NOT_CLOSED_PROPERLY_ERROR = "Function call \"{0}\" is not closed properly, character \")\" is expected.";
 
-    public static final String SENTENCE_NOT_CLOSED_PROPERLY_ERROR = "Condition not closed properly, character \";\" is expected.";
+    private static final String SENTENCE_NOT_CLOSED_PROPERLY_ERROR = "Condition not closed properly, character \";\" is expected.";
 
-    public static final String FIELD_NAME_EXPECTED_ERROR = "A valid field name is expected.";
+    private static final String FIELD_NAME_EXPECTED_ERROR = "A valid field name is expected.";
 
-    public static final String PARAMETER_DELIMITER_EXPECTED_ERROR = "Parameter delimiter \",\" is expected.";
+    private static final String PARAMETER_DELIMITER_EXPECTED_ERROR = "Parameter delimiter \",\" is expected.";
 
-    public static final String STRING_PARAMETER_EXPECTED_ERROR = "String parameter value like \"some value\" is expected.";
+    private static final String STRING_PARAMETER_EXPECTED_ERROR = "String parameter value like \"some value\" is expected.";
 
-    public static final String SENTENCE_EXPECTED_AT_POSITION_ERROR = "Sentence \"{0}\" is expected at position {1}.";
+    private static final String SENTENCE_EXPECTED_AT_POSITION_ERROR = "Sentence \"{0}\" is expected at position {1}.";
 
-    public static final String BLANK_AFTER_RETURN_EXPECTED_ERROR = "Sentence \"{0}\" must be followed by a blank space or a line break.";
+    private static final String BLANK_AFTER_RETURN_EXPECTED_ERROR = "Sentence \"{0}\" must be followed by a blank space or a line break.";
 
-    public static final String METHOD_NOT_PROPERLY_OPENED_ERROR = "Method \"{0}\" invocation is not properly opened, character \"(\" is expected.";
+    private static final String METHOD_NOT_PROPERLY_OPENED_ERROR = "Method \"{0}\" invocation is not properly opened, character \"(\" is expected.";
 
-    public static final String METHOD_NOT_PROPERLY_CLOSED_ERROR = "Method \"{0}\" invocation is not properly closed, character \")\" is expected.";
+    private static final String METHOD_NOT_PROPERLY_CLOSED_ERROR = "Method \"{0}\" invocation is not properly closed, character \")\" is expected.";
 
     private static String functionNames = buildFunctionNames();
 
@@ -241,55 +243,25 @@ public class ConditionParser {
             throw new ParseException(STRING_PARAMETER_EXPECTED_ERROR, parseIndex);
         }
 
-        int shift = 1;
-        Character scapeChar = Character.valueOf('\\');
+        Character scapeChar = '\\';
         Character last = null;
         boolean strReaded = false;
         StringBuilder param = new StringBuilder();
         for (int i = index + 1; i < expression.length(); i++) {
-            if (expression.charAt(i) == '\\') {
-                if (scapeChar.equals(last)) {
-                    shift += 2;
-                    param.append('\\');
-                    last = null;
-                } else {
-                    last = expression.charAt(i);
-                }
-            } else if (expression.charAt(i) == '"') {
-                if (scapeChar.equals(last)) {
-                    shift += 2;
-                    param.append('"');
-                    last = null;
-                } else {
-                    shift++;
-                    strReaded = true;
-                    break;
-                }
-            } else if (expression.charAt(i) == 'n') {
-                if (scapeChar.equals(last)) {
-                    shift += 2;
-                    param.append('\n');
-                } else {
-                    shift += 1;
-                    param.append(expression.charAt(i));
-                }
-                last = null;
+            if (expression.charAt(i) == '"' && !scapeChar.equals(last)) {
+                strReaded = true;
+                break;
             } else {
-                if (last != null) {
-                    shift++;
-                    param.append(last);
-                }
-                last = null;
-                shift++;
                 param.append(expression.charAt(i));
+                last = expression.charAt(i);
             }
         }
 
         if (!strReaded) {
             throw new ParseException(STRING_PARAMETER_EXPECTED_ERROR, parseIndex);
         }
-        setParseIndex(index + shift);
-        return param.toString();
+        setParseIndex(index + param.length() + 2);
+        return unescapeJava(param.toString());
     }
 
     private int nextNonBlank() {
@@ -313,7 +285,7 @@ public class ConditionParser {
     }
 
     private void setParseIndex(int parseIndex) throws ParseException {
-        if (parseIndex > expression.length()) {
+        if (parseIndex >= expression.length()) {
             throw new ParseException(errorMessage(CONDITION_OUT_OF_BOUNDS_ERROR, functionName), parseIndex);
         }
         this.parseIndex = parseIndex;
