@@ -144,6 +144,14 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
 
+    <!-- Test scope. -->
+
+    <dependency>
+      <groupId>org.kie.workbench.stunner</groupId>
+      <artifactId>kie-wb-common-stunner-bpmn-backend</artifactId>
+      <type>test-jar</type>
+    </dependency>
+
   </dependencies>
 
 </project>

@@ -16,6 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions;
 
+/**
+ * Class intended for testing purposes, please do not delete or verify the tests if modified.
+ */
 public class Bean1 {
 
     private String fieldBean1_1;
@@ -25,8 +28,6 @@ public class Bean1 {
     private boolean fieldBean1_3;
 
     private Integer fieldBean1_4;
-
-    private Object fieldBean1_5;
 
     public String getFieldBean1_1() {
         return fieldBean1_1;
@@ -40,10 +41,6 @@ public class Bean1 {
         return fieldBean1_2;
     }
 
-    public void setFieldBean1_2(int fieldBean1_2) {
-        this.fieldBean1_2 = fieldBean1_2;
-    }
-
     public boolean isFieldBean1_3() {
         return fieldBean1_3;
     }
@@ -52,19 +49,7 @@ public class Bean1 {
         this.fieldBean1_3 = fieldBean1_3;
     }
 
-    public Integer getFieldBean1_4() {
-        return fieldBean1_4;
-    }
-
     public void setFieldBean1_4(Integer fieldBean1_4) {
         this.fieldBean1_4 = fieldBean1_4;
-    }
-
-    public Object getFieldBean1_5() {
-        return fieldBean1_5;
-    }
-
-    public void setFieldBean1_5(Object fieldBean1_5) {
-        this.fieldBean1_5 = fieldBean1_5;
     }
 }

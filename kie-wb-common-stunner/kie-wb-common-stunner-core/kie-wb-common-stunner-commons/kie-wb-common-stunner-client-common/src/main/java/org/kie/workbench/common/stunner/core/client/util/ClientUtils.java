@@ -45,7 +45,7 @@ public class ClientUtils {
         return null;
     }
 
-    public static Node getSelectedElement(Diagram diagram, ClientSession clientSession) {
+    public static Node getSelectedNode(Diagram diagram, ClientSession clientSession) {
         String uuid = getSelectedElementUUID(clientSession);
         return uuid != null ? diagram.getGraph().getNode(uuid) : null;
     }

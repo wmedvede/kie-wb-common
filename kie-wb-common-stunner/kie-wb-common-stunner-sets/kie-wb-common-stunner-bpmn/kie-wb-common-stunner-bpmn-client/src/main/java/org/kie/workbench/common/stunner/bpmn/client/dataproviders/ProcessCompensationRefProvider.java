@@ -44,7 +44,7 @@ import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 import org.kie.workbench.common.stunner.core.util.SafeComparator;
 import org.uberfire.commons.data.Pair;
 
-import static org.kie.workbench.common.stunner.core.client.util.ClientUtils.getSelectedElement;
+import static org.kie.workbench.common.stunner.core.client.util.ClientUtils.getSelectedNode;
 import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
 
 public class ProcessCompensationRefProvider implements SelectorDataProvider {
@@ -66,7 +66,7 @@ public class ProcessCompensationRefProvider implements SelectorDataProvider {
     public SelectorData getSelectorData(FormRenderingContext context) {
         final Diagram diagram = sessionManager.getCurrentSession().getCanvasHandler().getDiagram();
         final String rootUUID = diagram.getMetadata().getCanvasRootUUID();
-        final Node<?, ? extends Edge> selectedNode = getSelectedElement(diagram, sessionManager.getCurrentSession());
+        final Node<?, ? extends Edge> selectedNode = getSelectedNode(diagram, sessionManager.getCurrentSession());
         final Map<Object, String> values = new TreeMap<>(SafeComparator.TO_STRING_COMPARATOR);
         if (selectedNode != null) {
             Node<?, ? extends Edge> currentNode = selectedNode;

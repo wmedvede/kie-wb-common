@@ -16,17 +16,14 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions;
 
+/**
+ * Class intended for testing purposes, please do not delete or verify the tests if modified.
+ */
 public class Bean2 extends Bean1 {
 
     private String fieldBean2_1;
 
-    private int fieldBean2_2;
-
-    private boolean fieldBean2_3;
-
-    private Bean2 fieldBean2_4;
-
-    private Object fieldBean2_5;
+    private Object fieldBean2_2;
 
     public String getFieldBean2_1() {
         return fieldBean2_1;
@@ -36,35 +33,11 @@ public class Bean2 extends Bean1 {
         this.fieldBean2_1 = fieldBean2_1;
     }
 
-    public int getFieldBean2_2() {
+    public Object getFieldBean2_2() {
         return fieldBean2_2;
     }
 
-    public void setFieldBean2_2(int fieldBean2_2) {
+    public void setFieldBean2_2(Object fieldBean2_2) {
         this.fieldBean2_2 = fieldBean2_2;
-    }
-
-    public boolean isFieldBean2_3() {
-        return fieldBean2_3;
-    }
-
-    public void setFieldBean2_3(boolean fieldBean2_3) {
-        this.fieldBean2_3 = fieldBean2_3;
-    }
-
-    public Bean2 getFieldBean2_4() {
-        return fieldBean2_4;
-    }
-
-    public void setFieldBean2_4(Bean2 fieldBean2_4) {
-        this.fieldBean2_4 = fieldBean2_4;
-    }
-
-    public Object getFieldBean2_5() {
-        return fieldBean2_5;
-    }
-
-    public void setFieldBean2_5(Object fieldBean2_5) {
-        this.fieldBean2_5 = fieldBean2_5;
     }
 }

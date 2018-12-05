@@ -16,6 +16,8 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.parser;
 
+import java.text.MessageFormat;
+
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.Condition;
 
 import static org.kie.workbench.common.services.datamodeller.util.StringEscapeUtils.escapeJavaNonUTFChars;
@@ -24,6 +26,7 @@ public class ConditionGenerator {
 
     private static final String PARAMETER_NULL_EMPTY = "Parameter can not be null nor empty";
     private static final String MISSING_CONDITION_ERROR = "A condition must be provided";
+    private static final String FUNCTION_NOT_FOUND_ERROR = "Function {0} was not found in current functions definitions";
 
     public String generateScript(Condition condition) throws GenerateConditionException {
         final StringBuilder script = new StringBuilder();
@@ -33,7 +36,7 @@ public class ConditionGenerator {
         }
 
         if (!isValidFunction(condition.getFunction())) {
-            throw new GenerateConditionException("Invalid function: " + condition.getFunction());
+            throw new GenerateConditionException(MessageFormat.format(FUNCTION_NOT_FOUND_ERROR, condition.getFunction()));
         }
 
         String function = condition.getFunction().trim();

@@ -16,20 +16,13 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.forms.conditions;
 
-import org.junit.Test;
-import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadata;
+import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
 
-public class ConditionEditorServiceImplTest {
+public class ConditionEditorServiceImplTest
+        extends ConditionEditorServiceBaseTest {
 
-    @Test
-    public void testBuildTypeMetadata() throws Exception {
-        ConditionEditorServiceImpl service = new ConditionEditorServiceImpl();
-        TypeMetadata typeMetadata = service.buildTypeMetadata(Bean1.class.getName(), ClassLoader.getSystemClassLoader());
-
-        TypeMetadata typeMetadata2 = service.buildTypeMetadata(Bean2.class.getName(), ClassLoader.getSystemClassLoader());
-
-        int i = 0;
-
-
+    @Override
+    protected ConditionEditorService createService() {
+        return new ConditionEditorServiceImpl();
     }
 }

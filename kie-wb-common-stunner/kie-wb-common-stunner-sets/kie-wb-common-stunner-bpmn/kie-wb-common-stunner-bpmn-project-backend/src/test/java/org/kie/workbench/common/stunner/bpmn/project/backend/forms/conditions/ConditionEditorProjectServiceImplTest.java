@@ -16,42 +16,37 @@
 
 package org.kie.workbench.common.stunner.bpmn.project.backend.forms.conditions;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Specializes;
-import javax.inject.Inject;
-
-import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.services.backend.project.ModuleClassLoaderHelper;
 import org.kie.workbench.common.services.shared.project.KieModule;
 import org.kie.workbench.common.services.shared.project.KieModuleService;
-import org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.ConditionEditorServiceImpl;
+import org.kie.workbench.common.stunner.bpmn.backend.forms.conditions.ConditionEditorServiceBaseTest;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
-import org.uberfire.backend.vfs.Path;
+import org.mockito.Mock;
 
-@Service
-@Specializes
-@ApplicationScoped
-public class ConditionEditorProjectServiceImpl
-        extends ConditionEditorServiceImpl
-        implements ConditionEditorService {
+import static org.mockito.Mockito.when;
 
+public class ConditionEditorProjectServiceImplTest
+        extends ConditionEditorServiceBaseTest {
+
+    @Mock
     private KieModuleService moduleService;
 
+    @Mock
     private ModuleClassLoaderHelper moduleClassLoaderHelper;
 
-    private ConditionEditorProjectServiceImpl() {
-        //Empty constructor for proxying
+    @Mock
+    private KieModule module;
+
+    @Override
+    public void setUp() {
+        super.setUp();
+        when(moduleService.resolveModule(path)).thenReturn(module);
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        when(moduleClassLoaderHelper.getModuleClassLoader(module)).thenReturn(classLoader);
     }
 
-    @Inject
-    public ConditionEditorProjectServiceImpl(KieModuleService moduleService,
-                                             ModuleClassLoaderHelper moduleClassLoaderHelper) {
-        this.moduleService = moduleService;
-        this.moduleClassLoaderHelper = moduleClassLoaderHelper;
-    }
-
-    protected ClassLoader resolveClassLoader(Path path) {
-        KieModule module = moduleService.resolveModule(path);
-        return moduleClassLoaderHelper.getModuleClassLoader(module);
+    @Override
+    protected ConditionEditorService createService() {
+        return new ConditionEditorProjectServiceImpl(moduleService, moduleClassLoaderHelper);
     }
 }
