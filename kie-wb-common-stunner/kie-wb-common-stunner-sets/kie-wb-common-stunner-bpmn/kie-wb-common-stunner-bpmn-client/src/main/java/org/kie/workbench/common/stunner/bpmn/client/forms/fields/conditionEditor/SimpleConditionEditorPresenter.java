@@ -199,10 +199,17 @@ public class SimpleConditionEditorPresenter
         String type = variableSearchService.getOptionType(variable);
         String function = functionSearchSelectionHandler.getSelectedKey();
         Condition condition = new Condition();
-        condition.setFunction(function);
-        condition.addParam(variable);
-
-        valid = !isEmpty(variable) && !isEmpty(function) && !isEmpty(type);
+        valid = true;
+        if (!isEmpty(function)) {
+            condition.setFunction(function);
+        } else {
+            valid = false;
+        }
+        if (!isEmpty(variable) && !isEmpty(type)) {
+            condition.addParam(variable);
+        } else {
+            valid = false;
+        }
         for (ConditionParamPresenter param : currentParams) {
             if (!param.validateParam(type)) {
                 valid = false;
@@ -234,7 +241,7 @@ public class SimpleConditionEditorPresenter
         ParamDef paramDef;
         for (int i = 1; i < functionDef.getParams().size(); i++) {
             paramDef = functionDef.getParams().get(i);
-            ConditionParamPresenter param = paramInstance.get();
+            ConditionParamPresenter param = newParamPresenter();
             currentParams.add(param);
             param.setName(functionNamingService.getParamName(functionDef.getName(), paramDef.getName()));
             param.setHelp(functionNamingService.getParamHelp(functionDef.getName(), paramDef.getName()));
@@ -273,4 +280,10 @@ public class SimpleConditionEditorPresenter
         return new SingleLiveSearchSelectionHandler<>();
     }
 
+    /**
+     * For facilitating testing
+     */
+    ConditionParamPresenter newParamPresenter() {
+        return paramInstance.get();
+    }
 }
