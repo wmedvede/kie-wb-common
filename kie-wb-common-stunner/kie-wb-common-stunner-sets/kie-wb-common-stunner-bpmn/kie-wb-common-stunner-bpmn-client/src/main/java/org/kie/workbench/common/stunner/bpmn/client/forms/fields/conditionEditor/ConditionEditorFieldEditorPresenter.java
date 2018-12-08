@@ -43,11 +43,11 @@ public class ConditionEditorFieldEditorPresenter
 
     private static final String DEFAULT_LANGUAGE = "java";
 
-    private static final String SCRIPT_PARSING_ERROR = "ConditionEditorFieldEditorView.ScriptParsingError";
+    static final String SCRIPT_PARSING_ERROR = "ConditionEditorFieldEditorView.ScriptParsingError";
 
-    private static final String UNEXPECTED_SCRIPT_PARSING_ERROR = "ConditionEditorFieldEditorView.UnexpectedScriptParsingError";
+    static final String UNEXPECTED_SCRIPT_PARSING_ERROR = "ConditionEditorFieldEditorView.UnexpectedScriptParsingError";
 
-    private static final String UNEXPECTED_SCRIPT_GENERATION_ERROR = "ConditionEditorFieldEditorView.UnexpectedScriptGenerationError";
+    static final String UNEXPECTED_SCRIPT_GENERATION_ERROR = "ConditionEditorFieldEditorView.UnexpectedScriptGenerationError";
 
     public interface View extends UberElement<ConditionEditorFieldEditorPresenter> {
 
@@ -138,7 +138,7 @@ public class ConditionEditorFieldEditorPresenter
         }
     }
 
-    public void onSimpleConditionSelected() {
+    void onSimpleConditionSelected() {
         clearError();
         if (value != null && !isEmpty(value.getScript())) {
             editorService.call(result -> onSimpleConditionSelected((ParseConditionResult) result),
@@ -149,13 +149,13 @@ public class ConditionEditorFieldEditorPresenter
         }
     }
 
-    public void onScriptEditorSelected() {
+    void onScriptEditorSelected() {
         scriptEditor.setValue(value);
         clearError();
         showScriptEditor();
     }
 
-    private void onSimpleConditionChange(Condition oldValue, Condition newValue) {
+    void onSimpleConditionChange(Condition oldValue, Condition newValue) {
         if (simpleConditionEditor.isValid()) {
             editorService.call(result -> onSimpleConditionChange((GenerateConditionResult) result),
                                (message, throwable) -> onSimpleConditionChangeError((Message) message, throwable)).generateCondition(newValue);
@@ -176,11 +176,11 @@ public class ConditionEditorFieldEditorPresenter
     }
 
     private boolean onSimpleConditionChangeError(Message message, Throwable throwable) {
-        errorPopup.showMessage(translationService.getValue(UNEXPECTED_SCRIPT_GENERATION_ERROR) + ": " + throwable.getMessage());
+        errorPopup.showMessage(translationService.getValue(UNEXPECTED_SCRIPT_GENERATION_ERROR, throwable.getMessage()));
         return false;
     }
 
-    private void onScriptChange(ScriptTypeValue oldValue, ScriptTypeValue newValue) {
+    void onScriptChange(ScriptTypeValue oldValue, ScriptTypeValue newValue) {
         value = newValue;
         notifyChange(oldValue, newValue);
         enableSimpleConditionEditor(isInDefaultLanguage(newValue));
@@ -191,13 +191,12 @@ public class ConditionEditorFieldEditorPresenter
             simpleConditionEditor.setValue(result.getCondition());
             showSimpleConditionEditor();
         } else {
-            scriptEditor.setValue(value);
             showScriptEditor();
         }
     }
 
     private boolean onSetValueError(Message message, Throwable throwable) {
-        errorPopup.showMessage(translationService.getValue(UNEXPECTED_SCRIPT_PARSING_ERROR) + ": " + throwable.getMessage());
+        errorPopup.showMessage(translationService.getValue(UNEXPECTED_SCRIPT_PARSING_ERROR, throwable.getMessage()));
         return false;
     }
 
@@ -212,7 +211,7 @@ public class ConditionEditorFieldEditorPresenter
     }
 
     private boolean onSimpleConditionSelectedError(Message message, Throwable throwable) {
-        errorPopup.showMessage(translationService.getValue(UNEXPECTED_SCRIPT_PARSING_ERROR) + ": " + throwable.getMessage());
+        errorPopup.showMessage(translationService.getValue(UNEXPECTED_SCRIPT_PARSING_ERROR, throwable.getMessage()));
         return false;
     }
 

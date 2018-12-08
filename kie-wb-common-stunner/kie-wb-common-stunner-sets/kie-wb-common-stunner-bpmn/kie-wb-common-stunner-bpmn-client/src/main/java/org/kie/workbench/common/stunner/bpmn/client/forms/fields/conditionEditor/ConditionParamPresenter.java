@@ -30,27 +30,27 @@ import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
 
 public class ConditionParamPresenter {
 
-    private static final String PARAM_MUST_BE_COMPLETED_ERROR = "ConditionParamPresenter.ParamMustBeCompletedErrorMessage";
+    static final String PARAM_MUST_BE_COMPLETED_ERROR = "ConditionParamPresenter.ParamMustBeCompletedErrorMessage";
 
-    private static final String SHORT_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.ShortNumericValueExpectedErrorMessage";
+    static final String SHORT_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.ShortNumericValueExpectedErrorMessage";
 
-    private static final String INTEGER_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.IntegerNumericValueExpectedErrorMessage";
+    static final String INTEGER_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.IntegerNumericValueExpectedErrorMessage";
 
-    private static final String LONG_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.LongNumericValueExpectedErrorMessage";
+    static final String LONG_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.LongNumericValueExpectedErrorMessage";
 
-    private static final String FLOAT_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.FloatNumericValueExpectedErrorMessage";
+    static final String FLOAT_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.FloatNumericValueExpectedErrorMessage";
 
-    private static final String DOUBLE_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.DoubleNumericValueExpectedErrorMessage";
+    static final String DOUBLE_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.DoubleNumericValueExpectedErrorMessage";
 
-    private static final String BIG_DECIMAL_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.BigDecimalNumericValueExpectedErrorMessage";
+    static final String BIG_DECIMAL_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.BigDecimalNumericValueExpectedErrorMessage";
 
-    private static final String BIG_INTEGER_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.BigIntegerNumericValueExpectedErrorMessage";
+    static final String BIG_INTEGER_NUMERIC_VALUE_EXPECTED_ERROR = "ConditionParamPresenter.BigIntegerNumericValueExpectedErrorMessage";
 
     public interface View extends UberElement<ConditionParamPresenter> {
 
-        void setName(String name);
-
         String getName();
+
+        void setName(String name);
 
         void setHelp(String help);
 
@@ -88,16 +88,16 @@ public class ConditionParamPresenter {
         return view;
     }
 
+    public String getName() {
+        return view.getName();
+    }
+
     public void setName(String name) {
         view.setName(name);
     }
 
     public void setHelp(String help) {
         view.setHelp(help);
-    }
-
-    public String getName() {
-        return view.getName();
     }
 
     public String getValue() {
@@ -201,7 +201,7 @@ public class ConditionParamPresenter {
         return true;
     }
 
-    public void onValueChange() {
+    void onValueChange() {
         if (onChangeCommand != null) {
             onChangeCommand.execute();
         }

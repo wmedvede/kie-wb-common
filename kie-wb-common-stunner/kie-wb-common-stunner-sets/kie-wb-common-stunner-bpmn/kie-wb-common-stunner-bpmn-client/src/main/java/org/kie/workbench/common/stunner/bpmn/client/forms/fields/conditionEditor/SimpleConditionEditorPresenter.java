@@ -42,11 +42,13 @@ import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
 public class SimpleConditionEditorPresenter
         extends FieldEditorPresenter<Condition> {
 
-    private static final String VARIABLE_NOT_SELECTED_ERROR = "SimpleConditionEditorView.VariableNotSelectedErrorMessage";
+    static final String VARIABLE_NOT_SELECTED_ERROR = "SimpleConditionEditorView.VariableNotSelectedErrorMessage";
 
-    private static final String FUNCTION_NOT_SELECTED_ERROR = "SimpleConditionEditorView.FunctionNotSelectedErrorMessage";
+    static final String FUNCTION_NOT_SELECTED_ERROR = "SimpleConditionEditorView.FunctionNotSelectedErrorMessage";
 
-    private static final String VARIABLE_NOT_FOUND_ERROR = "SimpleConditionEditorView.VariableNotFoundError";
+    static final String VARIABLE_NOT_FOUND_ERROR = "SimpleConditionEditorView.VariableNotFoundError";
+
+    static final String CONDITION_MAL_FORMED = "SimpleConditionEditorView.ConditionMalFormedError";
 
     public interface View extends UberElement<SimpleConditionEditorPresenter> {
 
@@ -75,9 +77,9 @@ public class SimpleConditionEditorPresenter
 
     private FunctionSearchService functionSearchService;
 
-    private SingleLiveSearchSelectionHandler<String> variableSearchSelectionHandler = new SingleLiveSearchSelectionHandler<>();
+    private SingleLiveSearchSelectionHandler<String> variableSearchSelectionHandler;
 
-    private SingleLiveSearchSelectionHandler<String> functionSearchSelectionHandler = new SingleLiveSearchSelectionHandler<>();
+    private SingleLiveSearchSelectionHandler<String> functionSearchSelectionHandler;
 
     private FunctionNamingService functionNamingService;
 
@@ -100,6 +102,8 @@ public class SimpleConditionEditorPresenter
         this.functionSearchService = functionSearchService;
         this.functionNamingService = functionNamingService;
         this.translationService = translationService;
+        this.variableSearchSelectionHandler = newVariableSelectionHandler();
+        this.functionSearchSelectionHandler = newFunctionSelectionHandler();
     }
 
     @PostConstruct
@@ -133,6 +137,9 @@ public class SimpleConditionEditorPresenter
                 } else {
                     view.setVariableError(translationService.getValue(VARIABLE_NOT_FOUND_ERROR, value.getParams().get(0)));
                 }
+            } else {
+                //uncommon case
+                view.setConditionError(translationService.getValue(CONDITION_MAL_FORMED));
             }
         }
     }
@@ -152,7 +159,7 @@ public class SimpleConditionEditorPresenter
         clearErrors();
     }
 
-    public void onVariableChange() {
+    void onVariableChange() {
         clearErrors();
         String variable = variableSearchSelectionHandler.getSelectedKey();
         if (!isEmpty(variable)) {
@@ -171,7 +178,7 @@ public class SimpleConditionEditorPresenter
         }
     }
 
-    public void onConditionChange() {
+    void onConditionChange() {
         view.clearConditionError();
         removeParams();
         String function = functionSearchSelectionHandler.getSelectedKey();
@@ -251,4 +258,19 @@ public class SimpleConditionEditorPresenter
         currentParams.clear();
         view.removeParams();
     }
+
+    /**
+     * For facilitating testing
+     */
+    SingleLiveSearchSelectionHandler<String> newVariableSelectionHandler() {
+        return new SingleLiveSearchSelectionHandler<>();
+    }
+
+    /**
+     * For facilitating testing
+     */
+    SingleLiveSearchSelectionHandler<String> newFunctionSelectionHandler() {
+        return new SingleLiveSearchSelectionHandler<>();
+    }
+
 }
