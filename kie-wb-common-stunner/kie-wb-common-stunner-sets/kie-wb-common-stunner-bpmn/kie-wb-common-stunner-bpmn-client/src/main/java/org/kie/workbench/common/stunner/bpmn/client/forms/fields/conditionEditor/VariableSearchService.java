@@ -233,7 +233,7 @@ public class VariableSearchService implements LiveSearchService<String> {
         Node<?, ? extends Edge> sourceNode;
         while (nodes.hasNext()) {
             sourceNode = nodes.next();
-            if (sourceNode.getInEdges().stream()
+            if (sourceNode.getOutEdges().stream()
                     .filter(edge -> edge.getUUID().equals(edgeUuid)).findFirst()
                     .isPresent()) {
                 return sourceNode;
