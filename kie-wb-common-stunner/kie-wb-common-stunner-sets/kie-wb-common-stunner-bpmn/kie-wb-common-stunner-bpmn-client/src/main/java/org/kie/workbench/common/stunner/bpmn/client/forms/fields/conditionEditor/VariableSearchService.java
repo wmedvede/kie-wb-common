@@ -196,7 +196,10 @@ public class VariableSearchService implements LiveSearchService<String> {
                 });
     }
 
-    private static String unboxDefaultType(String type) {
+    static String unboxDefaultType(String type) {
+        if (type == null) {
+            return null;
+        }
         switch (type) {
             case "Short":
             case "short":
@@ -210,7 +213,7 @@ public class VariableSearchService implements LiveSearchService<String> {
             case "Float":
             case "float":
                 return Float.class.getName();
-            case "Dobule":
+            case "Double":
             case "double":
                 return Double.class.getName();
             case "Boolean":

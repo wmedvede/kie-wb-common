@@ -136,6 +136,13 @@ public class SimpleConditionEditorPresenterTest {
     public void setUp() {
         when(view.getConditionSelectorDropDown()).thenReturn(conditionSelectorDropDown);
         when(view.getVariableSelectorDropDown()).thenReturn(variableSelectorDropDown);
+        presenter = spy(new SimpleConditionEditorPresenterWrapper(view,
+                                                                  paramInstance,
+                                                                  variableSearchService,
+                                                                  functionSearchService,
+                                                                  functionNamingService,
+                                                                  translationService));
+        /*
         presenter = spy(new SimpleConditionEditorPresenter(view,
                                                            paramInstance,
                                                            variableSearchService,
@@ -160,6 +167,7 @@ public class SimpleConditionEditorPresenterTest {
                 return super.newParamPresenter();
             }
         });
+        */
         presenter.addChangeHandler(changeHandler);
     }
 
@@ -322,6 +330,36 @@ public class SimpleConditionEditorPresenterTest {
         paramCommandCaptor.getValue().execute();
         verifyConditionWasCreated();
         assertFalse(presenter.isValid());
+    }
+
+    public class SimpleConditionEditorPresenterWrapper extends SimpleConditionEditorPresenter {
+
+        public SimpleConditionEditorPresenterWrapper(View view,
+                                                     ManagedInstance<ConditionParamPresenter> paramInstance,
+                                                     VariableSearchService variableSearchService,
+                                                     FunctionSearchService functionSearchService,
+                                                     FunctionNamingService functionNamingService,
+                                                     ClientTranslationService translationService) {
+            super(view, paramInstance, variableSearchService, functionSearchService, functionNamingService, translationService);
+        }
+
+        @Override
+        SingleLiveSearchSelectionHandler<String> newVariableSelectionHandler() {
+            return variableSearchSelectionHandler;
+        }
+
+        @Override
+        SingleLiveSearchSelectionHandler<String> newFunctionSelectionHandler() {
+            return functionSearchSelectionHandler;
+        }
+
+        @Override
+        ConditionParamPresenter newParamPresenter() {
+            ConditionParamPresenter paramPresenter = mockParamPresenter();
+            when(paramInstance.get()).thenReturn(paramPresenter);
+            paramPresenterInstances.add(paramPresenter);
+            return super.newParamPresenter();
+        }
     }
 
     private void prepareForParamChangeTest(boolean paramIsValid) {

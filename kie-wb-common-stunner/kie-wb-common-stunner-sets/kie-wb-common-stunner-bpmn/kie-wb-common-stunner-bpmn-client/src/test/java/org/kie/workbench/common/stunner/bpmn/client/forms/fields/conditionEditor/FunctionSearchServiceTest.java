@@ -214,19 +214,29 @@ public class FunctionSearchServiceTest {
         assertNull(functionDef);
     }
 
-    private void verifyContains(LiveSearchResults<String> results, Pair<String, String>... values) {
-        assertEquals(results.size(), values.length);
-        Arrays.stream(values).forEach(value -> assertTrue(results.stream()
-                                                                  .filter(entry -> value.getK1().equals(entry.getKey()) && value.getK2().equals(entry.getValue()))
-                                                                  .findFirst()
-                                                                  .isPresent()));
+    public static void verifyContains(LiveSearchResults<String> results, Pair<String, String>... values) {
+        verifyContains(results, Arrays.asList(values));
     }
 
-    private void verifyNotContains(LiveSearchResults<String> results, Pair<String, String>... values) {
-        Arrays.stream(values).forEach(value -> assertFalse(results.stream()
-                                                                   .filter(entry -> value.getK1().equals(entry.getKey()) && value.getK2().equals(entry.getValue()))
-                                                                   .findFirst()
-                                                                   .isPresent()));
+    public static void verifyContains(LiveSearchResults<String> results, List<Pair<String, String>> values) {
+        assertEquals(results.size(), values.size());
+        values.forEach(value -> assertTrue("Expected value <" + value.getK1() + ", " + value.getK2() + "> is not present in results but was expected",
+                                           results.stream()
+                                                   .filter(entry -> value.getK1().equals(entry.getKey()) && value.getK2().equals(entry.getValue()))
+                                                   .findFirst()
+                                                   .isPresent()));
+    }
+
+    public static void verifyNotContains(LiveSearchResults<String> results, Pair<String, String>... values) {
+        verifyNotContains(results, Arrays.asList(values));
+    }
+
+    public static void verifyNotContains(LiveSearchResults<String> results, List<Pair<String, String>> values) {
+        values.forEach(value -> assertFalse("Expected value <" + value.getK1() + ", " + value.getK2() + "> is present in results but wasn't expected",
+                                            results.stream()
+                                                    .filter(entry -> value.getK1().equals(entry.getKey()) && value.getK2().equals(entry.getValue()))
+                                                    .findFirst()
+                                                    .isPresent()));
     }
 
     private void prepareForLoad() {
