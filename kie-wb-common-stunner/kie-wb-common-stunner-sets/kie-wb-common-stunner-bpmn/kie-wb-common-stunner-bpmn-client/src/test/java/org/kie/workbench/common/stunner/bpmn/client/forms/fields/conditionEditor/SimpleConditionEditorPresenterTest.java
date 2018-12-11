@@ -49,7 +49,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -136,38 +135,12 @@ public class SimpleConditionEditorPresenterTest {
     public void setUp() {
         when(view.getConditionSelectorDropDown()).thenReturn(conditionSelectorDropDown);
         when(view.getVariableSelectorDropDown()).thenReturn(variableSelectorDropDown);
-        presenter = spy(new SimpleConditionEditorPresenterWrapper(view,
-                                                                  paramInstance,
-                                                                  variableSearchService,
-                                                                  functionSearchService,
-                                                                  functionNamingService,
-                                                                  translationService));
-        /*
-        presenter = spy(new SimpleConditionEditorPresenter(view,
-                                                           paramInstance,
-                                                           variableSearchService,
-                                                           functionSearchService,
-                                                           functionNamingService,
-                                                           translationService) {
-            @Override
-            SingleLiveSearchSelectionHandler<String> newVariableSelectionHandler() {
-                return variableSearchSelectionHandler;
-            }
-
-            @Override
-            SingleLiveSearchSelectionHandler<String> newFunctionSelectionHandler() {
-                return functionSearchSelectionHandler;
-            }
-
-            @Override
-            ConditionParamPresenter newParamPresenter() {
-                ConditionParamPresenter paramPresenter = mockParamPresenter();
-                when(paramInstance.get()).thenReturn(paramPresenter);
-                paramPresenterInstances.add(paramPresenter);
-                return super.newParamPresenter();
-            }
-        });
-        */
+        presenter = new SimpleConditionEditorPresenterWrapper(view,
+                                                              paramInstance,
+                                                              variableSearchService,
+                                                              functionSearchService,
+                                                              functionNamingService,
+                                                              translationService);
         presenter.addChangeHandler(changeHandler);
     }
 
@@ -259,15 +232,16 @@ public class SimpleConditionEditorPresenterTest {
     public void testOnVariableChangeWhenVariableSelected() {
         when(variableSearchSelectionHandler.getSelectedKey()).thenReturn(VARIABLE);
         when(variableSearchService.getOptionType(VARIABLE)).thenReturn(TYPE);
+        when(translationService.getValue(FUNCTION_NOT_SELECTED_ERROR)).thenReturn(TRANSLATED_MESSAGE);
         presenter.onVariableChange();
         verify(functionSearchService).reload(eq(TYPE), commandCaptor.capture());
         verifyClearError();
         commandCaptor.getValue().execute();
         verify(functionSearchSelectionHandler).clearSelection();
         verify(conditionSelectorDropDown).clear();
-        verify(presenter).onConditionChange();
         assertFalse(presenter.isValid());
         verify(paramInstance, never()).get();
+        view.setConditionError(translationService.getValue(FUNCTION_NOT_SELECTED_ERROR));
     }
 
     @Test
