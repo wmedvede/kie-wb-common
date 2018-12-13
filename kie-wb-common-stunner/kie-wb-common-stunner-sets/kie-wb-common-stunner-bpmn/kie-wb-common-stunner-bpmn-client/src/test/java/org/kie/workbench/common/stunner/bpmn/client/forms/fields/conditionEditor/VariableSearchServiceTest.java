@@ -34,6 +34,8 @@ import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.MultipleInstanceSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.property.cm.CaseFileVariables;
+import org.kie.workbench.common.stunner.bpmn.definition.property.cm.CaseManagementSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessData;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessVariables;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
@@ -42,6 +44,7 @@ import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadata;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadataQueryResult;
 import org.kie.workbench.common.stunner.core.client.canvas.AbstractCanvasHandler;
 import org.kie.workbench.common.stunner.core.client.canvas.controls.select.SelectionControl;
+import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
 import org.kie.workbench.common.stunner.core.client.session.impl.EditorSession;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
 import org.kie.workbench.common.stunner.core.diagram.Metadata;
@@ -77,24 +80,30 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class VariableSearchServiceTest {
 
-    private static final String CANVAS_ROOT_ID = "CANVAS_ROOT_ID";
-    private static final String SELECTED_ITEM = "SELECTED_ITEM";
-    private static final String SOURCE_NODE = "SOURCE_NODE";
-    private static final String PARENT_NODE1 = "PARENT_NODE1";
-    private static final String PARENT_NODE2 = "PARENT_NODE2";
-    private static final String PARENT_NODE3 = "PARENT_NODE3";
-    private static final String PARENT_NODE4 = "PARENT_NODE4";
+    protected static final String CANVAS_ROOT_ID = "CANVAS_ROOT_ID";
+    protected static final String SELECTED_ITEM = "SELECTED_ITEM";
+    protected static final String SOURCE_NODE = "SOURCE_NODE";
+    protected static final String PARENT_NODE1 = "PARENT_NODE1";
+    protected static final String PARENT_NODE2 = "PARENT_NODE2";
+    protected static final String PARENT_NODE3 = "PARENT_NODE3";
+    protected static final String PARENT_NODE4 = "PARENT_NODE4";
 
-    private static final String MULTIPLE_INSTANCE_SUBPROCESS = "MultipleInstanceSubprocess";
-    private static final String EMBEDDED_SUBPROCESS = "EmbeddedSubprocess";
-    private static final String ADHOC_SUBPROCESS = "AdHocSubprocess";
-    private static final String EVENT_SUBPROCESS = "EventSubprocess";
-    private static final String MAIN_PROCESS = "MainProcess";
+    protected static final String MULTIPLE_INSTANCE_SUBPROCESS = "MultipleInstanceSubprocess";
+    protected static final String EMBEDDED_SUBPROCESS = "EmbeddedSubprocess";
+    protected static final String ADHOC_SUBPROCESS = "AdHocSubprocess";
+    protected static final String EVENT_SUBPROCESS = "EventSubprocess";
+    protected static final String MAIN_PROCESS = "MainProcess";
+    protected static final String CASE_FILE = "CaseFile";
+
+    private static final String CASE_VARIABLE_LABEL_PREFIX = "CASE_VARIABLE_LABEL_PREFIX";
 
     @Mock
-    private ConditionEditorService editorService;
+    protected ConditionEditorService editorService;
 
-    private Caller<ConditionEditorService> editorServiceCaller;
+    protected Caller<ConditionEditorService> editorServiceCaller;
+
+    @Mock
+    protected ClientTranslationService translationService;
 
     private VariableSearchService searchService;
 
@@ -125,7 +134,7 @@ public class VariableSearchServiceTest {
     @Captor
     private ArgumentCaptor<LiveSearchResults<String>> searchResultsCaptor;
 
-    private Set<String> mockedVariableNames = new HashSet<>();
+    private List<Pair<String, String>> mockedVariableNames = new ArrayList<>();
 
     private Map<String, String> mockedVariableTypes = new HashMap<>();
 
@@ -138,13 +147,18 @@ public class VariableSearchServiceTest {
         when(metadata.getPath()).thenReturn(path);
         when(metadata.getCanvasRootUUID()).thenReturn(CANVAS_ROOT_ID);
         editorServiceCaller = new CallerMock<>(editorService);
-        searchService = new VariableSearchService(editorServiceCaller);
+        when(translationService.getValue("VariableSearchService.CaseVariableLabelPrefix")).thenReturn(CASE_VARIABLE_LABEL_PREFIX);
+        searchService = newSearchService();
+    }
+
+    protected VariableSearchService newSearchService() {
+        return new VariableSearchService(editorServiceCaller, translationService);
     }
 
     @Test
     public void testInitSession() {
         prepareAndInitSession();
-        mockedVariableNames.forEach(variable -> verifyVariable(variable, variable));
+        mockedVariableNames.forEach(entry -> verifyVariable(buildExpectedVariableName(entry.getK1(), entry.getK2()), buildExpectedVariableLabel(entry.getK1(), entry.getK2())));
     }
 
     @Test
@@ -261,8 +275,19 @@ public class VariableSearchServiceTest {
         }
     }
 
-    private void prepareAndInitSession() {
+    protected void prepareAndInitSession() {
         prepareSelectedItem();
+        List<Node> nodes = mockNodes();
+        when(graph.nodes()).thenReturn(nodes);
+        Set<TypeMetadata> typeMetadatas = new HashSet<>();
+        typeMetadatas.add(mockBean1Metadata());
+        TypeMetadataQueryResult queryResult = new TypeMetadataQueryResult(typeMetadatas, new HashSet<>());
+        when(editorService.findMetadata(any())).thenReturn(queryResult);
+
+        searchService.init(clientSession);
+    }
+
+    protected List<Node> mockNodes() {
         Node sourceNode = mockSourceNode(SOURCE_NODE, SELECTED_ITEM);
 
         Node parentNode1 = mockNode(PARENT_NODE1, mockMultipleInstanceSubprocess(mockVariables(MULTIPLE_INSTANCE_SUBPROCESS)));
@@ -277,7 +302,7 @@ public class VariableSearchServiceTest {
         Node parentNode4 = mockNode(PARENT_NODE4, mockEventSubProcess(mockVariables(EVENT_SUBPROCESS)));
         setParentNode(parentNode3, parentNode4);
 
-        Node canvasRoot = mockNode(CANVAS_ROOT_ID, mockBPMNDiagram(mockVariables(MAIN_PROCESS)));
+        Node canvasRoot = mockNode(CANVAS_ROOT_ID, mockBPMNDiagram(mockVariables(MAIN_PROCESS), mockVariables(CASE_FILE)));
         setParentNode(parentNode4, canvasRoot);
 
         ArrayList<Node> nodes = new ArrayList<>();
@@ -287,18 +312,13 @@ public class VariableSearchServiceTest {
         nodes.add(parentNode3);
         nodes.add(parentNode4);
         nodes.add(canvasRoot);
-
-        when(graph.nodes()).thenReturn(nodes);
-        Set<TypeMetadata> typeMetadatas = new HashSet<>();
-        typeMetadatas.add(mockBean1Metadata());
-        TypeMetadataQueryResult queryResult = new TypeMetadataQueryResult(typeMetadatas, new HashSet<>());
-        when(editorService.findMetadata(any())).thenReturn(queryResult);
-
-        searchService.init(clientSession);
+        return nodes;
     }
 
     private void verifyVariable(String variableKey, String variableValue) {
-        searchService.searchEntry(variableKey, results -> assertTrue(results.stream()
+        int i = 0;
+        searchService.searchEntry(variableKey, results -> assertTrue("It seems like variable <" + variableKey + ", " + variableValue + "> is not present in results",
+                                                                     results.stream()
                                                                              .filter(entry -> variableKey.equals(entry.getKey()) && variableValue.equals(entry.getValue()))
                                                                              .findFirst()
                                                                              .isPresent()));
@@ -321,7 +341,7 @@ public class VariableSearchServiceTest {
     }
 
     @SuppressWarnings("unchecked")
-    private Node mockSourceNode(String UUID, String edgeId) {
+    protected Node mockSourceNode(String UUID, String edgeId) {
         Node sourceNode = mockNode(UUID, null);
         EdgeImpl edge = mock(EdgeImpl.class);
         when(edge.getUUID()).thenReturn(edgeId);
@@ -331,7 +351,7 @@ public class VariableSearchServiceTest {
         return sourceNode;
     }
 
-    private void setParentNode(Node childNode, Node parentNode) {
+    protected void setParentNode(Node childNode, Node parentNode) {
         List<Edge> inEdges = new ArrayList<>();
         Edge edge = mock(Edge.class);
         String edgeUUID = "from_" + parentNode.getUUID() + "_to_" + childNode;
@@ -343,7 +363,7 @@ public class VariableSearchServiceTest {
         when(edge.getSourceNode()).thenReturn(parentNode);
     }
 
-    private Node mockNode(String UUID, Object definition) {
+    protected Node mockNode(String UUID, Object definition) {
         Node node = mock(Node.class);
         when(node.getUUID()).thenReturn(UUID);
         when(node.asNode()).thenReturn(node);
@@ -353,42 +373,47 @@ public class VariableSearchServiceTest {
         return node;
     }
 
-    private EventSubprocess mockEventSubProcess(String variables) {
+    protected EventSubprocess mockEventSubProcess(String variables) {
         EventSubprocess eventSubprocess = mock(EventSubprocess.class);
         ProcessData processData = mockProcessData(variables);
         when(eventSubprocess.getProcessData()).thenReturn(processData);
         return eventSubprocess;
     }
 
-    private AdHocSubprocess mockAdHocSubProcess(String variables) {
+    protected AdHocSubprocess mockAdHocSubProcess(String variables) {
         AdHocSubprocess adHocSubprocess = mock(AdHocSubprocess.class);
         ProcessData processData = mockProcessData(variables);
         when(adHocSubprocess.getProcessData()).thenReturn(processData);
         return adHocSubprocess;
     }
 
-    private EmbeddedSubprocess mockEmbeddedSubprocess(String variables) {
+    protected EmbeddedSubprocess mockEmbeddedSubprocess(String variables) {
         EmbeddedSubprocess embeddedSubprocess = mock(EmbeddedSubprocess.class);
         ProcessData processData = mockProcessData(variables);
         when(embeddedSubprocess.getProcessData()).thenReturn(processData);
         return embeddedSubprocess;
     }
 
-    private MultipleInstanceSubprocess mockMultipleInstanceSubprocess(String variables) {
+    protected MultipleInstanceSubprocess mockMultipleInstanceSubprocess(String variables) {
         MultipleInstanceSubprocess multipleInstanceSubprocess = mock(MultipleInstanceSubprocess.class);
         ProcessData processData = mockProcessData(variables);
         when(multipleInstanceSubprocess.getProcessData()).thenReturn(processData);
         return multipleInstanceSubprocess;
     }
 
-    private BPMNDiagramImpl mockBPMNDiagram(String variables) {
+    protected BPMNDiagramImpl mockBPMNDiagram(String variables, String caseVariables) {
         BPMNDiagramImpl bpmnDiagram = mock(BPMNDiagramImpl.class);
         ProcessData processData = mockProcessData(variables);
         when(bpmnDiagram.getProcessData()).thenReturn(processData);
+        CaseManagementSet caseManagementSet = mock(CaseManagementSet.class);
+        CaseFileVariables caseFileVariables = mock(CaseFileVariables.class);
+        when(caseManagementSet.getCaseFileVariables()).thenReturn(caseFileVariables);
+        when(caseFileVariables.getValue()).thenReturn(caseVariables);
+        when(bpmnDiagram.getCaseManagementSet()).thenReturn(caseManagementSet);
         return bpmnDiagram;
     }
 
-    private ProcessData mockProcessData(String variables) {
+    protected ProcessData mockProcessData(String variables) {
         ProcessData processData = mock(ProcessData.class);
         ProcessVariables processVariables = mock(ProcessVariables.class);
         when(processData.getProcessVariables()).thenReturn(processVariables);
@@ -396,7 +421,7 @@ public class VariableSearchServiceTest {
         return processData;
     }
 
-    private String mockVariables(String prefix) {
+    protected String mockVariables(String prefix) {
         StringBuilder variables = new StringBuilder();
         int index = 0;
         variables.append(mockVariable(prefix, index++, Short.class.getName()));
@@ -427,8 +452,24 @@ public class VariableSearchServiceTest {
 
     private String mockVariableName(String prefix, int index) {
         String variable = prefix + "Variable" + index;
-        mockedVariableNames.add(variable);
+        mockedVariableNames.add(new Pair<>(prefix, variable));
         return variable;
+    }
+
+    private String buildExpectedVariableName(String prefix, String name) {
+        if (prefix.equals(CASE_FILE)) {
+            return "caseFile_" + name;
+        } else {
+            return name;
+        }
+    }
+
+    private String buildExpectedVariableLabel(String prefix, String variable) {
+        if (prefix.equals(CASE_FILE)) {
+            return CASE_VARIABLE_LABEL_PREFIX + " " + variable;
+        } else {
+            return variable;
+        }
     }
 
     private List<Pair<String, String>> buildExpectedVariableNames(String prefix, int count) {
@@ -436,20 +477,20 @@ public class VariableSearchServiceTest {
         String varName;
         for (int i = 0; i < count; i++) {
             varName = mockVariableName(prefix, i);
-            result.add(new Pair<>(varName, varName));
+            result.add(new Pair<>(buildExpectedVariableName(prefix, varName), buildExpectedVariableLabel(prefix, varName)));
         }
-        String bean1Variable = result.get(count - 1).getK1();
-        Pair<String, String> name = new Pair<>(bean1Variable + ".getName()", bean1Variable + ".name");
-        Pair<String, String> surname = new Pair<>(bean1Variable + ".getSurname()", bean1Variable + ".surname");
-        Pair<String, String> age = new Pair<>(bean1Variable + ".getAge()", bean1Variable + ".age");
+        Pair<String, String> bean1Variable = result.get(count - 1);
+        Pair<String, String> name = new Pair<>(buildExpectedVariableName(prefix, bean1Variable.getK1() + ".getName()"), buildExpectedVariableLabel(prefix, bean1Variable.getK2() + ".name"));
+        Pair<String, String> surname = new Pair<>(buildExpectedVariableName(prefix, bean1Variable.getK1() + ".getSurname()"), buildExpectedVariableLabel(prefix, bean1Variable.getK2() + ".surname"));
+        Pair<String, String> age = new Pair<>(buildExpectedVariableName(prefix, bean1Variable.getK1() + ".getAge()"), buildExpectedVariableLabel(prefix, bean1Variable.getK2() + ".age"));
         result.add(name);
         result.add(surname);
         result.add(age);
-        mockedVariableNames.add(name.getK1());
+        mockedVariableNames.add(name);
         mockedVariableTypes.put(name.getK1(), String.class.getName());
-        mockedVariableNames.add(surname.getK1());
+        mockedVariableNames.add(surname);
         mockedVariableTypes.put(surname.getK1(), String.class.getName());
-        mockedVariableNames.add(age.getK1());
+        mockedVariableNames.add(age);
         mockedVariableTypes.put(age.getK1(), Integer.class.getName());
         return result;
     }

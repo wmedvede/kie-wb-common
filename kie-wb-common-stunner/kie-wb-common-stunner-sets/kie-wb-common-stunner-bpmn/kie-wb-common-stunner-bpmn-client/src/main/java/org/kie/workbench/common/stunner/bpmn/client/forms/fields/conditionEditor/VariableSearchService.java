@@ -34,10 +34,12 @@ import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.MultipleInstanceSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.property.cm.CaseManagementSet;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.ConditionEditorService;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadata;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadataQuery;
 import org.kie.workbench.common.stunner.bpmn.forms.conditions.TypeMetadataQueryResult;
+import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
 import org.kie.workbench.common.stunner.core.graph.Edge;
@@ -54,7 +56,13 @@ import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
 
 public class VariableSearchService implements LiveSearchService<String> {
 
+    private static final String CASE_VARIABLE_PREFIX = "caseFile_";
+
+    private static final String CASE_VARIABLE_LABEL_PREFIX = "VariableSearchService.CaseVariableLabelPrefix";
+
     private Caller<ConditionEditorService> service;
+
+    private ClientTranslationService translationService;
 
     private Map<String, String> options = new HashMap<>();
 
@@ -65,8 +73,9 @@ public class VariableSearchService implements LiveSearchService<String> {
     private Map<String, String> optionType = new HashMap<>();
 
     @Inject
-    public VariableSearchService(Caller<ConditionEditorService> service) {
+    public VariableSearchService(Caller<ConditionEditorService> service, ClientTranslationService translationService) {
         this.service = service;
+        this.translationService = translationService;
     }
 
     public void init(ClientSession session) {
@@ -125,7 +134,7 @@ public class VariableSearchService implements LiveSearchService<String> {
         optionType.clear();
     }
 
-    private String getVariables(Node<?, ? extends Edge> node) {
+    protected String getVariables(Node<?, ? extends Edge> node) {
         View view = node.getContent() instanceof View ? (View) node.getContent() : null;
         if (view == null) {
             return null;
@@ -142,11 +151,44 @@ public class VariableSearchService implements LiveSearchService<String> {
         if (view.getDefinition() instanceof MultipleInstanceSubprocess) {
             return ((MultipleInstanceSubprocess) view.getDefinition()).getProcessData().getProcessVariables().getValue();
         }
-        //TODO, WM Ver como cuaja case management acá...
         if (view.getDefinition() instanceof BPMNDiagramImpl) {
-            return ((BPMNDiagramImpl) view.getDefinition()).getProcessData().getProcessVariables().getValue();
+            BPMNDiagramImpl bpmnDiagram = ((BPMNDiagramImpl) view.getDefinition());
+            StringBuilder variablesBuilder = new StringBuilder();
+            String processVariables = bpmnDiagram.getProcessData().getProcessVariables().getValue();
+            if (!isEmpty(processVariables)) {
+                variablesBuilder.append(processVariables);
+            }
+            addCaseFileVariables(variablesBuilder, bpmnDiagram.getCaseManagementSet());
+            return variablesBuilder.length() > 0 ? variablesBuilder.toString() : null;
         }
         return null;
+    }
+
+    protected void addCaseFileVariables(StringBuilder variablesBuilder, CaseManagementSet caseManagementSet) {
+        if (caseManagementSet != null && caseManagementSet.getCaseFileVariables() != null && !isEmpty(caseManagementSet.getCaseFileVariables().getValue())) {
+            String caseVariables = caseManagementSet.getCaseFileVariables().getValue();
+            String[] caseVariableDefs = caseVariables.split(",");
+            boolean isFirst = variablesBuilder.length() == 0;
+            for (String caseVariableDefItem : caseVariableDefs) {
+                if (!caseVariableDefItem.isEmpty()) {
+                    String[] caseVariable = caseVariableDefItem.split(":");
+                    if (!isFirst) {
+                        variablesBuilder.append(",");
+                    }
+                    if (caseVariable.length == 1) {
+                        variablesBuilder.append(CASE_VARIABLE_PREFIX)
+                                .append(caseVariable[0])
+                                .append(":");
+                    } else {
+                        variablesBuilder.append(CASE_VARIABLE_PREFIX)
+                                .append(caseVariable[0])
+                                .append(":")
+                                .append(caseVariable[1]);
+                    }
+                    isFirst = false;
+                }
+            }
+        }
     }
 
     private void addVariables(String variables, Map<String, VariableMetadata> collectedVariables, Set<String> collectedTypes) {
@@ -182,7 +224,7 @@ public class VariableSearchService implements LiveSearchService<String> {
 
     private void addVariableOptions(VariableMetadata variableMetadata) {
         String option = variableMetadata.getName();
-        String optionLabel = variableMetadata.getName();
+        String optionLabel = getVariableLabel(variableMetadata);
         options.put(option, optionLabel);
         optionType.put(option, unboxDefaultType(variableMetadata.getType()));
         TypeMetadata typeMetadata = variableMetadata.getTypeMetadata();
@@ -190,7 +232,7 @@ public class VariableSearchService implements LiveSearchService<String> {
                 .filter(fieldMetadata -> fieldMetadata.getAccessor() != null)
                 .forEach(fieldMetadata -> {
                     String fieldOption = variableMetadata.getName() + "." + fieldMetadata.getAccessor() + "()";
-                    String fieldOptionLabel = variableMetadata.getName() + "." + fieldMetadata.getName();
+                    String fieldOptionLabel = optionLabel + "." + fieldMetadata.getName();
                     options.put(fieldOption, fieldOptionLabel);
                     optionType.put(fieldOption, unboxDefaultType(fieldMetadata.getType()));
                 });
@@ -243,5 +285,14 @@ public class VariableSearchService implements LiveSearchService<String> {
             }
         }
         return null;
+    }
+
+    private String getVariableLabel(VariableMetadata variableMetadata) {
+        if (variableMetadata.getName().startsWith(CASE_VARIABLE_PREFIX)) {
+            return translationService.getValue(CASE_VARIABLE_LABEL_PREFIX) + " " +
+                    variableMetadata.getName().substring(CASE_VARIABLE_PREFIX.length(), variableMetadata.getName().length());
+        } else {
+            return variableMetadata.getName();
+        }
     }
 }
