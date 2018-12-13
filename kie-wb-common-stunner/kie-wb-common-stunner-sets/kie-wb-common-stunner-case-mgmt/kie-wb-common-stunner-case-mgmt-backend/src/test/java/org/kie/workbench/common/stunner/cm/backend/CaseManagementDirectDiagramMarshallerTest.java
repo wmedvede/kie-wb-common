@@ -330,7 +330,7 @@ public class CaseManagementDirectDiagramMarshallerTest {
 
 
         DefinitionSet definitionSet = new DefinitionSetImpl("org.kie.workbench.common.stunner.cm.CaseManagementDefinitionSet");
-        definitionSet.setBounds(BoundsImpl.build(0.0, 0.0, 2800.0, 1400.0));
+        //definitionSet.setBounds(BoundsImpl.build(0.0, 0.0, 2800.0, 1400.0));
 
         Graph graph = new GraphImpl<>("_E0752AEB-6594-483D-9757-F147960EA60A", new GraphNodeStoreImpl());
         graph.getLabels().add("org.kie.workbench.common.stunner.cm.CaseManagementDefinitionSet");
