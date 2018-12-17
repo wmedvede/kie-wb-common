@@ -282,7 +282,7 @@ public class BPMNShapeFactory
                           () -> basicShapesFactory)
                 .delegate(DataObject.class,
                           new DataObjectShapeDef(),
-                          () -> basicShapesFactory);
+                          () -> svgShapeFactory);
     }
 
     private <W extends BPMNViewDefinition, V extends ShapeView> FontHandler.Builder<W, V> getFontHandler() {

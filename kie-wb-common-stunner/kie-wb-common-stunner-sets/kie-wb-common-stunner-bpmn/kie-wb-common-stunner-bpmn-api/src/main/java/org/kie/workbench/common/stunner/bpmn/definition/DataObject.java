@@ -16,7 +16,6 @@
 
 package org.kie.workbench.common.stunner.bpmn.definition;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -25,6 +24,7 @@ import javax.validation.Valid;
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.kie.soup.commons.util.Sets;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FieldParam;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormDefinition;
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormField;
@@ -47,8 +47,6 @@ import static org.kie.workbench.common.forms.adf.engine.shared.formGeneration.pr
 @Portable
 @Bindable
 @Definition(graphFactory = NodeFactory.class)
-//TODO WM, se puede declarar esto sin morph base?
-//@Morph(base = BaseSubprocess.class)
 @FormDefinition(
         startElement = "general",
         policy = FieldPolicy.ONLY_MARKED,
@@ -59,8 +57,22 @@ public class DataObject implements BPMNViewDefinition {
     @Category
     public static final transient String category = BPMNCategories.DATA_OBJECTS;
 
+    //TODO WM, check labels configuration
     @Labels
-    protected final Set<String> labels = new HashSet<>();
+    private final Set<String> labels = new Sets.Builder<String>()
+            .add("all")
+            .add("lane_child")
+            .add("sequence_start")
+            .add("sequence_end")
+            .add("from_task_event")
+            .add("to_task_event")
+            .add("FromEventbasedGateway")
+            .add("messageflow_start")
+            .add("messageflow_end")
+            .add("fromtoall")
+            .add("ActivitiesMorph")
+            .add("cm_activity")
+            .build();
 
     @PropertySet
     @FormField
@@ -107,6 +119,14 @@ public class DataObject implements BPMNViewDefinition {
         this.dimensionsSet = dimensionsSet;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public Set<String> getLabels() {
+        return labels;
+    }
+
     public DataObjectExecutionSet getExecutionSet() {
         return executionSet;
     }
@@ -116,7 +136,7 @@ public class DataObject implements BPMNViewDefinition {
     }
 
     @Override
-    public BPMNBaseInfo getGeneral() {
+    public BPMNGeneralSet getGeneral() {
         return general;
     }
 

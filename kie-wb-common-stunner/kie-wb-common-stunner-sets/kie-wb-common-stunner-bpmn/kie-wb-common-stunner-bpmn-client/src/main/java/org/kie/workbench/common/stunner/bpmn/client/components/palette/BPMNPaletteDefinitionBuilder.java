@@ -113,10 +113,12 @@ public class BPMNPaletteDefinitionBuilder
                          category -> category
                                  .bindToDefinition(Lane.class)
                                  .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryContainer().getSafeUri())))
+
                     .put(BPMNCategories.DATA_OBJECTS,
                          category -> category
                                  .bindToDefinition(DataObject.class)
                                  .useGlyph(Builder.build(BPMNImageResources.INSTANCE.dataObjects().getSafeUri())))
+
                     .put(BPMNCategories.CONNECTING_OBJECTS,
                          category -> category
                                  .bindToDefinition(SequenceFlow.class)
@@ -140,6 +142,7 @@ public class BPMNPaletteDefinitionBuilder
 
     private static final Map<String, String> CUSTOM_GROUPS = new Maps.Builder<String, String>()
             .put(Lane.class.getName(), "org.kie.workbench.common.stunner.bpmn.definition.customGroup.Containers")
+            .put(DataObject.class.getName(), "org.kie.workbench.common.stunner.bpmn.definition.customGroup.DataObjects")
             .build();
 
     private final DefinitionManager definitionManager;

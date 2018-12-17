@@ -46,7 +46,7 @@ public class DataObjectShapeDef extends BaseDimensionedShapeDef
         //TODO WM, Use the data object shape instead of the script
         return newViewInstance(Optional.ofNullable(dataObject.getDimensionsSet().getWidth()),
                                Optional.ofNullable(dataObject.getDimensionsSet().getHeight()),
-                               factory.scriptTask());
+                               factory.dataObject());
     }
 
     @Override

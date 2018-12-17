@@ -678,3 +678,13 @@
     text-align: left;
     align: left;
 }
+
+
+.dataObject_background {
+    fill: #f2f2f2;
+}
+
+.dataObject_border {
+    stroke: #000000;
+    stroke-width: 0.5px;
+}
