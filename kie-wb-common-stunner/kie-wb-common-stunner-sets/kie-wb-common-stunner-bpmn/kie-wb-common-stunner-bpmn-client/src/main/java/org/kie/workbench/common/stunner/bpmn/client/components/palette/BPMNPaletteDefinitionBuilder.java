@@ -40,6 +40,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.Association;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNCategories;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.DataObject;
 import org.kie.workbench.common.stunner.bpmn.definition.EndNoneEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateTimerEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.Lane;
@@ -112,6 +113,10 @@ public class BPMNPaletteDefinitionBuilder
                          category -> category
                                  .bindToDefinition(Lane.class)
                                  .useGlyph(Builder.build(BPMNImageResources.INSTANCE.categoryContainer().getSafeUri())))
+                    .put(BPMNCategories.DATA_OBJECTS,
+                         category -> category
+                                 .bindToDefinition(DataObject.class)
+                                 .useGlyph(Builder.build(BPMNImageResources.INSTANCE.dataObjects().getSafeUri())))
                     .put(BPMNCategories.CONNECTING_OBJECTS,
                          category -> category
                                  .bindToDefinition(SequenceFlow.class)
@@ -129,6 +134,7 @@ public class BPMNPaletteDefinitionBuilder
             .add(BPMNCategories.SUB_PROCESSES)
             .add(BPMNCategories.GATEWAYS)
             .add(BPMNCategories.CONTAINERS)
+            .add(BPMNCategories.DATA_OBJECTS)
             .add(BPMNCategories.SERVICE_TASKS)
             .build();
 

@@ -27,6 +27,7 @@ import org.kie.workbench.common.stunner.bpmn.BPMNDefinitionSet;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.AssociationConnectorDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.BPMNDiagramShapeDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.CatchingIntermediateEventShapeDef;
+import org.kie.workbench.common.stunner.bpmn.client.shape.def.DataObjectShapeDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.EndEventShapeDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.GatewayShapeDef;
 import org.kie.workbench.common.stunner.bpmn.client.shape.def.LaneShapeDef;
@@ -43,6 +44,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.BPMNDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
+import org.kie.workbench.common.stunner.bpmn.definition.DataObject;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EndCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndErrorEvent;
@@ -126,7 +128,7 @@ public class BPMNShapeFactory
         this.basicShapesFactory = basicShapesFactory;
         this.svgShapeFactory = svgShapeFactory;
         this.delegateShapeFactory = delegateShapeFactory;
-        this.workItemDefinitionRegistry =  workItemDefinitionRegistry::get;
+        this.workItemDefinitionRegistry = workItemDefinitionRegistry::get;
         this.definitionUtils = definitionUtils;
         this.preferencesRegistries = preferencesRegistries;
     }
@@ -277,6 +279,9 @@ public class BPMNShapeFactory
                           () -> basicShapesFactory)
                 .delegate(Association.class,
                           new AssociationConnectorDef(),
+                          () -> basicShapesFactory)
+                .delegate(DataObject.class,
+                          new DataObjectShapeDef(),
                           () -> basicShapesFactory);
     }
 

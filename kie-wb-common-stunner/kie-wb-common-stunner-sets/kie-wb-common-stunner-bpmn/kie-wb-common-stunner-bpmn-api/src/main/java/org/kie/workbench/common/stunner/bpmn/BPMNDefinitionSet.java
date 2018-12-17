@@ -24,6 +24,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.Association;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
+import org.kie.workbench.common.stunner.bpmn.definition.DataObject;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EndCompensationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndErrorEvent;
@@ -116,6 +117,7 @@ import org.kie.workbench.common.stunner.core.rule.annotation.Occurrences;
                 EventSubprocess.class,
                 AdHocSubprocess.class,
                 MultipleInstanceSubprocess.class,
+                DataObject.class,
                 SequenceFlow.class,
                 Association.class
         },
