@@ -44,6 +44,11 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.task.CreatedBy;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.Description;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.EmptyTaskExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsAsync;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsMultipleInstance;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCollectionInput;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCollectionOutput;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceDataInput;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceDataOutput;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnEntryAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnExitAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.RuleFlowGroup;
@@ -196,6 +201,7 @@ public class TaskConverter {
                 p.getSimulationSet()
         );
 
+        //TODO WM review here
         definition.setExecutionSet(new UserTaskExecutionSet(
                 new TaskName(p.getTaskName()),
                 p.getActors(),
@@ -208,6 +214,11 @@ public class TaskConverter {
                 new Description(p.getDescription()),
                 new CreatedBy(p.getCreatedBy()),
                 new AdHocAutostart(p.isAdHocAutostart()),
+                new IsMultipleInstance(),
+                new MultipleInstanceCollectionInput(),
+                new MultipleInstanceDataInput(),
+                new MultipleInstanceCollectionOutput(),
+                new MultipleInstanceDataOutput(),
                 new OnEntryAction(p.getOnEntryAction()),
                 new OnExitAction(p.getOnExitAction()),
                 new Content(p.getContent()),

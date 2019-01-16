@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties;
+package org.kie.workbench.common.stunner.bpmn.client.forms.filters;
 
-import org.eclipse.bpmn2.SubProcess;
+import org.kie.workbench.common.stunner.bpmn.definition.UserTask;
 
-public class MultipleInstanceSubProcessPropertyWriter extends SubProcessPropertyWriter {
+public class UserTaskMIFilterProvider extends MINodeFilterProvider<UserTask> {
 
-    public MultipleInstanceSubProcessPropertyWriter(SubProcess process, VariableScope variableScope) {
-        super(process, variableScope);
-        getLoopCharacteristics();
-        getIoSpecification();
-        getInputSet(getIoSpecification());
-        getOutputSet(getIoSpecification());
+    @Override
+    public boolean isMultipleInstance(UserTask value) {
+        return value.getExecutionSet().getIsMultipleInstance().getValue();
     }
 
+    @Override
+    public Class<UserTask> getDefinitionType() {
+        return UserTask.class;
+    }
 }

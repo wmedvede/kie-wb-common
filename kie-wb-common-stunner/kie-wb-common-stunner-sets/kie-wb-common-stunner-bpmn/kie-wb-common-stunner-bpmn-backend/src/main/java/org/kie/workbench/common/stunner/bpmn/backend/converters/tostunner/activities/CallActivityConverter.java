@@ -24,6 +24,11 @@ import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.CalledElement;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.Independent;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsAsync;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsMultipleInstance;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCollectionInput;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCollectionOutput;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceDataInput;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceDataOutput;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnEntryAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnExitAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ReusableSubprocessTaskExecutionSet;
@@ -52,6 +57,12 @@ public class CallActivityConverter extends BaseCallActivityConverter<ReusableSub
                                                                                           OnEntryAction onEntryAction,
                                                                                           OnExitAction onExitAction,
                                                                                           ActivityPropertyReader p) {
-        return new ReusableSubprocessTaskExecutionSet(calledElement, independent, waitForCompletion, isAsync, onEntryAction, onExitAction);
+        return new ReusableSubprocessTaskExecutionSet(calledElement, independent, waitForCompletion, isAsync,
+                                                      new IsMultipleInstance(),
+                                                      new MultipleInstanceCollectionInput(),
+                                                      new MultipleInstanceDataInput(),
+                                                      new MultipleInstanceCollectionOutput(),
+                                                      new MultipleInstanceDataOutput(),
+                                                      onEntryAction, onExitAction);
     }
 }

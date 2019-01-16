@@ -26,10 +26,12 @@ import org.kie.workbench.common.stunner.core.client.ManagedInstanceStub;
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.graph.Element;
 import org.kie.workbench.common.stunner.core.graph.content.definition.Definition;
+import org.kie.workbench.common.stunner.forms.client.event.RefreshFormPropertiesEvent;
 import org.kie.workbench.common.stunner.forms.client.formFilters.FormFiltersProviderFactory;
 import org.kie.workbench.common.stunner.forms.client.formFilters.StunnerFormElementFilterProvider;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.uberfire.mocks.EventSourceMock;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,6 +49,9 @@ public class StunnerBPMNEntryPointTest {
     private ManagedInstance<StunnerFormElementFilterProvider> managedFilters;
 
     @Mock
+    private EventSourceMock<RefreshFormPropertiesEvent> refreshFormPropertiesEvent;
+
+    @Mock
     private BPMNDiagramFilterProvider bpmnDiagramFilterProvider;
 
     @Mock
@@ -59,7 +64,7 @@ public class StunnerBPMNEntryPointTest {
         diagramDef = new BPMNDiagramImpl();
         when(bpmnDiagramFilterProvider.getDefinitionType()).thenReturn((Class) BPMNDiagramImpl.class);
         managedFilters = new ManagedInstanceStub(bpmnDiagramFilterProvider);
-        tested = new StunnerBPMNEntryPoint(sessionManager, managedFilters);
+        tested = new StunnerBPMNEntryPoint(sessionManager, managedFilters, refreshFormPropertiesEvent);
     }
 
     @Test

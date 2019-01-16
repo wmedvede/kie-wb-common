@@ -17,8 +17,6 @@
 package org.kie.workbench.common.stunner.bpmn.definition;
 
 import org.junit.Test;
-import org.kie.workbench.common.stunner.bpmn.definition.property.assignee.Actors;
-import org.kie.workbench.common.stunner.bpmn.definition.property.assignee.Groupid;
 import org.kie.workbench.common.stunner.bpmn.definition.property.background.BackgroundSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.background.BgColor;
 import org.kie.workbench.common.stunner.bpmn.definition.property.background.BorderColor;
@@ -68,7 +66,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.task.Content;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.CreatedBy;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.Description;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsAsync;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.MITrigger;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsMultipleInstance;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCollectionInput;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCollectionOutput;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCompletionCondition;
@@ -83,10 +81,6 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.task.Script;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTaskExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.Skippable;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.Subject;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.TaskName;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.UserTaskExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessData;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessVariables;
 
@@ -902,7 +896,7 @@ public class HashCodeAndEqualityTest {
                  new MultipleInstanceCompletionCondition(MULTIPLE_INSTANCE_COMPLETION_CONDITION),
                  new OnEntryAction(ON_ENTRY_ACTION),
                  new OnExitAction(ON_EXIT_ACTION),
-                 new MITrigger("true"),
+                 new IsMultipleInstance(true),
                  new IsAsync(IS_ASYNC));
 
         final MultipleInstanceSubprocessTaskExecutionSet B_EXECUTION_SET = new MultipleInstanceSubprocessTaskExecutionSet(
@@ -913,7 +907,7 @@ public class HashCodeAndEqualityTest {
                 new MultipleInstanceCompletionCondition(MULTIPLE_INSTANCE_COMPLETION_CONDITION),
                 new OnEntryAction(ON_ENTRY_ACTION),
                 new OnExitAction(ON_EXIT_ACTION),
-                new MITrigger("true"),
+                new IsMultipleInstance(true),
                 new IsAsync(IS_ASYNC));
 
         final MultipleInstanceSubprocessTaskExecutionSet C_EXECUTION_SET = new MultipleInstanceSubprocessTaskExecutionSet(
@@ -924,7 +918,7 @@ public class HashCodeAndEqualityTest {
                 new MultipleInstanceCompletionCondition(MULTIPLE_INSTANCE_COMPLETION_CONDITION),
                 new OnEntryAction(ON_ENTRY_ACTION),
                 new OnExitAction(ON_EXIT_ACTION),
-                new MITrigger("true"),
+                new IsMultipleInstance(true),
                 new IsAsync(IS_ASYNC));
 
         final MultipleInstanceSubprocessTaskExecutionSet D_EXECUTION_SET = new MultipleInstanceSubprocessTaskExecutionSet(
@@ -935,7 +929,7 @@ public class HashCodeAndEqualityTest {
                 new MultipleInstanceCompletionCondition(MULTIPLE_INSTANCE_COMPLETION_CONDITION),
                 new OnEntryAction(ON_ENTRY_ACTION),
                 new OnExitAction(ON_EXIT_ACTION),
-                new MITrigger("true"),
+                new IsMultipleInstance(true),
                 new IsAsync(IS_ASYNC));
 
         final MultipleInstanceSubprocessTaskExecutionSet E_EXECUTION_SET = new MultipleInstanceSubprocessTaskExecutionSet(
@@ -946,7 +940,7 @@ public class HashCodeAndEqualityTest {
                 new MultipleInstanceCompletionCondition(MULTIPLE_INSTANCE_COMPLETION_CONDITION),
                 new OnEntryAction(ON_ENTRY_ACTION),
                 new OnExitAction(ON_EXIT_ACTION),
-                new MITrigger("true"),
+                new IsMultipleInstance(true),
                 new IsAsync(IS_ASYNC));
 
         final MultipleInstanceSubprocessTaskExecutionSet F_EXECUTION_SET = new MultipleInstanceSubprocessTaskExecutionSet(
@@ -957,7 +951,7 @@ public class HashCodeAndEqualityTest {
                 new MultipleInstanceCompletionCondition(MULTIPLE_INSTANCE_COMPLETION_CONDITION),
                 new OnEntryAction(ON_ENTRY_ACTION),
                 new OnExitAction(ON_EXIT_ACTION),
-                new MITrigger("true"),
+                new IsMultipleInstance(true),
                 new IsAsync(IS_ASYNC));
 
         final MultipleInstanceSubprocessTaskExecutionSet G_EXECUTION_SET = new MultipleInstanceSubprocessTaskExecutionSet(
@@ -968,7 +962,7 @@ public class HashCodeAndEqualityTest {
                 new MultipleInstanceCompletionCondition(OTHER_VALUE),
                 new OnEntryAction(ON_ENTRY_ACTION),
                 new OnExitAction(ON_EXIT_ACTION),
-                new MITrigger("true"),
+                new IsMultipleInstance(true),
                 new IsAsync(IS_ASYNC));
 
         final MultipleInstanceSubprocessTaskExecutionSet H_EXECUTION_SET
@@ -981,7 +975,7 @@ public class HashCodeAndEqualityTest {
                  new OnEntryAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("other language",
                                                                                           ""))),
                  new OnExitAction(ON_EXIT_ACTION),
-                 new MITrigger("true"),
+                 new IsMultipleInstance(true),
                  new IsAsync(IS_ASYNC));
 
         final MultipleInstanceSubprocessTaskExecutionSet I_EXECUTION_SET
@@ -994,7 +988,7 @@ public class HashCodeAndEqualityTest {
                  new OnEntryAction(ON_ENTRY_ACTION),
                  new OnExitAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("other language",
                                                                                          ""))),
-                 new MITrigger("true"),
+                 new IsMultipleInstance(true),
                  new IsAsync(IS_ASYNC));
 
         final MultipleInstanceSubprocessTaskExecutionSet J_EXECUTION_SET
@@ -1006,7 +1000,7 @@ public class HashCodeAndEqualityTest {
                  new MultipleInstanceCompletionCondition(MULTIPLE_INSTANCE_COMPLETION_CONDITION),
                  new OnEntryAction(ON_ENTRY_ACTION),
                  new OnExitAction(ON_EXIT_ACTION),
-                 new MITrigger("true"),
+                 new IsMultipleInstance(true),
                  new IsAsync(false));
 
         final String PROCESS_DATA = "some value";
@@ -1339,6 +1333,7 @@ public class HashCodeAndEqualityTest {
                 .test();
     }
 
+    /*
     @Test
     public void testUserTaskExecutionSetEqualsAndHashCode() {
         TestCaseBuilder.newTestCase()
@@ -1378,7 +1373,7 @@ public class HashCodeAndEqualityTest {
                                                       new SLADueDate()))
                 .test();
     }
-
+*/
     @Test
     public void testInclusiveGatewayEqualsAndHashCode() {
         TestCaseBuilder.newTestCase()

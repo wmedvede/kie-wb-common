@@ -23,6 +23,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.prop
 import org.kie.workbench.common.stunner.bpmn.definition.BaseReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.BaseReusableSubprocessTaskExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.ReusableSubprocessTaskExecutionSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
@@ -57,6 +58,14 @@ public abstract class BaseReusableSubprocessConverter<T extends BaseReusableSubp
         p.setWaitForCompletion(executionSet.getWaitForCompletion().getValue());
 
         p.setAssignmentsInfo(definition.getDataIOSet().getAssignmentsinfo());
+
+        //TODO WM chequear esto
+        ReusableSubprocessTaskExecutionSet reusableSubprocessTaskExecutionSet = (ReusableSubprocessTaskExecutionSet)executionSet;
+        p.setMICollectionInput(reusableSubprocessTaskExecutionSet.getMultipleInstanceCollectionInput().getValue());
+        p.setMIInput(reusableSubprocessTaskExecutionSet.getMultipleInstanceDataInput().getValue());
+        p.setMICollectionOutput(reusableSubprocessTaskExecutionSet.getMultipleInstanceCollectionOutput().getValue());
+        p.setMIOutput(reusableSubprocessTaskExecutionSet.getMultipleInstanceDataOutput().getValue());
+        //p.setMICompletionCondition(reusableSubprocessTaskExecutionSet.getMultipleInstanceCompletionCondition().getValue());
 
         p.setSimulationSet(definition.getSimulationSet());
 

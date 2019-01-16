@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
@@ -24,6 +25,7 @@ import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.kie.workbench.common.stunner.bpmn.client.forms.filters.AssociationFilterProvider;
 import org.kie.workbench.common.stunner.bpmn.client.forms.filters.CatchingIntermediateEventFilterProvider;
+import org.kie.workbench.common.stunner.bpmn.client.forms.filters.ReusableSubProcessFilterProvider;
 import org.kie.workbench.common.stunner.bpmn.client.forms.filters.StartEventFilterProvider;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateConditionalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEvent;
@@ -37,6 +39,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.StartMessageEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartSignalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartTimerEvent;
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
+import org.kie.workbench.common.stunner.forms.client.event.RefreshFormPropertiesEvent;
 import org.kie.workbench.common.stunner.forms.client.formFilters.FormFiltersProviderFactory;
 import org.kie.workbench.common.stunner.forms.client.formFilters.StunnerFormElementFilterProvider;
 
@@ -48,10 +51,15 @@ public class StunnerBPMNEntryPoint {
 
     private ManagedInstance<StunnerFormElementFilterProvider> managedFilters;
 
+    private Event<RefreshFormPropertiesEvent> refreshFormPropertiesEvent;
+
     @Inject
-    public StunnerBPMNEntryPoint(SessionManager sessionManager, ManagedInstance<StunnerFormElementFilterProvider> managedFilters) {
+    public StunnerBPMNEntryPoint(SessionManager sessionManager,
+                                 ManagedInstance<StunnerFormElementFilterProvider> managedFilters,
+                                 Event<RefreshFormPropertiesEvent> refreshFormPropertiesEvent) {
         this.sessionManager = sessionManager;
         this.managedFilters = managedFilters;
+        this.refreshFormPropertiesEvent = refreshFormPropertiesEvent;
     }
 
     @PostConstruct
@@ -68,6 +76,7 @@ public class StunnerBPMNEntryPoint {
         FormFiltersProviderFactory.registerProvider(new CatchingIntermediateEventFilterProvider(sessionManager, IntermediateMessageEventCatching.class));
         FormFiltersProviderFactory.registerProvider(new CatchingIntermediateEventFilterProvider(sessionManager, IntermediateEscalationEvent.class));
         FormFiltersProviderFactory.registerProvider(new AssociationFilterProvider());
+        FormFiltersProviderFactory.registerProvider(new ReusableSubProcessFilterProvider(sessionManager, refreshFormPropertiesEvent));
 
         //registering managed filters instances
         managedFilters.forEach(FormFiltersProviderFactory::registerProvider);
