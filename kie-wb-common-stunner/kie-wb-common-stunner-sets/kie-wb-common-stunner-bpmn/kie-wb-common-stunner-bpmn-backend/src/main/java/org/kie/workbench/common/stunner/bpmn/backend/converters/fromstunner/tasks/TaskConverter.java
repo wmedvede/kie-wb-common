@@ -35,6 +35,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.task.BaseUserTa
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.BusinessRuleTaskExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.RuleLanguage;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTaskExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.UserTaskExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.workitem.ServiceTask;
 import org.kie.workbench.common.stunner.bpmn.workitem.ServiceTaskExecutionSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
@@ -116,6 +117,13 @@ public class TaskConverter {
         p.setAsync(executionSet.getIsAsync().getValue());
         p.setCreatedBy(executionSet.getCreatedBy().getValue());
         p.setAdHocAutostart(executionSet.getAdHocAutostart().getValue());
+        if (executionSet instanceof UserTaskExecutionSet && Boolean.TRUE.equals(((UserTaskExecutionSet) executionSet).getIsMultipleInstance().getValue())) {
+            p.setCollectionInput(((UserTaskExecutionSet) executionSet).getMultipleInstanceCollectionInput().getValue());
+            p.setInput(((UserTaskExecutionSet) executionSet).getMultipleInstanceDataInput().getValue());
+            p.setCollectionOutput(((UserTaskExecutionSet) executionSet).getMultipleInstanceCollectionOutput().getValue());
+            p.setOutput(((UserTaskExecutionSet) executionSet).getMultipleInstanceDataOutput().getValue());
+            p.setCompletionCondition(((UserTaskExecutionSet) executionSet).getMultipleInstanceCompletionCondition().getValue());
+        }
         p.setOnEntryAction(executionSet.getOnEntryAction());
         p.setOnExitAction(executionSet.getOnExitAction());
         p.setContent(executionSet.getContent().getValue());
