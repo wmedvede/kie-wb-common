@@ -115,13 +115,6 @@ public class TaskConverter {
         p.setAsync(executionSet.getIsAsync().getValue());
         p.setCreatedBy(executionSet.getCreatedBy().getValue());
         p.setAdHocAutostart(executionSet.getAdHocAutostart().getValue());
-
-        //TODO WM chequear esto
-        p.setMICollectionInput(executionSet.getMultipleInstanceCollectionInput().getValue());
-        p.setMIInput(executionSet.getMultipleInstanceDataInput().getValue());
-        p.setMICollectionOutput(executionSet.getMultipleInstanceCollectionOutput().getValue());
-        p.setMIOutput(executionSet.getMultipleInstanceDataOutput().getValue());
-
         p.setOnEntryAction(executionSet.getOnEntryAction());
         p.setOnExitAction(executionSet.getOnExitAction());
         p.setContent(executionSet.getContent().getValue());

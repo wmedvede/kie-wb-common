@@ -17,6 +17,8 @@
 package org.kie.workbench.common.stunner.bpmn.backend.service.diagram;
 
 import java.io.ByteArrayInputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -222,6 +224,8 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_ENDERROR_EVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/endErrorEvent.bpmn";
     private static final String BPMN_EVENT_DEFINITION_REF = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/eventDefinitionRef.bpmn";
     private static final String BPMN_SERVICE_TASKS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/serviceTasks.bpmn";
+
+    private static final String BPMN_DUMMY_PROCESS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyProcess.bpmn2";
 
     private static final String NEW_LINE = System.lineSeparator();
 
@@ -3082,6 +3086,23 @@ public class BPMNDirectDiagramMarshallerTest {
         testMagnetsInLane(diagram2);
     }
 
+    @Test
+    public void testMarshallReusableSubProcessMI() throws Exception {
+        Diagram<Graph, Metadata> diagram1 = unmarshall(BPMN_DUMMY_PROCESS);
+
+        Node node = diagram1.getGraph().getNode("_BEF599DA-0FC3-48E1-940D-84FC4B29CA5B");
+        ReusableSubprocess reusableSubprocess = (ReusableSubprocess)((View)node.getContent()).getDefinition();
+        reusableSubprocess.getExecutionSet().getIsMultipleInstance().setValue(true);
+        reusableSubprocess.getExecutionSet().getMultipleInstanceCollectionInput().setValue("theInputList");
+        reusableSubprocess.getExecutionSet().getMultipleInstanceDataInput().setValue("theInputVariable");
+        reusableSubprocess.getExecutionSet().getMultipleInstanceCollectionOutput().setValue("theOutputList");
+        reusableSubprocess.getExecutionSet().getMultipleInstanceDataOutput().setValue("theOutputVariable");
+
+        String result = tested.marshall(diagram1);
+        Files.write(Paths.get("src/test/resources/org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyProcessWithMIConverted.bpmn2"), result.getBytes());
+        int i = 0;
+    }
+
     private ViewConnector getInEdgeViewConnector(Node node) {
         List<Edge> edges = node.getInEdges();
         if (edges != null) {
@@ -3246,6 +3267,11 @@ public class BPMNDirectDiagramMarshallerTest {
         assertTrue(result.contains("drools:taskName=\"Email\""));
         assertTrue(result.contains("drools:taskName=\"Log\""));
     }
+
+    public void testMarshallMultipleInstanceReusableSubprocess() {
+
+    }
+
 
     private List<Node> getNodes(Diagram<Graph, Metadata> diagram) {
         Graph graph = diagram.getGraph();

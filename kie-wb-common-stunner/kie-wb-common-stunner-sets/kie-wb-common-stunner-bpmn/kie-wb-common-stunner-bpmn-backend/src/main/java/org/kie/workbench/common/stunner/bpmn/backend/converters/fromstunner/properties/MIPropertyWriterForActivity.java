@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties;
 
+import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
@@ -28,30 +29,25 @@ import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.MultiInstanceLoopCharacteristics;
 import org.eclipse.bpmn2.OutputSet;
 import org.eclipse.bpmn2.Property;
-import org.eclipse.bpmn2.SubProcess;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Ids;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.Scripts.asCData;
 
-public class MultipleInstanceSubProcessPropertyWriter extends SubProcessPropertyWriter {
+public class MIPropertyWriterForActivity extends ActivityPropertyWriter {
 
     private final MultiInstanceLoopCharacteristics miloop;
     private final InputOutputSpecification ioSpec;
     private final InputSet inputSet;
     private final OutputSet outputSet;
 
-    public MultipleInstanceSubProcessPropertyWriter(SubProcess process, VariableScope variableScope) {
-        super(process, variableScope);
+    public MIPropertyWriterForActivity(Activity activity, VariableScope variableScope) {
+        super(activity, variableScope);
         this.miloop = bpmn2.createMultiInstanceLoopCharacteristics();
-        process.setLoopCharacteristics(miloop);
-        this.ioSpec = bpmn2.createInputOutputSpecification();
-        this.inputSet = bpmn2.createInputSet();
-        this.ioSpec.getInputSets().add(inputSet);
-        this.outputSet = bpmn2.createOutputSet();
-        this.ioSpec.getOutputSets().add(outputSet);
-
-        process.setIoSpecification(ioSpec);
+        activity.setLoopCharacteristics(miloop);
+        this.ioSpec = super.getIoSpecification();
+        this.inputSet = getInputSet(ioSpec);
+        this.outputSet = getOutputSet(ioSpec);
     }
 
     public void setCollectionInput(String collectionInput) {
@@ -60,20 +56,22 @@ public class MultipleInstanceSubProcessPropertyWriter extends SubProcessProperty
             return;
         }
 
-        DataInput dataInputElement = createDataInput("IN_COLLECTION");
+        String suffix = "IN_COLLECTION";
+        String id = Ids.dataInput(activity.getId(), suffix);
+        DataInput dataInputElement = createDataInput(id, suffix);
+        this.ioSpec.getDataInputs().add(dataInputElement);
         Property prop = findPropertyById(collectionInput); // check whether this exist or throws
-        miloop.setLoopDataInputRef(dataInputElement);
+        dataInputElement.setItemSubjectRef(prop.getItemSubjectRef());
+
+        this.miloop.setLoopDataInputRef(dataInputElement);
+
+        //TODO WM revisar si lo saco..., en los ejemplos jbpm no está pero creo que no molestaria.
         this.inputSet.getDataInputRefs().add(dataInputElement);
 
         DataInputAssociation dia = Bpmn2Factory.eINSTANCE.createDataInputAssociation();
         dia.getSourceRef().add(prop);
         dia.setTargetRef(dataInputElement);
-        process.getDataInputAssociations().add(dia);
-    }
-
-    public void setInput(String value) {
-        DataInput dataInput = createDataInput(value);
-        miloop.setInputDataItem(dataInput);
+        this.activity.getDataInputAssociations().add(dia);
     }
 
     public void setCollectionOutput(String collectionOutput) {
@@ -82,49 +80,82 @@ public class MultipleInstanceSubProcessPropertyWriter extends SubProcessProperty
             return;
         }
 
-        DataOutput dataOutputElement = createDataOutput("OUT_COLLECTION");
+        String suffix = "OUT_COLLECTION";
+        String id = Ids.dataOutput(activity.getId(), suffix);
+        DataOutput dataOutputElement = createDataOutput(id, suffix);
+        this.ioSpec.getDataOutputs().add(dataOutputElement);
+
         Property prop = findPropertyById(collectionOutput); // check whether this exist or throws
-        miloop.setLoopDataOutputRef(dataOutputElement);
-        ItemDefinition item = bpmn2.createItemDefinition();
-        item.setId(Ids.multiInstanceItemType(process.getId(), "OUT_COLLECTION"));
-        dataOutputElement.setItemSubjectRef(item);
-        this.addItemDefinition(item);
+        dataOutputElement.setItemSubjectRef(prop.getItemSubjectRef());
+
+        this.miloop.setLoopDataOutputRef(dataOutputElement);
+
+        //TODO WM revisar si lo saco...n en los ejemplos jbpm no está, pero creo que no molestaria...
         this.outputSet.getDataOutputRefs().add(dataOutputElement);
 
         DataOutputAssociation doa = Bpmn2Factory.eINSTANCE.createDataOutputAssociation();
         doa.getSourceRef().add(dataOutputElement);
         doa.setTargetRef(prop);
-        process.getDataOutputAssociations().add(doa);
+        activity.getDataOutputAssociations().add(doa);
+    }
+
+    public void setInput(String name) {
+
+        DataInput miDataInputElement = createDataInput(name, name);
+        ItemDefinition item = bpmn2.createItemDefinition();
+        item.setId(Ids.multiInstanceItemType(activity.getId(), name));
+        this.addItemDefinition(item);
+        miDataInputElement.setItemSubjectRef(item);
+        miloop.setInputDataItem(miDataInputElement);
+
+        String id = Ids.dataInput(activity.getId(), name);
+        DataInput dataInputElement = createDataInput(id, name);
+        ioSpec.getDataInputs().add(dataInputElement);
+
+        this.inputSet.getDataInputRefs().add(dataInputElement);
+
+        DataInputAssociation dia = Bpmn2Factory.eINSTANCE.createDataInputAssociation();
+        dia.getSourceRef().add(miDataInputElement);
+        dia.setTargetRef(dataInputElement);
+        this.activity.getDataInputAssociations().add(dia);
     }
 
     public void setOutput(String name) {
-        DataOutput dataOutput = createDataOutput(name);
-        miloop.setOutputDataItem(dataOutput);
+
+        DataOutput miDataOutputElement = createDataOutput(name, name);
         ItemDefinition item = bpmn2.createItemDefinition();
-        item.setId(Ids.multiInstanceItemType(process.getId(), name));
-        dataOutput.setItemSubjectRef(item);
+        item.setId(Ids.multiInstanceItemType(activity.getId(), name));
         this.addItemDefinition(item);
+        miDataOutputElement.setItemSubjectRef(item);
+        miloop.setOutputDataItem(miDataOutputElement);
+
+        String id = Ids.dataOutput(activity.getId(), name);
+        DataOutput dataOutputElement = createDataOutput(id, name);
+        ioSpec.getDataOutputs().add(dataOutputElement);
+
+        this.outputSet.getDataOutputRefs().add(dataOutputElement);
+
+        DataOutputAssociation doa = Bpmn2Factory.eINSTANCE.createDataOutputAssociation();
+        doa.getSourceRef().add(dataOutputElement);
+        doa.setTargetRef(miDataOutputElement);
+        this.activity.getDataOutputAssociations().add(doa);
     }
 
     private Property findPropertyById(String id) {
         return variableScope.lookup(id).getTypedIdentifier();
     }
 
-    public DataInput createDataInput(String name) {
+    public DataInput createDataInput(String id, String name) {
         DataInput dataInput = bpmn2.createDataInput();
-        dataInput.setId(Ids.dataInput(process.getId(), name));
+        dataInput.setId(id);
         dataInput.setName(name);
-
-        this.ioSpec.getDataInputs().add(dataInput);
         return dataInput;
     }
 
-    public DataOutput createDataOutput(String value) {
+    public DataOutput createDataOutput(String id, String name) {
         DataOutput dataOutput = bpmn2.createDataOutput();
-        dataOutput.setId(Ids.dataOutput(process.getId(), value));
-        dataOutput.setName(value);
-
-        this.ioSpec.getDataOutputs().add(dataOutput);
+        dataOutput.setId(id);
+        dataOutput.setName(name);
         return dataOutput;
     }
 

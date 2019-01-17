@@ -94,11 +94,11 @@ public abstract class BaseSubProcessConverter<A extends BaseAdHocSubprocess>
         p.setProcessVariables(processData.getProcessVariables());
 
         MultipleInstanceSubprocessTaskExecutionSet executionSet = definition.getExecutionSet();
-        p.setMICollectionInput(executionSet.getMultipleInstanceCollectionInput().getValue());
-        p.setMIInput(executionSet.getMultipleInstanceDataInput().getValue());
-        p.setMICollectionOutput(executionSet.getMultipleInstanceCollectionOutput().getValue());
-        p.setMIOutput(executionSet.getMultipleInstanceDataOutput().getValue());
-        p.setMICompletionCondition(executionSet.getMultipleInstanceCompletionCondition().getValue());
+        p.setCollectionInput(executionSet.getMultipleInstanceCollectionInput().getValue());
+        p.setInput(executionSet.getMultipleInstanceDataInput().getValue());
+        p.setCollectionOutput(executionSet.getMultipleInstanceCollectionOutput().getValue());
+        p.setOutput(executionSet.getMultipleInstanceDataOutput().getValue());
+        p.setCompletionCondition(executionSet.getMultipleInstanceCompletionCondition().getValue());
         p.setOnEntryAction(executionSet.getOnEntryAction());
         p.setOnExitAction(executionSet.getOnExitAction());
         p.setAsync(executionSet.getIsAsync().getValue());

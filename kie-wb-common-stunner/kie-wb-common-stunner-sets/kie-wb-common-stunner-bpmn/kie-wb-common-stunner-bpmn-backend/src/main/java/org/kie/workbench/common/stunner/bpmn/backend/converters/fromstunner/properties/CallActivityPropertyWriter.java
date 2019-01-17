@@ -27,9 +27,13 @@ public class CallActivityPropertyWriter extends ActivityPropertyWriter {
 
     private final CallActivity activity;
 
+    private VariableScope variableScope;
+
     public CallActivityPropertyWriter(CallActivity activity, VariableScope variableScope) {
         super(activity, variableScope);
         this.activity = activity;
+        //TODO WM, revisar esto posiblemente se va....
+        this.variableScope = variableScope;
     }
 
     public void setOnEntryAction(OnEntryAction onEntryAction) {
@@ -54,5 +58,9 @@ public class CallActivityPropertyWriter extends ActivityPropertyWriter {
 
     public void setCalledElement(String value) {
         activity.setCalledElement(value);
+    }
+
+    public VariableScope getVariableScope() {
+        return variableScope;
     }
 }

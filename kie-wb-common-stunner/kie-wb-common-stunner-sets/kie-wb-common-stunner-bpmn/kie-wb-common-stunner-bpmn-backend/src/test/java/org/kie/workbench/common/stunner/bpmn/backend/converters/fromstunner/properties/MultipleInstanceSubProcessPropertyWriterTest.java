@@ -22,6 +22,7 @@ import org.eclipse.bpmn2.SubProcess;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 
 public class MultipleInstanceSubProcessPropertyWriterTest {
@@ -33,18 +34,13 @@ public class MultipleInstanceSubProcessPropertyWriterTest {
                 new MultipleInstanceSubProcessPropertyWriter(
                         subProcess, new FlatVariableScope());
 
-        //TODO WM, ver este test...
-        /*
-
         assertThatCode(() -> {
-            p.setMIInput(null);
-            p.setMIOutput(null);
-            p.createMIDataInput(null);
-            p.createMIDataOutput(null);
-            p.setMICompletionCondition(null);
+            p.setInput(null);
+            p.setOutput(null);
+            p.createDataInput(null);
+            p.createDataOutput(null);
+            p.setCompletionCondition(null);
         }).doesNotThrowAnyException();
-        */
-
     }
 
     @Test
@@ -55,7 +51,7 @@ public class MultipleInstanceSubProcessPropertyWriterTest {
         MultipleInstanceSubProcessPropertyWriter p =
                 new MultipleInstanceSubProcessPropertyWriter(
                         subProcess, new FlatVariableScope());
-        p.setMICompletionCondition(expression);
+        p.setCompletionCondition(expression);
         MultiInstanceLoopCharacteristics loopCharacteristics =
                 (MultiInstanceLoopCharacteristics) subProcess.getLoopCharacteristics();
         FormalExpression completionCondition =
