@@ -18,6 +18,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.activ
 
 import org.eclipse.bpmn2.CallActivity;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.ActivityPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
@@ -27,6 +28,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsAsync;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsMultipleInstance;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCollectionInput;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCollectionOutput;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCompletionCondition;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceDataInput;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceDataOutput;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnEntryAction;
@@ -39,6 +41,8 @@ import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
 public class CallActivityConverter extends BaseCallActivityConverter<ReusableSubprocess> {
 
+    ActivityPropertyReader p;
+
     public CallActivityConverter(TypedFactoryManager factoryManager,
                                  PropertyReaderFactory propertyReaderFactory) {
         super(factoryManager, propertyReaderFactory);
@@ -46,7 +50,27 @@ public class CallActivityConverter extends BaseCallActivityConverter<ReusableSub
 
     @Override
     protected Node<View<ReusableSubprocess>, Edge> createNode(CallActivity activity, ActivityPropertyReader p) {
+        this.p = p;
         return factoryManager.newNode(activity.getId(), ReusableSubprocess.class);
+    }
+
+    @Override
+    public BpmnNode convert(CallActivity activity) {
+        BpmnNode result = super.convert(activity);
+
+
+        ReusableSubprocess subprocess =  (ReusableSubprocess) result.value().getContent().getDefinition();
+        ReusableSubprocessTaskExecutionSet executionSet = subprocess.getExecutionSet();
+
+        executionSet.getMultipleInstanceCollectionInput().setValue(p.getCollectionInput());
+        executionSet.getMultipleInstanceDataInput().setValue(p.getDataInput());
+        executionSet.getMultipleInstanceCollectionOutput().setValue(p.getCollectionOutput());
+        executionSet.getMultipleInstanceDataOutput().setValue(p.getDataOutput());
+        executionSet.getMultipleInstanceCompletionCondition().setValue(p.getCompletionCondition());
+
+        /////executionSet
+        ///activity.getLoopCharacteristics();
+        return result;
     }
 
     @Override
@@ -63,6 +87,7 @@ public class CallActivityConverter extends BaseCallActivityConverter<ReusableSub
                                                       new MultipleInstanceDataInput(),
                                                       new MultipleInstanceCollectionOutput(),
                                                       new MultipleInstanceDataOutput(),
+                                                      new MultipleInstanceCompletionCondition(),
                                                       onEntryAction, onExitAction);
     }
 }

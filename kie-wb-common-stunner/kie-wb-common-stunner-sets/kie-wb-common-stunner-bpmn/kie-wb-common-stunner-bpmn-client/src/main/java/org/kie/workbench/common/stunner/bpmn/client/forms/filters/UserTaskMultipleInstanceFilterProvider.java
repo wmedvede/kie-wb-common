@@ -19,30 +19,29 @@ package org.kie.workbench.common.stunner.bpmn.client.forms.filters;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
-import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.UserTask;
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.forms.client.event.RefreshFormPropertiesEvent;
 
-public class ReusableSubProcessFilterProvider extends MultipleInstanceNodeFilterProvider {
+public class UserTaskMultipleInstanceFilterProvider extends MultipleInstanceNodeFilterProvider {
 
-    public ReusableSubProcessFilterProvider() {
-        this(null, null);
+    public UserTaskMultipleInstanceFilterProvider() {
     }
 
     @Inject
-    public ReusableSubProcessFilterProvider(final SessionManager sessionManager,
-                                            final Event<RefreshFormPropertiesEvent> refreshFormPropertiesEvent) {
+    public UserTaskMultipleInstanceFilterProvider(final SessionManager sessionManager,
+                                                  final Event<RefreshFormPropertiesEvent> refreshFormPropertiesEvent) {
         super(sessionManager, refreshFormPropertiesEvent);
     }
 
     @Override
-    public Class<?> getDefinitionType() {
-        return ReusableSubprocess.class;
+    public Class<UserTask> getDefinitionType() {
+        return UserTask.class;
     }
 
     @Override
     public boolean isMultipleInstance(final Object definition) {
-        final ReusableSubprocess subProcess = (ReusableSubprocess) definition;
-        return subProcess.getExecutionSet().getIsMultipleInstance().getValue();
+        final UserTask userTask = (UserTask) definition;
+        return userTask.getExecutionSet().getIsMultipleInstance().getValue();
     }
 }

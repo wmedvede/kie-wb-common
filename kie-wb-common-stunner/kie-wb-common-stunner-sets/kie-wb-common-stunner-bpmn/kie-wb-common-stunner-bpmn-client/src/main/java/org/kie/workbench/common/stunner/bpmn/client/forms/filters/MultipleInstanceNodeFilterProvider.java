@@ -31,44 +31,42 @@ import org.kie.workbench.common.stunner.forms.client.event.FormFieldChanged;
 import org.kie.workbench.common.stunner.forms.client.event.RefreshFormPropertiesEvent;
 import org.kie.workbench.common.stunner.forms.client.formFilters.StunnerFormElementFilterProvider;
 
-public abstract class MINodeFilterProvider<T> implements StunnerFormElementFilterProvider {
+public abstract class MultipleInstanceNodeFilterProvider implements StunnerFormElementFilterProvider {
 
     private final SessionManager sessionManager;
 
     private final Event<RefreshFormPropertiesEvent> refreshFormPropertiesEvent;
 
-    public MINodeFilterProvider() {
+    public MultipleInstanceNodeFilterProvider() {
         this(null, null);
     }
 
-    public MINodeFilterProvider(final SessionManager sessionManager,
-                                final Event<RefreshFormPropertiesEvent> refreshFormPropertiesEvent) {
+    public MultipleInstanceNodeFilterProvider(final SessionManager sessionManager,
+                                              final Event<RefreshFormPropertiesEvent> refreshFormPropertiesEvent) {
         this.sessionManager = sessionManager;
         this.refreshFormPropertiesEvent = refreshFormPropertiesEvent;
     }
 
-    public abstract boolean isMultipleInstance(T value);
+    public abstract boolean isMultipleInstance(final Object definition);
 
     @Override
-    public abstract Class<T> getDefinitionType();
-
-    @Override
-    public Collection<FormElementFilter> provideFilters(String elementUUID, Object definition) {
+    public Collection<FormElementFilter> provideFilters(final String elementUUID, final Object definition) {
         final List<FormElementFilter> filters = new ArrayList<>();
-        final Predicate predicate = o -> isMultipleInstance((T) definition);
-
+        final Predicate predicate = o -> isMultipleInstance(definition);
         filters.add(new FormElementFilter("executionSet.multipleInstanceCollectionInput", predicate));
         filters.add(new FormElementFilter("executionSet.multipleInstanceDataInput", predicate));
         filters.add(new FormElementFilter("executionSet.multipleInstanceCollectionOutput", predicate));
         filters.add(new FormElementFilter("executionSet.multipleInstanceDataOutput", predicate));
+        filters.add(new FormElementFilter("executionSet.multipleInstanceCompletionCondition", predicate));
         return filters;
     }
 
-    void onFormFieldChanged(@Observes FormFieldChanged formFieldChanged) {
+    void onFormFieldChanged(@Observes final FormFieldChanged formFieldChanged) {
         final String isMultipleInstance = "executionSet.isMultipleInstance";
         if (!Objects.equals(formFieldChanged.getName(), isMultipleInstance)) {
             return;
         }
-        refreshFormPropertiesEvent.fire(new RefreshFormPropertiesEvent(sessionManager.getCurrentSession(), formFieldChanged.getUuid()));
+        refreshFormPropertiesEvent.fire(new RefreshFormPropertiesEvent(sessionManager.getCurrentSession(),
+                                                                       formFieldChanged.getUuid()));
     }
 }

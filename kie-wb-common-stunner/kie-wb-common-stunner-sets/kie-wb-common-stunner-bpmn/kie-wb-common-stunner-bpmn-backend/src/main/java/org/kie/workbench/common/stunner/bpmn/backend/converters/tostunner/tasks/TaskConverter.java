@@ -47,6 +47,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsAsync;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.IsMultipleInstance;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCollectionInput;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCollectionOutput;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceCompletionCondition;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceDataInput;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.MultipleInstanceDataOutput;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnEntryAction;
@@ -201,7 +202,7 @@ public class TaskConverter {
                 p.getSimulationSet()
         );
 
-        //TODO WM review here
+        //TODO WM review here, we need to complete the user task multiple instance attributes.
         definition.setExecutionSet(new UserTaskExecutionSet(
                 new TaskName(p.getTaskName()),
                 p.getActors(),
@@ -219,6 +220,7 @@ public class TaskConverter {
                 new MultipleInstanceDataInput(),
                 new MultipleInstanceCollectionOutput(),
                 new MultipleInstanceDataOutput(),
+                new MultipleInstanceCompletionCondition(),
                 new OnEntryAction(p.getOnEntryAction()),
                 new OnExitAction(p.getOnExitAction()),
                 new Content(p.getContent()),

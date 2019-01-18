@@ -65,13 +65,12 @@ public class MIPropertyWriterForActivity extends ActivityPropertyWriter {
 
         this.miloop.setLoopDataInputRef(dataInputElement);
 
-        //TODO WM revisar si lo saco..., en los ejemplos jbpm no está pero creo que no molestaria.
         this.inputSet.getDataInputRefs().add(dataInputElement);
 
         DataInputAssociation dia = Bpmn2Factory.eINSTANCE.createDataInputAssociation();
         dia.getSourceRef().add(prop);
         dia.setTargetRef(dataInputElement);
-        this.activity.getDataInputAssociations().add(dia);
+        activity.getDataInputAssociations().add(dia);
     }
 
     public void setCollectionOutput(String collectionOutput) {
@@ -90,7 +89,6 @@ public class MIPropertyWriterForActivity extends ActivityPropertyWriter {
 
         this.miloop.setLoopDataOutputRef(dataOutputElement);
 
-        //TODO WM revisar si lo saco...n en los ejemplos jbpm no está, pero creo que no molestaria...
         this.outputSet.getDataOutputRefs().add(dataOutputElement);
 
         DataOutputAssociation doa = Bpmn2Factory.eINSTANCE.createDataOutputAssociation();

@@ -121,7 +121,6 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
     @Valid
     private AdHocAutostart adHocAutostart;
 
-
     @Property
     @Valid
     @FormField(afterElement = "adHocAutostart")
@@ -163,7 +162,16 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
     private MultipleInstanceDataOutput multipleInstanceDataOutput;
 
     @Property
-    @FormField(afterElement = "multipleInstanceDataOutput",
+    @FormField(
+            type = TextAreaFieldType.class,
+            afterElement = "multipleInstanceDataOutput",
+            settings = {@FieldParam(name = "rows", value = "5")}
+    )
+    @Valid
+    private MultipleInstanceCompletionCondition multipleInstanceCompletionCondition;
+
+    @Property
+    @FormField(afterElement = "multipleInstanceCompletionCondition",
             settings = {@FieldParam(name = "mode", value = "ACTION_SCRIPT")})
     @Valid
     private OnEntryAction onEntryAction;
@@ -199,11 +207,12 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
              new Description(""),
              new CreatedBy(),
              new AdHocAutostart(),
-             new IsMultipleInstance(),
+             new IsMultipleInstance(false),
              new MultipleInstanceCollectionInput(),
              new MultipleInstanceDataInput(),
              new MultipleInstanceCollectionOutput(),
              new MultipleInstanceDataOutput(),
+             new MultipleInstanceCompletionCondition(),
              new OnEntryAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
                                                                                       ""))),
              new OnExitAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
@@ -228,6 +237,7 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
                                 final @MapsTo("multipleInstanceDataInput") MultipleInstanceDataInput multipleInstanceDataInput,
                                 final @MapsTo("multipleInstanceCollectionOutput") MultipleInstanceCollectionOutput multipleInstanceCollectionOutput,
                                 final @MapsTo("multipleInstanceDataOutput") MultipleInstanceDataOutput multipleInstanceDataOutput,
+                                final @MapsTo("multipleInstanceCompletionCondition") MultipleInstanceCompletionCondition multipleInstanceCompletionCondition,
                                 final @MapsTo("onEntryAction") OnEntryAction onEntryAction,
                                 final @MapsTo("onExitAction") OnExitAction onExitAction,
                                 final @MapsTo("content") Content content,
@@ -248,6 +258,7 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
         this.multipleInstanceDataInput = multipleInstanceDataInput;
         this.multipleInstanceCollectionOutput = multipleInstanceCollectionOutput;
         this.multipleInstanceDataOutput = multipleInstanceDataOutput;
+        this.multipleInstanceCompletionCondition = multipleInstanceCompletionCondition;
         this.onEntryAction = onEntryAction;
         this.onExitAction = onExitAction;
         this.content = content;
@@ -382,6 +393,14 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
         this.multipleInstanceDataOutput = multipleInstanceDataOutput;
     }
 
+    public MultipleInstanceCompletionCondition getMultipleInstanceCompletionCondition() {
+        return multipleInstanceCompletionCondition;
+    }
+
+    public void setMultipleInstanceCompletionCondition(MultipleInstanceCompletionCondition multipleInstanceCompletionCondition) {
+        this.multipleInstanceCompletionCondition = multipleInstanceCompletionCondition;
+    }
+
     public OnEntryAction getOnEntryAction() {
         return onEntryAction;
     }
@@ -427,6 +446,12 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
                                          Objects.hashCode(description),
                                          Objects.hashCode(createdBy),
                                          Objects.hashCode(adHocAutostart),
+                                         Objects.hashCode(isMultipleInstance),
+                                         Objects.hashCode(multipleInstanceCollectionInput),
+                                         Objects.hashCode(multipleInstanceDataInput),
+                                         Objects.hashCode(multipleInstanceCollectionOutput),
+                                         Objects.hashCode(multipleInstanceDataOutput),
+                                         Objects.hashCode(multipleInstanceCompletionCondition),
                                          Objects.hashCode(onEntryAction),
                                          Objects.hashCode(onExitAction),
                                          Objects.hashCode(content),
@@ -435,38 +460,32 @@ public class UserTaskExecutionSet implements BPMNPropertySet {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
         if (o instanceof UserTaskExecutionSet) {
             UserTaskExecutionSet other = (UserTaskExecutionSet) o;
-            return Objects.equals(taskName,
-                                  other.taskName) &&
-                    Objects.equals(subject,
-                                   other.subject) &&
-                    Objects.equals(actors,
-                                   other.actors) &&
-                    Objects.equals(groupid,
-                                   other.groupid) &&
-                    Objects.equals(assignmentsinfo,
-                                   other.assignmentsinfo) &&
-                    Objects.equals(isAsync,
-                                   other.isAsync) &&
-                    Objects.equals(skippable,
-                                   other.skippable) &&
-                    Objects.equals(priority,
-                                   other.priority) &&
-                    Objects.equals(description,
-                                   other.description) &&
-                    Objects.equals(createdBy,
-                                   other.createdBy) &&
-                    Objects.equals(adHocAutostart,
-                                   other.adHocAutostart) &&
-                    Objects.equals(onEntryAction,
-                                   other.onEntryAction) &&
-                    Objects.equals(onExitAction,
-                                   other.onExitAction) &&
-                    Objects.equals(content,
-                                   other.content) &&
-                    Objects.equals(slaDueDate,
-                                   other.slaDueDate);
+            return Objects.equals(taskName, other.taskName) &&
+                    Objects.equals(subject, other.subject) &&
+                    Objects.equals(actors, other.actors) &&
+                    Objects.equals(groupid, other.groupid) &&
+                    Objects.equals(assignmentsinfo, other.assignmentsinfo) &&
+                    Objects.equals(isAsync, other.isAsync) &&
+                    Objects.equals(skippable, other.skippable) &&
+                    Objects.equals(priority, other.priority) &&
+                    Objects.equals(description, other.description) &&
+                    Objects.equals(createdBy, other.createdBy) &&
+                    Objects.equals(adHocAutostart, other.adHocAutostart) &&
+                    Objects.equals(isMultipleInstance, other.isMultipleInstance) &&
+                    Objects.equals(multipleInstanceCollectionInput, other.multipleInstanceCollectionInput) &&
+                    Objects.equals(multipleInstanceDataInput, other.multipleInstanceDataInput) &&
+                    Objects.equals(multipleInstanceCollectionOutput, other.multipleInstanceCollectionOutput) &&
+                    Objects.equals(multipleInstanceDataOutput, other.multipleInstanceDataOutput) &&
+                    Objects.equals(multipleInstanceCompletionCondition, other.multipleInstanceCompletionCondition) &&
+                    Objects.equals(onEntryAction, other.onEntryAction) &&
+                    Objects.equals(onExitAction, other.onExitAction) &&
+                    Objects.equals(content, other.content) &&
+                    Objects.equals(slaDueDate, other.slaDueDate);
         }
         return false;
     }

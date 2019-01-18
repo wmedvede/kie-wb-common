@@ -27,6 +27,7 @@ import org.kie.workbench.common.forms.adf.definitions.annotations.FormDefinition
 import org.kie.workbench.common.forms.adf.definitions.annotations.FormField;
 import org.kie.workbench.common.forms.adf.definitions.annotations.field.selector.SelectorDataProvider;
 import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.selectors.listBox.type.ListBoxFieldType;
+import org.kie.workbench.common.forms.fields.shared.fieldTypes.basic.textArea.type.TextAreaFieldType;
 import org.kie.workbench.common.stunner.core.definition.annotation.Property;
 import org.kie.workbench.common.stunner.core.definition.annotation.PropertySet;
 import org.kie.workbench.common.stunner.core.util.HashUtil;
@@ -110,7 +111,16 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
     private MultipleInstanceDataOutput multipleInstanceDataOutput;
 
     @Property
-    @FormField(afterElement = "multipleInstanceDataOutput",
+    @FormField(
+            type = TextAreaFieldType.class,
+            afterElement = "multipleInstanceDataOutput",
+            settings = {@FieldParam(name = "rows", value = "5")}
+    )
+    @Valid
+    private MultipleInstanceCompletionCondition multipleInstanceCompletionCondition;
+
+    @Property
+    @FormField(afterElement = "multipleInstanceCompletionCondition",
             settings = {@FieldParam(name = "mode", value = "ACTION_SCRIPT")}
     )
     @Valid
@@ -128,11 +138,12 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
              new Independent(),
              new WaitForCompletion(),
              new IsAsync(),
-             new IsMultipleInstance(),
+             new IsMultipleInstance(false),
              new MultipleInstanceCollectionInput(),
              new MultipleInstanceDataInput(),
              new MultipleInstanceCollectionOutput(),
              new MultipleInstanceDataOutput(),
+             new MultipleInstanceCompletionCondition(),
              new OnEntryAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
                                                                                       ""))),
              new OnExitAction(new ScriptTypeListValue().addValue(new ScriptTypeValue("java",
@@ -148,6 +159,7 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
                                               final @MapsTo("multipleInstanceDataInput") MultipleInstanceDataInput multipleInstanceDataInput,
                                               final @MapsTo("multipleInstanceCollectionOutput") MultipleInstanceCollectionOutput multipleInstanceCollectionOutput,
                                               final @MapsTo("multipleInstanceDataOutput") MultipleInstanceDataOutput multipleInstanceDataOutput,
+                                              final @MapsTo("multipleInstanceCompletionCondition") MultipleInstanceCompletionCondition multipleInstanceCompletionCondition,
                                               final @MapsTo("onEntryAction") OnEntryAction onEntryAction,
                                               final @MapsTo("onExitAction") OnExitAction onExitAction) {
         this.calledElement = calledElement;
@@ -159,6 +171,7 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
         this.multipleInstanceDataInput = multipleInstanceDataInput;
         this.multipleInstanceCollectionOutput = multipleInstanceCollectionOutput;
         this.multipleInstanceDataOutput = multipleInstanceDataOutput;
+        this.multipleInstanceCompletionCondition = multipleInstanceCompletionCondition;
         this.onEntryAction = onEntryAction;
         this.onExitAction = onExitAction;
     }
@@ -243,6 +256,14 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
         this.multipleInstanceDataOutput = multipleInstanceDataOutput;
     }
 
+    public MultipleInstanceCompletionCondition getMultipleInstanceCompletionCondition() {
+        return multipleInstanceCompletionCondition;
+    }
+
+    public void setMultipleInstanceCompletionCondition(MultipleInstanceCompletionCondition multipleInstanceCompletionCondition) {
+        this.multipleInstanceCompletionCondition = multipleInstanceCompletionCondition;
+    }
+
     @Override
     public OnEntryAction getOnEntryAction() {
         return onEntryAction;
@@ -274,8 +295,9 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
                                          Objects.hashCode(multipleInstanceDataInput),
                                          Objects.hashCode(multipleInstanceCollectionOutput),
                                          Objects.hashCode(multipleInstanceDataOutput),
-                                         onEntryAction.hashCode(),
-                                         onExitAction.hashCode());
+                                         Objects.hashCode(multipleInstanceCompletionCondition),
+                                         Objects.hashCode(onEntryAction),
+                                         Objects.hashCode(onExitAction));
     }
 
     @Override
@@ -294,6 +316,7 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
                     Objects.equals(multipleInstanceDataInput, other.multipleInstanceDataInput) &&
                     Objects.equals(multipleInstanceCollectionOutput, other.multipleInstanceCollectionOutput) &&
                     Objects.equals(multipleInstanceDataOutput, other.multipleInstanceDataOutput) &&
+                    Objects.equals(multipleInstanceCompletionCondition, other.multipleInstanceCompletionCondition) &&
                     Objects.equals(onEntryAction, other.onEntryAction) &&
                     Objects.equals(onExitAction, other.onExitAction);
         }

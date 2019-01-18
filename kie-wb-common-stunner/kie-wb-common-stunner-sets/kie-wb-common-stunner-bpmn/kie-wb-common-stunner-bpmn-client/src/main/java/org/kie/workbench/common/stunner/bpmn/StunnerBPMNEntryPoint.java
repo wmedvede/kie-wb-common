@@ -25,7 +25,6 @@ import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.kie.workbench.common.stunner.bpmn.client.forms.filters.AssociationFilterProvider;
 import org.kie.workbench.common.stunner.bpmn.client.forms.filters.CatchingIntermediateEventFilterProvider;
-import org.kie.workbench.common.stunner.bpmn.client.forms.filters.ReusableSubProcessFilterProvider;
 import org.kie.workbench.common.stunner.bpmn.client.forms.filters.StartEventFilterProvider;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateConditionalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEvent;
@@ -76,7 +75,7 @@ public class StunnerBPMNEntryPoint {
         FormFiltersProviderFactory.registerProvider(new CatchingIntermediateEventFilterProvider(sessionManager, IntermediateMessageEventCatching.class));
         FormFiltersProviderFactory.registerProvider(new CatchingIntermediateEventFilterProvider(sessionManager, IntermediateEscalationEvent.class));
         FormFiltersProviderFactory.registerProvider(new AssociationFilterProvider());
-        FormFiltersProviderFactory.registerProvider(new ReusableSubProcessFilterProvider(sessionManager, refreshFormPropertiesEvent));
+        //FormFiltersProviderFactory.registerProvider(new ReusableSubProcessFilterProvider(sessionManager, refreshFormPropertiesEvent));
 
         //registering managed filters instances
         managedFilters.forEach(FormFiltersProviderFactory::registerProvider);

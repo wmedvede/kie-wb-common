@@ -43,7 +43,13 @@ public class InputAssignmentReader {
         }
 
         if (!sourceList.isEmpty()) {
-            return new InputAssignmentReader(sourceList.get(0), targetName);
+            //TODO WM, ver esto, si en realidad queremos filtrar esto..., pero vendria bien asi no confundimos con mierda
+            //en la parte de assignments :) en los mappings de las tareas ?
+            if (sourceList.get(0) instanceof Property) {
+                return new InputAssignmentReader((Property)sourceList.get(0), targetName);
+            } else {
+                return null;
+            }
         } else if (!assignmentList.isEmpty()) {
             return new InputAssignmentReader(assignmentList.get(0), targetName);
         } else {
@@ -62,8 +68,8 @@ public class InputAssignmentReader {
                 targetName);
     }
 
-    InputAssignmentReader(ItemAwareElement source, String targetName) {
-        String propertyName = getPropertyName((Property) source);
+    InputAssignmentReader(Property source, String targetName) {
+        String propertyName = getPropertyName(source);
         this.associationDeclaration = new AssociationDeclaration(
                 AssociationDeclaration.Direction.Input,
                 AssociationDeclaration.Type.SourceTarget,
@@ -87,6 +93,4 @@ public class InputAssignmentReader {
     private static String getPropertyName(Property prop) {
         return prop.getName() == null ? prop.getId() : prop.getName();
     }
-
-
 }

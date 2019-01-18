@@ -67,7 +67,7 @@ public abstract class BaseReusableSubprocessConverter<T extends BaseReusableSubp
         miPropertyWriter.setInput(reusableSubprocessTaskExecutionSet.getMultipleInstanceDataInput().getValue());
         miPropertyWriter.setCollectionOutput(reusableSubprocessTaskExecutionSet.getMultipleInstanceCollectionOutput().getValue());
         miPropertyWriter.setOutput(reusableSubprocessTaskExecutionSet.getMultipleInstanceDataOutput().getValue());
-        // agregar el completion condition ya vi que funciona bien miPropertyWriter.setCompletionCondition(reusableSubprocessTaskExecutionSet.get);
+        miPropertyWriter.setCompletionCondition(reusableSubprocessTaskExecutionSet.getMultipleInstanceCompletionCondition().getValue());
         p.getItemDefinitions().addAll(miPropertyWriter.getItemDefinitions());
 
         p.setSimulationSet(definition.getSimulationSet());
