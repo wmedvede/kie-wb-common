@@ -18,13 +18,11 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.act
 
 import org.eclipse.bpmn2.CallActivity;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.CallActivityPropertyWriter;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.MIPropertyWriterForActivity;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.BaseReusableSubprocessTaskExecutionSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.ReusableSubprocessTaskExecutionSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
@@ -59,16 +57,6 @@ public abstract class BaseReusableSubprocessConverter<T extends BaseReusableSubp
         p.setWaitForCompletion(executionSet.getWaitForCompletion().getValue());
 
         p.setAssignmentsInfo(definition.getDataIOSet().getAssignmentsinfo());
-
-        //TODO WM chequear esto
-        MIPropertyWriterForActivity miPropertyWriter = new MIPropertyWriterForActivity(activity, p.getVariableScope());
-        ReusableSubprocessTaskExecutionSet reusableSubprocessTaskExecutionSet = (ReusableSubprocessTaskExecutionSet)executionSet;
-        miPropertyWriter.setCollectionInput(reusableSubprocessTaskExecutionSet.getMultipleInstanceCollectionInput().getValue());
-        miPropertyWriter.setInput(reusableSubprocessTaskExecutionSet.getMultipleInstanceDataInput().getValue());
-        miPropertyWriter.setCollectionOutput(reusableSubprocessTaskExecutionSet.getMultipleInstanceCollectionOutput().getValue());
-        miPropertyWriter.setOutput(reusableSubprocessTaskExecutionSet.getMultipleInstanceDataOutput().getValue());
-        miPropertyWriter.setCompletionCondition(reusableSubprocessTaskExecutionSet.getMultipleInstanceCompletionCondition().getValue());
-        p.getItemDefinitions().addAll(miPropertyWriter.getItemDefinitions());
 
         p.setSimulationSet(definition.getSimulationSet());
 

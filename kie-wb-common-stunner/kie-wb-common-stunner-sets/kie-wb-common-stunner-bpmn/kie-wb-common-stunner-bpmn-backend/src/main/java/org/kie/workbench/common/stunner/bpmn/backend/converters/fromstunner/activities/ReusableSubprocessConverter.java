@@ -15,12 +15,32 @@
  */
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.activities;
 
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.CallActivityPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.ReusableSubprocessTaskExecutionSet;
+import org.kie.workbench.common.stunner.core.graph.Node;
+import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
 public class ReusableSubprocessConverter extends BaseReusableSubprocessConverter<ReusableSubprocess> {
 
     public ReusableSubprocessConverter(PropertyWriterFactory propertyWriterFactory) {
         super(propertyWriterFactory);
+    }
+
+    @Override
+    public PropertyWriter toFlowElement(Node<View<ReusableSubprocess>, ?> n) {
+        CallActivityPropertyWriter p = (CallActivityPropertyWriter) super.toFlowElement(n);
+        ReusableSubprocess reusableSubprocess = n.getContent().getDefinition();
+        ReusableSubprocessTaskExecutionSet executionSet = reusableSubprocess.getExecutionSet();
+        if (Boolean.TRUE.equals(executionSet.getIsAsync().getValue())) {
+            p.setCollectionInput(executionSet.getMultipleInstanceCollectionInput().getValue());
+            p.setInput(executionSet.getMultipleInstanceDataInput().getValue());
+            p.setCollectionOutput(executionSet.getMultipleInstanceCollectionOutput().getValue());
+            p.setOutput(executionSet.getMultipleInstanceDataOutput().getValue());
+            p.setCompletionCondition(executionSet.getMultipleInstanceCompletionCondition().getValue());
+        }
+        return p;
     }
 }

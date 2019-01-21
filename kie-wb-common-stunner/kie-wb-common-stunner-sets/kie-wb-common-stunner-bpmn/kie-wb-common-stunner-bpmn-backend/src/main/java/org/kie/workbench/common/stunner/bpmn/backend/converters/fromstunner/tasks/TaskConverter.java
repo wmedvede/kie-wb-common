@@ -115,6 +115,13 @@ public class TaskConverter {
         p.setAsync(executionSet.getIsAsync().getValue());
         p.setCreatedBy(executionSet.getCreatedBy().getValue());
         p.setAdHocAutostart(executionSet.getAdHocAutostart().getValue());
+        if (Boolean.TRUE.equals(executionSet.getIsAsync().getValue())) {
+            p.setCollectionInput(executionSet.getMultipleInstanceCollectionInput().getValue());
+            p.setInput(executionSet.getMultipleInstanceDataInput().getValue());
+            p.setCollectionOutput(executionSet.getMultipleInstanceCollectionOutput().getValue());
+            p.setOutput(executionSet.getMultipleInstanceDataOutput().getValue());
+            p.setCompletionCondition(executionSet.getMultipleInstanceCompletionCondition().getValue());
+        }
         p.setOnEntryAction(executionSet.getOnEntryAction());
         p.setOnExitAction(executionSet.getOnExitAction());
         p.setContent(executionSet.getContent().getValue());
