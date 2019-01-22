@@ -16,12 +16,6 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties;
 
-import java.util.Optional;
-
-import org.eclipse.bpmn2.FormalExpression;
-import org.eclipse.bpmn2.ItemAwareElement;
-import org.eclipse.bpmn2.MultiInstanceLoopCharacteristics;
-import org.eclipse.bpmn2.Property;
 import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.DefinitionResolver;
@@ -32,53 +26,14 @@ public class MultipleInstanceSubProcessPropertyReader extends SubProcessProperty
         super(element, plane, definitionResolver);
     }
 
-    public String getCollectionInput() {
-        ItemAwareElement ieDataInput = getMultiInstanceLoopCharacteristics()
-                .map(MultiInstanceLoopCharacteristics::getLoopDataInputRef)
-                .orElse(null);
-        return process.getDataInputAssociations().stream()
-                .filter(dia -> dia.getTargetRef().getId().equals(ieDataInput.getId()))
-                .map(dia -> getVariableName((Property) dia.getSourceRef().get(0)))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public String getCollectionOutput() {
-        ItemAwareElement ieDataOutput = getMultiInstanceLoopCharacteristics()
-                .map(MultiInstanceLoopCharacteristics::getLoopDataOutputRef)
-                .orElse(null);
-        return process.getDataOutputAssociations().stream()
-                .filter(doa -> doa.getSourceRef().get(0).getId().equals(ieDataOutput.getId()))
-                .map(doa -> getVariableName((Property) doa.getTargetRef()))
-                .findFirst()
-                .orElse(null);
-    }
-
+    @Override
     public String getDataInput() {
-        return getMultiInstanceLoopCharacteristics()
-                .map(MultiInstanceLoopCharacteristics::getInputDataItem)
-                .map(d -> Optional.ofNullable(d.getName()).orElse(d.getId()))
-                .orElse("");
+        //TODO WM chequear si acá tengo que hacer algun tipo de extension como en el casi del writer.
+        return super.getDataInput();
     }
 
     public String getDataOutput() {
-        return getMultiInstanceLoopCharacteristics()
-                .map(MultiInstanceLoopCharacteristics::getOutputDataItem)
-                .map(d -> Optional.ofNullable(d.getName()).orElse(d.getId()))
-                .orElse("");
-    }
-
-    public String getCompletionCondition() {
-        return getMultiInstanceLoopCharacteristics()
-                .map(miloop -> (FormalExpression) miloop.getCompletionCondition())
-                .map(FormalExpression::getBody).orElse("");
-    }
-
-    private Optional<MultiInstanceLoopCharacteristics> getMultiInstanceLoopCharacteristics() {
-        return Optional.ofNullable((MultiInstanceLoopCharacteristics) process.getLoopCharacteristics());
-    }
-
-    private static String getVariableName(Property property) {
-        return ProcessVariableReader.getProcessVariableName(property);
+        //TODO WM chequear si acá tengo que hacer algun tipo de extension como en el casi del writer.
+        return super.getDataOutput();
     }
 }

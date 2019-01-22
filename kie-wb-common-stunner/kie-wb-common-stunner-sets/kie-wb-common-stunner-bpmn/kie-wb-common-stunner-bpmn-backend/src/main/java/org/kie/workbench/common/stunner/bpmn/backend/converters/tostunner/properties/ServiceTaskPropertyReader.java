@@ -16,11 +16,7 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties;
 
-import java.util.Collections;
-import java.util.Optional;
-
 import org.drools.core.util.StringUtils;
-import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.Task;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomElement;
@@ -64,20 +60,9 @@ public class ServiceTaskPropertyReader extends TaskPropertyReader {
         return CustomInput.taskName.of(task).get();
     }
 
+    @Override
     public AssignmentsInfo getAssignmentsInfo() {
-        Optional<InputOutputSpecification> ioSpecification =
-                Optional.ofNullable(task.getIoSpecification());
-
-        AssignmentsInfo info = AssignmentsInfos.of(
-                ioSpecification.map(InputOutputSpecification::getDataInputs)
-                        .orElse(Collections.emptyList()),
-                task.getDataInputAssociations(),
-                ioSpecification.map(InputOutputSpecification::getDataOutputs)
-                        .orElse(Collections.emptyList()),
-                task.getDataOutputAssociations(),
-                ioSpecification.isPresent()
-        );
-
+        AssignmentsInfo info = super.getAssignmentsInfo();
         // do not break compatibility with old marshallers: return
         // empty delimited fields instead of empty string
         if (info.getValue().isEmpty()) {

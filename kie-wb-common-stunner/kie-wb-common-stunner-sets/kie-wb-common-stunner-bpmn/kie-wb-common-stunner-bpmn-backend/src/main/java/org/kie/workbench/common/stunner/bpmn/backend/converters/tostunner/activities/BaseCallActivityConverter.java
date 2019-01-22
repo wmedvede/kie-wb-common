@@ -18,7 +18,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.activ
 import org.eclipse.bpmn2.CallActivity;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.ActivityPropertyReader;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.CallActivityPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DataIOSet;
@@ -36,7 +36,7 @@ import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-public abstract class BaseCallActivityConverter <R extends BaseReusableSubprocess> {
+public abstract class BaseCallActivityConverter<R extends BaseReusableSubprocess> {
 
     protected final TypedFactoryManager factoryManager;
     private final PropertyReaderFactory propertyReaderFactory;
@@ -49,7 +49,7 @@ public abstract class BaseCallActivityConverter <R extends BaseReusableSubproces
 
     @SuppressWarnings("unchecked")
     public BpmnNode convert(CallActivity activity) {
-        ActivityPropertyReader p = propertyReaderFactory.of(activity);
+        CallActivityPropertyReader p = propertyReaderFactory.of(activity);
 
         Node<View<R>, Edge> node = createNode(activity, p);
 
@@ -61,7 +61,7 @@ public abstract class BaseCallActivityConverter <R extends BaseReusableSubproces
         ));
 
         definition.setExecutionSet(createReusableSubprocessTaskExecutionSet(
-                new CalledElement(activity.getCalledElement()),
+                new CalledElement(p.getCalledElement()),
                 new Independent(p.isIndependent()),
                 new WaitForCompletion(p.isWaitForCompletion()),
                 new IsAsync(p.isAsync()),
@@ -83,7 +83,7 @@ public abstract class BaseCallActivityConverter <R extends BaseReusableSubproces
         return BpmnNode.of(node);
     }
 
-    protected abstract Node<View<R>, Edge> createNode(CallActivity activity, ActivityPropertyReader p);
+    protected abstract Node<View<R>, Edge> createNode(CallActivity activity, CallActivityPropertyReader p);
 
     protected abstract BaseReusableSubprocessTaskExecutionSet createReusableSubprocessTaskExecutionSet(CalledElement calledElement,
                                                                                                        Independent independent,
@@ -91,6 +91,5 @@ public abstract class BaseCallActivityConverter <R extends BaseReusableSubproces
                                                                                                        IsAsync isAsync,
                                                                                                        OnEntryAction onEntryAction,
                                                                                                        OnExitAction onExitAction,
-                                                                                                       ActivityPropertyReader p);
-
+                                                                                                       CallActivityPropertyReader p);
 }

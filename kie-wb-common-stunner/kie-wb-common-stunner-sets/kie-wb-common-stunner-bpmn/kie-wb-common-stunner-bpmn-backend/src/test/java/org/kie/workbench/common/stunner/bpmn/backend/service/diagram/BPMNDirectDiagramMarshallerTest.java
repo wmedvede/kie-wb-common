@@ -227,9 +227,9 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_EVENT_DEFINITION_REF = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/eventDefinitionRef.bpmn";
     private static final String BPMN_SERVICE_TASKS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/serviceTasks.bpmn";
 
-    private static final String BPMN_DUMMY_PROCESS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyProcess.bpmn2";
+    private static final String BPMN_DUMMY_MULTIPLE_INSTANCE_REUSABLE_SUB_PROCESS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyMultipleInstanceReusableSubprocess.bpmn2";
 
-    private static final String BPMN_DUMMY_MI_PROCESS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyMultipleInstanceSubProcess.bpmn";
+    private static final String BPMN_DUMMY_MULTIPLE_INSTANCE_SUB_PROCESS  = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyMultipleInstanceSubProcess.bpmn2";
 
 
     private static final String NEW_LINE = System.lineSeparator();
@@ -3092,10 +3092,22 @@ public class BPMNDirectDiagramMarshallerTest {
     }
 
     @Test
-    public void testMarshallReusableSubProcessMI() throws Exception {
-        Diagram<Graph, Metadata> template = unmarshall(BPMN_DUMMY_PROCESS);
+    public void testMarshallMultipleInstanceReusableSubProcessMI() throws Exception {
+        Diagram<Graph, Metadata> template = unmarshall(BPMN_DUMMY_MULTIPLE_INSTANCE_REUSABLE_SUB_PROCESS);
 
-        Node node = template.getGraph().getNode("_BEF599DA-0FC3-48E1-940D-84FC4B29CA5B");
+        prepareMultipleInstanceSubProcessReusable(template, "_BEF599DA-0FC3-48E1-940D-84FC4B29CA5B");
+
+        String result = tested.marshall(template);
+        Path path = Paths.get("src/test/resources/org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyMultipleInstanceReusableSubprocessConverted.bpmn2");
+        Files.write(path, result.getBytes());
+
+        Diagram<Graph, Metadata> miDiagram = unmarshall(Files.newInputStream(path));
+
+        verifyMultipleInstanceSubProcessReusable(miDiagram, "_BEF599DA-0FC3-48E1-940D-84FC4B29CA5B");
+    }
+
+    private void prepareMultipleInstanceSubProcessReusable(Diagram<Graph, Metadata> template, String nodeId) {
+        Node node = template.getGraph().getNode(nodeId);
         ReusableSubprocess reusableSubprocess = (ReusableSubprocess)((View)node.getContent()).getDefinition();
         reusableSubprocess.getExecutionSet().getIsMultipleInstance().setValue(true);
 
@@ -3104,14 +3116,11 @@ public class BPMNDirectDiagramMarshallerTest {
         reusableSubprocess.getExecutionSet().getMultipleInstanceCollectionOutput().setValue("theOutputList");
         reusableSubprocess.getExecutionSet().getMultipleInstanceDataOutput().setValue("theOutputVariable");
         reusableSubprocess.getExecutionSet().getMultipleInstanceCompletionCondition().setValue("return theOutputList.size()==2;");
+    }
 
-        String result = tested.marshall(template);
-        Path path = Paths.get("src/test/resources/org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyProcessWithMIConverted.bpmn2");
-        Files.write(path, result.getBytes());
-
-        Diagram<Graph, Metadata> miDiagram = unmarshall(Files.newInputStream(path));
-
-        Node resultNode = miDiagram.getGraph().getNode("_BEF599DA-0FC3-48E1-940D-84FC4B29CA5B");
+    private void verifyMultipleInstanceSubProcessReusable(Diagram<Graph, Metadata> miDiagram, String nodeId) {
+        Node node = miDiagram.getGraph().getNode(nodeId);
+        assertNotNull(nodeId);
         ReusableSubprocess resultModel  = (ReusableSubprocess)((View)node.getContent()).getDefinition();
         resultModel.getExecutionSet().getIsMultipleInstance().setValue(true);
         assertEquals("theInputList", resultModel.getExecutionSet().getMultipleInstanceCollectionInput().getValue());
@@ -3119,24 +3128,34 @@ public class BPMNDirectDiagramMarshallerTest {
         assertEquals("theOutputList", resultModel.getExecutionSet().getMultipleInstanceCollectionOutput().getValue());
         assertEquals("theOutputVariable", resultModel.getExecutionSet().getMultipleInstanceDataOutput().getValue());
         assertEquals("return theOutputList.size()==2;", resultModel.getExecutionSet().getMultipleInstanceCompletionCondition().getValue());
+        assertEquals("", resultModel.getDataIOSet().getAssignmentsinfo().getValue());
+    }
 
+    @Test
+    public void testMarshallMultipleInstanceReusableSubProcessMITwoTimes() throws Exception {
+        Diagram<Graph, Metadata> template = unmarshall(BPMN_DUMMY_MULTIPLE_INSTANCE_REUSABLE_SUB_PROCESS);
+        prepareMultipleInstanceSubProcessReusable(template, "_BEF599DA-0FC3-48E1-940D-84FC4B29CA5B");
 
-        int i = 0;
+        String result = tested.marshall(template);
+        Path path = Paths.get("src/test/resources/org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyMultipleInstanceReusableSubprocessConverted.bpmn2");
+        Files.write(path, result.getBytes());
+
+        Diagram<Graph, Metadata> miDiagram = unmarshall(Files.newInputStream(path));
+
+        result = tested.marshall(miDiagram);
+        path = Paths.get("src/test/resources/org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyMultipleInstanceReusableSubprocessConvertedTwoTimes.bpmn2");
+        Files.write(path, result.getBytes());
+
+        miDiagram = unmarshall(Files.newInputStream(path));
+
+        verifyMultipleInstanceSubProcessReusable(miDiagram, "_BEF599DA-0FC3-48E1-940D-84FC4B29CA5B");
     }
 
 
     @Test
     public void testMarshallMultipleInstanceSubProcessMI() throws Exception {
-        Diagram<Graph, Metadata> template = unmarshall(BPMN_DUMMY_MI_PROCESS);
-
-        Node node = template.getGraph().getNode("_4F3FD343-F5A2-42DB-B764-4B02AC863A41");
-        MultipleInstanceSubprocess multipleInstanceSubprocess = (MultipleInstanceSubprocess)((View)node.getContent()).getDefinition();
-
-        multipleInstanceSubprocess.getExecutionSet().getMultipleInstanceCollectionInput().setValue("theInputList");
-        multipleInstanceSubprocess.getExecutionSet().getMultipleInstanceDataInput().setValue("theInputVariable");
-        multipleInstanceSubprocess.getExecutionSet().getMultipleInstanceCollectionOutput().setValue("theOutputList");
-        multipleInstanceSubprocess.getExecutionSet().getMultipleInstanceDataOutput().setValue("theOutputVariable");
-        multipleInstanceSubprocess.getExecutionSet().getMultipleInstanceCompletionCondition().setValue("return theOutputList.size()==2;");
+        Diagram<Graph, Metadata> template = unmarshall(BPMN_DUMMY_MULTIPLE_INSTANCE_SUB_PROCESS);
+        prepareMultipleInstanceSubProcess(template, "_4F3FD343-F5A2-42DB-B764-4B02AC863A41");
 
         String result = tested.marshall(template);
         Path path = Paths.get("src/test/resources/org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyMultipleInstanceSubProcessConverted.bpmn2");
@@ -3144,18 +3163,52 @@ public class BPMNDirectDiagramMarshallerTest {
 
         Diagram<Graph, Metadata> miDiagram = unmarshall(Files.newInputStream(path));
 
-        Node resultNode = miDiagram.getGraph().getNode("_BEF599DA-0FC3-48E1-940D-84FC4B29CA5B");
-        ReusableSubprocess resultModel  = (ReusableSubprocess)((View)node.getContent()).getDefinition();
+        verifyMultipleInstanceSubProcess(miDiagram, "_4F3FD343-F5A2-42DB-B764-4B02AC863A41");
+    }
+
+    private void prepareMultipleInstanceSubProcess(Diagram<Graph, Metadata> template, String nodeId) {
+        Node node = template.getGraph().getNode(nodeId);
+        MultipleInstanceSubprocess multipleInstanceSubprocess = (MultipleInstanceSubprocess)((View)node.getContent()).getDefinition();
+
+        multipleInstanceSubprocess.getExecutionSet().getMultipleInstanceCollectionInput().setValue("theInputList");
+        multipleInstanceSubprocess.getExecutionSet().getMultipleInstanceDataInput().setValue("theInputVariable");
+        multipleInstanceSubprocess.getExecutionSet().getMultipleInstanceCollectionOutput().setValue("theOutputList");
+        multipleInstanceSubprocess.getExecutionSet().getMultipleInstanceDataOutput().setValue("theOutputVariable");
+        multipleInstanceSubprocess.getExecutionSet().getMultipleInstanceCompletionCondition().setValue("return theOutputList.size()==2;");
+    }
+
+    private void verifyMultipleInstanceSubProcess(Diagram<Graph, Metadata> miDiagram, String nodeId) {
+        Node node = miDiagram.getGraph().getNode(nodeId);
+        assertNotNull(node);
+        MultipleInstanceSubprocess resultModel  = (MultipleInstanceSubprocess)((View)node.getContent()).getDefinition();
         resultModel.getExecutionSet().getIsMultipleInstance().setValue(true);
         assertEquals("theInputList", resultModel.getExecutionSet().getMultipleInstanceCollectionInput().getValue());
         assertEquals("theInputVariable", resultModel.getExecutionSet().getMultipleInstanceDataInput().getValue());
         assertEquals("theOutputList", resultModel.getExecutionSet().getMultipleInstanceCollectionOutput().getValue());
         assertEquals("theOutputVariable", resultModel.getExecutionSet().getMultipleInstanceDataOutput().getValue());
         assertEquals("return theOutputList.size()==2;", resultModel.getExecutionSet().getMultipleInstanceCompletionCondition().getValue());
-
-
-        int i = 0;
     }
+
+    @Test
+    public void testMarshallMultipleInstanceSubProcessMITwoTimes() throws Exception {
+        Diagram<Graph, Metadata> template = unmarshall(BPMN_DUMMY_MULTIPLE_INSTANCE_SUB_PROCESS);
+
+        prepareMultipleInstanceSubProcess(template, "_4F3FD343-F5A2-42DB-B764-4B02AC863A41");
+
+        String result = tested.marshall(template);
+        Path path = Paths.get("src/test/resources/org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyMultipleInstanceSubProcessConverted.bpmn2");
+        Files.write(path, result.getBytes());
+
+        Diagram<Graph, Metadata> miDiagram = unmarshall(Files.newInputStream(path));
+
+        result = tested.marshall(miDiagram);
+        path = Paths.get("src/test/resources/org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyMultipleInstanceSubProcessConvertedTwoTimes.bpmn2");
+        Files.write(path, result.getBytes());
+
+        miDiagram = unmarshall(Files.newInputStream(path));
+        verifyMultipleInstanceSubProcess(miDiagram, "_4F3FD343-F5A2-42DB-B764-4B02AC863A41" );
+    }
+
 
     private ViewConnector getInEdgeViewConnector(Node node) {
         List<Edge> edges = node.getInEdges();

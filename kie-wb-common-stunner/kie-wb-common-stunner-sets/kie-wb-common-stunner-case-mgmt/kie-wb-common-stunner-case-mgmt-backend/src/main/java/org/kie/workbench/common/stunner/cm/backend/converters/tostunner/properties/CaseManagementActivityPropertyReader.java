@@ -15,15 +15,15 @@
  */
 package org.kie.workbench.common.stunner.cm.backend.converters.tostunner.properties;
 
-import org.eclipse.bpmn2.Activity;
+import org.eclipse.bpmn2.CallActivity;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.DefinitionResolver;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.ActivityPropertyReader;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.CallActivityPropertyReader;
 import org.kie.workbench.common.stunner.cm.backend.converters.customproperties.CaseManagementCustomElement;
 
-public class CaseManagementActivityPropertyReader extends ActivityPropertyReader {
+public class CaseManagementActivityPropertyReader extends CallActivityPropertyReader {
 
-    public CaseManagementActivityPropertyReader(Activity activity,
+    public CaseManagementActivityPropertyReader(CallActivity activity,
                                                 BPMNPlane plane,
                                                 DefinitionResolver definitionResolver) {
         super(activity, plane, definitionResolver);

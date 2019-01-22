@@ -105,6 +105,9 @@ public abstract class BaseSubProcessConverter<A extends BaseAdHocSubprocess> {
                                                  new Documentation(p.getDocumentation())
         ));
 
+        //TODO WM borrar la lectura de los assignments
+        p.getAssignmentsInfo();
+
         definition.setExecutionSet(
                 new MultipleInstanceSubprocessTaskExecutionSet(new MultipleInstanceCollectionInput(p.getCollectionInput()),
                                                                new MultipleInstanceCollectionOutput(p.getCollectionOutput()),

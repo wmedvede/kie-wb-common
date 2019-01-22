@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.bpmn2.BaseElement;
+import org.eclipse.bpmn2.Documentation;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomElement;
@@ -52,9 +53,10 @@ public abstract class BasePropertyReader {
     }
 
     public String getDocumentation() {
-        return element.getDocumentation().stream()
+        return element.getDocumentation()
+                .stream()
                 .findFirst()
-                .map(org.eclipse.bpmn2.Documentation::getText)
+                .map(Documentation::getText)
                 .orElse("");
     }
 

@@ -18,7 +18,7 @@ package org.kie.workbench.common.stunner.cm.backend.converters.tostunner.activit
 import org.eclipse.bpmn2.CallActivity;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.activities.BaseCallActivityConverter;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.ActivityPropertyReader;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.CallActivityPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.CalledElement;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.Independent;
@@ -46,7 +46,7 @@ public class CaseManagementCallActivityConverter extends BaseCallActivityConvert
     }
 
     @Override
-    protected Node<View<BaseCaseManagementReusableSubprocess>, Edge> createNode(CallActivity activity, ActivityPropertyReader p) {
+    protected Node<View<BaseCaseManagementReusableSubprocess>, Edge> createNode(CallActivity activity, CallActivityPropertyReader p) {
         Class<? extends BaseCaseManagementReusableSubprocess> clazz = ((CaseManagementActivityPropertyReader) p).isCase() ?
                 CaseReusableSubprocess.class : ProcessReusableSubprocess.class;
 
@@ -60,7 +60,7 @@ public class CaseManagementCallActivityConverter extends BaseCallActivityConvert
                                                                                                             IsAsync isAsync,
                                                                                                             OnEntryAction onEntryAction,
                                                                                                             OnExitAction onExitAction,
-                                                                                                            ActivityPropertyReader p) {
+                                                                                                            CallActivityPropertyReader p) {
         return ((CaseManagementActivityPropertyReader) p).isCase() ?
                 new CaseReusableSubprocessTaskExecutionSet(calledElement,
                                                            new IsCase(true),

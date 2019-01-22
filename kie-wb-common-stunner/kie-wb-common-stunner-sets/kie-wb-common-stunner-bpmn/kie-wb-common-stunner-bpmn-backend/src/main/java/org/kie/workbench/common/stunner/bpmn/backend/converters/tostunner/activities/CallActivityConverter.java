@@ -19,7 +19,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.activ
 import org.eclipse.bpmn2.CallActivity;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.ActivityPropertyReader;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.CallActivityPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.CalledElement;
@@ -39,9 +39,11 @@ import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
+import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
+
 public class CallActivityConverter extends BaseCallActivityConverter<ReusableSubprocess> {
 
-    ActivityPropertyReader p;
+    private CallActivityPropertyReader p;
 
     public CallActivityConverter(TypedFactoryManager factoryManager,
                                  PropertyReaderFactory propertyReaderFactory) {
@@ -49,7 +51,7 @@ public class CallActivityConverter extends BaseCallActivityConverter<ReusableSub
     }
 
     @Override
-    protected Node<View<ReusableSubprocess>, Edge> createNode(CallActivity activity, ActivityPropertyReader p) {
+    protected Node<View<ReusableSubprocess>, Edge> createNode(CallActivity activity, CallActivityPropertyReader p) {
         this.p = p;
         return factoryManager.newNode(activity.getId(), ReusableSubprocess.class);
     }
@@ -57,9 +59,7 @@ public class CallActivityConverter extends BaseCallActivityConverter<ReusableSub
     @Override
     public BpmnNode convert(CallActivity activity) {
         BpmnNode result = super.convert(activity);
-
-
-        ReusableSubprocess subprocess =  (ReusableSubprocess) result.value().getContent().getDefinition();
+        ReusableSubprocess subprocess = (ReusableSubprocess) result.value().getContent().getDefinition();
         ReusableSubprocessTaskExecutionSet executionSet = subprocess.getExecutionSet();
 
         executionSet.getMultipleInstanceCollectionInput().setValue(p.getCollectionInput());
@@ -68,8 +68,12 @@ public class CallActivityConverter extends BaseCallActivityConverter<ReusableSub
         executionSet.getMultipleInstanceDataOutput().setValue(p.getDataOutput());
         executionSet.getMultipleInstanceCompletionCondition().setValue(p.getCompletionCondition());
 
-        /////executionSet
-        ///activity.getLoopCharacteristics();
+        boolean multipleInstance = !isEmpty(executionSet.getMultipleInstanceCollectionInput().getValue()) ||
+                !isEmpty(executionSet.getMultipleInstanceDataInput().getValue()) ||
+                !isEmpty(executionSet.getMultipleInstanceCollectionOutput().getValue()) ||
+                !isEmpty(executionSet.getMultipleInstanceDataOutput().getValue()) ||
+                !isEmpty(executionSet.getMultipleInstanceCompletionCondition().getValue());
+        executionSet.setIsMultipleInstance(new IsMultipleInstance(multipleInstance));
         return result;
     }
 
@@ -80,7 +84,7 @@ public class CallActivityConverter extends BaseCallActivityConverter<ReusableSub
                                                                                           IsAsync isAsync,
                                                                                           OnEntryAction onEntryAction,
                                                                                           OnExitAction onExitAction,
-                                                                                          ActivityPropertyReader p) {
+                                                                                          CallActivityPropertyReader p) {
         return new ReusableSubprocessTaskExecutionSet(calledElement, independent, waitForCompletion, isAsync,
                                                       new IsMultipleInstance(),
                                                       new MultipleInstanceCollectionInput(),

@@ -16,19 +16,24 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties;
 
-import org.eclipse.bpmn2.SubProcess;
+import org.eclipse.bpmn2.CallActivity;
 import org.eclipse.bpmn2.di.BPMNPlane;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomAttribute;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomElement;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
 
-public class SubProcessPropertyReader extends MultipleInstanceActivityPropertyReader {
+public class CallActivityPropertyReader extends MultipleInstanceActivityPropertyReader {
 
-    protected final SubProcess process;
+    protected final CallActivity callActivity;
 
-    public SubProcessPropertyReader(SubProcess element, BPMNPlane plane, DefinitionResolver definitionResolver) {
-        super(element, plane, definitionResolver);
-        this.process = element;
+    public CallActivityPropertyReader(CallActivity callActivity, BPMNPlane plane, DefinitionResolver definitionResolver) {
+        super(callActivity, plane, definitionResolver);
+        this.callActivity = callActivity;
+    }
+
+    public String getCalledElement() {
+        return callActivity.getCalledElement();
     }
 
     public ScriptTypeListValue getOnEntryAction() {
@@ -39,11 +44,15 @@ public class SubProcessPropertyReader extends MultipleInstanceActivityPropertyRe
         return Scripts.onExit(element.getExtensionValues());
     }
 
-    public boolean isAsync() {
-        return CustomElement.async.of(element).get();
+    public boolean isIndependent() {
+        return CustomAttribute.independent.of(element).get();
     }
 
-    public String getProcessVariables() {
-        return ProcessVariableReader.getProcessVariables(process.getProperties());
+    public boolean isWaitForCompletion() {
+        return CustomAttribute.waitForCompletion.of(element).get();
+    }
+
+    public boolean isAsync() {
+        return CustomElement.async.of(element).get();
     }
 }

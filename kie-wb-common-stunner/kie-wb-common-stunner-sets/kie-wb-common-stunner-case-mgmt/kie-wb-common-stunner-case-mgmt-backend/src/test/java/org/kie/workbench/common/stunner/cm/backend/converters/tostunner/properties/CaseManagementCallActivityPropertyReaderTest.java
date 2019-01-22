@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.di;
 
-public class CaseManagementActivityPropertyReaderTest {
+public class CaseManagementCallActivityPropertyReaderTest {
 
     private DefinitionResolver definitionResolver;
 

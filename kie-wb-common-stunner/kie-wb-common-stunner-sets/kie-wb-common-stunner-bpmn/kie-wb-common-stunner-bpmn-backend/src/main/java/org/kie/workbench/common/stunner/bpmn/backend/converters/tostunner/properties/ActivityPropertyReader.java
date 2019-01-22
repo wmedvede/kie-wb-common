@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,24 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.bpmn2.Activity;
-import org.eclipse.bpmn2.FormalExpression;
+import org.eclipse.bpmn2.DataInput;
+import org.eclipse.bpmn2.DataInputAssociation;
+import org.eclipse.bpmn2.DataOutput;
+import org.eclipse.bpmn2.DataOutputAssociation;
 import org.eclipse.bpmn2.InputOutputSpecification;
-import org.eclipse.bpmn2.ItemAwareElement;
-import org.eclipse.bpmn2.MultiInstanceLoopCharacteristics;
-import org.eclipse.bpmn2.Property;
 import org.eclipse.bpmn2.di.BPMNPlane;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomAttribute;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomElement;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
 
 public class ActivityPropertyReader extends FlowElementPropertyReader {
 
-    private final Activity activity;
-    private DefinitionResolver definitionResolver;
+    protected final Activity activity;
+    protected final DefinitionResolver definitionResolver;
 
     public ActivityPropertyReader(Activity activity, BPMNPlane plane, DefinitionResolver definitionResolver) {
         super(activity, plane, definitionResolver.getShape(activity.getId()));
@@ -44,96 +42,37 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
         this.definitionResolver = definitionResolver;
     }
 
-    public ScriptTypeListValue getOnEntryAction() {
-        return Scripts.onEntry(element.getExtensionValues());
-    }
-
-    public ScriptTypeListValue getOnExitAction() {
-        return Scripts.onExit(element.getExtensionValues());
-    }
-
-    public boolean isIndependent() {
-        return CustomAttribute.independent.of(element).get();
-    }
-
-    public boolean isWaitForCompletion() {
-        return CustomAttribute.waitForCompletion.of(element).get();
-    }
-
-    public boolean isAsync() {
-        return CustomElement.async.of(element).get();
-    }
-
-    public AssignmentsInfo getAssignmentsInfo() {
-        Optional<InputOutputSpecification> ioSpecification =
-                Optional.ofNullable(activity.getIoSpecification());
-
-        return AssignmentsInfos.of(
-                ioSpecification.map(InputOutputSpecification::getDataInputs)
-                        .orElse(Collections.emptyList()),
-                activity.getDataInputAssociations(),
-                ioSpecification.map(InputOutputSpecification::getDataOutputs)
-                        .orElse(Collections.emptyList()),
-                activity.getDataOutputAssociations(),
-                ioSpecification.isPresent()
-        );
-    }
-
     public SimulationSet getSimulationSet() {
-        return definitionResolver.resolveSimulationParameters(element.getId())
+        return definitionResolver.resolveSimulationParameters(activity.getId())
                 .map(SimulationSets::of)
                 .orElse(new SimulationSet());
     }
 
-
-    public String getCollectionInput() {
-        ItemAwareElement ieDataInput = getMultiInstanceLoopCharacteristics()
-                .map(MultiInstanceLoopCharacteristics::getLoopDataInputRef)
-                .orElse(null);
-        return activity.getDataInputAssociations().stream()
-                .filter(dia -> dia.getTargetRef().getId().equals(ieDataInput.getId()))
-                .map(dia -> getVariableName((Property) dia.getSourceRef().get(0)))
-                .findFirst()
-                .orElse(null);
+    public AssignmentsInfo getAssignmentsInfo() {
+        return AssignmentsInfos.of(getDataInputs(),
+                                   getDataInputAssociations(),
+                                   getDataOutputs(),
+                                   getDataOutputAssociations(),
+                                   getIOSpecification().isPresent());
     }
 
-    public String getCollectionOutput() {
-        ItemAwareElement ieDataOutput = getMultiInstanceLoopCharacteristics()
-                .map(MultiInstanceLoopCharacteristics::getLoopDataOutputRef)
-                .orElse(null);
-        return activity.getDataOutputAssociations().stream()
-                .filter(doa -> doa.getSourceRef().get(0).getId().equals(ieDataOutput.getId()))
-                .map(doa -> getVariableName((Property) doa.getTargetRef()))
-                .findFirst()
-                .orElse(null);
+    protected Optional<InputOutputSpecification> getIOSpecification() {
+        return Optional.ofNullable(activity.getIoSpecification());
     }
 
-    public String getDataInput() {
-        return getMultiInstanceLoopCharacteristics()
-                .map(MultiInstanceLoopCharacteristics::getInputDataItem)
-                .map(d -> Optional.ofNullable(d.getName()).orElse(d.getId()))
-                .orElse("");
+    protected List<DataInput> getDataInputs() {
+        return getIOSpecification().map(InputOutputSpecification::getDataInputs).orElse(Collections.emptyList());
     }
 
-    public String getDataOutput() {
-        return getMultiInstanceLoopCharacteristics()
-                .map(MultiInstanceLoopCharacteristics::getOutputDataItem)
-                .map(d -> Optional.ofNullable(d.getName()).orElse(d.getId()))
-                .orElse("");
+    protected List<DataOutput> getDataOutputs() {
+        return getIOSpecification().map(InputOutputSpecification::getDataOutputs).orElse(Collections.emptyList());
     }
 
-    public String getCompletionCondition() {
-        return getMultiInstanceLoopCharacteristics()
-                .map(miloop -> (FormalExpression) miloop.getCompletionCondition())
-                .map(FormalExpression::getBody).orElse("");
+    protected List<DataInputAssociation> getDataInputAssociations() {
+        return activity.getDataInputAssociations();
     }
 
-    private Optional<MultiInstanceLoopCharacteristics> getMultiInstanceLoopCharacteristics() {
-        return Optional.ofNullable((MultiInstanceLoopCharacteristics) activity.getLoopCharacteristics());
+    protected List<DataOutputAssociation> getDataOutputAssociations() {
+        return activity.getDataOutputAssociations();
     }
-
-    private static String getVariableName(Property property) {
-        return ProcessVariableReader.getProcessVariableName(property);
-    }
-
 }

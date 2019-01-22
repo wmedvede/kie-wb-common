@@ -34,7 +34,7 @@ public class ReusableSubprocessConverter extends BaseReusableSubprocessConverter
         CallActivityPropertyWriter p = (CallActivityPropertyWriter) super.toFlowElement(n);
         ReusableSubprocess reusableSubprocess = n.getContent().getDefinition();
         ReusableSubprocessTaskExecutionSet executionSet = reusableSubprocess.getExecutionSet();
-        if (Boolean.TRUE.equals(executionSet.getIsAsync().getValue())) {
+        if (Boolean.TRUE.equals(executionSet.getIsMultipleInstance().getValue())) {
             p.setCollectionInput(executionSet.getMultipleInstanceCollectionInput().getValue());
             p.setInput(executionSet.getMultipleInstanceDataInput().getValue());
             p.setCollectionOutput(executionSet.getMultipleInstanceCollectionOutput().getValue());

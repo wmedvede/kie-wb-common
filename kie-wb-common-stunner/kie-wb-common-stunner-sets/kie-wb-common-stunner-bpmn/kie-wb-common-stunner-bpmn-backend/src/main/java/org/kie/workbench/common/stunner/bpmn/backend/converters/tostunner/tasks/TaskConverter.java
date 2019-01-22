@@ -66,6 +66,8 @@ import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
+import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
+
 public class TaskConverter {
 
     private final TypedFactoryManager factoryManager;
@@ -202,8 +204,7 @@ public class TaskConverter {
                 p.getSimulationSet()
         );
 
-        //TODO WM review here, we need to complete the user task multiple instance attributes.
-        definition.setExecutionSet(new UserTaskExecutionSet(
+        UserTaskExecutionSet executionSet = new UserTaskExecutionSet(
                 new TaskName(p.getTaskName()),
                 p.getActors(),
                 new Groupid(p.getGroupid()),
@@ -216,16 +217,24 @@ public class TaskConverter {
                 new CreatedBy(p.getCreatedBy()),
                 new AdHocAutostart(p.isAdHocAutostart()),
                 new IsMultipleInstance(),
-                new MultipleInstanceCollectionInput(),
-                new MultipleInstanceDataInput(),
-                new MultipleInstanceCollectionOutput(),
-                new MultipleInstanceDataOutput(),
-                new MultipleInstanceCompletionCondition(),
+                new MultipleInstanceCollectionInput(p.getCollectionInput()),
+                new MultipleInstanceDataInput(p.getDataInput()),
+                new MultipleInstanceCollectionOutput(p.getCollectionOutput()),
+                new MultipleInstanceDataOutput(p.getDataInput()),
+                new MultipleInstanceCompletionCondition(p.getCompletionCondition()),
                 new OnEntryAction(p.getOnEntryAction()),
                 new OnExitAction(p.getOnExitAction()),
                 new Content(p.getContent()),
-                new SLADueDate(p.getSLADueDate())
-        ));
+                new SLADueDate(p.getSLADueDate());
+
+        boolean multipleInstance = !isEmpty(executionSet.getMultipleInstanceCollectionInput().getValue()) ||
+                !isEmpty(executionSet.getMultipleInstanceDataInput().getValue()) ||
+                !isEmpty(executionSet.getMultipleInstanceCollectionOutput().getValue()) ||
+                !isEmpty(executionSet.getMultipleInstanceDataOutput().getValue()) ||
+                !isEmpty(executionSet.getMultipleInstanceCompletionCondition().getValue());
+        executionSet.setIsMultipleInstance(new IsMultipleInstance(multipleInstance));
+
+        definition.setExecutionSet(executionSet);
 
         node.getContent().setBounds(p.getBounds());
 
