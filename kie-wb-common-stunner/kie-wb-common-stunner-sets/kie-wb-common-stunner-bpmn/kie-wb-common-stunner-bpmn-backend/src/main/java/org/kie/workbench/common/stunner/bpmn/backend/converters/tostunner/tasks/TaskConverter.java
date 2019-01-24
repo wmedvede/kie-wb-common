@@ -220,12 +220,12 @@ public class TaskConverter {
                 new MultipleInstanceCollectionInput(p.getCollectionInput()),
                 new MultipleInstanceDataInput(p.getDataInput()),
                 new MultipleInstanceCollectionOutput(p.getCollectionOutput()),
-                new MultipleInstanceDataOutput(p.getDataInput()),
+                new MultipleInstanceDataOutput(p.getDataOutput()),
                 new MultipleInstanceCompletionCondition(p.getCompletionCondition()),
                 new OnEntryAction(p.getOnEntryAction()),
                 new OnExitAction(p.getOnExitAction()),
                 new Content(p.getContent()),
-                new SLADueDate(p.getSLADueDate());
+                new SLADueDate(p.getSLADueDate()));
 
         boolean multipleInstance = !isEmpty(executionSet.getMultipleInstanceCollectionInput().getValue()) ||
                 !isEmpty(executionSet.getMultipleInstanceDataInput().getValue()) ||

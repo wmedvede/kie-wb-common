@@ -17,10 +17,12 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.bpmn2.Activity;
+import org.eclipse.bpmn2.DataAssociation;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.DataOutput;
@@ -41,7 +43,8 @@ public class MultipleInstanceActivityPropertyReader extends ActivityPropertyRead
     public String getCollectionInput() {
         String ieDataInputId = getLoopDataInputRefId();
         return super.getDataInputAssociations().stream()
-                .filter(dia -> dia.getTargetRef().getId().equals(ieDataInputId))
+                .filter(dia -> hasTargetRef(dia, ieDataInputId))
+                .filter(MultipleInstanceActivityPropertyReader::hasSourceRefs)
                 .map(dia -> getVariableName((Property) dia.getSourceRef().get(0)))
                 .findFirst()
                 .orElse(null);
@@ -50,7 +53,7 @@ public class MultipleInstanceActivityPropertyReader extends ActivityPropertyRead
     public String getCollectionOutput() {
         String ieDataOutputId = getLoopDataOutputRefId();
         return super.getDataOutputAssociations().stream()
-                .filter(doa -> doa.getSourceRef().get(0).getId().equals(ieDataOutputId))
+                .filter(doa -> hasSourceRef(doa, ieDataOutputId))
                 .map(doa -> getVariableName((Property) doa.getTargetRef()))
                 .findFirst()
                 .orElse(null);
@@ -90,8 +93,8 @@ public class MultipleInstanceActivityPropertyReader extends ActivityPropertyRead
         String dataInputIdForInputVariable = getDataInputIdForDataInputVariable();
         String dataInputIdForInputCollection = getLoopDataInputRefId();
         return super.getDataInputs().stream()
-                .filter(dataInput -> !dataInput.getId().equals(dataInputIdForInputVariable))
-                .filter(dataInput -> !dataInput.getId().equals(dataInputIdForInputCollection))
+                .filter(di -> !di.getId().equals(dataInputIdForInputVariable))
+                .filter(di -> !di.getId().equals(dataInputIdForInputCollection))
                 .collect(Collectors.toList());
     }
 
@@ -100,8 +103,8 @@ public class MultipleInstanceActivityPropertyReader extends ActivityPropertyRead
         String dataOuputIdForOutputVariable = getDataOutputIdForDataOutputVariable();
         String dataOutputIdForCollection = getLoopDataOutputRefId();
         return super.getDataOutputs().stream()
-                .filter(dataOutput -> !dataOutput.getId().equals(dataOuputIdForOutputVariable))
-                .filter(dataOutput -> !dataOutput.getId().equals(dataOutputIdForCollection))
+                .filter(dout -> !dout.getId().equals(dataOuputIdForOutputVariable))
+                .filter(dout -> !dout.getId().equals(dataOutputIdForCollection))
                 .collect(Collectors.toList());
     }
 
@@ -110,8 +113,8 @@ public class MultipleInstanceActivityPropertyReader extends ActivityPropertyRead
         String dataInputIdForInputVariable = getDataInputIdForDataInputVariable();
         String dataInputIdForInputCollection = getLoopDataInputRefId();
         return super.getDataInputAssociations().stream()
-                .filter(dataInputAssociation -> !dataInputAssociation.getTargetRef().getId().equals(dataInputIdForInputVariable))
-                .filter(dataInputAssociation -> !dataInputAssociation.getTargetRef().getId().equals(dataInputIdForInputCollection))
+                .filter(dia -> !hasTargetRef(dia, dataInputIdForInputVariable))
+                .filter(dia -> !hasTargetRef(dia, dataInputIdForInputCollection))
                 .collect(Collectors.toList());
     }
 
@@ -120,16 +123,16 @@ public class MultipleInstanceActivityPropertyReader extends ActivityPropertyRead
         String dataOutputIdForOutputVariable = getDataOutputIdForDataOutputVariable();
         String dataOutputIdForOutputCollection = getLoopDataOutputRefId();
         return super.getDataOutputAssociations().stream()
-                .filter(dataOutputAssociation -> !dataOutputAssociation.getSourceRef().get(0).getId().equals(dataOutputIdForOutputVariable))
-                .filter(dataOutputAssociation -> !dataOutputAssociation.getSourceRef().get(0).getId().equals(dataOutputIdForOutputCollection))
+                .filter(doa -> !hasSourceRef(doa, dataOutputIdForOutputVariable))
+                .filter(doa -> !hasSourceRef(doa, dataOutputIdForOutputCollection))
                 .collect(Collectors.toList());
     }
 
     protected String getDataInputIdForDataInputVariable() {
         String dataInputVariable = getDataInput();
         String dataInputVariableId = super.getDataInputAssociations().stream()
-                .filter(dataInputAssociation -> dataInputAssociation.getSourceRef().get(0).getId().equals(dataInputVariable))
-                .map(dataInputAssociation -> dataInputAssociation.getTargetRef().getId())
+                .filter(dia -> hasSourceRef(dia, dataInputVariable))
+                .map(dia -> dia.getTargetRef().getId())
                 .findFirst().orElse(null);
         return dataInputVariableId;
     }
@@ -137,8 +140,8 @@ public class MultipleInstanceActivityPropertyReader extends ActivityPropertyRead
     protected String getDataOutputIdForDataOutputVariable() {
         String dataOutputVariable = getDataOutput();
         String dataOutputVariableId = super.getDataOutputAssociations().stream()
-                .filter(dataOutputAssociation -> dataOutputAssociation.getTargetRef().getId().equals(dataOutputVariable))
-                .map(dataOutputAssociation -> dataOutputAssociation.getSourceRef().get(0).getId())
+                .filter(doa -> hasTargetRef(doa, dataOutputVariable))
+                .map(doa -> doa.getSourceRef().get(0).getId())
                 .findFirst().orElse(null);
         return dataOutputVariableId;
     }
@@ -155,5 +158,17 @@ public class MultipleInstanceActivityPropertyReader extends ActivityPropertyRead
                 .map(MultiInstanceLoopCharacteristics::getLoopDataOutputRef)
                 .map(ItemAwareElement::getId)
                 .orElse(null);
+    }
+
+    static boolean hasSourceRefs(DataAssociation dataAssociation) {
+        return dataAssociation.getSourceRef() != null && !dataAssociation.getSourceRef().isEmpty();
+    }
+
+    static boolean hasSourceRef(DataAssociation dataAssociation, String id) {
+        return hasSourceRefs(dataAssociation) && Objects.equals(dataAssociation.getSourceRef().get(0).getId(), id);
+    }
+
+    static boolean hasTargetRef(DataAssociation dataAssociation, String id) {
+        return dataAssociation.getTargetRef() != null && Objects.equals(dataAssociation.getTargetRef().getId(), id);
     }
 }

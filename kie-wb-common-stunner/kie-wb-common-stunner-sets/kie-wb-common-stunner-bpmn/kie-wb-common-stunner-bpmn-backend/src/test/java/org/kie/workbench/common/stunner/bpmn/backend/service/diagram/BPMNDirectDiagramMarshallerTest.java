@@ -231,6 +231,7 @@ public class BPMNDirectDiagramMarshallerTest {
 
     private static final String BPMN_DUMMY_MULTIPLE_INSTANCE_SUB_PROCESS  = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyMultipleInstanceSubProcess.bpmn2";
 
+    private static final String BPMN_DUMMY_USER_TASK_MULTIPLE_INSTANCE  = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyUserTaskMultipleInstance.bpmn2";
 
     private static final String NEW_LINE = System.lineSeparator();
 
@@ -3111,6 +3112,7 @@ public class BPMNDirectDiagramMarshallerTest {
         ReusableSubprocess reusableSubprocess = (ReusableSubprocess)((View)node.getContent()).getDefinition();
         reusableSubprocess.getExecutionSet().getIsMultipleInstance().setValue(true);
 
+
         reusableSubprocess.getExecutionSet().getMultipleInstanceCollectionInput().setValue("theInputList");
         reusableSubprocess.getExecutionSet().getMultipleInstanceDataInput().setValue("theInputVariable");
         reusableSubprocess.getExecutionSet().getMultipleInstanceCollectionOutput().setValue("theOutputList");
@@ -3208,6 +3210,77 @@ public class BPMNDirectDiagramMarshallerTest {
         miDiagram = unmarshall(Files.newInputStream(path));
         verifyMultipleInstanceSubProcess(miDiagram, "_4F3FD343-F5A2-42DB-B764-4B02AC863A41" );
     }
+
+    @Test
+    public void testMarshallMultipleInstanceUserTaskMI() throws Exception {
+        Diagram<Graph, Metadata> template = unmarshall(BPMN_DUMMY_USER_TASK_MULTIPLE_INSTANCE);
+
+        UserTask userTask = prepareMultipleInstanceUserTask(template, "_9939F400-8845-424C-8C0C-D111B8C2150B");
+        String userTaskAssignments = userTask.getExecutionSet().getAssignmentsinfo().getValue();
+
+        String result = tested.marshall(template);
+        Path path = Paths.get("src/test/resources/org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyUserTaskMultipleInstanceConverted.bpmn2");
+        Files.write(path, result.getBytes());
+
+        Diagram<Graph, Metadata> miDiagram = unmarshall(Files.newInputStream(path));
+        userTask = verifyMultipleInstanceUserTask(miDiagram,"_9939F400-8845-424C-8C0C-D111B8C2150B");
+
+        assertEquals(userTaskAssignments, userTask.getExecutionSet().getAssignmentsinfo().getValue());
+    }
+
+    private UserTask prepareMultipleInstanceUserTask(Diagram<Graph, Metadata> template, String nodeId) {
+        Node node = template.getGraph().getNode("_9939F400-8845-424C-8C0C-D111B8C2150B");
+        assertNotNull(node);
+        UserTask userTask = (UserTask) ((View)node.getContent()).getDefinition();
+        assertNotNull(userTask);
+
+        userTask.getExecutionSet().getIsMultipleInstance().setValue(true);
+        userTask.getExecutionSet().getMultipleInstanceCollectionInput().setValue("inputList");
+        userTask.getExecutionSet().getMultipleInstanceDataInput().setValue("theInputVariable");
+        userTask.getExecutionSet().getMultipleInstanceCollectionOutput().setValue("outputList");
+        userTask.getExecutionSet().getMultipleInstanceDataOutput().setValue("theOutputVariable");
+        userTask.getExecutionSet().getMultipleInstanceCompletionCondition().setValue("return theOutputList.size()==2;");
+
+        return userTask;
+    }
+
+    private UserTask verifyMultipleInstanceUserTask(Diagram<Graph, Metadata> miDiagram, String nodeId) {
+        Node node = miDiagram.getGraph().getNode("_9939F400-8845-424C-8C0C-D111B8C2150B");
+        assertNotNull(node);
+        UserTask userTask = (UserTask) ((View)node.getContent()).getDefinition();
+        assertNotNull(userTask);
+        assertEquals(true, userTask.getExecutionSet().getIsMultipleInstance().getValue());
+        assertEquals("inputList", userTask.getExecutionSet().getMultipleInstanceCollectionInput().getValue());
+        assertEquals("theInputVariable", userTask.getExecutionSet().getMultipleInstanceDataInput().getValue());
+        assertEquals("outputList", userTask.getExecutionSet().getMultipleInstanceCollectionOutput().getValue());
+        assertEquals("theOutputVariable", userTask.getExecutionSet().getMultipleInstanceDataOutput().getValue());
+        assertEquals("return theOutputList.size()==2;", userTask.getExecutionSet().getMultipleInstanceCompletionCondition().getValue());
+        return userTask;
+    }
+
+    @Test
+    public void testMarshallMultipleInstanceUserTaskMITwoTimes() throws Exception {
+        Diagram<Graph, Metadata> template = unmarshall(BPMN_DUMMY_USER_TASK_MULTIPLE_INSTANCE);
+
+        UserTask userTask = prepareMultipleInstanceUserTask(template, "_9939F400-8845-424C-8C0C-D111B8C2150B");
+        String userTaskAssignments = userTask.getExecutionSet().getAssignmentsinfo().getValue();
+
+        String result = tested.marshall(template);
+        Path path = Paths.get("src/test/resources/org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyUserTaskMultipleInstanceConverted.bpmn2");
+        Files.write(path, result.getBytes());
+
+        Diagram<Graph, Metadata> miDiagram = unmarshall(Files.newInputStream(path));
+
+        result = tested.marshall(miDiagram);
+        path = Paths.get("src/test/resources/org/kie/workbench/common/stunner/bpmn/backend/service/diagram/DummyUserTaskMultipleInstanceConvertedTwoTimes.bpmn2");
+        Files.write(path, result.getBytes());
+
+        miDiagram = unmarshall(Files.newInputStream(path));
+        userTask = verifyMultipleInstanceUserTask(miDiagram,"_9939F400-8845-424C-8C0C-D111B8C2150B");
+
+        assertEquals(userTaskAssignments, userTask.getExecutionSet().getAssignmentsinfo().getValue());
+    }
+
 
 
     private ViewConnector getInEdgeViewConnector(Node node) {

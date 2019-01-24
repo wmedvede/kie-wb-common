@@ -49,11 +49,16 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
     }
 
     public AssignmentsInfo getAssignmentsInfo() {
-        return AssignmentsInfos.of(getDataInputs(),
+        AssignmentsInfo info = AssignmentsInfos.of(getDataInputs(),
                                    getDataInputAssociations(),
                                    getDataOutputs(),
                                    getDataOutputAssociations(),
                                    getIOSpecification().isPresent());
+
+        if (info.getValue().isEmpty()) {
+            info.setValue("||||");
+        }
+        return info;
     }
 
     protected Optional<InputOutputSpecification> getIOSpecification() {

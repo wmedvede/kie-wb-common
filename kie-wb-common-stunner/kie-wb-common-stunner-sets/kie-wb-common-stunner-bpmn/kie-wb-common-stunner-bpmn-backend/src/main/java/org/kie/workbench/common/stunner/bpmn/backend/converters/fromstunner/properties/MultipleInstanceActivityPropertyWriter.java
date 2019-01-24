@@ -55,13 +55,13 @@ public class MultipleInstanceActivityPropertyWriter extends ActivityPropertyWrit
         String suffix = "IN_COLLECTION";
         String id = Ids.dataInput(activity.getId(), suffix);
         DataInput dataInputElement = createDataInput(id, suffix);
-        this.ioSpec.getDataInputs().add(dataInputElement);
+        ioSpec.getDataInputs().add(dataInputElement);
         Property prop = findPropertyById(collectionInput); // check whether this exist or throws
         dataInputElement.setItemSubjectRef(prop.getItemSubjectRef());
 
-        this.miloop.setLoopDataInputRef(dataInputElement);
+        miloop.setLoopDataInputRef(dataInputElement);
 
-        this.inputSet.getDataInputRefs().add(dataInputElement);
+        inputSet.getDataInputRefs().add(dataInputElement);
 
         DataInputAssociation dia = Bpmn2Factory.eINSTANCE.createDataInputAssociation();
         dia.getSourceRef().add(prop);
@@ -78,14 +78,14 @@ public class MultipleInstanceActivityPropertyWriter extends ActivityPropertyWrit
         String suffix = "OUT_COLLECTION";
         String id = Ids.dataOutput(activity.getId(), suffix);
         DataOutput dataOutputElement = createDataOutput(id, suffix);
-        this.ioSpec.getDataOutputs().add(dataOutputElement);
+        ioSpec.getDataOutputs().add(dataOutputElement);
 
         Property prop = findPropertyById(collectionOutput); // check whether this exist or throws
         dataOutputElement.setItemSubjectRef(prop.getItemSubjectRef());
 
-        this.miloop.setLoopDataOutputRef(dataOutputElement);
+        miloop.setLoopDataOutputRef(dataOutputElement);
 
-        this.outputSet.getDataOutputRefs().add(dataOutputElement);
+        outputSet.getDataOutputRefs().add(dataOutputElement);
 
         DataOutputAssociation doa = Bpmn2Factory.eINSTANCE.createDataOutputAssociation();
         doa.getSourceRef().add(dataOutputElement);
@@ -94,53 +94,74 @@ public class MultipleInstanceActivityPropertyWriter extends ActivityPropertyWrit
     }
 
     public void setInput(String name) {
+        setInput(name, true);
+    }
+
+    protected void setInput(String name, boolean addDataInputAssociation) {
         if (isEmpty(name)) {
             return;
         }
 
         setUpLoopCharacteristics();
         DataInput miDataInputElement = createDataInput(name, name);
-        ItemDefinition item = bpmn2.createItemDefinition();
-        item.setId(Ids.multiInstanceItemType(activity.getId(), name));
-        this.addItemDefinition(item);
+        ItemDefinition item = createItemDefinition(name);
+        addItemDefinition(item);
         miDataInputElement.setItemSubjectRef(item);
         miloop.setInputDataItem(miDataInputElement);
 
         String id = Ids.dataInput(activity.getId(), name);
         DataInput dataInputElement = createDataInput(id, name);
+        dataInputElement.setItemSubjectRef(item);
         ioSpec.getDataInputs().add(dataInputElement);
 
-        this.inputSet.getDataInputRefs().add(dataInputElement);
+        inputSet.getDataInputRefs().add(dataInputElement);
 
-        DataInputAssociation dia = Bpmn2Factory.eINSTANCE.createDataInputAssociation();
-        dia.getSourceRef().add(miDataInputElement);
-        dia.setTargetRef(dataInputElement);
-        this.activity.getDataInputAssociations().add(dia);
+        if (addDataInputAssociation) {
+            DataInputAssociation dia = Bpmn2Factory.eINSTANCE.createDataInputAssociation();
+            dia.getSourceRef().add(miDataInputElement);
+            dia.setTargetRef(dataInputElement);
+            activity.getDataInputAssociations().add(dia);
+        }
     }
 
     public void setOutput(String name) {
+        setOutput(name, true);
+    }
+
+    public void setOutput(String name, boolean addDataOutputAssociation) {
         if (isEmpty(name)) {
             return;
         }
 
         setUpLoopCharacteristics();
         DataOutput miDataOutputElement = createDataOutput(name, name);
-        ItemDefinition item = bpmn2.createItemDefinition();
-        item.setId(Ids.multiInstanceItemType(activity.getId(), name));
-        this.addItemDefinition(item);
+        ItemDefinition item = createItemDefinition(name);
+        addItemDefinition(item);
         miDataOutputElement.setItemSubjectRef(item);
         miloop.setOutputDataItem(miDataOutputElement);
 
         String id = Ids.dataOutput(activity.getId(), name);
         DataOutput dataOutputElement = createDataOutput(id, name);
+        dataOutputElement.setItemSubjectRef(item);
         ioSpec.getDataOutputs().add(dataOutputElement);
 
-        this.outputSet.getDataOutputRefs().add(dataOutputElement);
+        outputSet.getDataOutputRefs().add(dataOutputElement);
 
-        DataOutputAssociation doa = Bpmn2Factory.eINSTANCE.createDataOutputAssociation();
-        doa.getSourceRef().add(dataOutputElement);
-        doa.setTargetRef(miDataOutputElement);
-        this.activity.getDataOutputAssociations().add(doa);
+        if (addDataOutputAssociation) {
+            DataOutputAssociation doa = Bpmn2Factory.eINSTANCE.createDataOutputAssociation();
+            doa.getSourceRef().add(dataOutputElement);
+            doa.setTargetRef(miDataOutputElement);
+            activity.getDataOutputAssociations().add(doa);
+        }
+    }
+
+    public void setCompletionCondition(String expression) {
+        if (!isEmpty(expression)) {
+            setUpLoopCharacteristics();
+            FormalExpression formalExpression = bpmn2.createFormalExpression();
+            formalExpression.setBody(asCData(expression));
+            miloop.setCompletionCondition(formalExpression);
+        }
     }
 
     protected void setUpLoopCharacteristics() {
@@ -153,31 +174,28 @@ public class MultipleInstanceActivityPropertyWriter extends ActivityPropertyWrit
         }
     }
 
-    protected MultiInstanceLoopCharacteristics getMiloop() {
-        return miloop;
-    }
-
-    private Property findPropertyById(String id) {
-        return variableScope.lookup(id).getTypedIdentifier();
-    }
-
-    public DataInput createDataInput(String id, String name) {
+    protected DataInput createDataInput(String id, String name) {
         DataInput dataInput = bpmn2.createDataInput();
         dataInput.setId(id);
         dataInput.setName(name);
         return dataInput;
     }
 
-    public DataOutput createDataOutput(String id, String name) {
+    protected DataOutput createDataOutput(String id, String name) {
         DataOutput dataOutput = bpmn2.createDataOutput();
         dataOutput.setId(id);
         dataOutput.setName(name);
         return dataOutput;
     }
 
-    public void setCompletionCondition(String expression) {
-        FormalExpression formalExpression = bpmn2.createFormalExpression();
-        formalExpression.setBody(asCData(expression));
-        this.miloop.setCompletionCondition(formalExpression);
+    protected ItemDefinition createItemDefinition(String name) {
+        ItemDefinition item = bpmn2.createItemDefinition();
+        item.setId(Ids.multiInstanceItemType(activity.getId(), name));
+        item.setStructureRef("Object");
+        return item;
+    }
+
+    private Property findPropertyById(String id) {
+        return variableScope.lookup(id).getTypedIdentifier();
     }
 }

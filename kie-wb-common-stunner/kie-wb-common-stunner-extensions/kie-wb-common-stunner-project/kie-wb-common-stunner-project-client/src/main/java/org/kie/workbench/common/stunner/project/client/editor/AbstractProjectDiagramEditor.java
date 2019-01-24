@@ -392,7 +392,7 @@ public abstract class AbstractProjectDiagramEditor<R extends ClientResourceType>
     protected void initialiseKieEditorForSession(final ProjectDiagram diagram) {
         resetEditorPages(diagram.getMetadata().getOverview());
         updateTitle(diagram.getMetadata().getTitle());
-        addDocumentationPage(diagram);
+        //addDocumentationPage(diagram);
         setOriginalHash(getCurrentDiagramHash());
         hideLoadingViews();
         onDiagramLoad();
