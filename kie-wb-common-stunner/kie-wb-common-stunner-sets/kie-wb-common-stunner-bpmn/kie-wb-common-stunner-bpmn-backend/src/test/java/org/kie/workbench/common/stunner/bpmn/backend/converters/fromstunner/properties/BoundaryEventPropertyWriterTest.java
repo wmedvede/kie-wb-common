@@ -1,0 +1,132 @@
+/*
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.bpmn2.Activity;
+import org.eclipse.bpmn2.BoundaryEvent;
+import org.eclipse.bpmn2.EventDefinition;
+import org.eclipse.dd.dc.Bounds;
+import org.eclipse.emf.ecore.util.FeatureMap;
+import org.junit.Test;
+import org.kie.workbench.common.stunner.core.graph.Edge;
+import org.kie.workbench.common.stunner.core.graph.Node;
+import org.kie.workbench.common.stunner.core.graph.content.relationship.Dock;
+import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
+import org.kie.workbench.common.stunner.core.graph.content.view.View;
+import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+
+public class BoundaryEventPropertyWriterTest extends AbstractBasePropertyWriterTest<BoundaryEventPropertyWriter, BoundaryEvent> {
+
+    @Mock
+    private FeatureMap featureMap;
+
+    @Captor
+    private ArgumentCaptor<FeatureMap.Entry> entryCaptor;
+
+    @Override
+    protected BoundaryEventPropertyWriter newPropertyWriter(BoundaryEvent baseElement, VariableScope variableScope) {
+        return new BoundaryEventPropertyWriter(baseElement, variableScope);
+    }
+
+    @Override
+    protected BoundaryEvent mockElement() {
+        BoundaryEvent eventMock = mock(BoundaryEvent.class);
+        when(eventMock.getAnyAttribute()).thenReturn(featureMap);
+        return eventMock;
+    }
+
+    @Test
+    public void testSetCancelActivityTrue() {
+        testSetCancelActivity(true);
+    }
+
+    @Test
+    public void testSetCancelActivityFalse() {
+        testSetCancelActivity(false);
+    }
+
+    private void testSetCancelActivity(boolean value) {
+        propertyWriter.setCancelActivity(value);
+        verify(featureMap).add(entryCaptor.capture());
+        assertEquals(String.format("drools:boundaryca=%s", value), entryCaptor.getValue().toString());
+        verify(element).setCancelActivity(value);
+    }
+
+    @Test
+    public void testSetParentActivity() {
+        ActivityPropertyWriter parentActivityWriter = mock(ActivityPropertyWriter.class);
+        Activity activity = mock(Activity.class);
+        when(parentActivityWriter.getFlowElement()).thenReturn(activity);
+        propertyWriter.setParentActivity(parentActivityWriter);
+        verify(element).setAttachedToRef(activity);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testAddEventDefinition() {
+        List<EventDefinition> eventDefinitions = mock(List.class);
+        when(element.getEventDefinitions()).thenReturn(eventDefinitions);
+        EventDefinition eventDefinition = mock(EventDefinition.class);
+        propertyWriter.addEventDefinition(eventDefinition);
+        verify(eventDefinitions).add(eventDefinition);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testSetAbsoluteBounds() {
+        Node<View, Edge> node = (Node<View, Edge>) super.createNode();
+        Node<View, ?> dockSourceNode = mockNode(new Object(), mock(org.kie.workbench.common.stunner.core.graph.content.Bounds.class));
+        Edge dockEdge = mock(Edge.class);
+        when(dockEdge.getSourceNode()).thenReturn(dockSourceNode);
+        Dock dock = mock(Dock.class);
+        when(dockEdge.getContent()).thenReturn(dock);
+        List<Edge> edges = new ArrayList<>();
+        edges.add(dockEdge);
+        when(node.getInEdges()).thenReturn(edges);
+
+        double dockSourceAbsoluteX = 100d;
+        double dockSourceAbsoluteY = 200d;
+        Point2D dockSourceComputedPosition = Point2D.create(dockSourceAbsoluteX, dockSourceAbsoluteY);
+        mockStatic(GraphUtils.class);
+        PowerMockito.when(GraphUtils.getComputedPosition(dockSourceNode)).thenReturn(dockSourceComputedPosition);
+
+        propertyWriter.setAbsoluteBounds(node);
+        Bounds shapeBounds = propertyWriter.getShape().getBounds();
+        org.kie.workbench.common.stunner.core.graph.content.Bounds relativeBounds = node.getContent().getBounds();
+        assertEquals(dockSourceAbsoluteX + relativeBounds.getX(), shapeBounds.getX(), 0);
+        assertEquals(dockSourceAbsoluteY + relativeBounds.getY(), shapeBounds.getY(), 0);
+        assertEquals(relativeBounds.getWidth(), shapeBounds.getWidth(), 0);
+        assertEquals(relativeBounds.getHeight(), shapeBounds.getHeight(), 0);
+
+        verify(featureMap).add(entryCaptor.capture());
+        assertEquals(String.format("drools:dockerinfo=%s^%s|", relativeBounds.getUpperLeft().getX(), relativeBounds.getUpperLeft().getY()),
+                     entryCaptor.getValue().toString());
+    }
+}

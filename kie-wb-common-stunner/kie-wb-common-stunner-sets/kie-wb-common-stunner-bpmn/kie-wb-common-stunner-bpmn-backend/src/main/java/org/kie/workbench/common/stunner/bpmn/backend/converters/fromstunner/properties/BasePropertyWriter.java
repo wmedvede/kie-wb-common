@@ -26,12 +26,18 @@ import org.eclipse.bpmn2.RootElement;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Ids;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseAdHocSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
+import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.Bound;
 import org.kie.workbench.common.stunner.core.graph.content.Bounds;
+import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.dc;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.di;
+import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.util.PropertyWriterUtils.absoluteBounds;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.Scripts.asCData;
 import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
 
@@ -52,7 +58,7 @@ public abstract class BasePropertyWriter {
         return this.baseElement.getId();
     }
 
-    public void setBounds(Bounds rect) {
+    protected void setBounds(Bounds rect) {
         this.shape = di.createBPMNShape();
         shape.setId(Ids.bpmnShape(getId()));
         shape.setBpmnElement(baseElement);
@@ -68,6 +74,16 @@ public abstract class BasePropertyWriter {
         bounds.setHeight(lowerRight.getY().floatValue() - upperLeft.getY().floatValue());
 
         shape.setBounds(bounds);
+    }
+
+    public void setAbsoluteBounds(Node<? extends View, ?> node) {
+        Object definition = node.getContent().getDefinition();
+        setBounds(absoluteBounds(node));
+        if (definition instanceof BaseAdHocSubprocess ||
+                definition instanceof EventSubprocess ||
+                definition instanceof EmbeddedSubprocess) {
+            shape.setIsExpanded(true);
+        }
     }
 
     public BaseElement getElement() {
@@ -110,46 +126,6 @@ public abstract class BasePropertyWriter {
 
     public void setParent(BasePropertyWriter parent) {
         parent.addChild(this);
-        if (this.getShape() == null) {
-            return;
-        }
-        if (parent.getShape() == null) {
-            throw new IllegalArgumentException(
-                    "Cannot set parent with undefined shape: " +
-                            parent.getElement().getId());
-        }
-        org.eclipse.dd.dc.Bounds parentBounds =
-                getParentBounds(parent.getShape().getBounds());
-        getShape().setBounds(parentBounds);
-    }
-
-    protected org.eclipse.dd.dc.Bounds getParentBounds(org.eclipse.dd.dc.Bounds parentRect) {
-        if (getShape() == null) {
-            throw new NullPointerException(
-                    "Shape is null:" + getElement().getId());
-        }
-        if (getShape().getBounds() == null) {
-            throw new IllegalArgumentException(
-                    "Cannot set parent bounds if the child " +
-                            "has undefined bounds. Use setBounds() first." + getElement().getId());
-        }
-
-        org.eclipse.dd.dc.Bounds relativeBounds = getShape().getBounds();
-        float x = relativeBounds.getX();
-        float y = relativeBounds.getY();
-        float width = relativeBounds.getWidth();
-        float height = relativeBounds.getHeight();
-
-        float parentX = parentRect.getX();
-        float parentY = parentRect.getY();
-
-        org.eclipse.dd.dc.Bounds bounds = dc.createBounds();
-        bounds.setX(parentX + x);
-        bounds.setY(parentY + y);
-        bounds.setWidth(width);
-        bounds.setHeight(height);
-
-        return bounds;
     }
 
     protected void addItemDefinition(ItemDefinition itemDefinition) {

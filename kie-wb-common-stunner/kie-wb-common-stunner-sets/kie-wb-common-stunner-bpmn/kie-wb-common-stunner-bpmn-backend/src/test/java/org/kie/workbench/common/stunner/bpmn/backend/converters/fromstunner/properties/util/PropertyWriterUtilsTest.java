@@ -16,6 +16,8 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,18 +31,30 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.BasePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
+import org.kie.workbench.common.stunner.core.graph.Edge;
+import org.kie.workbench.common.stunner.core.graph.Node;
+import org.kie.workbench.common.stunner.core.graph.content.relationship.Dock;
 import org.kie.workbench.common.stunner.core.graph.content.view.Connection;
 import org.kie.workbench.common.stunner.core.graph.content.view.ControlPoint;
 import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
+import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
+import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(GraphUtils.class)
 public class PropertyWriterUtilsTest {
 
     private static final String SOURCE_SHAPE_ID = "SOURCE_SHAPE_ID";
@@ -88,6 +102,58 @@ public class PropertyWriterUtilsTest {
         assertWaypoint(20, 20, 4, edge.getWaypoint());
     }
 
+    @Test
+    public void testGetDockSourceNodeWhenDocked() {
+        Node<? extends View, Edge> dockSourceNode = mock(Node.class);
+        Node<? extends View, Edge> node = mockDockedNode(dockSourceNode);
+        assertEquals(dockSourceNode, PropertyWriterUtils.getDockSourceNode(node));
+    }
+
+    @Test
+    public void testGetDockSourceNodeWhenNotDocked() {
+        Node<? extends View, Edge> node = mock(Node.class);
+        List<Edge> edges = new ArrayList<>();
+        when(node.getInEdges()).thenReturn(edges);
+        assertNull(PropertyWriterUtils.getDockSourceNode(node));
+    }
+
+    @Test
+    public void testIsDockedWhenTrue() {
+        Node<? extends View, Edge> dockSourceNode = mock(Node.class);
+        Node<? extends View, Edge> node = mockDockedNode(dockSourceNode);
+        assertTrue(PropertyWriterUtils.isDocked(node));
+    }
+
+    @Test
+    public void testIsDockedWhenFalse() {
+        Node<? extends View, Edge> node = mock(Node.class);
+        List<Edge> edges = new ArrayList<>();
+        when(node.getInEdges()).thenReturn(edges);
+        assertFalse(PropertyWriterUtils.isDocked(node));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testAbsoluteBounds() {
+        Node<View, ?> node = mock(Node.class);
+        View view = mock(View.class);
+        when(node.getContent()).thenReturn(view);
+        org.kie.workbench.common.stunner.core.graph.content.Bounds relativeBounds =
+                org.kie.workbench.common.stunner.core.graph.content.Bounds.create(1, 1, 46, 56);
+        when(view.getBounds()).thenReturn(relativeBounds);
+        double absoluteX = 100;
+        double absoluteY = 300;
+        Point2D computedPosition = Point2D.create(absoluteX, absoluteY);
+        mockStatic(GraphUtils.class);
+        PowerMockito.when(GraphUtils.getComputedPosition(node)).thenReturn(computedPosition);
+        org.kie.workbench.common.stunner.core.graph.content.Bounds expectedResult =
+                org.kie.workbench.common.stunner.core.graph.content.Bounds.create(absoluteX,
+                                                                                  absoluteY,
+                                                                                  absoluteX + relativeBounds.getWidth(),
+                                                                                  absoluteY + relativeBounds.getHeight());
+        assertEquals(expectedResult, PropertyWriterUtils.absoluteBounds(node));
+    }
+
     public static void assertWaypoint(float x, float y, int index, List<Point> waypoints) {
         assertEquals(x, waypoints.get(index).getX(), 0);
         assertEquals(y, waypoints.get(index).getY(), 0);
@@ -125,5 +191,16 @@ public class PropertyWriterUtilsTest {
         when(connector.getTargetConnection()).thenReturn(targetConnectionOpt);
         when(connector.getControlPoints()).thenReturn(controlPoints);
         return connector;
+    }
+
+    private static Node<? extends View, Edge> mockDockedNode(Node dockSourceNode) {
+        Dock dockContent = mock(Dock.class);
+        Edge edge = mock(Edge.class);
+        List<Edge> inEdges = Collections.singletonList(edge);
+        when(edge.getContent()).thenReturn(dockContent);
+        when(edge.getSourceNode()).thenReturn(dockSourceNode);
+        Node<? extends View, Edge> node = mock(Node.class);
+        when(node.getInEdges()).thenReturn(inEdges);
+        return node;
     }
 }

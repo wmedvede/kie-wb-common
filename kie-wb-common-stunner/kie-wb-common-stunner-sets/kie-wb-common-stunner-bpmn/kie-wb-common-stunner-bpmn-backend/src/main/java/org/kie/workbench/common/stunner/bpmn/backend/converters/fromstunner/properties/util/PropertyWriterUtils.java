@@ -23,9 +23,14 @@ import org.eclipse.dd.dc.Bounds;
 import org.eclipse.dd.dc.Point;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Ids;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.BasePropertyWriter;
+import org.kie.workbench.common.stunner.core.graph.Edge;
+import org.kie.workbench.common.stunner.core.graph.Node;
+import org.kie.workbench.common.stunner.core.graph.content.relationship.Dock;
 import org.kie.workbench.common.stunner.core.graph.content.view.Connection;
 import org.kie.workbench.common.stunner.core.graph.content.view.ControlPoint;
 import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
+import org.kie.workbench.common.stunner.core.graph.content.view.View;
+import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.dc;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.di;
@@ -67,6 +72,35 @@ public class PropertyWriterUtils {
         waypoints.add(targetPoint);
 
         return bpmnEdge;
+    }
+
+    public static org.kie.workbench.common.stunner.core.graph.content.Bounds absoluteBounds(final Node<? extends View, ?> node) {
+        final Point2D point2D = GraphUtils.getComputedPosition(node);
+        final org.kie.workbench.common.stunner.core.graph.content.Bounds bounds = node.getContent().getBounds();
+        return org.kie.workbench.common.stunner.core.graph.content.Bounds.create(point2D.getX(),
+                                                                                 point2D.getY(),
+                                                                                 point2D.getX() + bounds.getWidth(),
+                                                                                 point2D.getY() + bounds.getHeight());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean isDocked(Node node) {
+        return null != getDockSourceNode(node);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Node<View, Edge> getDockSourceNode(final Node<? extends View, ?> node) {
+        return (Node<View, Edge>) node
+                .getInEdges()
+                .stream()
+                .filter(PropertyWriterUtils::isDockEdge)
+                .map(Edge::getSourceNode)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static boolean isDockEdge(final Edge edge) {
+        return edge.getContent() instanceof Dock;
     }
 
     private static Point2D getSourceLocation(BasePropertyWriter source,
