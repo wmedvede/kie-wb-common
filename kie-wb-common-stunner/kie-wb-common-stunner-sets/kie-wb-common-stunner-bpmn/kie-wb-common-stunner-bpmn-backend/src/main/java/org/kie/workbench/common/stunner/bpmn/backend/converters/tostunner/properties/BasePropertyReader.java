@@ -142,4 +142,8 @@ public class BasePropertyReader {
         return new RectangleDimensionsSet(bounds.getWidth() * resolutionFactor,
                                           bounds.getHeight() * resolutionFactor);
     }
+
+    public boolean isCollapsed() {
+        return !shape.isIsExpanded();
+    }
 }

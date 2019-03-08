@@ -121,4 +121,16 @@ final class ProcessConverterDelegate {
     private void convertLaneSet(LaneSet laneSet, List<Lane> parents, Map<String, BpmnNode> freeFloatingNodes, BpmnNode firstDiagramNode) {
         laneSet.getLanes().forEach(lane -> convertLane(lane, parents, freeFloatingNodes, firstDiagramNode));
     }
+
+    public void postConvert(BpmnNode processRoot) {
+        postConvertNode(processRoot);
+    }
+
+    private void postConvertNode(BpmnNode node) {
+        converterFactory.processPostConverter().postConvert(node);
+
+        //Esto es por si quisiera converters adicionales por nodo....
+        node.getChildren().forEach(this::postConvertNode);
+        converterFactory.flowElementPostConverter().postConvert(node);
+    }
 }

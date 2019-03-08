@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.BasePropertyReader;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
@@ -43,6 +44,8 @@ public abstract class BpmnNode {
     private final List<BpmnNode> children = new ArrayList<>();
     private List<BpmnEdge> edges = new ArrayList<>();
     private BpmnNode parent;
+    private BasePropertyReader propertyReader;
+    private boolean resized = false;
 
     protected BpmnNode(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
         this.value = value;
@@ -59,6 +62,11 @@ public abstract class BpmnNode {
         public boolean isDocked() {
             return false;
         }
+    }
+
+    public BpmnNode with(BasePropertyReader propertyReader) {
+        this.propertyReader = propertyReader;
+        return this;
     }
 
     public static class Docked extends BpmnNode {
@@ -107,6 +115,18 @@ public abstract class BpmnNode {
 
     public Node<? extends View<? extends BPMNViewDefinition>, ?> value() {
         return value;
+    }
+
+    public BasePropertyReader getPropertyReader() {
+        return propertyReader;
+    }
+
+    public boolean isResized() {
+        return resized;
+    }
+
+    public void setResized(boolean resized) {
+        this.resized = resized;
     }
 
     public void addAllEdges(Collection<BpmnEdge> bpmnEdges) {
