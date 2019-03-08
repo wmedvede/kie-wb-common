@@ -233,6 +233,9 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_ARIS_LANES_2 = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/ARIS_LANES_2.bpmn";
     private static final String BPMN_ARIS_LANES_3 = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/ARIS_LANES_3.bpmn";
 
+    private static final String BPMN_ARIS_COLLAPSED_1 = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/TestImport1-collapsed.bpmn";
+
+
     private static final String NEW_LINE = System.lineSeparator();
 
     @Mock
@@ -3457,6 +3460,12 @@ public class BPMNDirectDiagramMarshallerTest {
         assertExpectedLane(diagram, "ID-4345241e-35dd-11e9-21c1-02b28450efee", "LaneA3.1", bpmnDiagramNode, "ID-69882527-35df-11e9-21c1-02b28450efee");
         //LaneA3.2 contains Task6
         assertExpectedLane(diagram, "ID-4345241b-35dd-11e9-21c1-02b28450efee", "LaneA3.2", bpmnDiagramNode, "ID-69882524-35df-11e9-21c1-02b28450efee");
+    }
+
+    @Test
+    public void testImport1Collapsed() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_COLLAPSED_1);
+        int i = 0;
     }
 
     @SuppressWarnings("unchecked")
