@@ -75,31 +75,25 @@ public class ProcessPostConverter {
     }
 
     private static void resizeSubProcess(BpmnNode subProcess) {
-        double padding = 10;
         List<Bound> ulBounds = subProcess.getChildren().stream()
                 .map(child -> child.value().getContent().getBounds().getUpperLeft())
                 .collect(Collectors.toList());
         List<Bound> lrBounds = subProcess.getChildren().stream()
                 .map(child -> child.value().getContent().getBounds().getLowerRight())
                 .collect(Collectors.toList());
-        double xUl = minX(ulBounds);
-        double yUl = minY(ulBounds);
-        double xLr = maxX(lrBounds);
-        double yLr = maxY(lrBounds);
-        double width = xLr - xUl;
-        double height = yLr - yUl;
+        double leftPadding = minX(ulBounds);
+        double topPadding = minY(ulBounds);
+        double width = maxX(lrBounds) + leftPadding;
+        double height = maxY(lrBounds) + topPadding;
 
         Bounds subProcessBounds = subProcess.value().getContent().getBounds();
         Bound subProcessUl = subProcessBounds.getUpperLeft();
         Bound subProcessLr = subProcessBounds.getLowerRight();
-        subProcessLr.setX(subProcessUl.getX() + width + padding);
-        subProcessLr.setY(subProcessUl.getY() + height + padding);
+        subProcessLr.setX(subProcessUl.getX() + width);
+        subProcessLr.setY(subProcessUl.getY() + height);
         RectangleDimensionsSet subProcessRectangle = ((BaseSubprocess) subProcess.value().getContent().getDefinition()).getDimensionsSet();
         subProcessRectangle.setWidth(new Width(width));
         subProcessRectangle.setHeight(new Height(height));
-
-        //TODO ver sino tengo q resizar tambien el rectangle...
-
         subProcess.setResized(true);
     }
 
@@ -125,15 +119,17 @@ public class ProcessPostConverter {
         double deltaX = currentBounds.getWidth() - originalBounds.getWidth();
         double deltaY = currentBounds.getHeight() - originalBounds.getHeight();
         container.getChildren().stream()
+                .filter(child -> child != resizedChild)
                 .filter(child -> needsTranslation(originalBounds.getUpperLeft(), child.value().getContent().getBounds()))
                 .forEach(child -> translate(child, deltaX, deltaY));
     }
 
-    private static void translate(BpmnNode child, double deltaX, double deltaY) {
+    private static void translate(BpmnNode node, double deltaX, double deltaY) {
         //TODO WM, ver los nodos q son circulos...
-        Bounds childBounds = child.value().getContent().getBounds();
+        Bounds childBounds = node.value().getContent().getBounds();
         translate(childBounds.getUpperLeft(), deltaX, deltaY);
         translate(childBounds.getLowerRight(), deltaX, deltaY);
+        node.getChildren().forEach(child -> translate(child, deltaX, deltaY));
     }
 
     private static void translate(Bound bound, double deltaX, double deltaY) {

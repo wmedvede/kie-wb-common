@@ -233,7 +233,10 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_ARIS_LANES_2 = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/ARIS_LANES_2.bpmn";
     private static final String BPMN_ARIS_LANES_3 = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/ARIS_LANES_3.bpmn";
 
-    private static final String BPMN_ARIS_COLLAPSED_1 = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/TestImport1-collapsed.bpmn";
+    private static final String BPMN_ARIS_COLLAPSED_1 = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/SimpleCollapsed1-colapsado.bpmn";
+    private static final String BPMN_ARIS_PROCESO_NORMAL = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/ProcesoNormal.bpmn";
+    private static final String BPMN_ARIS_TWO_SUBPROCESSES_COLLAPSED = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/TwoCollapsedSubprocesses-collapsed.bpmn";
+
 
 
     private static final String NEW_LINE = System.lineSeparator();
@@ -3464,7 +3467,10 @@ public class BPMNDirectDiagramMarshallerTest {
 
     @Test
     public void testImport1Collapsed() throws Exception {
-        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_COLLAPSED_1);
+        //Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_COLLAPSED_1);
+//        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_PROCESO_NORMAL);
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_TWO_SUBPROCESSES_COLLAPSED);
+
         int i = 0;
     }
 
