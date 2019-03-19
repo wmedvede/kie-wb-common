@@ -46,6 +46,7 @@ public abstract class BpmnNode {
     private BpmnNode parent;
     private BasePropertyReader propertyReader;
     private boolean resized = false;
+    private Boolean collapsed = null;
 
     protected BpmnNode(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
         this.value = value;
@@ -127,6 +128,18 @@ public abstract class BpmnNode {
 
     public void setResized(boolean resized) {
         this.resized = resized;
+    }
+
+    public boolean isCollapsed() {
+        //TODO acomodar esto
+        if (collapsed != null) {
+            return collapsed;
+        }
+        return propertyReader != null && propertyReader.isCollapsed();
+    }
+
+    public void setCollapsed(boolean collapsed) {
+        this.collapsed = collapsed;
     }
 
     public void addAllEdges(Collection<BpmnEdge> bpmnEdges) {

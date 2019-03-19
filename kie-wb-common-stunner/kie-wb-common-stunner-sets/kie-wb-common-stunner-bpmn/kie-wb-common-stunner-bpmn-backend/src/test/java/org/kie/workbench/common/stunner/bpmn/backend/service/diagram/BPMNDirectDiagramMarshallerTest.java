@@ -238,8 +238,13 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_ARIS_TWO_SUBPROCESSES_COLLAPSED = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/TwoCollapsedSubprocesses-collapsed.bpmn";
     private static final String BPMN_ARIS_SUBPROCESSES_WITH_EDGES_INSIDE_COLLAPSED = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/TestSubprocessWithEdgesInside-collapsed.bpmn";
 
-    private static final String BPMN_ARIS_SUBPROCESSES_WITH_EDGES_INSIDE_COLLAPSED2 = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/EdgesInside1 (7).bpmn";
+    private static final String BPMN_ARIS_SUBPROCESSES_WITH_EDGES_INSIDE_COLLAPSED2 = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/EdgesInside1 (14).bpmn";
 
+    private static final String BPMN_ARIS_SUBPROCESSES_WITH_NestedSubprocessesCollapsed = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/NestedSubprocesesCollapsedA.bpmn";
+
+    private static final String BPMN_ARIS_SIMPLE_NESTED_SUBPROCESES = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/BasicNestedSubprocess.bpmn";
+
+    private static final String BPMN_ARIS_MultipleCollapsedSubprocessesAtFirstLevel = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/MultipleCollapsedSubprocessesAtFirstLevel.bpmn";
 
     private static final String NEW_LINE = System.lineSeparator();
 
@@ -3471,9 +3476,13 @@ public class BPMNDirectDiagramMarshallerTest {
     public void testImport1Collapsed() throws Exception {
         //Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_COLLAPSED_1);
 //        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_PROCESO_NORMAL);
-        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_SUBPROCESSES_WITH_EDGES_INSIDE_COLLAPSED2);
+        //Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_SIMPLE_NESTED_SUBPROCESES);
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_MultipleCollapsedSubprocessesAtFirstLevel);
 
         int i = 0;
+
+        double a;
+        double b;
     }
 
     @SuppressWarnings("unchecked")
