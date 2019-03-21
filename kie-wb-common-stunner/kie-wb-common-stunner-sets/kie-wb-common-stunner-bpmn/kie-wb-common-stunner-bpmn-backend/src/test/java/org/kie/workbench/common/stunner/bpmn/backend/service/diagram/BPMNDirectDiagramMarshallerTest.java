@@ -246,6 +246,12 @@ public class BPMNDirectDiagramMarshallerTest {
 
     private static final String BPMN_ARIS_MultipleCollapsedSubprocessesAtFirstLevel = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/MultipleCollapsedSubprocessesAtFirstLevel.bpmn";
 
+
+    private static final String BPMN_ARIS_SECOND_APPROACH = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/SecondApproach1.bpmn";
+
+    private static final String BPMN_ARIS_LANES_IMPORT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/CollapsedWidhLanes.bpmn";
+
+
     private static final String NEW_LINE = System.lineSeparator();
 
     @Mock
@@ -3477,7 +3483,9 @@ public class BPMNDirectDiagramMarshallerTest {
         //Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_COLLAPSED_1);
 //        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_PROCESO_NORMAL);
         //Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_SIMPLE_NESTED_SUBPROCESES);
-        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_MultipleCollapsedSubprocessesAtFirstLevel);
+//        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_SECOND_APPROACH);
+
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_LANES_IMPORT);
 
         int i = 0;
 

@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.Lane;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.Height;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.RectangleDimensionsSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.Width;
@@ -34,7 +35,7 @@ import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
 
 public class ProcessPostConverter {
 
-    private static double PRECISION = 0.001;
+    private static double PRECISION = 0.5;
 
     public void postConvert(BpmnNode rootNode) {
         //TODO WM, ver los lanes.
@@ -71,10 +72,10 @@ public class ProcessPostConverter {
 
         List<BpmnNode> resizedChildren = getResizedChildren(subProcess);
         resizedChildren.forEach(resizedChild -> applyNodeResize(subProcess, resizedChild));
-        if ((subProcess.isCollapsed() && !subProcess.getChildren().isEmpty()) || !resizedChildren.isEmpty()) {
+        if ((subProcess.isSubprocess() && subProcess.isCollapsed() && !subProcess.getChildren().isEmpty()) || !resizedChildren.isEmpty()) {
             resizeSubProcess(subProcess);
         }
-        if (subProcess.isCollapsed()) {
+        if (subProcess.isSubprocess() && subProcess.isCollapsed()) {
             Bound subProcessUl = subProcess.value().getContent().getBounds().getUpperLeft();
             subProcess.getChildren().forEach(child -> translate(child, subProcessUl.getX(), subProcessUl.getY()));
             translate(subProcess.getEdges(), subProcessUl.getX(), subProcessUl.getY());
@@ -125,7 +126,13 @@ public class ProcessPostConverter {
             Bound subProcessLr = subProcessBounds.getLowerRight();
             subProcessLr.setX(subProcessUl.getX() + width);
             subProcessLr.setY(subProcessUl.getY() + height);
-            RectangleDimensionsSet subProcessRectangle = ((BaseSubprocess) subProcess.value().getContent().getDefinition()).getDimensionsSet();
+
+            RectangleDimensionsSet subProcessRectangle;
+            if (subProcess.value().getContent().getDefinition() instanceof BaseSubprocess) {
+                subProcessRectangle = ((BaseSubprocess) subProcess.value().getContent().getDefinition()).getDimensionsSet();
+            } else {
+                subProcessRectangle = ((Lane) subProcess.value().getContent().getDefinition()).getDimensionsSet();
+            }
             subProcessRectangle.setWidth(new Width(width));
             subProcessRectangle.setHeight(new Height(height));
             subProcess.setResized(true);
@@ -173,25 +180,25 @@ public class ProcessPostConverter {
     }
 
     private static void applyNodeResize(BpmnNode container, BpmnNode resizedChild) {
-        ///Acá si un nodo ya ha sido trasladado pues no puedo usar originalUL para tomar como punto base
-        ///si q lo puedo hacer para calcular el delta... ? NO! tampoco pues el nodo se ha resizdeado mas de una vez como consecuenia
-        //de que mas de un hijo ha sido agrandado....
-        //tendria q tener un campo originalBounds... donde guardo
         Bounds originalBounds = resizedChild.getPropertyReader().getBounds();
-
         Bounds currentBounds = resizedChild.value().getContent().getBounds();
-        Bound originalUl = originalBounds.getUpperLeft();
         double deltaX = currentBounds.getWidth() - originalBounds.getWidth();
         double deltaY = currentBounds.getHeight() - originalBounds.getHeight();
         container.getChildren().stream()
                 .filter(child -> child != resizedChild)
-                // ANTES .forEach(child -> applyTranslationIfRequired(originalUl.getX(), originalUl.getY(), deltaX, deltaY, child));
                 .forEach(child -> applyTranslationIfRequired(currentBounds.getX(), currentBounds.getY(), deltaX, deltaY, child));
-        // ANTES toSimpleEdgesStream(container.getEdges()).forEach(edge -> applyTranslationIfRequired(originalUl.getX(), originalUl.getY(), deltaX, deltaY, edge));
+
         toSimpleEdgesStream(container.getEdges()).forEach(edge -> applyTranslationIfRequired(currentBounds.getX(), currentBounds.getY(), deltaX, deltaY, edge));
 
+        /*
         inEdges(container, resizedChild).forEach(edge -> adjustEdgeConnection(edge, true));
+        inEdges(container, resizedChild).forEach(edge -> adjustEdgeConnection(edge, false));
         outEdges(container, resizedChild).forEach(edge -> adjustEdgeConnection(edge, false));
+        outEdges(container, resizedChild).forEach(edge -> adjustEdgeConnection(edge, true));
+        */
+
+        toSimpleEdgesStream(container.getEdges()).forEach(edge -> adjustEdgeConnection(edge, true));
+        toSimpleEdgesStream(container.getEdges()).forEach(edge -> adjustEdgeConnection(edge, false));
     }
 
     private static void translate(BpmnNode node, double deltaX, double deltaY) {
@@ -257,7 +264,7 @@ public class ProcessPostConverter {
     }
 
     private static boolean isSubProcess(BpmnNode node) {
-        return node.value().getContent().getDefinition() instanceof EmbeddedSubprocess;
+        return node.value().getContent().getDefinition() instanceof EmbeddedSubprocess || node.value().getContent().getDefinition() instanceof Lane;
     }
 
     private static List<BpmnEdge.Simple> inEdges(BpmnNode container, BpmnNode targetNode) {
@@ -291,42 +298,6 @@ public class ProcessPostConverter {
             return true;
         } else {
             return Math.abs(a - b) < delta;
-        }
-    }
-
-    private static void scaleFUERA(BpmnEdge.Simple edge, boolean targetConnection, double widthFactor, double heightFactor) {
-        Point2D siblingPoint = null;
-        Point2D scaledPoint;
-        BpmnNode scaledPointNode;
-        List<Point2D> controlPoints = edge.getControlPoints();
-        if (targetConnection) {
-            scaledPoint = edge.getTargetConnection().getLocation();
-            scaledPointNode = edge.getTarget();
-            scale(scaledPoint, widthFactor, heightFactor);
-            if (controlPoints.size() >= 2) {
-                siblingPoint = controlPoints.get(controlPoints.size() - 1);
-            }
-        } else {
-            scaledPoint = edge.getSourceConnection().getLocation();
-            scaledPointNode = edge.getSource();
-            scale(scaledPoint, widthFactor, heightFactor);
-            if (controlPoints.size() >= 2) {
-                siblingPoint = controlPoints.get(0);
-            }
-        }
-        if (siblingPoint != null) {
-            Bounds bounds = scaledPointNode.value().getContent().getBounds();
-            if (scaledPoint.getY() == 0 || scaledPoint.getY() == bounds.getHeight()) {
-                //scaled point is on top or bottom
-                if (siblingPoint.getY() < scaledPoint.getY() || siblingPoint.getY() > scaledPoint.getY()) {
-                    siblingPoint.setX(bounds.getUpperLeft().getX() + scaledPoint.getX());
-                }
-            } else {
-                //scaled point left or right
-                if (siblingPoint.getX() < scaledPoint.getX() || siblingPoint.getX() > scaledPoint.getX()) {
-                    siblingPoint.setY(bounds.getUpperLeft().getY() + scaledPoint.getY());
-                }
-            }
         }
     }
 }

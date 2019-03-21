@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.BasePropertyReader;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
+import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.slf4j.Logger;
@@ -138,6 +139,10 @@ public abstract class BpmnNode {
         return propertyReader != null && propertyReader.isCollapsed();
     }
 
+    public boolean isSubprocess() {
+        //TODO review this
+        return value().getContent().getDefinition() instanceof EmbeddedSubprocess;
+    }
     public void setCollapsed(boolean collapsed) {
         this.collapsed = collapsed;
     }

@@ -144,6 +144,8 @@ public class BasePropertyReader {
     }
 
     public boolean isCollapsed() {
+        //TODO, WM, esto está ok, pero los procesos modelados en jbpm designer siempre diran collapsed pues
+        //pues el valor isExpanded nunca se setea y el valor por defecto en eclipse es false.
         return !shape.isIsExpanded();
     }
 }
