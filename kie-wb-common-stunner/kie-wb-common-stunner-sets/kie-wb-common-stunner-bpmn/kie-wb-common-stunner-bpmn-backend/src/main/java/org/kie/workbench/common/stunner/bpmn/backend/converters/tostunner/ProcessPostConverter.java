@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -38,13 +39,40 @@ public class ProcessPostConverter {
     private static double PRECISION = 0.5;
 
     public void postConvert(BpmnNode rootNode) {
-        //TODO WM, ver los lanes.
+
+        //TODO WM
+        //aca pudo hacer una inspeccion cutre a ver si es necesario hacer algo
+        //es decir sino hay ningun proceso colapsado y que ademas tenga nodos, pues
+        //mejor no romper los huevos...
+
+        //List<Pair<BpmnNode, List<BpmnNode>>> lanes = new ArrayList<>();
+        List<LaneInfo> laneInfos = new ArrayList<>();
+        new ArrayList<>(rootNode.getChildren()).stream()
+                .filter(ProcessPostConverter::isLane)
+                .forEach(lane -> {
+                    LaneInfo laneInfo = new LaneInfo(lane, calculatePaddings(lane), new ArrayList<>(lane.getChildren()));
+                    laneInfos.add(laneInfo);
+                    laneInfo.getChildren().forEach(child -> child.setParent(rootNode));
+                    rootNode.removeChild(lane);
+                });
+
         rootNode.getChildren().stream()
                 .filter(ProcessPostConverter::isSubProcess)
                 .forEach(this::postConvertSubProcess);
 
         List<BpmnNode> resizedChildren = getResizedChildren(rootNode);
         resizedChildren.forEach(resizedChild -> applyNodeResize(rootNode, resizedChild));
+
+
+        laneInfos.forEach(laneInfo -> {
+            laneInfo.getLane().setParent(rootNode);
+            laneInfo.getChildren().forEach(node -> node.setParent(laneInfo.getLane()));
+            resizeLane(laneInfo.getLane(), laneInfo.getPadding());
+        });
+
+        //finally resize the Lanes to hold the content...
+        //TODO WM, ojo, estas manipulaciones solo habria q hacerlas si hay nodos resized, etc.
+        //lanes.forEach(pair -> resizeLane(pair.getK1()));
     }
 
     private void postConvertSubProcess(BpmnNode subProcess) {
@@ -144,6 +172,44 @@ public class ProcessPostConverter {
         }
     }
 
+    private static void resizeLane(BpmnNode lane, Padding padding) {
+        if (!lane.getChildren().isEmpty()) {
+            List<Bound> ulBounds = lane.getChildren().stream()
+                    .map(child -> child.value().getContent().getBounds().getUpperLeft())
+                    .collect(Collectors.toList());
+            List<Bound> lrBounds = lane.getChildren().stream()
+                    .map(child -> child.value().getContent().getBounds().getLowerRight())
+                    .collect(Collectors.toList());
+            /*
+            Por ahora no
+            List<Point2D> controlPoints = toSimpleEdgesStream(lane.getEdges())
+                    .map(BpmnEdge.Simple::getControlPoints)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+
+            */
+
+            double ulx = min(ulBounds, Bound::getX);
+            double uly = min(ulBounds, Bound::getY);
+            double lrx = max(lrBounds, Bound::getX);
+            double lry = max(lrBounds, Bound::getY);
+
+
+            Bounds laneBounds = lane.value().getContent().getBounds();
+            Bound laneUl = laneBounds.getUpperLeft();
+            Bound laneLr = laneBounds.getLowerRight();
+            laneUl.setX(ulx - padding.getLeft());
+            laneUl.setY(uly - padding.getTop());
+            laneLr.setX(lrx + padding.getRight());
+            laneLr.setY(lry + padding.getBottom());
+
+            RectangleDimensionsSet laneRectangle = ((Lane) lane.value().getContent().getDefinition()).getDimensionsSet();
+
+            laneRectangle.setWidth(new Width( laneBounds.getWidth()));
+            laneRectangle.setHeight(new Height(laneBounds.getHeight()));
+        }
+    }
+
     private static void adjustEdgeConnection(BpmnEdge.Simple edge, boolean targetConnection) {
         Point2D siblingPoint = null;
         Point2D connnectionPoint;
@@ -199,6 +265,33 @@ public class ProcessPostConverter {
 
         toSimpleEdgesStream(container.getEdges()).forEach(edge -> adjustEdgeConnection(edge, true));
         toSimpleEdgesStream(container.getEdges()).forEach(edge -> adjustEdgeConnection(edge, false));
+    }
+
+    private static Padding calculatePaddings(BpmnNode lane) {
+        if (lane.getChildren().isEmpty()) {
+            return new Padding();
+        }
+
+        List<Bound> ulBounds = lane.getChildren().stream()
+                .map(child -> child.value().getContent().getBounds().getUpperLeft())
+                .collect(Collectors.toList());
+        List<Bound> lrBounds = lane.getChildren().stream()
+                .map(child -> child.value().getContent().getBounds().getLowerRight())
+                .collect(Collectors.toList());
+
+        double ulx = min(ulBounds, Bound::getX);
+        double uly = min(ulBounds,  Bound::getY);
+        double lrx = max(lrBounds, Bound::getX);
+        double lry = max(lrBounds, Bound::getY);
+
+        Bounds bounds = lane.value().getContent().getBounds();
+
+        double topPadding = Math.abs(uly - bounds.getUpperLeft().getY());
+        double rightPadding = Math.abs(lrx - bounds.getLowerRight().getX());
+        double bottomPadding = Math.abs(lry - bounds.getLowerRight().getY());
+        double leftPadding = Math.abs(ulx - bounds.getUpperLeft().getX());
+
+        return new Padding(topPadding, rightPadding, bottomPadding, leftPadding);
     }
 
     private static void translate(BpmnNode node, double deltaX, double deltaY) {
@@ -264,7 +357,12 @@ public class ProcessPostConverter {
     }
 
     private static boolean isSubProcess(BpmnNode node) {
-        return node.value().getContent().getDefinition() instanceof EmbeddedSubprocess || node.value().getContent().getDefinition() instanceof Lane;
+        //TODO WM agregar adhoc y event subprocesses
+        return node.value().getContent().getDefinition() instanceof EmbeddedSubprocess;// || node.value().getContent().getDefinition() instanceof Lane;
+    }
+
+    private static boolean isLane(BpmnNode node) {
+        return node.value().getContent().getDefinition() instanceof Lane;
     }
 
     private static List<BpmnEdge.Simple> inEdges(BpmnNode container, BpmnNode targetNode) {
@@ -298,6 +396,63 @@ public class ProcessPostConverter {
             return true;
         } else {
             return Math.abs(a - b) < delta;
+        }
+    }
+
+    private static class Padding {
+        double top;
+        double right;
+        double bottom;
+        double left;
+
+        public Padding() {
+        }
+
+        public Padding(double top, double right, double bottom, double left) {
+            this.top = top;
+            this.right = right;
+            this.bottom = bottom;
+            this.left = left;
+        }
+
+        public double getTop() {
+            return top;
+        }
+
+        public double getRight() {
+            return right;
+        }
+
+        public double getBottom() {
+            return bottom;
+        }
+
+        public double getLeft() {
+            return left;
+        }
+    }
+
+    private static class LaneInfo {
+        private BpmnNode lane;
+        private Padding padding;
+        private List<BpmnNode> children;
+
+        public LaneInfo(BpmnNode lane, Padding padding, List<BpmnNode> children) {
+            this.lane = lane;
+            this.padding = padding;
+            this.children = children;
+        }
+
+        public BpmnNode getLane() {
+            return lane;
+        }
+
+        public Padding getPadding() {
+            return padding;
+        }
+
+        public List<BpmnNode> getChildren() {
+            return children;
         }
     }
 }
