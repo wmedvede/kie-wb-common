@@ -124,16 +124,5 @@ final class ProcessConverterDelegate {
 
     public void postConvert(BpmnNode processRoot) {
         converterFactory.processPostConverter().postConvert(processRoot);
-
-//        postConvertNode(processRoot);
-    }
-
-    private void postConvertNode(BpmnNode node) {
-
-        /*
-        //Esto es por si quisiera converters adicionales por nodo....
-        node.getChildren().forEach(this::postConvertNode);
-        converterFactory.flowElementPostConverter().postConvert(node);
-        */
     }
 }

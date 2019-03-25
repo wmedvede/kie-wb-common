@@ -24,8 +24,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.Lane;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.Height;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.RectangleDimensionsSet;
@@ -39,40 +41,46 @@ public class ProcessPostConverter {
     private static double PRECISION = 0.5;
 
     public void postConvert(BpmnNode rootNode) {
+        if (hasCollapsedChildren(rootNode)) {
+            List<LaneInfo> laneInfos = new ArrayList<>();
+            new ArrayList<>(rootNode.getChildren()).stream()
+                    .filter(ProcessPostConverter::isLane)
+                    .filter(BpmnNode::hasChildren)
+                    .forEach(lane -> {
+                        LaneInfo laneInfo = new LaneInfo(lane, Padding.of(lane), new ArrayList<>(lane.getChildren()));
+                        laneInfos.add(laneInfo);
+                        laneInfo.getChildren().forEach(child -> child.setParent(rootNode));
+                        rootNode.removeChild(lane);
+                    });
 
-        //TODO WM
-        //aca pudo hacer una inspeccion cutre a ver si es necesario hacer algo
-        //es decir sino hay ningun proceso colapsado y que ademas tenga nodos, pues
-        //mejor no romper los huevos...
+            rootNode.getChildren().stream()
+                    .filter(ProcessPostConverter::isSubProcess)
+                    .forEach(this::postConvertSubProcess);
 
-        //List<Pair<BpmnNode, List<BpmnNode>>> lanes = new ArrayList<>();
-        List<LaneInfo> laneInfos = new ArrayList<>();
-        new ArrayList<>(rootNode.getChildren()).stream()
-                .filter(ProcessPostConverter::isLane)
-                .forEach(lane -> {
-                    LaneInfo laneInfo = new LaneInfo(lane, calculatePaddings(lane), new ArrayList<>(lane.getChildren()));
-                    laneInfos.add(laneInfo);
-                    laneInfo.getChildren().forEach(child -> child.setParent(rootNode));
-                    rootNode.removeChild(lane);
-                });
+            List<BpmnNode> resizedChildren = getResizedChildren(rootNode);
+            resizedChildren.forEach(resizedChild -> applyNodeResize(rootNode, resizedChild));
 
-        rootNode.getChildren().stream()
-                .filter(ProcessPostConverter::isSubProcess)
-                .forEach(this::postConvertSubProcess);
+            laneInfos.forEach(laneInfo -> {
+                laneInfo.getLane().setParent(rootNode);
+                laneInfo.getChildren().forEach(node -> node.setParent(laneInfo.getLane()));
+                resizeLane(laneInfo.getLane(), laneInfo.getPadding());
+            });
+        }
+    }
 
-        List<BpmnNode> resizedChildren = getResizedChildren(rootNode);
-        resizedChildren.forEach(resizedChild -> applyNodeResize(rootNode, resizedChild));
-
-
-        laneInfos.forEach(laneInfo -> {
-            laneInfo.getLane().setParent(rootNode);
-            laneInfo.getChildren().forEach(node -> node.setParent(laneInfo.getLane()));
-            resizeLane(laneInfo.getLane(), laneInfo.getPadding());
-        });
-
-        //finally resize the Lanes to hold the content...
-        //TODO WM, ojo, estas manipulaciones solo habria q hacerlas si hay nodos resized, etc.
-        //lanes.forEach(pair -> resizeLane(pair.getK1()));
+    private static boolean hasCollapsedChildren(BpmnNode rootNode) {
+        boolean result = false;
+        for (BpmnNode child : rootNode.getChildren()) {
+            if (isLane(child)) {
+                result = hasCollapsedChildren(child);
+            } else if (isSubProcess(child)) {
+                result = child.isCollapsed() || hasCollapsedChildren(child);
+            }
+            if (result) {
+                break;
+            }
+        }
+        return result;
     }
 
     private void postConvertSubProcess(BpmnNode subProcess) {
@@ -80,32 +88,17 @@ public class ProcessPostConverter {
                 .filter(ProcessPostConverter::isSubProcess)
                 .forEach(this::postConvertSubProcess);
 
-        /*
-        Alternativas
-        1) subproceso estaba colapsado y no hay hijos resized
-            1.1) calcular en nuevo tamanño q debe tener el suproceso
-                    esta parte es "facil" porque se puede hacer utilzando la posicion actual del los hijos
-                    ya que en el subproceso nada ha cambiado
-        2) subproceso estaba colapsado pero ademas hay hijos resized
-                    acá habria que iterar primero los hijos que han sido resized uno a uno
-                    y reubicar los nodos restantes empujandolos etc
-                    y luego al final podemos calcular el tamaño del subproceso una vez todos los hijos han sido reubicados
-
-        3) subproceso no estaba colapsado pero hay hijos resized.
-                    lo mismo tenemos que iterar primero los hijos resized uno a uno
-                    y reubicar los nodos restantes empujandolos, etc, y luego al final
-                    podemos calcular el tamaño del subproceso aunque este en realidad no estaba colapsado.
-
-        */
-
         List<BpmnNode> resizedChildren = getResizedChildren(subProcess);
         resizedChildren.forEach(resizedChild -> applyNodeResize(subProcess, resizedChild));
-        if ((subProcess.isSubprocess() && subProcess.isCollapsed() && !subProcess.getChildren().isEmpty()) || !resizedChildren.isEmpty()) {
+        if ((subProcess.isCollapsed() && subProcess.hasChildren()) || !resizedChildren.isEmpty()) {
             resizeSubProcess(subProcess);
         }
-        if (subProcess.isSubprocess() && subProcess.isCollapsed()) {
+        if (subProcess.isCollapsed()) {
             Bound subProcessUl = subProcess.value().getContent().getBounds().getUpperLeft();
-            subProcess.getChildren().forEach(child -> translate(child, subProcessUl.getX(), subProcessUl.getY()));
+            //docked nodes are relative to the holding element, translation is not applied.
+            subProcess.getChildren().stream()
+                    .filter(child -> !child.isDocked())
+                    .forEach(child -> translate(child, subProcessUl.getX(), subProcessUl.getY()));
             translate(subProcess.getEdges(), subProcessUl.getX(), subProcessUl.getY());
             subProcess.setCollapsed(false);
         }
@@ -118,34 +111,12 @@ public class ProcessPostConverter {
     }
 
     private static void resizeSubProcess(BpmnNode subProcess) {
-        if (!subProcess.getChildren().isEmpty()) {
-            List<Bound> ulBounds = subProcess.getChildren().stream()
-                    .map(child -> child.value().getContent().getBounds().getUpperLeft())
-                    .collect(Collectors.toList());
-            List<Bound> lrBounds = subProcess.getChildren().stream()
-                    .map(child -> child.value().getContent().getBounds().getLowerRight())
-                    .collect(Collectors.toList());
-            List<Point2D> controlPoints = toSimpleEdgesStream(subProcess.getEdges())
-                    .map(BpmnEdge.Simple::getControlPoints)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toList());
-
-            double leftPadding;
-            double topPadding;
-            double width;
-            double height;
-
-            if (controlPoints.isEmpty()) {
-                leftPadding = min(ulBounds, Bound::getX);
-                topPadding = min(ulBounds, Bound::getY);
-                width = max(lrBounds, Bound::getX) + leftPadding;
-                height = max(lrBounds, Bound::getY) + topPadding;
-            } else {
-                leftPadding = Math.min(min(ulBounds, Bound::getX), min(controlPoints, Point2D::getX));
-                topPadding = Math.min(min(ulBounds, Bound::getY), min(controlPoints, Point2D::getY));
-                width = Math.max(max(lrBounds, Bound::getX), max(controlPoints, Point2D::getX)) + leftPadding;
-                height = Math.max(max(lrBounds, Bound::getY), max(controlPoints, Point2D::getY)) + topPadding;
-            }
+        if (subProcess.hasChildren()) {
+            ViewPort viewPort = ViewPort.of(subProcess, true);
+            double leftPadding = viewPort.getUpperLeftX();
+            double topPadding = viewPort.getUpperLeftY();
+            double width = viewPort.getLowerRightX() + leftPadding;
+            double height = viewPort.getLowerRightY() + topPadding;
 
             Bounds subProcessBounds = subProcess.value().getContent().getBounds();
             double originalWidth = subProcessBounds.getWidth();
@@ -155,12 +126,7 @@ public class ProcessPostConverter {
             subProcessLr.setX(subProcessUl.getX() + width);
             subProcessLr.setY(subProcessUl.getY() + height);
 
-            RectangleDimensionsSet subProcessRectangle;
-            if (subProcess.value().getContent().getDefinition() instanceof BaseSubprocess) {
-                subProcessRectangle = ((BaseSubprocess) subProcess.value().getContent().getDefinition()).getDimensionsSet();
-            } else {
-                subProcessRectangle = ((Lane) subProcess.value().getContent().getDefinition()).getDimensionsSet();
-            }
+            RectangleDimensionsSet subProcessRectangle = ((BaseSubprocess) subProcess.value().getContent().getDefinition()).getDimensionsSet();
             subProcessRectangle.setWidth(new Width(width));
             subProcessRectangle.setHeight(new Height(height));
             subProcess.setResized(true);
@@ -173,39 +139,18 @@ public class ProcessPostConverter {
     }
 
     private static void resizeLane(BpmnNode lane, Padding padding) {
-        if (!lane.getChildren().isEmpty()) {
-            List<Bound> ulBounds = lane.getChildren().stream()
-                    .map(child -> child.value().getContent().getBounds().getUpperLeft())
-                    .collect(Collectors.toList());
-            List<Bound> lrBounds = lane.getChildren().stream()
-                    .map(child -> child.value().getContent().getBounds().getLowerRight())
-                    .collect(Collectors.toList());
-            /*
-            Por ahora no
-            List<Point2D> controlPoints = toSimpleEdgesStream(lane.getEdges())
-                    .map(BpmnEdge.Simple::getControlPoints)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toList());
-
-            */
-
-            double ulx = min(ulBounds, Bound::getX);
-            double uly = min(ulBounds, Bound::getY);
-            double lrx = max(lrBounds, Bound::getX);
-            double lry = max(lrBounds, Bound::getY);
-
-
+        if (lane.hasChildren()) {
+            ViewPort viewPort = ViewPort.of(lane, false);
             Bounds laneBounds = lane.value().getContent().getBounds();
             Bound laneUl = laneBounds.getUpperLeft();
             Bound laneLr = laneBounds.getLowerRight();
-            laneUl.setX(ulx - padding.getLeft());
-            laneUl.setY(uly - padding.getTop());
-            laneLr.setX(lrx + padding.getRight());
-            laneLr.setY(lry + padding.getBottom());
+            laneUl.setX(viewPort.getUpperLeftX() - padding.getLeft());
+            laneUl.setY(viewPort.getUpperLeftY() - padding.getTop());
+            laneLr.setX(viewPort.getLowerRightX() + padding.getRight());
+            laneLr.setY(viewPort.getLowerRightY() + padding.getBottom());
 
             RectangleDimensionsSet laneRectangle = ((Lane) lane.value().getContent().getDefinition()).getDimensionsSet();
-
-            laneRectangle.setWidth(new Width( laneBounds.getWidth()));
+            laneRectangle.setWidth(new Width(laneBounds.getWidth()));
             laneRectangle.setHeight(new Height(laneBounds.getHeight()));
         }
     }
@@ -256,42 +201,8 @@ public class ProcessPostConverter {
 
         toSimpleEdgesStream(container.getEdges()).forEach(edge -> applyTranslationIfRequired(currentBounds.getX(), currentBounds.getY(), deltaX, deltaY, edge));
 
-        /*
-        inEdges(container, resizedChild).forEach(edge -> adjustEdgeConnection(edge, true));
-        inEdges(container, resizedChild).forEach(edge -> adjustEdgeConnection(edge, false));
-        outEdges(container, resizedChild).forEach(edge -> adjustEdgeConnection(edge, false));
-        outEdges(container, resizedChild).forEach(edge -> adjustEdgeConnection(edge, true));
-        */
-
         toSimpleEdgesStream(container.getEdges()).forEach(edge -> adjustEdgeConnection(edge, true));
         toSimpleEdgesStream(container.getEdges()).forEach(edge -> adjustEdgeConnection(edge, false));
-    }
-
-    private static Padding calculatePaddings(BpmnNode lane) {
-        if (lane.getChildren().isEmpty()) {
-            return new Padding();
-        }
-
-        List<Bound> ulBounds = lane.getChildren().stream()
-                .map(child -> child.value().getContent().getBounds().getUpperLeft())
-                .collect(Collectors.toList());
-        List<Bound> lrBounds = lane.getChildren().stream()
-                .map(child -> child.value().getContent().getBounds().getLowerRight())
-                .collect(Collectors.toList());
-
-        double ulx = min(ulBounds, Bound::getX);
-        double uly = min(ulBounds,  Bound::getY);
-        double lrx = max(lrBounds, Bound::getX);
-        double lry = max(lrBounds, Bound::getY);
-
-        Bounds bounds = lane.value().getContent().getBounds();
-
-        double topPadding = Math.abs(uly - bounds.getUpperLeft().getY());
-        double rightPadding = Math.abs(lrx - bounds.getLowerRight().getX());
-        double bottomPadding = Math.abs(lry - bounds.getLowerRight().getY());
-        double leftPadding = Math.abs(ulx - bounds.getUpperLeft().getX());
-
-        return new Padding(topPadding, rightPadding, bottomPadding, leftPadding);
     }
 
     private static void translate(BpmnNode node, double deltaX, double deltaY) {
@@ -310,8 +221,8 @@ public class ProcessPostConverter {
     }
 
     private static void translate(BpmnEdge.Simple edge, double deltaX, double deltaY) {
-        //source and target connections points are relative to the respective source and target node, so don't need
-        // translation. Only the control points are translated.
+        //source and target connections points are relative to the respective source and target node, no translation is required for them,
+        //only the control points are translated.
         edge.getControlPoints().forEach(controlPoint -> translate(controlPoint, deltaX, deltaY));
     }
 
@@ -357,8 +268,9 @@ public class ProcessPostConverter {
     }
 
     private static boolean isSubProcess(BpmnNode node) {
-        //TODO WM agregar adhoc y event subprocesses
-        return node.value().getContent().getDefinition() instanceof EmbeddedSubprocess;// || node.value().getContent().getDefinition() instanceof Lane;
+        return node.value().getContent().getDefinition() instanceof EmbeddedSubprocess ||
+                node.value().getContent().getDefinition() instanceof EventSubprocess ||
+                node.value().getContent().getDefinition() instanceof AdHocSubprocess;
     }
 
     private static boolean isLane(BpmnNode node) {
@@ -399,11 +311,37 @@ public class ProcessPostConverter {
         }
     }
 
+    private static class LaneInfo {
+
+        private BpmnNode lane;
+        private Padding padding;
+        private List<BpmnNode> children;
+
+        public LaneInfo(BpmnNode lane, Padding padding, List<BpmnNode> children) {
+            this.lane = lane;
+            this.padding = padding;
+            this.children = children;
+        }
+
+        public BpmnNode getLane() {
+            return lane;
+        }
+
+        public Padding getPadding() {
+            return padding;
+        }
+
+        public List<BpmnNode> getChildren() {
+            return children;
+        }
+    }
+
     private static class Padding {
-        double top;
-        double right;
-        double bottom;
-        double left;
+
+        private double top;
+        private double right;
+        private double bottom;
+        private double left;
 
         public Padding() {
         }
@@ -430,29 +368,80 @@ public class ProcessPostConverter {
         public double getLeft() {
             return left;
         }
+
+        public static Padding of(BpmnNode node) {
+            if (!node.hasChildren()) {
+                return new Padding();
+            }
+            ViewPort viewPort = ViewPort.of(node, false);
+            Bounds bounds = node.value().getContent().getBounds();
+            double topPadding = Math.abs(viewPort.getUpperLeftY() - bounds.getUpperLeft().getY());
+            double rightPadding = Math.abs(viewPort.getLowerRightX() - bounds.getLowerRight().getX());
+            double bottomPadding = Math.abs(viewPort.getLowerRightY() - bounds.getLowerRight().getY());
+            double leftPadding = Math.abs(viewPort.getUpperLeftX() - bounds.getUpperLeft().getX());
+            return new Padding(topPadding, rightPadding, bottomPadding, leftPadding);
+        }
     }
 
-    private static class LaneInfo {
-        private BpmnNode lane;
-        private Padding padding;
-        private List<BpmnNode> children;
+    private static class ViewPort {
 
-        public LaneInfo(BpmnNode lane, Padding padding, List<BpmnNode> children) {
-            this.lane = lane;
-            this.padding = padding;
-            this.children = children;
+        private double ulx;
+        private double uly;
+        private double lrx;
+        private double lry;
+
+        public ViewPort(double ulx, double uly, double lrx, double lry) {
+            this.ulx = ulx;
+            this.uly = uly;
+            this.lrx = lrx;
+            this.lry = lry;
         }
 
-        public BpmnNode getLane() {
-            return lane;
+        public double getUpperLeftX() {
+            return ulx;
         }
 
-        public Padding getPadding() {
-            return padding;
+        public double getUpperLeftY() {
+            return uly;
         }
 
-        public List<BpmnNode> getChildren() {
-            return children;
+        public double getLowerRightX() {
+            return lrx;
+        }
+
+        public double getLowerRightY() {
+            return lry;
+        }
+
+        public static ViewPort of(BpmnNode node, boolean includeEdges) {
+            final List<Bound> ulBounds = node.getChildren().stream()
+                    .map(child -> child.value().getContent().getBounds().getUpperLeft())
+                    .collect(Collectors.toList());
+            final List<Bound> lrBounds = node.getChildren().stream()
+                    .map(child -> child.value().getContent().getBounds().getLowerRight())
+                    .collect(Collectors.toList());
+            List<Point2D> controlPoints;
+            if (includeEdges) {
+                controlPoints = toSimpleEdgesStream(node.getEdges())
+                        .map(BpmnEdge.Simple::getControlPoints)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+            } else {
+                controlPoints = Collections.emptyList();
+            }
+
+            double ulx = min(ulBounds, Bound::getX);
+            double uly = min(ulBounds, Bound::getY);
+            double lrx = max(lrBounds, Bound::getX);
+            double lry = max(lrBounds, Bound::getY);
+
+            if (!controlPoints.isEmpty()) {
+                ulx = Math.min(ulx, min(controlPoints, Point2D::getX));
+                uly = Math.min(uly, min(controlPoints, Point2D::getY));
+                lrx = Math.max(lrx, max(controlPoints, Point2D::getX));
+                lry = Math.max(lry, max(controlPoints, Point2D::getY));
+            }
+            return new ViewPort(ulx, uly, lrx, lry);
         }
     }
 }
