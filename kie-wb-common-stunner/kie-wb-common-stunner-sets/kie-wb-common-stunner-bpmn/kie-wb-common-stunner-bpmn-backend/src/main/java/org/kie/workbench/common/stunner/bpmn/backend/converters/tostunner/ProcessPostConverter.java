@@ -24,6 +24,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.bpmn2.di.BPMNEdge;
+import org.eclipse.dd.dc.Point;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.SequenceFlowPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
@@ -38,33 +41,37 @@ import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
 
 public class ProcessPostConverter {
 
-    private static double PRECISION = 0.5;
+    private static double PRECISION = 1;
 
-    public void postConvert(BpmnNode rootNode) {
-        if (hasCollapsedChildren(rootNode)) {
-            List<LaneInfo> laneInfos = new ArrayList<>();
-            new ArrayList<>(rootNode.getChildren()).stream()
-                    .filter(ProcessPostConverter::isLane)
-                    .filter(BpmnNode::hasChildren)
-                    .forEach(lane -> {
-                        LaneInfo laneInfo = new LaneInfo(lane, Padding.of(lane), new ArrayList<>(lane.getChildren()));
-                        laneInfos.add(laneInfo);
-                        laneInfo.getChildren().forEach(child -> child.setParent(rootNode));
-                        rootNode.removeChild(lane);
-                    });
+    public void postConvert(BpmnNode rootNode, DefinitionResolver definitionResolver) {
+        if ("ARIS".equalsIgnoreCase(definitionResolver.getExporter())) {
+            adjustAllEdgeConnections(rootNode, true);
+            if (hasCollapsedChildren(rootNode)) {
+                List<LaneInfo> laneInfos = new ArrayList<>();
+                new ArrayList<>(rootNode.getChildren()).stream()
+                        .filter(ProcessPostConverter::isLane)
+                        .filter(BpmnNode::hasChildren)
+                        .forEach(lane -> {
+                            LaneInfo laneInfo = new LaneInfo(lane, Padding.of(lane), new ArrayList<>(lane.getChildren()));
+                            laneInfos.add(laneInfo);
+                            laneInfo.getChildren().forEach(child -> child.setParent(rootNode));
+                            rootNode.removeChild(lane);
+                        });
 
-            rootNode.getChildren().stream()
-                    .filter(ProcessPostConverter::isSubProcess)
-                    .forEach(this::postConvertSubProcess);
+                rootNode.getChildren().stream()
+                        .filter(ProcessPostConverter::isSubProcess)
+                        .forEach(this::postConvertSubProcess);
 
-            List<BpmnNode> resizedChildren = getResizedChildren(rootNode);
-            resizedChildren.forEach(resizedChild -> applyNodeResize(rootNode, resizedChild));
+                List<BpmnNode> resizedChildren = getResizedChildren(rootNode);
+                resizedChildren.forEach(resizedChild -> applyNodeResize(rootNode, resizedChild));
 
-            laneInfos.forEach(laneInfo -> {
-                laneInfo.getLane().setParent(rootNode);
-                laneInfo.getChildren().forEach(node -> node.setParent(laneInfo.getLane()));
-                resizeLane(laneInfo.getLane(), laneInfo.getPadding());
-            });
+                laneInfos.forEach(laneInfo -> {
+                    laneInfo.getLane().setParent(rootNode);
+                    laneInfo.getChildren().forEach(node -> node.setParent(laneInfo.getLane()));
+                    adjustLane(laneInfo.getLane(), laneInfo.getPadding());
+                });
+            }
+            adjustAllEdgeConnections(rootNode, false);
         }
     }
 
@@ -95,7 +102,7 @@ public class ProcessPostConverter {
         }
         if (subProcess.isCollapsed()) {
             Bound subProcessUl = subProcess.value().getContent().getBounds().getUpperLeft();
-            //docked nodes are relative to the holding element, translation is not applied.
+            //boundary elements are relative to the target node, translation is no applied for this elements.
             subProcess.getChildren().stream()
                     .filter(child -> !child.isDocked())
                     .forEach(child -> translate(child, subProcessUl.getX(), subProcessUl.getY()));
@@ -133,12 +140,35 @@ public class ProcessPostConverter {
 
             double widthFactor = width / originalWidth;
             double heightFactor = height / originalHeight;
+            //incoming connections has the target point relative to subProcess so they needs to be scaled.
             inEdges(subProcess.getParent(), subProcess).forEach(edge -> scale(edge.getTargetConnection().getLocation(), widthFactor, heightFactor));
+            //outgoing connections has source point relative to the subProcess so they needs to be scaled.
             outEdges(subProcess.getParent(), subProcess).forEach(edge -> scale(edge.getSourceConnection().getLocation(), widthFactor, heightFactor));
+            //boundary elements are relative to the target subProcess so they needs to be scaled.
+            dockedNodes(subProcess.getParent(), subProcess).forEach(node -> scaleBoundaryEventPosition(node, widthFactor, heightFactor));
         }
     }
 
-    private static void resizeLane(BpmnNode lane, Padding padding) {
+    /**
+     * Scales a boundary event position accordingly with his positioning on the target node.
+     */
+    private static void scaleBoundaryEventPosition(BpmnNode boundaryEvent, double widthFactor, double heightFactor) {
+        Bounds bounds = boundaryEvent.value().getContent().getBounds();
+        Bound ul = bounds.getUpperLeft();
+        Bound lr = bounds.getLowerRight();
+        double width = bounds.getWidth();
+        double height = bounds.getHeight();
+        if (ul.getX() > 0) {
+            ul.setX(ul.getX() * widthFactor);
+        }
+        if (ul.getY() > 0) {
+            ul.setY(ul.getY() * heightFactor);
+        }
+        lr.setX(ul.getX() + width);
+        lr.setY(ul.getY() + height);
+    }
+
+    private static void adjustLane(BpmnNode lane, Padding padding) {
         if (lane.hasChildren()) {
             ViewPort viewPort = ViewPort.of(lane, false);
             Bounds laneBounds = lane.value().getContent().getBounds();
@@ -155,19 +185,92 @@ public class ProcessPostConverter {
         }
     }
 
+    private static void adjustEdgeConnections(BpmnEdge.Simple edge, boolean includeMagnets) {
+        if (includeMagnets) {
+            adjustMagnet(edge, true);
+            adjustMagnet(edge, false);
+        }
+        adjustEdgeConnection(edge, true);
+        adjustEdgeConnection(edge, false);
+    }
+
+    private static void adjustMagnet(BpmnEdge.Simple edge, boolean targetConnection) {
+        SequenceFlowPropertyReader propertyReader = (SequenceFlowPropertyReader) edge.getPropertyReader();
+        BPMNEdge bpmnEdge = propertyReader.getDefinitionResolver().getEdge(propertyReader.getElement().getId());
+        Point wayPoint;
+        org.eclipse.dd.dc.Bounds bounds;
+        Bounds nodeBounds;
+        Point2D magnetLocation;
+        //TODO, WM, ver el caso waypoints = 0
+        if (targetConnection) {
+            wayPoint = bpmnEdge.getWaypoint().get(bpmnEdge.getWaypoint().size() - 1);
+            bounds = edge.getTarget().getPropertyReader().getShape().getBounds();
+            magnetLocation = edge.getTargetConnection().getLocation();
+            nodeBounds = edge.getTarget().value().getContent().getBounds();
+//            if (edge.getTarget().isDocked()) {
+//                return;
+//            }
+        } else {
+            wayPoint = bpmnEdge.getWaypoint().get(0);
+            bounds = edge.getSource().getPropertyReader().getShape().getBounds();
+            magnetLocation = edge.getSourceConnection().getLocation();
+            nodeBounds = edge.getSource().value().getContent().getBounds();
+//            if (edge.getSource().isDocked()) {
+//                return;
+//            }
+
+        }
+        //establish the magnet location using orignal aris elements.
+        double wayPointX = wayPoint.getX();
+        double wayPointY = wayPoint.getY();
+        double boundX = bounds.getX();
+        double boundY = bounds.getY();
+        double width = bounds.getWidth();
+        double height = bounds.getHeight();
+
+        if (equals(wayPointY, boundY, PRECISION)) {
+            //magnet is on top in the aris node
+            magnetLocation.setX(nodeBounds.getWidth() / 2);
+            magnetLocation.setY(0);
+        } else if (equals(wayPointY, boundY + height, PRECISION)) {
+            //magnet is on bottom in the aris node
+            magnetLocation.setX(nodeBounds.getWidth() / 2);
+            magnetLocation.setY(nodeBounds.getHeight());
+        } else if (equals(wayPointX, boundX, PRECISION)) {
+            //magnet is on the left in the aris node
+            magnetLocation.setX(0);
+            magnetLocation.setY(nodeBounds.getHeight() / 2);
+        } else if (equals(wayPointX, boundX + width, PRECISION)) {
+            //magnet is on the right the aris node
+            magnetLocation.setX(nodeBounds.getWidth());
+            magnetLocation.setY(nodeBounds.getHeight() / 2);
+        } else {
+            //uncommon case
+            magnetLocation.setX(nodeBounds.getWidth() / 2);
+            magnetLocation.setY(nodeBounds.getHeight() / 2);
+        }
+    }
+
+    private static void adjustAllEdgeConnections(BpmnNode parentNode, boolean includeMagnets) {
+        parentNode.getChildren().stream()
+                .filter(child -> !child.isDocked())
+                .forEach(node -> adjustAllEdgeConnections(node, includeMagnets));
+        simpleEdges(parentNode.getEdges()).forEach(edge -> adjustEdgeConnections(edge, includeMagnets));
+    }
+
     private static void adjustEdgeConnection(BpmnEdge.Simple edge, boolean targetConnection) {
         Point2D siblingPoint = null;
-        Point2D connnectionPoint;
+        Point2D magnetPoint;
         BpmnNode connectionPointNode;
         List<Point2D> controlPoints = edge.getControlPoints();
         if (targetConnection) {
-            connnectionPoint = edge.getTargetConnection().getLocation();
+            magnetPoint = edge.getTargetConnection().getLocation();
             connectionPointNode = edge.getTarget();
             if (controlPoints.size() >= 1) {
                 siblingPoint = controlPoints.get(controlPoints.size() - 1);
             }
         } else {
-            connnectionPoint = edge.getSourceConnection().getLocation();
+            magnetPoint = edge.getSourceConnection().getLocation();
             connectionPointNode = edge.getSource();
             if (controlPoints.size() >= 1) {
                 siblingPoint = controlPoints.get(0);
@@ -176,18 +279,52 @@ public class ProcessPostConverter {
         if (siblingPoint != null) {
             Bounds bounds = connectionPointNode.value().getContent().getBounds();
             Bound nodeUl = bounds.getUpperLeft();
-            if (equals(connnectionPoint.getY(), 0, PRECISION) || equals(connnectionPoint.getY(), bounds.getHeight(), PRECISION)) {
-                //scaled point is on top or bottom
-                if (siblingPoint.getY() != (connnectionPoint.getY() + nodeUl.getY())) {
+            if (connectionPointNode.isDocked()) {
+                //boundary nodes coordinates are relative to the target node, so we need to de-relativize the coordinates.
+                BpmnNode dockedNodeTarget = findDockedNodeTarget(connectionPointNode);
+                if (dockedNodeTarget != null) {
+                    double width = bounds.getWidth();
+                    double height = bounds.getHeight();
+                    Bounds dockedNodeTargetBounds = dockedNodeTarget.value().getContent().getBounds();
+                    Bound dockingNodeUL = dockedNodeTargetBounds.getUpperLeft();
+                    //translate to absolute coordinates
+                    nodeUl = new Bound(nodeUl.getX() + dockingNodeUL.getX(),
+                                       nodeUl.getY() + dockingNodeUL.getY());
+                    Bound nodeLr = new Bound(nodeUl.getX() + width, nodeUl.getY() + height);
+                    bounds = Bounds.create(nodeUl, nodeLr);
+                }
+            }
+            if (equals(magnetPoint.getY(), 0, PRECISION) || equals(magnetPoint.getY(), bounds.getHeight(), PRECISION)) {
+                //magnet point is on top or bottom
+                if (siblingPoint.getY() != (magnetPoint.getY() + nodeUl.getY())) {
                     siblingPoint.setX(nodeUl.getX() + (bounds.getWidth() / 2));
                 }
             } else {
-                //scaled point left or right
-                if (siblingPoint.getX() != (connnectionPoint.getX() + nodeUl.getX())) {
+                //magnet point is on left or right
+                if (siblingPoint.getX() != (magnetPoint.getX() + nodeUl.getX())) {
                     siblingPoint.setY(nodeUl.getY() + (bounds.getHeight() / 2));
                 }
             }
         }
+    }
+
+    /**
+     * @return The node to which a docked/boundary node is attached.
+     */
+    private static BpmnNode findDockedNodeTarget(BpmnNode dockedNode) {
+        BpmnNode parent = dockedNode.getParent();
+        while (parent != null && isLane(parent)) {
+            //lanes has no edges, so we need to reach first non lane parent to get the edges.
+            parent = parent.getParent();
+        }
+        if (parent != null) {
+            return parent.getEdges().stream()
+                    .filter(BpmnEdge::isDocked)
+                    .filter(edge -> edge.getTarget() == dockedNode)
+                    .map(BpmnEdge::getSource)
+                    .findFirst().orElse(null);
+        }
+        return null;
     }
 
     private static void applyNodeResize(BpmnNode container, BpmnNode resizedChild) {
@@ -199,10 +336,10 @@ public class ProcessPostConverter {
                 .filter(child -> child != resizedChild)
                 .forEach(child -> applyTranslationIfRequired(currentBounds.getX(), currentBounds.getY(), deltaX, deltaY, child));
 
-        toSimpleEdgesStream(container.getEdges()).forEach(edge -> applyTranslationIfRequired(currentBounds.getX(), currentBounds.getY(), deltaX, deltaY, edge));
-
-        toSimpleEdgesStream(container.getEdges()).forEach(edge -> adjustEdgeConnection(edge, true));
-        toSimpleEdgesStream(container.getEdges()).forEach(edge -> adjustEdgeConnection(edge, false));
+        simpleEdges(container.getEdges()).forEach(edge -> {
+            applyTranslationIfRequired(currentBounds.getX(), currentBounds.getY(), deltaX, deltaY, edge);
+            adjustEdgeConnections(edge, false);
+        });
     }
 
     private static void translate(BpmnNode node, double deltaX, double deltaY) {
@@ -217,7 +354,7 @@ public class ProcessPostConverter {
     }
 
     private static void translate(List<BpmnEdge> edges, double deltaX, double deltaY) {
-        toSimpleEdgesStream(edges).forEach(edge -> translate(edge, deltaX, deltaY));
+        simpleEdges(edges).forEach(edge -> translate(edge, deltaX, deltaY));
     }
 
     private static void translate(BpmnEdge.Simple edge, double deltaX, double deltaY) {
@@ -277,19 +414,35 @@ public class ProcessPostConverter {
         return node.value().getContent().getDefinition() instanceof Lane;
     }
 
+    /**
+     * @return The list of incoming edges for the targetNode.
+     */
     private static List<BpmnEdge.Simple> inEdges(BpmnNode container, BpmnNode targetNode) {
-        return toSimpleEdgesStream(container.getEdges())
+        return simpleEdges(container.getEdges())
                 .filter(edge -> edge.getTarget() == targetNode)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * @return The list of outgoing edges for the sourceNode.
+     */
     private static List<BpmnEdge.Simple> outEdges(BpmnNode container, BpmnNode sourceNode) {
-        return toSimpleEdgesStream(container.getEdges())
+        return simpleEdges(container.getEdges())
                 .filter(edge -> edge.getSource() == sourceNode)
                 .collect(Collectors.toList());
     }
 
-    private static Stream<BpmnEdge.Simple> toSimpleEdgesStream(List<BpmnEdge> edges) {
+    /**
+     * @return The list of nodes that are docked, typically the boundary events, on the given node.
+     */
+    private static Stream<BpmnNode> dockedNodes(BpmnNode container, BpmnNode node) {
+        return container.getEdges().stream()
+                .filter(BpmnEdge::isDocked)
+                .filter(edge -> edge.getSource() == node)
+                .map(BpmnEdge::getTarget);
+    }
+
+    private static Stream<BpmnEdge.Simple> simpleEdges(List<BpmnEdge> edges) {
         return edges.stream()
                 .filter(edge -> edge instanceof BpmnEdge.Simple)
                 .map(edge -> (BpmnEdge.Simple) edge);
@@ -415,14 +568,16 @@ public class ProcessPostConverter {
 
         public static ViewPort of(BpmnNode node, boolean includeEdges) {
             final List<Bound> ulBounds = node.getChildren().stream()
+                    .filter(child -> !child.isDocked())
                     .map(child -> child.value().getContent().getBounds().getUpperLeft())
                     .collect(Collectors.toList());
             final List<Bound> lrBounds = node.getChildren().stream()
+                    .filter(child -> !child.isDocked())
                     .map(child -> child.value().getContent().getBounds().getLowerRight())
                     .collect(Collectors.toList());
             List<Point2D> controlPoints;
             if (includeEdges) {
-                controlPoints = toSimpleEdgesStream(node.getEdges())
+                controlPoints = simpleEdges(node.getEdges())
                         .map(BpmnEdge.Simple::getControlPoints)
                         .flatMap(Collection::stream)
                         .collect(Collectors.toList());

@@ -253,6 +253,11 @@ public class BPMNDirectDiagramMarshallerTest {
 
     private static final String BPMN_ARIS_BOUNDARY_EVENTS_IMPORT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/CollapsedWithBoundaryEvents.bpmn";
 
+    private static final String BPMN_STUNER_BOUNDARY_EVENTS_IMPORT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/StunnerBoundary(6).bpmn";
+
+    private static final String BPMN_STUNER_EDGE_CASE = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/EdgeCase.bpmn";
+
+
     private static final String NEW_LINE = System.lineSeparator();
 
     @Mock
@@ -3486,7 +3491,17 @@ public class BPMNDirectDiagramMarshallerTest {
         //Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_SIMPLE_NESTED_SUBPROCESES);
 //        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_SECOND_APPROACH);
 
-        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ARIS_BOUNDARY_EVENTS_IMPORT);
+        String process;
+
+        //process = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/CollapsedSubProcessHasTheBoundaryEvent(6).bpmn";
+        process = BPMN_STUNER_EDGE_CASE;
+
+        process = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/4.6.10.10_P1_v3_Inserción_extraordinaria_de_flujos_de_caja(1)(3).bpmn";
+
+        Diagram<Graph, Metadata> diagram = unmarshall(process);
+
+
+
 
         int i = 0;
 

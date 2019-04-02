@@ -94,4 +94,8 @@ public class SequenceFlowPropertyReader extends FlowElementPropertyReader {
         return PropertyReaderUtils.getControlPoints(definitionResolver,
                                                     element.getId());
     }
+
+    public DefinitionResolver getDefinitionResolver() {
+        return definitionResolver;
+    }
 }

@@ -48,16 +48,17 @@ public abstract class BpmnNode {
     private boolean resized = false;
     private Boolean collapsed = null;
 
-    protected BpmnNode(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
+    protected BpmnNode(Node<? extends View<? extends BPMNViewDefinition>, ?> value, BasePropertyReader propertyReader) {
         this.value = value;
+        this.propertyReader = propertyReader;
     }
 
     public abstract boolean isDocked();
 
     public static class Simple extends BpmnNode {
 
-        public Simple(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
-            super(value);
+        public Simple(Node<? extends View<? extends BPMNViewDefinition>, ?> value, BasePropertyReader propertyReader) {
+            super(value, propertyReader);
         }
 
         @Override
@@ -66,15 +67,10 @@ public abstract class BpmnNode {
         }
     }
 
-    public BpmnNode with(BasePropertyReader propertyReader) {
-        this.propertyReader = propertyReader;
-        return this;
-    }
-
     public static class Docked extends BpmnNode {
 
-        public Docked(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
-            super(value);
+        public Docked(Node<? extends View<? extends BPMNViewDefinition>, ?> value, BasePropertyReader propertyReader) {
+            super(value, propertyReader);
         }
 
         @Override
@@ -83,12 +79,12 @@ public abstract class BpmnNode {
         }
     }
 
-    public static BpmnNode of(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
-        return new BpmnNode.Simple(value);
+    public static BpmnNode of(Node<? extends View<? extends BPMNViewDefinition>, ?> value, BasePropertyReader propertyReader) {
+        return new BpmnNode.Simple(value, propertyReader);
     }
 
     public BpmnNode docked() {
-        return new BpmnNode.Docked(this.value);
+        return new BpmnNode.Docked(this.value, this.propertyReader);
     }
 
     public BpmnNode getParent() {

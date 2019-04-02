@@ -109,7 +109,8 @@ public class ProcessConverterDelegateTest {
 
     @Before
     public void setUp() {
-        parentNode = new BpmnNode.Simple(new NodeImpl<>("ParentNode"));
+        //TODO WM, check null this here
+        parentNode = new BpmnNode.Simple(new NodeImpl<>("ParentNode"), null);
         when(diagram.getPlane()).thenReturn(plane);
         List<RootElement> rootElements = Collections.singletonList(process);
         List<BPMNDiagram> diagrams = Collections.singletonList(diagram);

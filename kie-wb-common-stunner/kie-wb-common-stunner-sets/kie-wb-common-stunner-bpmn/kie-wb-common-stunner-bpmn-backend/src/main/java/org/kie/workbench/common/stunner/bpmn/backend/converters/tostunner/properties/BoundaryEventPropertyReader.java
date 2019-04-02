@@ -40,8 +40,21 @@ public class BoundaryEventPropertyReader extends CatchEventPropertyReader {
     @Override
     protected Bounds computeBounds(final org.eclipse.dd.dc.Bounds bounds) {
         final Point2D docker = getDockerInfo();
-        final double x = docker.getX() * resolutionFactor;
-        final double y = docker.getY() * resolutionFactor;
+        double x = 0;
+        double y = 0;
+        if (docker.getX() != 0 && docker.getY() != 0) {
+            x = docker.getX() * resolutionFactor;
+            y = docker.getY() * resolutionFactor;
+        } else if (event.getAttachedToRef() != null) {
+            //when the node was generated in other tool than Stunner/jBPM designer the dockerInfo attribute don't exists
+            //use the attachedToRef activity and relativize the event coordinates accordingly to calculate the equivalent values
+            String activityId = event.getAttachedToRef().getId();
+            org.eclipse.dd.dc.Bounds activityBounds = definitionResolver.getShape(activityId).getBounds();
+            x = (bounds.getX() - activityBounds.getX()) * resolutionFactor;
+            y = (bounds.getY() - activityBounds.getY()) * resolutionFactor;
+        }
+        //TODO, WM check with Roger if the events size is fixed.
+        //return Bounds.create(x, y, x + bounds.getWidth() * resolutionFactor, y + bounds.getHeight() * resolutionFactor);
         return Bounds.create(x, y, x + WIDTH, y + HEIGHT);
     }
 

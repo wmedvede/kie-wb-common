@@ -123,6 +123,6 @@ final class ProcessConverterDelegate {
     }
 
     public void postConvert(BpmnNode processRoot) {
-        converterFactory.processPostConverter().postConvert(processRoot);
+        converterFactory.processPostConverter().postConvert(processRoot, definitionResolver);
     }
 }

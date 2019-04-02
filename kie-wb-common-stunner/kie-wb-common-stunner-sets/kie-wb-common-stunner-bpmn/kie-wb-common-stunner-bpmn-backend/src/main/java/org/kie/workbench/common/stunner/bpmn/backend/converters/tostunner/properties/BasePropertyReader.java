@@ -148,4 +148,12 @@ public class BasePropertyReader {
         //pues el valor isExpanded nunca se setea y el valor por defecto en eclipse es false.
         return !shape.isIsExpanded();
     }
+
+    public BaseElement getElement() {
+        return element;
+    }
+
+    public BPMNShape getShape() {
+        return shape;
+    }
 }

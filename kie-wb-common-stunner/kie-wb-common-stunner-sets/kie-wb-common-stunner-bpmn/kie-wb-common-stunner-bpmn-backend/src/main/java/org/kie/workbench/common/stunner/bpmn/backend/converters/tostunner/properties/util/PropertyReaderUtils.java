@@ -102,4 +102,51 @@ public class PropertyReaderUtils {
         return Point2D.create((wayPoint.getX() * factor) - (sourceBounds.getX() * factor),
                               (wayPoint.getY() * factor) - (sourceBounds.getY() * factor));
     }
+
+    private static Point2D offsetPositionTEST(Bounds sourceBounds,
+                                          Point wayPoint,
+                                          double factor) {
+
+        //TODO WM, chequear esto, igual tendría q estar un poco mas elaborado
+        //porque va bien para stunner dado que alli las cuentas siempre "salen"  pero en el caso de importacion desde ARIS
+        //donde el wayPoint puede estar en cualquier lado pues pueden darse casos donde le magnet quede mal ubicado...
+        //creo q se puede llegar a casos de borde con ese problema
+        double wayPointX = wayPoint.getX() * factor;
+        double wayPointY = wayPoint.getY() * factor;
+        double boundX = sourceBounds.getX() * factor;
+        double boundY = sourceBounds.getY() * factor;
+        double width = sourceBounds.getWidth() * factor;
+        double height = sourceBounds.getHeight() * factor;
+
+        if (equals(wayPointY, boundY, PRECISION)) {
+            //magnet is on top
+            return Point2D.create(width / 2, 0);
+        } else if (equals(wayPointY, boundY + height, PRECISION)) {
+            //magnet is on bottom
+            return Point2D.create(width / 2, height);
+        } else if (equals(wayPointX, boundX, PRECISION)) {
+            //magnet is on the left
+            return Point2D.create(0, height / 2);
+        } else if (equals(wayPointX, boundX + width, PRECISION)) {
+            //magnet is on the right
+            return Point2D.create(width, height / 2);
+        } else {
+            //un common case
+            return Point2D.create(width / 2, height / 2);
+        }
+
+    }
+
+    private static double PRECISION = 0.5;
+
+    private static boolean equals(double a, double b, double delta) {
+        if (Double.compare(a, b) == 0) {
+            return true;
+        } else {
+            return Math.abs(a - b) < delta;
+        }
+    }
+
+
+
 }

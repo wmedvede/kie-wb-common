@@ -96,7 +96,7 @@ public abstract class BaseRootProcessConverter<D extends BPMNDiagram<S, P>,
         definition.setFontSet(e.getFontSet());
         definition.setBackgroundSet(e.getBackgroundSet());
 
-        return BpmnNode.of(diagramNode).with(e);
+        return BpmnNode.of(diagramNode, e);
     }
 
     protected abstract Node<View<D>, Edge> createNode(String id);

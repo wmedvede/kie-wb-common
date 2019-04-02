@@ -91,6 +91,11 @@ public class DefinitionResolver {
         return resolutionFactor;
     }
 
+    public String getExporter() {
+        //TODO, WM
+        return definitions.getExporter();
+    }
+
     //TODO WM este metodo se puede ir.
     public BPMNPlane getPlane() {
         return diagram.getPlane();
