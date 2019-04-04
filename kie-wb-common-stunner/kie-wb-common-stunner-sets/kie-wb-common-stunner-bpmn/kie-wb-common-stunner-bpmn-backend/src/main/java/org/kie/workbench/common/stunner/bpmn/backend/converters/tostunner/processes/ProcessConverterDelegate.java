@@ -122,7 +122,7 @@ final class ProcessConverterDelegate {
         laneSet.getLanes().forEach(lane -> convertLane(lane, parents, freeFloatingNodes, firstDiagramNode));
     }
 
-    public void postConvert(BpmnNode processRoot) {
-        converterFactory.processPostConverter().postConvert(processRoot, definitionResolver);
+    void postConvert(BpmnNode processRoot) {
+        converterFactory.newProcessPostConverter().postConvert(processRoot, definitionResolver);
     }
 }

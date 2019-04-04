@@ -43,8 +43,6 @@ public abstract class BaseConverterFactory {
     private final EndEventConverter endEventConverter;
     private final LaneConverter laneConverter;
     private final GatewayConverter gatewayConverter;
-    private final ProcessPostConverter processPostConverter;
-
 
     public BaseConverterFactory(DefinitionResolver definitionResolver,
                                 TypedFactoryManager factoryManager,
@@ -62,7 +60,6 @@ public abstract class BaseConverterFactory {
         this.laneConverter = new LaneConverter(factoryManager, propertyReaderFactory);
         this.gatewayConverter = new GatewayConverter(factoryManager, propertyReaderFactory);
         this.edgeConverter = new EdgeConverter(factoryManager, propertyReaderFactory);
-        this.processPostConverter = new ProcessPostConverter();
     }
 
     public FlowElementConverter flowElementConverter() {
@@ -105,7 +102,7 @@ public abstract class BaseConverterFactory {
 
     public abstract BaseTaskConverter taskConverter();
 
-    public ProcessPostConverter processPostConverter() {
-        return processPostConverter;
+    public ProcessPostConverter newProcessPostConverter() {
+        return new ProcessPostConverter();
     }
 }

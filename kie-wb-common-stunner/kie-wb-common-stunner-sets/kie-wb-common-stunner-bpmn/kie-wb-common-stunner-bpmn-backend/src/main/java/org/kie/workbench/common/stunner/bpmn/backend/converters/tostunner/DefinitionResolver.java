@@ -70,10 +70,12 @@ public class DefinitionResolver {
     private final Process process;
     private final BPMNDiagram diagram;
     private final double resolutionFactor;
+    private final boolean jbpm;
 
     public DefinitionResolver(
             Definitions definitions,
-            Collection<WorkItemDefinition> workItemDefinitions) {
+            Collection<WorkItemDefinition> workItemDefinitions,
+            boolean jbpm) {
         this.definitions = definitions;
         this.signals = initSignals(definitions);
         this.simulationParameters = initSimulationParameters(definitions);
@@ -81,6 +83,12 @@ public class DefinitionResolver {
         this.process = findProcess();
         this.diagram = findDiagram();
         this.resolutionFactor = calculateResolutionFactor(diagram);
+        this.jbpm = jbpm;
+    }
+
+    public DefinitionResolver(Definitions definitions,
+                              Collection<WorkItemDefinition> workItemDefinitions) {
+        this(definitions, workItemDefinitions, true);
     }
 
     public BPMNDiagram getDiagram() {
@@ -91,14 +99,8 @@ public class DefinitionResolver {
         return resolutionFactor;
     }
 
-    public String getExporter() {
-        //TODO, WM
-        return definitions.getExporter();
-    }
-
-    //TODO WM este metodo se puede ir.
-    public BPMNPlane getPlane() {
-        return diagram.getPlane();
+    public boolean isJbpm() {
+        return jbpm;
     }
 
     public Definitions getDefinitions() {

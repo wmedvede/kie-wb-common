@@ -3496,7 +3496,15 @@ public class BPMNDirectDiagramMarshallerTest {
         //process = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/CollapsedSubProcessHasTheBoundaryEvent(6).bpmn";
         process = BPMN_STUNER_EDGE_CASE;
 
-        process = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/4.6.10.10_P1_v3_Inserción_extraordinaria_de_flujos_de_caja(1)(3).bpmn";
+        //process = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/4.6.10.10_P1_v3_Inserción_extraordinaria_de_flujos_de_caja(1)(3).bpmn";
+
+        //process = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/ArisMagnets(8).bpmn";
+
+        process = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/StunnerMagnets(4).bpmn";
+
+        process = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/7.6.2.2_P1_Solicitud_de_mantenimiento_de_equipos_en_CPD(3)(2).bpmn";
+
+        process = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/aris/aris-resolution-v2.bpmn";
 
         Diagram<Graph, Metadata> diagram = unmarshall(process);
 

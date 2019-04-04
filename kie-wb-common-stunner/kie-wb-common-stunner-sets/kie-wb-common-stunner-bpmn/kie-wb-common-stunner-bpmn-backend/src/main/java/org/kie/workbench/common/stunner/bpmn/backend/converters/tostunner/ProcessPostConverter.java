@@ -19,6 +19,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,16 +38,23 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.Rect
 import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.Width;
 import org.kie.workbench.common.stunner.core.graph.content.Bound;
 import org.kie.workbench.common.stunner.core.graph.content.Bounds;
+import org.kie.workbench.common.stunner.core.graph.content.view.Connection;
+import org.kie.workbench.common.stunner.core.graph.content.view.MagnetConnection;
 import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
 
 public class ProcessPostConverter {
 
     private static double PRECISION = 1;
+    private PostConverterContext context;
+
+    ProcessPostConverter() {
+    }
 
     public void postConvert(BpmnNode rootNode, DefinitionResolver definitionResolver) {
-        if ("ARIS".equalsIgnoreCase(definitionResolver.getExporter())) {
+        if (definitionResolver.getResolutionFactor() != 1) {
+            context = PostConverterContext.of(rootNode, definitionResolver.isJbpm());
             adjustAllEdgeConnections(rootNode, true);
-            if (hasCollapsedChildren(rootNode)) {
+            if (context.hasCollapsedNodes()) {
                 List<LaneInfo> laneInfos = new ArrayList<>();
                 new ArrayList<>(rootNode.getChildren()).stream()
                         .filter(ProcessPostConverter::isLane)
@@ -62,7 +70,7 @@ public class ProcessPostConverter {
                         .filter(ProcessPostConverter::isSubProcess)
                         .forEach(this::postConvertSubProcess);
 
-                List<BpmnNode> resizedChildren = getResizedChildren(rootNode);
+                List<BpmnNode> resizedChildren = context.getResizedChildren(rootNode);
                 resizedChildren.forEach(resizedChild -> applyNodeResize(rootNode, resizedChild));
 
                 laneInfos.forEach(laneInfo -> {
@@ -70,24 +78,72 @@ public class ProcessPostConverter {
                     laneInfo.getChildren().forEach(node -> node.setParent(laneInfo.getLane()));
                     adjustLane(laneInfo.getLane(), laneInfo.getPadding());
                 });
+                adjustAllEdgeConnections(rootNode, false);
             }
-            adjustAllEdgeConnections(rootNode, false);
         }
     }
 
-    private static boolean hasCollapsedChildren(BpmnNode rootNode) {
-        boolean result = false;
-        for (BpmnNode child : rootNode.getChildren()) {
-            if (isLane(child)) {
-                result = hasCollapsedChildren(child);
-            } else if (isSubProcess(child)) {
-                result = child.isCollapsed() || hasCollapsedChildren(child);
+    private static class PostConverterContext {
+
+        private HashMap<BpmnNode, Boolean> collapsedNodes;
+        private HashMap<BpmnNode, Boolean> resizedNodes = new HashMap<>();
+
+        private PostConverterContext(HashMap<BpmnNode, Boolean> collapsedNodes) {
+            this.collapsedNodes = collapsedNodes;
+        }
+
+        public boolean isCollapsed(BpmnNode node) {
+            return collapsedNodes.getOrDefault(node, false);
+        }
+
+        public void setCollapsed(BpmnNode node, boolean collapsed) {
+            collapsedNodes.put(node, collapsed);
+        }
+
+        public boolean hasCollapsedNodes() {
+            return collapsedNodes.values().stream()
+                    .filter(value -> value).findFirst()
+                    .orElse(false);
+        }
+
+        public boolean isResized(BpmnNode node) {
+            return resizedNodes.getOrDefault(node, false);
+        }
+
+        public void setResized(BpmnNode node, boolean resized) {
+            resizedNodes.put(node, resized);
+        }
+
+        public List<BpmnNode> getResizedChildren(BpmnNode node) {
+            return node.getChildren().stream()
+                    .filter(this::isResized)
+                    .collect(Collectors.toList());
+        }
+
+        public static PostConverterContext of(BpmnNode rootNode, boolean jbpmnModel) {
+            HashMap<BpmnNode, Boolean> collapsedNodes = new HashMap<>();
+            calculateCollapsedNodes(rootNode, jbpmnModel, collapsedNodes);
+            return new PostConverterContext(collapsedNodes);
+        }
+
+        private static void calculateCollapsedNodes(BpmnNode rootNode,
+                                                    boolean jbpmnModel,
+                                                    HashMap<BpmnNode, Boolean> collapsedNodes) {
+            if (jbpmnModel) {
+                return;
             }
-            if (result) {
-                break;
+            for (BpmnNode child : rootNode.getChildren()) {
+                if (isLane(child)) {
+                    calculateCollapsedNodes(child, jbpmnModel, collapsedNodes);
+                } else if (isSubProcess(child)) {
+                    //this calculation can't be done for jBPM processes since this expanded attribute wasn't properly
+                    //set for jBPM Designer or initial Stunner versions.
+                    boolean collapsed = !child.getPropertyReader().isExpanded();
+                    collapsedNodes.put(child, collapsed);
+                    calculateCollapsedNodes(child, jbpmnModel, collapsedNodes);
+                }
             }
         }
-        return result;
     }
 
     private void postConvertSubProcess(BpmnNode subProcess) {
@@ -95,29 +151,23 @@ public class ProcessPostConverter {
                 .filter(ProcessPostConverter::isSubProcess)
                 .forEach(this::postConvertSubProcess);
 
-        List<BpmnNode> resizedChildren = getResizedChildren(subProcess);
+        List<BpmnNode> resizedChildren = context.getResizedChildren(subProcess);
         resizedChildren.forEach(resizedChild -> applyNodeResize(subProcess, resizedChild));
-        if ((subProcess.isCollapsed() && subProcess.hasChildren()) || !resizedChildren.isEmpty()) {
+        if ((context.isCollapsed(subProcess) && subProcess.hasChildren()) || !resizedChildren.isEmpty()) {
             resizeSubProcess(subProcess);
         }
-        if (subProcess.isCollapsed()) {
+        if (context.isCollapsed(subProcess)) {
             Bound subProcessUl = subProcess.value().getContent().getBounds().getUpperLeft();
             //boundary elements are relative to the target node, translation is no applied for this elements.
             subProcess.getChildren().stream()
                     .filter(child -> !child.isDocked())
                     .forEach(child -> translate(child, subProcessUl.getX(), subProcessUl.getY()));
             translate(subProcess.getEdges(), subProcessUl.getX(), subProcessUl.getY());
-            subProcess.setCollapsed(false);
+            context.setCollapsed(subProcess, false);
         }
     }
 
-    private static List<BpmnNode> getResizedChildren(BpmnNode node) {
-        return node.getChildren().stream()
-                .filter(BpmnNode::isResized)
-                .collect(Collectors.toList());
-    }
-
-    private static void resizeSubProcess(BpmnNode subProcess) {
+    private void resizeSubProcess(BpmnNode subProcess) {
         if (subProcess.hasChildren()) {
             ViewPort viewPort = ViewPort.of(subProcess, true);
             double leftPadding = viewPort.getUpperLeftX();
@@ -136,7 +186,7 @@ public class ProcessPostConverter {
             RectangleDimensionsSet subProcessRectangle = ((BaseSubprocess) subProcess.value().getContent().getDefinition()).getDimensionsSet();
             subProcessRectangle.setWidth(new Width(width));
             subProcessRectangle.setHeight(new Height(height));
-            subProcess.setResized(true);
+            context.setResized(subProcess, true);
 
             double widthFactor = width / originalWidth;
             double heightFactor = height / originalHeight;
@@ -197,57 +247,57 @@ public class ProcessPostConverter {
     private static void adjustMagnet(BpmnEdge.Simple edge, boolean targetConnection) {
         SequenceFlowPropertyReader propertyReader = (SequenceFlowPropertyReader) edge.getPropertyReader();
         BPMNEdge bpmnEdge = propertyReader.getDefinitionResolver().getEdge(propertyReader.getElement().getId());
-        Point wayPoint;
-        org.eclipse.dd.dc.Bounds bounds;
-        Bounds nodeBounds;
-        Point2D magnetLocation;
-        //TODO, WM, ver el caso waypoints = 0
-        if (targetConnection) {
-            wayPoint = bpmnEdge.getWaypoint().get(bpmnEdge.getWaypoint().size() - 1);
-            bounds = edge.getTarget().getPropertyReader().getShape().getBounds();
-            magnetLocation = edge.getTargetConnection().getLocation();
-            nodeBounds = edge.getTarget().value().getContent().getBounds();
-//            if (edge.getTarget().isDocked()) {
-//                return;
-//            }
-        } else {
-            wayPoint = bpmnEdge.getWaypoint().get(0);
-            bounds = edge.getSource().getPropertyReader().getShape().getBounds();
-            magnetLocation = edge.getSourceConnection().getLocation();
-            nodeBounds = edge.getSource().value().getContent().getBounds();
-//            if (edge.getSource().isDocked()) {
-//                return;
-//            }
 
-        }
-        //establish the magnet location using orignal aris elements.
-        double wayPointX = wayPoint.getX();
-        double wayPointY = wayPoint.getY();
-        double boundX = bounds.getX();
-        double boundY = bounds.getY();
-        double width = bounds.getWidth();
-        double height = bounds.getHeight();
+        if (bpmnEdge.getWaypoint().size() >= 2) {
+            Point wayPoint;
+            org.eclipse.dd.dc.Bounds bounds;
+            Bounds nodeBounds;
+            Connection magnetConnection;
+            Point2D magnetLocation;
 
-        if (equals(wayPointY, boundY, PRECISION)) {
-            //magnet is on top in the aris node
-            magnetLocation.setX(nodeBounds.getWidth() / 2);
-            magnetLocation.setY(0);
-        } else if (equals(wayPointY, boundY + height, PRECISION)) {
-            //magnet is on bottom in the aris node
-            magnetLocation.setX(nodeBounds.getWidth() / 2);
-            magnetLocation.setY(nodeBounds.getHeight());
-        } else if (equals(wayPointX, boundX, PRECISION)) {
-            //magnet is on the left in the aris node
-            magnetLocation.setX(0);
-            magnetLocation.setY(nodeBounds.getHeight() / 2);
-        } else if (equals(wayPointX, boundX + width, PRECISION)) {
-            //magnet is on the right the aris node
-            magnetLocation.setX(nodeBounds.getWidth());
-            magnetLocation.setY(nodeBounds.getHeight() / 2);
-        } else {
-            //uncommon case
-            magnetLocation.setX(nodeBounds.getWidth() / 2);
-            magnetLocation.setY(nodeBounds.getHeight() / 2);
+            if (targetConnection) {
+                wayPoint = bpmnEdge.getWaypoint().get(bpmnEdge.getWaypoint().size() - 1);
+                bounds = edge.getTarget().getPropertyReader().getShape().getBounds();
+                magnetConnection = edge.getTargetConnection();
+                magnetLocation = magnetConnection.getLocation();
+                nodeBounds = edge.getTarget().value().getContent().getBounds();
+            } else {
+                wayPoint = bpmnEdge.getWaypoint().get(0);
+                bounds = edge.getSource().getPropertyReader().getShape().getBounds();
+                magnetConnection = edge.getSourceConnection();
+                magnetLocation = magnetConnection.getLocation();
+                nodeBounds = edge.getSource().value().getContent().getBounds();
+            }
+            //establish the magnet location using original elements for safety, since elements like events and gateways have
+            //fixed sizes in Stunner.
+            double wayPointX = wayPoint.getX();
+            double wayPointY = wayPoint.getY();
+            double boundX = bounds.getX();
+            double boundY = bounds.getY();
+            double width = bounds.getWidth();
+            double height = bounds.getHeight();
+
+            if (equals(wayPointY, boundY, PRECISION)) {
+                //magnet is on top in the aris node
+                magnetLocation.setX(nodeBounds.getWidth() / 2);
+                magnetLocation.setY(0);
+            } else if (equals(wayPointY, boundY + height, PRECISION)) {
+                //magnet is on bottom in the aris node
+                magnetLocation.setX(nodeBounds.getWidth() / 2);
+                magnetLocation.setY(nodeBounds.getHeight());
+            } else if (equals(wayPointX, boundX, PRECISION)) {
+                //magnet is on the left in the aris node
+                magnetLocation.setX(0);
+                magnetLocation.setY(nodeBounds.getHeight() / 2);
+            } else if (equals(wayPointX, boundX + width, PRECISION)) {
+                //magnet is on the right the aris node
+                magnetLocation.setX(nodeBounds.getWidth());
+                magnetLocation.setY(nodeBounds.getHeight() / 2);
+            } else {
+                if (magnetConnection instanceof MagnetConnection) {
+                    ((MagnetConnection) magnetConnection).setAuto(true);
+                }
+            }
         }
     }
 
@@ -260,17 +310,20 @@ public class ProcessPostConverter {
 
     private static void adjustEdgeConnection(BpmnEdge.Simple edge, boolean targetConnection) {
         Point2D siblingPoint = null;
+        Connection magnetConnection;
         Point2D magnetPoint;
         BpmnNode connectionPointNode;
         List<Point2D> controlPoints = edge.getControlPoints();
         if (targetConnection) {
-            magnetPoint = edge.getTargetConnection().getLocation();
+            magnetConnection = edge.getTargetConnection();
+            magnetPoint = magnetConnection.getLocation();
             connectionPointNode = edge.getTarget();
             if (controlPoints.size() >= 1) {
                 siblingPoint = controlPoints.get(controlPoints.size() - 1);
             }
         } else {
-            magnetPoint = edge.getSourceConnection().getLocation();
+            magnetConnection = edge.getSourceConnection();
+            magnetPoint = magnetConnection.getLocation();
             connectionPointNode = edge.getSource();
             if (controlPoints.size() >= 1) {
                 siblingPoint = controlPoints.get(0);
@@ -294,15 +347,17 @@ public class ProcessPostConverter {
                     bounds = Bounds.create(nodeUl, nodeLr);
                 }
             }
-            if (equals(magnetPoint.getY(), 0, PRECISION) || equals(magnetPoint.getY(), bounds.getHeight(), PRECISION)) {
-                //magnet point is on top or bottom
-                if (siblingPoint.getY() != (magnetPoint.getY() + nodeUl.getY())) {
-                    siblingPoint.setX(nodeUl.getX() + (bounds.getWidth() / 2));
-                }
-            } else {
-                //magnet point is on left or right
-                if (siblingPoint.getX() != (magnetPoint.getX() + nodeUl.getX())) {
-                    siblingPoint.setY(nodeUl.getY() + (bounds.getHeight() / 2));
+            if (!(magnetConnection instanceof MagnetConnection && ((MagnetConnection) magnetConnection).isAuto())) {
+                if (equals(magnetPoint.getY(), 0, PRECISION) || equals(magnetPoint.getY(), bounds.getHeight(), PRECISION)) {
+                    //magnet point is on top or bottom
+                    if (siblingPoint.getY() != (magnetPoint.getY() + nodeUl.getY())) {
+                        siblingPoint.setX(nodeUl.getX() + (bounds.getWidth() / 2));
+                    }
+                } else {
+                    //magnet point is on left or right
+                    if (siblingPoint.getX() != (magnetPoint.getX() + nodeUl.getX())) {
+                        siblingPoint.setY(nodeUl.getY() + (bounds.getHeight() / 2));
+                    }
                 }
             }
         }
@@ -327,7 +382,7 @@ public class ProcessPostConverter {
         return null;
     }
 
-    private static void applyNodeResize(BpmnNode container, BpmnNode resizedChild) {
+    private void applyNodeResize(BpmnNode container, BpmnNode resizedChild) {
         Bounds originalBounds = resizedChild.getPropertyReader().getBounds();
         Bounds currentBounds = resizedChild.value().getContent().getBounds();
         double deltaX = currentBounds.getWidth() - originalBounds.getWidth();
@@ -342,12 +397,11 @@ public class ProcessPostConverter {
         });
     }
 
-    private static void translate(BpmnNode node, double deltaX, double deltaY) {
-        //TODO WM, ver los nodos q son circulos...
+    private void translate(BpmnNode node, double deltaX, double deltaY) {
         Bounds childBounds = node.value().getContent().getBounds();
         translate(childBounds.getUpperLeft(), deltaX, deltaY);
         translate(childBounds.getLowerRight(), deltaX, deltaY);
-        if (!node.isCollapsed()) {
+        if (!context.isCollapsed(node)) {
             node.getChildren().forEach(child -> translate(child, deltaX, deltaY));
             translate(node.getEdges(), deltaX, deltaY);
         }
@@ -378,7 +432,7 @@ public class ProcessPostConverter {
         point2D.setY(point2D.getY() * heightFactor);
     }
 
-    private static void applyTranslationIfRequired(double x, double y, double deltaX, double deltaY, BpmnNode node) {
+    private void applyTranslationIfRequired(double x, double y, double deltaX, double deltaY, BpmnNode node) {
         Bounds bounds = node.value().getContent().getBounds();
         Bound ul = bounds.getUpperLeft();
         if (ul.getX() >= x && ul.getY() >= y) {
