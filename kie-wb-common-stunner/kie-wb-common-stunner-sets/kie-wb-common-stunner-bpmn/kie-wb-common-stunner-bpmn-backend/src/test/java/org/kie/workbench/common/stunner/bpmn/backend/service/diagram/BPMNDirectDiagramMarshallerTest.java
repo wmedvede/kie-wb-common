@@ -51,7 +51,7 @@ import org.kie.workbench.common.stunner.backend.definition.factory.TestScopeMode
 import org.kie.workbench.common.stunner.bpmn.BPMNDefinitionSet;
 import org.kie.workbench.common.stunner.bpmn.backend.BPMNDirectDiagramMarshaller;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.DefinitionsConverter;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.util.PropertyWriterUtils;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.BasePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.workitem.service.WorkItemDefinitionBackendService;
 import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.Association;
@@ -3477,7 +3477,7 @@ public class BPMNDirectDiagramMarshallerTest {
     @SuppressWarnings("unchecked")
     private static void assertCoordinatesProperlyCalculatedAndMarshalled(Diagram<Graph, Metadata> diagram, String marshalledDiagram, String elementId, Boolean isExpandedAttribute) {
         Node<View<? extends Definition>, ?> node = diagram.getGraph().getNode(elementId);
-        Bounds nodeAbsoluteBounds = PropertyWriterUtils.absoluteBounds(node);
+        Bounds nodeAbsoluteBounds = BasePropertyWriter.absoluteBounds(node);
         float expectedX = Double.valueOf(nodeAbsoluteBounds.getX()).floatValue();
         float expectedY = Double.valueOf(nodeAbsoluteBounds.getY()).floatValue();
         float expectedWidth = nodeAbsoluteBounds.getLowerRight().getX().floatValue() - nodeAbsoluteBounds.getUpperLeft().getX().floatValue();

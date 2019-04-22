@@ -17,21 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties;
 
 import org.eclipse.bpmn2.BaseElement;
-import org.junit.Test;
-import org.kie.workbench.common.stunner.bpmn.definition.BaseAdHocSubprocess;
-import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
-import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
-import org.kie.workbench.common.stunner.bpmn.definition.property.background.BackgroundSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dimensions.RectangleDimensionsSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.font.FontSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.BaseAdHocSubprocessTaskExecutionSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.variables.BaseProcessData;
-import org.kie.workbench.common.stunner.core.graph.Node;
-import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -50,61 +36,10 @@ public class BasePropertyWriterTest extends AbstractBasePropertyWriterTest<BaseP
         return mock(BaseElement.class);
     }
 
-    @Test
-    public void testSetAbsoluteBoundsForAdHocSubprocess() {
-        testSetAbsoluteBoundsForExpandedNode(mockNode(new BaseAdHocSubprocessMock(), org.kie.workbench.common.stunner.core.graph.content.Bounds.create(X1, Y1, X2, Y2)));
-    }
-
-    @Test
-    public void testSetAbsoluteBoundsForEmbeddedSubprocess() {
-        testSetAbsoluteBoundsForExpandedNode(mockNode(mock(EmbeddedSubprocess.class), org.kie.workbench.common.stunner.core.graph.content.Bounds.create(X1, Y1, X2, Y2)));
-    }
-
-    @Test
-    public void testSetAbsoluteBoundsForEventSubprocess() {
-        testSetAbsoluteBoundsForExpandedNode(mockNode(mock(EventSubprocess.class), org.kie.workbench.common.stunner.core.graph.content.Bounds.create(X1, Y1, X2, Y2)));
-    }
-
-    private void testSetAbsoluteBoundsForExpandedNode(Node<View, ?> node) {
-        testSetAbsoluteBounds(node);
-        assertTrue(propertyWriter.getShape().isIsExpanded());
-    }
-
     private class BasePropertyWriterMock extends BasePropertyWriter {
 
         BasePropertyWriterMock(BaseElement baseElement, VariableScope variableScope) {
             super(baseElement, variableScope);
-        }
-    }
-
-    private class BaseAdHocSubprocessMock extends BaseAdHocSubprocess {
-
-        BaseAdHocSubprocessMock() {
-            this(null, null, null, null, null);
-        }
-
-        private BaseAdHocSubprocessMock(BPMNGeneralSet general, BackgroundSet backgroundSet, FontSet fontSet, RectangleDimensionsSet dimensionsSet, SimulationSet simulationSet) {
-            super(general, backgroundSet, fontSet, dimensionsSet, simulationSet);
-        }
-
-        @Override
-        public BaseAdHocSubprocessTaskExecutionSet getExecutionSet() {
-            return null;
-        }
-
-        @Override
-        public void setExecutionSet(BaseAdHocSubprocessTaskExecutionSet executionSet) {
-
-        }
-
-        @Override
-        public BaseProcessData getProcessData() {
-            return null;
-        }
-
-        @Override
-        public void setProcessData(BaseProcessData processData) {
-
         }
     }
 }

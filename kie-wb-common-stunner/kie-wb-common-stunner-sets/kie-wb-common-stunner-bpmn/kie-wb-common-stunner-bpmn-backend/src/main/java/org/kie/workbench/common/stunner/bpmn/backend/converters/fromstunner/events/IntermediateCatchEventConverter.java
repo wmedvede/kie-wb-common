@@ -39,7 +39,7 @@ import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
-import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.util.PropertyWriterUtils.isDocked;
+import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.util.PropertyWriterUtils.getDockSourceNode;
 
 public class IntermediateCatchEventConverter {
 
@@ -198,8 +198,8 @@ public class IntermediateCatchEventConverter {
         return p;
     }
 
-    private CatchEventPropertyWriter createCatchEventPropertyWriter(Node n) {
-        return isDocked(n) ?
+    private CatchEventPropertyWriter createCatchEventPropertyWriter(Node<? extends View, ?> n) {
+        return getDockSourceNode(n).isPresent() ?
                 propertyWriterFactory.of(bpmn2.createBoundaryEvent()) :
                 propertyWriterFactory.of(bpmn2.createIntermediateCatchEvent());
     }

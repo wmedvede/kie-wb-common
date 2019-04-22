@@ -16,16 +16,18 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties;
 
+import java.util.Optional;
+
 import org.eclipse.bpmn2.BoundaryEvent;
 import org.eclipse.bpmn2.EventDefinition;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomAttribute;
+import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.Bound;
 import org.kie.workbench.common.stunner.core.graph.content.Bounds;
 import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.util.PropertyWriterUtils.absoluteBounds;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.util.PropertyWriterUtils.getDockSourceNode;
 
 public class BoundaryEventPropertyWriter extends CatchEventPropertyWriter {
@@ -58,12 +60,11 @@ public class BoundaryEventPropertyWriter extends CatchEventPropertyWriter {
         //docker information is relative
         setDockerInfo(Point2D.create(ul.getX(), ul.getY()));
 
-        Node dockSourceNode = getDockSourceNode(node);
-        if (dockSourceNode != null) {
+        Optional<Node<View, Edge>> dockSourceNode = getDockSourceNode(node);
+        if (dockSourceNode.isPresent()) {
             //docked node bounds are relative to the dockSourceNode in Stunner, but not in bpmn2 standard so the node
             //absolute bounds must be calculated by using hte dockSourceNode absolute coordinates.
-            @SuppressWarnings("unchecked")
-            Bounds dockSourceNodeBounds = absoluteBounds(dockSourceNode);
+            Bounds dockSourceNodeBounds = absoluteBounds(dockSourceNode.get());
             Bounds nodeBounds = node.getContent().getBounds();
             double x = dockSourceNodeBounds.getX() + nodeBounds.getUpperLeft().getX();
             double y = dockSourceNodeBounds.getY() + nodeBounds.getUpperLeft().getY();

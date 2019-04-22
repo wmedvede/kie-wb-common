@@ -16,7 +16,6 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.bpmn2.Activity;
@@ -28,19 +27,15 @@ import org.junit.Test;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.relationship.Dock;
-import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
-import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 public class BoundaryEventPropertyWriterTest extends AbstractBasePropertyWriterTest<BoundaryEventPropertyWriter, BoundaryEvent> {
 
@@ -102,24 +97,25 @@ public class BoundaryEventPropertyWriterTest extends AbstractBasePropertyWriterT
     @SuppressWarnings("unchecked")
     public void testSetAbsoluteBounds() {
         Node<View, Edge> node = (Node<View, Edge>) super.createNode();
-        Node<View, ?> dockSourceNode = mockNode(new Object(), mock(org.kie.workbench.common.stunner.core.graph.content.Bounds.class));
+        Node<View, ?> dockSourceParentNode = mockNode(new Object(), org.kie.workbench.common.stunner.core.graph.content.Bounds.create(PARENT_ABSOLUTE_X1, PARENT_ABSOLUTE_Y1, PARENT_ABSOLUTE_X2, PARENT_ABSOLUTE_Y2));
+        double dockSourceRelativeX1 = 15d;
+        double dockSourceRelativeY1 = 20d;
+        double dockSourceRelativeX2 = 50d;
+        double dockSourceAbsoluteY2 = 45d;
+        Node<View, ?> dockSourceNode = mockNode(new Object(), org.kie.workbench.common.stunner.core.graph.content.Bounds.create(dockSourceRelativeX1, dockSourceRelativeY1, dockSourceRelativeX2, dockSourceAbsoluteY2), dockSourceParentNode);
+
         Edge dockEdge = mock(Edge.class);
         when(dockEdge.getSourceNode()).thenReturn(dockSourceNode);
         Dock dock = mock(Dock.class);
         when(dockEdge.getContent()).thenReturn(dock);
-        List<Edge> edges = new ArrayList<>();
-        edges.add(dockEdge);
-        when(node.getInEdges()).thenReturn(edges);
-
-        double dockSourceAbsoluteX = 100d;
-        double dockSourceAbsoluteY = 200d;
-        Point2D dockSourceComputedPosition = Point2D.create(dockSourceAbsoluteX, dockSourceAbsoluteY);
-        mockStatic(GraphUtils.class);
-        PowerMockito.when(GraphUtils.getComputedPosition(dockSourceNode)).thenReturn(dockSourceComputedPosition);
+        node.getInEdges().clear();
+        node.getInEdges().add(dockEdge);
 
         propertyWriter.setAbsoluteBounds(node);
         Bounds shapeBounds = propertyWriter.getShape().getBounds();
         org.kie.workbench.common.stunner.core.graph.content.Bounds relativeBounds = node.getContent().getBounds();
+        double dockSourceAbsoluteX = PARENT_ABSOLUTE_X1 + dockSourceRelativeX1;
+        double dockSourceAbsoluteY = PARENT_ABSOLUTE_Y1 + dockSourceRelativeY1;
         assertEquals(dockSourceAbsoluteX + relativeBounds.getX(), shapeBounds.getX(), 0);
         assertEquals(dockSourceAbsoluteY + relativeBounds.getY(), shapeBounds.getY(), 0);
         assertEquals(relativeBounds.getWidth(), shapeBounds.getWidth(), 0);

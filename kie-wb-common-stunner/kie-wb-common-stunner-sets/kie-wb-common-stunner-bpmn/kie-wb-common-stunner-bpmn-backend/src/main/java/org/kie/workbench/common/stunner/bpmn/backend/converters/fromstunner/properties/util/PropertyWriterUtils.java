@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.util;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.dd.dc.Bounds;
@@ -30,7 +31,6 @@ import org.kie.workbench.common.stunner.core.graph.content.view.Connection;
 import org.kie.workbench.common.stunner.core.graph.content.view.ControlPoint;
 import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
-import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.dc;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.di;
@@ -74,29 +74,13 @@ public class PropertyWriterUtils {
         return bpmnEdge;
     }
 
-    public static org.kie.workbench.common.stunner.core.graph.content.Bounds absoluteBounds(final Node<? extends View, ?> node) {
-        final Point2D point2D = GraphUtils.getComputedPosition(node);
-        final org.kie.workbench.common.stunner.core.graph.content.Bounds bounds = node.getContent().getBounds();
-        return org.kie.workbench.common.stunner.core.graph.content.Bounds.create(point2D.getX(),
-                                                                                 point2D.getY(),
-                                                                                 point2D.getX() + bounds.getWidth(),
-                                                                                 point2D.getY() + bounds.getHeight());
-    }
-
     @SuppressWarnings("unchecked")
-    public static boolean isDocked(Node node) {
-        return null != getDockSourceNode(node);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Node<View, Edge> getDockSourceNode(final Node<? extends View, ?> node) {
-        return (Node<View, Edge>) node
-                .getInEdges()
-                .stream()
+    public static Optional<Node<View, Edge>> getDockSourceNode(final Node<? extends View, ?> node) {
+        return node.getInEdges().stream()
                 .filter(PropertyWriterUtils::isDockEdge)
                 .map(Edge::getSourceNode)
-                .findFirst()
-                .orElse(null);
+                .map(n -> (Node<View, Edge>) n)
+                .findFirst();
     }
 
     private static boolean isDockEdge(final Edge edge) {

@@ -26,18 +26,16 @@ import org.eclipse.bpmn2.RootElement;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Ids;
-import org.kie.workbench.common.stunner.bpmn.definition.BaseAdHocSubprocess;
-import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
-import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.Bound;
 import org.kie.workbench.common.stunner.core.graph.content.Bounds;
+import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
+import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.dc;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.di;
-import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.util.PropertyWriterUtils.absoluteBounds;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.Scripts.asCData;
 import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
 
@@ -77,13 +75,7 @@ public abstract class BasePropertyWriter {
     }
 
     public void setAbsoluteBounds(Node<? extends View, ?> node) {
-        Object definition = node.getContent().getDefinition();
         setBounds(absoluteBounds(node));
-        if (definition instanceof BaseAdHocSubprocess ||
-                definition instanceof EventSubprocess ||
-                definition instanceof EmbeddedSubprocess) {
-            shape.setIsExpanded(true);
-        }
     }
 
     public BaseElement getElement() {
@@ -142,5 +134,14 @@ public abstract class BasePropertyWriter {
 
     public List<RootElement> getRootElements() {
         return rootElements;
+    }
+
+    public static org.kie.workbench.common.stunner.core.graph.content.Bounds absoluteBounds(final Node<? extends View, ?> node) {
+        final Point2D point2D = GraphUtils.getComputedPosition(node);
+        final org.kie.workbench.common.stunner.core.graph.content.Bounds bounds = node.getContent().getBounds();
+        return org.kie.workbench.common.stunner.core.graph.content.Bounds.create(point2D.getX(),
+                                                                                 point2D.getY(),
+                                                                                 point2D.getX() + bounds.getWidth(),
+                                                                                 point2D.getY() + bounds.getHeight());
     }
 }

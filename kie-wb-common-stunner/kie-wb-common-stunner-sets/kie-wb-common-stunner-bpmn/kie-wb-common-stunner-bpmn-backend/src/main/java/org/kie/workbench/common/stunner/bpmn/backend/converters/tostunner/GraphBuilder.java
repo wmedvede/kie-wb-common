@@ -162,24 +162,25 @@ public class GraphBuilder {
     private void addChildNode(BpmnNode current) {
         addChildNode(current.getParent().value(), current.value());
         if (!current.isDocked()) {
-            double[] translationFactors = calculateTranslationFactors(current);
+            Point2D translationFactors = calculateTranslationFactors(current);
             translate(
                     current.value(),
-                    translationFactors[0], translationFactors[1]);
+                    translationFactors.getX(), translationFactors.getY());
         }
     }
 
-    private double[] calculateTranslationFactors(BpmnNode current) {
-        double[] translationFactors = {0, 0};
+    private Point2D calculateTranslationFactors(BpmnNode current) {
+        double xFactor = 0;
+        double yFactor = 0;
         Bounds bounds;
         BpmnNode parent = current.getParent();
-        while(parent != null) {
+        while (parent != null) {
             bounds = parent.value().getContent().getBounds();
-            translationFactors[0] = translationFactors[0] + bounds.getX();
-            translationFactors[1] = translationFactors[1] + bounds.getY();
+            xFactor += bounds.getX();
+            yFactor += bounds.getY();
             parent = parent.getParent();
         }
-        return translationFactors;
+        return Point2D.create(xFactor, yFactor);
     }
 
     private void addChildNode(Node<? extends View, ?> parent, Node<? extends View, ?> child) {

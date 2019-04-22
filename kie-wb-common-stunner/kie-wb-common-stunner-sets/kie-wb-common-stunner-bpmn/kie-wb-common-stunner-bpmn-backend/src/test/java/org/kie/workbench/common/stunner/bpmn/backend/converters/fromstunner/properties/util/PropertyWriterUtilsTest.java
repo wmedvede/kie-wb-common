@@ -39,22 +39,16 @@ import org.kie.workbench.common.stunner.core.graph.content.view.ControlPoint;
 import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
-import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(GraphUtils.class)
+@RunWith(MockitoJUnitRunner.class)
 public class PropertyWriterUtilsTest {
 
     private static final String SOURCE_SHAPE_ID = "SOURCE_SHAPE_ID";
@@ -106,7 +100,9 @@ public class PropertyWriterUtilsTest {
     public void testGetDockSourceNodeWhenDocked() {
         Node<? extends View, Edge> dockSourceNode = mock(Node.class);
         Node<? extends View, Edge> node = mockDockedNode(dockSourceNode);
-        assertEquals(dockSourceNode, PropertyWriterUtils.getDockSourceNode(node));
+        Optional<Node<View, Edge>> result = PropertyWriterUtils.getDockSourceNode(node);
+        assertTrue(result.isPresent());
+        assertEquals(dockSourceNode, result.get());
     }
 
     @Test
@@ -114,44 +110,8 @@ public class PropertyWriterUtilsTest {
         Node<? extends View, Edge> node = mock(Node.class);
         List<Edge> edges = new ArrayList<>();
         when(node.getInEdges()).thenReturn(edges);
-        assertNull(PropertyWriterUtils.getDockSourceNode(node));
-    }
-
-    @Test
-    public void testIsDockedWhenTrue() {
-        Node<? extends View, Edge> dockSourceNode = mock(Node.class);
-        Node<? extends View, Edge> node = mockDockedNode(dockSourceNode);
-        assertTrue(PropertyWriterUtils.isDocked(node));
-    }
-
-    @Test
-    public void testIsDockedWhenFalse() {
-        Node<? extends View, Edge> node = mock(Node.class);
-        List<Edge> edges = new ArrayList<>();
-        when(node.getInEdges()).thenReturn(edges);
-        assertFalse(PropertyWriterUtils.isDocked(node));
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testAbsoluteBounds() {
-        Node<View, ?> node = mock(Node.class);
-        View view = mock(View.class);
-        when(node.getContent()).thenReturn(view);
-        org.kie.workbench.common.stunner.core.graph.content.Bounds relativeBounds =
-                org.kie.workbench.common.stunner.core.graph.content.Bounds.create(1, 1, 46, 56);
-        when(view.getBounds()).thenReturn(relativeBounds);
-        double absoluteX = 100;
-        double absoluteY = 300;
-        Point2D computedPosition = Point2D.create(absoluteX, absoluteY);
-        mockStatic(GraphUtils.class);
-        PowerMockito.when(GraphUtils.getComputedPosition(node)).thenReturn(computedPosition);
-        org.kie.workbench.common.stunner.core.graph.content.Bounds expectedResult =
-                org.kie.workbench.common.stunner.core.graph.content.Bounds.create(absoluteX,
-                                                                                  absoluteY,
-                                                                                  absoluteX + relativeBounds.getWidth(),
-                                                                                  absoluteY + relativeBounds.getHeight());
-        assertEquals(expectedResult, PropertyWriterUtils.absoluteBounds(node));
+        Optional<Node<View, Edge>> result = PropertyWriterUtils.getDockSourceNode(node);
+        assertFalse(result.isPresent());
     }
 
     public static void assertWaypoint(float x, float y, int index, List<Point> waypoints) {
