@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.project.service;
+package org.kie.workbench.common.stunner.bpmn.integration.client;
 
-import org.jboss.errai.bus.server.annotations.Remote;
+import java.util.function.Consumer;
+
 import org.uberfire.backend.vfs.Path;
+import org.uberfire.mvp.ParameterizedCommand;
+import org.uberfire.mvp.PlaceRequest;
 
-@Remote
-public interface BPMNDiagramEditorService {
+public interface IntegrationHandler {
 
-    enum ServiceError {
-        MIGRATION_ERROR_PROCESS_ALREADY_EXIST
-    }
+    void migrateFromJBPMDesignerToStunner(Path path, PlaceRequest place, boolean isDirty, ParameterizedCommand<Consumer<Boolean>> saveCommand);
 
-    MigrationResult migrateDiagram(final Path path,
-                                   final String newName,
-                                   final String newExtension,
-                                   final String commitMessage);
+    void migrateFromStunnerToJBPMDesigner(Path path, PlaceRequest place, boolean isDirty, ParameterizedCommand<Consumer<Boolean>> saveCommand);
+
 }

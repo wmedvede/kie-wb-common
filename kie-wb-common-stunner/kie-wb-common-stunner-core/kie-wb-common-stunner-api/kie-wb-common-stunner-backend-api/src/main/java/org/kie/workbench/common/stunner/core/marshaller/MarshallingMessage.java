@@ -16,16 +16,22 @@
 
 package org.kie.workbench.common.stunner.core.marshaller;
 
+import java.util.List;
 import java.util.Objects;
 
+import org.jboss.errai.common.client.api.annotations.MapsTo;
+import org.jboss.errai.common.client.api.annotations.Portable;
 import org.kie.workbench.common.stunner.core.validation.DomainViolation;
 
+@Portable
 public class MarshallingMessage implements DomainViolation {
 
     private String elementUUID;
     private int code;
     private Type type;
     private String message;
+    private String messageKey;
+    private List<?> messageArguments;
 
     public String getElementUUID() {
         return elementUUID;
@@ -34,6 +40,14 @@ public class MarshallingMessage implements DomainViolation {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    public String getMessageKey() {
+        return messageKey;
+    }
+
+    public List<?> getMessageArguments() {
+        return messageArguments;
     }
 
     @Override
@@ -45,11 +59,18 @@ public class MarshallingMessage implements DomainViolation {
         return code;
     }
 
-    public MarshallingMessage(String elementUUID, int code, Type type, String message) {
+    public MarshallingMessage(@MapsTo("elementUUID") String elementUUID,
+                              @MapsTo("code") int code,
+                              @MapsTo("type") Type type,
+                              @MapsTo("message") String message,
+                              @MapsTo("messageKey") String messageKey,
+                              @MapsTo("messageArguments") List<?> messageArguments) {
         this.elementUUID = elementUUID;
         this.code = code;
         this.type = type;
         this.message = message;
+        this.messageKey = messageKey;
+        this.messageArguments = messageArguments;
     }
 
     public static MarshallingMessageBuilder builder(){
@@ -62,6 +83,8 @@ public class MarshallingMessage implements DomainViolation {
         private int code;
         private Type type = Type.ERROR;
         private String message;
+        private String messageKey;
+        private List<?> messageArguments;
 
         public MarshallingMessageBuilder elementUUID(String elementUUID) {
             this.elementUUID = elementUUID;
@@ -83,8 +106,18 @@ public class MarshallingMessage implements DomainViolation {
             return this;
         }
 
+        public MarshallingMessageBuilder messageKey(String messageKey) {
+            this.messageKey = messageKey;
+            return this;
+        }
+
+        public MarshallingMessageBuilder messageArguments(List<?> messageArguments) {
+            this.messageArguments = messageArguments;
+            return this;
+        }
+
         public MarshallingMessage build() {
-            return new MarshallingMessage(elementUUID, code, type, message);
+            return new MarshallingMessage(elementUUID, code, type, message, messageKey, messageArguments);
         }
     }
 

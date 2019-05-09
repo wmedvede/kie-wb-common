@@ -16,34 +16,14 @@
 
 package org.kie.workbench.common.stunner.bpmn.project.backend.service;
 
-import org.guvnor.common.services.backend.util.CommentedOptionFactory;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kie.workbench.common.stunner.bpmn.project.service.BPMNDiagramEditorService;
-import org.kie.workbench.common.stunner.bpmn.project.service.MigrationResult;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.uberfire.backend.vfs.Path;
-import org.uberfire.io.IOService;
-import org.uberfire.java.nio.base.options.CommentedOption;
-import org.uberfire.java.nio.file.FileSystem;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BPMNDiagramEditorServiceImplTest {
+
+    //TODO WM, move this Tests to the final destination.
+    /*
 
     private static final String FILE_URI = "default:///some_directory/ProcessFile.bpmn2";
 
@@ -133,4 +113,5 @@ public class BPMNDiagramEditorServiceImplTest {
         Assert.assertEquals(BPMNDiagramEditorService.ServiceError.MIGRATION_ERROR_PROCESS_ALREADY_EXIST,
                             migrationResult.getError());
     }
+    */
 }

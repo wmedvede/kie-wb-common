@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,37 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.project.service;
+package org.kie.workbench.common.stunner.bpmn.integration.service;
+
+import java.util.List;
 
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.kie.workbench.common.stunner.bpmn.integration.service.IntegrationService.ServiceError;
 import org.uberfire.backend.vfs.Path;
 
 @Portable
-public class MigrationResult {
+public class MigrateResult {
 
     private Path path;
 
-    private BPMNDiagramEditorService.ServiceError error;
+    private ServiceError error;
 
-    public MigrationResult(@MapsTo("path") final Path path,
-                           @MapsTo("error") final BPMNDiagramEditorService.ServiceError error) {
+    private String messageKey;
+
+    private List<?> messageArguments;
+
+    public MigrateResult(@MapsTo("path") final Path path,
+                         @MapsTo("error") final ServiceError error,
+                         @MapsTo("messageKey") final String messageKey,
+                         @MapsTo("messageArguments") final List<?> messageArguments) {
         this.path = path;
         this.error = error;
+        this.messageKey = messageKey;
+        this.messageArguments = messageArguments;
     }
 
-    public MigrationResult(final Path path) {
+    public MigrateResult(final Path path) {
         this.path = path;
     }
 
@@ -41,8 +52,16 @@ public class MigrationResult {
         return path;
     }
 
-    public BPMNDiagramEditorService.ServiceError getError() {
+    public ServiceError getError() {
         return error;
+    }
+
+    public String getMessageKey() {
+        return messageKey;
+    }
+
+    public List<?> getMessageArguments() {
+        return messageArguments;
     }
 
     public boolean hasError() {
