@@ -177,6 +177,19 @@ public class BPMNDirectDiagramMarshallerTest {
 
     static final String BPMN_DEF_SET_ID = BindableAdapterUtils.getDefinitionSetId(BPMNDefinitionSet.class);
 
+    private static final String BPMN_SERVICE_TASKS_UNSUPPORTED = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/unsupported/serviceTasks.bpmn";
+    private static final String BPMN_MANUAL_TASK = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/unsupported/manualTask.bpmn";
+    private static final String BPMN_SEND_TASK = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/unsupported/sendTask.bpmn";
+    private static final String BPMN_RECEIVE_TASK = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/unsupported/receiveTask.bpmn";
+    private static final String P1_v3 = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/unsupported/4.6.10.10_P1_v3.bpmn";
+    private static final String EXECUTION = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/unsupported/Execution.bpmn";
+    private static final String TestDataStore = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/unsupported/TestDataStore.bpmn";
+    private static final String jbpmDesigner1 = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram" +
+            "/unsupported" +
+            "/jbpmDesigner1.bpmn";
+
+    private static final String dataObject = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/unsupported/dataObject1.bpmn";
+
     private static final String BPMN_BASIC = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/basic.bpmn";
     private static final String BPMN_EVALUATION = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/evaluation.bpmn";
     private static final String BPMN_LANES = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/lanes.bpmn";
@@ -338,6 +351,98 @@ public class BPMNDirectDiagramMarshallerTest {
         when(adapterManager.forPropertySet()).thenReturn(propertySetAdapter);
         when(adapterManager.forProperty()).thenReturn(propertyAdapter);
     }
+
+
+    //Unsupported nodes
+    @Test
+    public void testManualTask() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_MANUAL_TASK);
+        String result = tested.marshall(diagram);
+        //todo:tiago
+//        assertDiagram(result,
+//                      1,
+//                      1,
+//                      0);
+//
+//        assertTrue(result.contains("<bpmn2:intermediateCatchEvent"));
+        System.out.println(result);
+
+    }
+
+    @Test
+    public void testSendTask() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_SEND_TASK);
+        String result = tested.marshall(diagram);
+
+        System.out.println(result);
+
+    }
+
+    //@Test
+    public void testReceiveTask() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_RECEIVE_TASK);
+        String result = tested.marshall(diagram);
+
+        System.out.println(result);
+
+    }
+
+    @Test
+    public void testServiceTaskUnsupported() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_SERVICE_TASKS_UNSUPPORTED);
+        String result = tested.marshall(diagram);
+
+        System.out.println(result);
+
+    }
+
+    @Test
+    public void testDataObject() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(dataObject);
+        String result = tested.marshall(diagram);
+
+        System.out.println(result);
+
+    }
+
+    @Test
+    public void testP1_v3Unsupported() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(EXECUTION);
+        String result = tested.marshall(diagram);
+
+        System.out.println(result);
+
+    }
+
+    @Test
+    public void testExecutionUnsupported() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(EXECUTION);
+        String result = tested.marshall(diagram);
+
+        System.out.println(result);
+
+    }
+
+    @Test
+    public void testTestDataStoreUnsupported() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(TestDataStore);
+        String result = tested.marshall(diagram);
+
+        System.out.println(result);
+
+    }
+
+
+    @Test
+    public void testTestjbpmDesigner1Unsupported() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(jbpmDesigner1);
+        String result = tested.marshall(diagram);
+
+        System.out.println(result);
+
+    }
+
+    //END Unsupported nodes
 
     // 4 nodes expected: BPMNDiagram, StartNode, Task and EndNode
     @Test

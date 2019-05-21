@@ -16,10 +16,15 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.gateways;
 
+import org.eclipse.bpmn2.EventBasedGateway;
 import org.eclipse.bpmn2.Gateway;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BPMNElementDecorators;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.AbstractConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.NodeConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.GatewayPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveGateway;
@@ -33,26 +38,36 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.general.Name;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
+import org.kie.workbench.common.stunner.core.marshaller.MarshallingRequest.Mode;
 
-public class GatewayConverter {
+public class GatewayConverter extends AbstractConverter implements NodeConverter<Gateway> {
 
     private final TypedFactoryManager factoryManager;
     private final PropertyReaderFactory propertyReaderFactory;
 
-    public GatewayConverter(TypedFactoryManager factoryManager, PropertyReaderFactory propertyReaderFactory) {
+    public GatewayConverter(TypedFactoryManager factoryManager, PropertyReaderFactory propertyReaderFactory,
+                            Mode mode) {
+        super(mode);
         this.factoryManager = factoryManager;
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public BpmnNode convert(org.eclipse.bpmn2.Gateway gateway) {
-        return Match.of(org.eclipse.bpmn2.Gateway.class, BpmnNode.class)
+    public Result<BpmnNode> convert(org.eclipse.bpmn2.Gateway gateway) {
+        return Match.of(org.eclipse.bpmn2.Gateway.class, Result.class)
                 .when(org.eclipse.bpmn2.ParallelGateway.class, this::parallelGateway)
                 .when(org.eclipse.bpmn2.ExclusiveGateway.class, this::exclusiveGateway)
                 .when(org.eclipse.bpmn2.InclusiveGateway.class, this::inclusiveGateway)
-                .apply(gateway).value();
+                .ignore(EventBasedGateway.class)
+                .defaultValue(Result.ignored("Gateway not found"))
+                .inputDecorator(BPMNElementDecorators.flowElementDecorator())
+                .outputDecorator(BPMNElementDecorators.resultBpmnDecorator())
+                .mode(getMode())
+                .apply(gateway)
+                .value()
+                .get();
     }
 
-    private BpmnNode inclusiveGateway(Gateway gateway) {
+    private Result<BpmnNode> inclusiveGateway(Gateway gateway) {
         Node<View<InclusiveGateway>, Edge> node = factoryManager.newNode(gateway.getId(), InclusiveGateway.class);
 
         InclusiveGateway definition = node.getContent().getDefinition();
@@ -73,10 +88,10 @@ public class GatewayConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return BpmnNode.of(node, p);
+        return Result.success(BpmnNode.of(node, p));
     }
 
-    private BpmnNode exclusiveGateway(Gateway gateway) {
+    private Result<BpmnNode> exclusiveGateway(Gateway gateway) {
         Node<View<ExclusiveGateway>, Edge> node = factoryManager.newNode(gateway.getId(), ExclusiveGateway.class);
 
         ExclusiveGateway definition = node.getContent().getDefinition();
@@ -97,10 +112,10 @@ public class GatewayConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return BpmnNode.of(node, p);
+        return Result.success(BpmnNode.of(node, p));
     }
 
-    private BpmnNode parallelGateway(Gateway gateway) {
+    private Result<BpmnNode> parallelGateway(Gateway gateway) {
         Node<View<ParallelGateway>, Edge> node = factoryManager.newNode(gateway.getId(), ParallelGateway.class);
         GatewayPropertyReader p = propertyReaderFactory.of(gateway);
 
@@ -116,6 +131,6 @@ public class GatewayConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return BpmnNode.of(node, p);
+        return Result.success(BpmnNode.of(node, p));
     }
 }

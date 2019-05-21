@@ -26,7 +26,6 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomAttribute;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
@@ -39,8 +38,8 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.task.BaseUserTa
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
+import org.kie.workbench.common.stunner.core.marshaller.MarshallingRequest;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -49,8 +48,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BaseTaskConverterTest {
+public abstract class BaseTaskConverterTest {
 
     protected BaseTaskConverter tested;
 
@@ -117,7 +115,7 @@ public class BaseTaskConverterTest {
     }
 
     protected BaseTaskConverter createTaskConverter() {
-        return spy(new BaseTaskConverter(factoryManager, propertyReaderFactory) {
+        return spy(new BaseTaskConverter(factoryManager, propertyReaderFactory, MarshallingRequest.Mode.AUTO) {
             @Override
             protected Node<View, Edge> createNode(String id) {
                 return null;
@@ -141,7 +139,7 @@ public class BaseTaskConverterTest {
         when(serviceTask.getName()).thenReturn(CustomAttribute.serviceTaskName.name());
         when(businessRuleAttr.getValue()).thenReturn("BusinessRuleTask");
 
-        final BpmnNode converted = tested.convert(serviceTask);
+        final BpmnNode converted = (BpmnNode) tested.convert(serviceTask).value().get();
         assertNotEquals(converted.value(), noneTaskNode);
         assertEquals(converted.value(), serviceTaskNode);
     }
