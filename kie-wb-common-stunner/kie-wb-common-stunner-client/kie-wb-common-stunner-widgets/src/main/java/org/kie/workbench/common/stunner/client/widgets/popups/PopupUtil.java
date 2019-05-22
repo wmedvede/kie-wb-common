@@ -73,13 +73,28 @@ public class PopupUtil {
         final Command cancelCommand = () -> {
             // Do nothing, but let the cancel button be shown.
         };
-        final YesNoCancelPopup yesNoCancelPopup = YesNoCancelPopup.newYesNoCancelPopup(title,
-                                                                                       message,
-                                                                                       yesCommand,
-                                                                                       noCommand,
-                                                                                       cancelCommand);
+        final YesNoCancelPopup yesNoCancelPopup = buildYesNoCancelPopup(title,
+                                                                        message,
+                                                                        yesCommand,
+                                                                        noCommand,
+                                                                        cancelCommand);
         yesNoCancelPopup.clearScrollHeight();
         yesNoCancelPopup.setClosable(false);
         yesNoCancelPopup.show();
+    }
+
+    /**
+     * intended for testing purposes
+     */
+    YesNoCancelPopup buildYesNoCancelPopup(final String title,
+                                           final String message,
+                                           final Command yesCommand,
+                                           final Command noCommand,
+                                           final Command cancelCommand) {
+        return YesNoCancelPopup.newYesNoCancelPopup(title,
+                                                    message,
+                                                    yesCommand,
+                                                    noCommand,
+                                                    cancelCommand);
     }
 }
