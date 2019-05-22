@@ -16,8 +16,11 @@
 
 package org.kie.workbench.common.stunner.bpmn.integration.service;
 
+import java.util.Objects;
+
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.kie.workbench.common.stunner.core.util.HashUtil;
 import org.kie.workbench.common.stunner.project.diagram.ProjectDiagram;
 import org.uberfire.backend.vfs.Path;
 
@@ -87,5 +90,32 @@ public class MigrateRequest {
                                                               final String commitMessage,
                                                               final ProjectDiagram projectDiagram) {
         return new MigrateRequest(Type.JBPM_DESIGNER_TO_STUNNER, path, newName, newExtension, commitMessage, projectDiagram);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MigrateRequest request = (MigrateRequest) o;
+        return type == request.type &&
+                Objects.equals(path, request.path) &&
+                Objects.equals(newName, request.newName) &&
+                Objects.equals(newExtension, request.newExtension) &&
+                Objects.equals(commitMessage, request.commitMessage) &&
+                Objects.equals(projectDiagram, request.projectDiagram);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashUtil.combineHashCodes(Objects.hashCode(type),
+                                         Objects.hashCode(path),
+                                         Objects.hashCode(newName),
+                                         Objects.hashCode(newExtension),
+                                         Objects.hashCode(commitMessage),
+                                         Objects.hashCode(projectDiagram));
     }
 }

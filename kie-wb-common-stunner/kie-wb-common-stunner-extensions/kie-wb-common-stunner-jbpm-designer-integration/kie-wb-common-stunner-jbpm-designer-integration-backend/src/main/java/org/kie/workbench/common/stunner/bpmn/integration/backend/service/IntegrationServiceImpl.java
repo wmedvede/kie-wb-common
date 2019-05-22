@@ -19,7 +19,6 @@ package org.kie.workbench.common.stunner.bpmn.integration.backend.service;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -65,7 +64,8 @@ import static org.kie.workbench.common.stunner.bpmn.integration.service.Integrat
 public class IntegrationServiceImpl implements IntegrationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationServiceImpl.class);
-    static final String BPMN_EXTENSION = "." + BPMNDefinitionSetResourceType.BPMN_EXTENSION;
+    private static final String BPMN2_EXTENSION = ".bpmn2";
+    private static final String BPMN_EXTENSION = "." + BPMNDefinitionSetResourceType.BPMN_EXTENSION;
 
     private ProjectDiagramService diagramService;
     private IOService ioService;
@@ -176,8 +176,12 @@ public class IntegrationServiceImpl implements IntegrationService {
         //End of code to be removed.
 
         final String fileName = path.getFileName();
-        //OJO, ver este -1 que saque
-        final String name = fileName.substring(0, fileName.length() - BPMN_EXTENSION.length());
+        String name;
+        if (fileName.endsWith(BPMN_EXTENSION)) {
+            name = fileName.substring(0, fileName.length() - BPMN_EXTENSION.length());
+        } else {
+            name = fileName.substring(0, fileName.length() - BPMN2_EXTENSION.length());
+        }
         final Package modulePackage = moduleService.resolvePackage(path);
         final KieModule kieModule = moduleService.resolveModule(path);
         final ProjectMetadata metadata = new ProjectMetadataImpl.ProjectMetadataBuilder()

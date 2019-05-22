@@ -64,7 +64,7 @@ public class IntegrationHandlerImpl implements IntegrationHandler {
     private final Caller<IntegrationService> integrationService;
     private final PlaceManager placeManager;
     private final PopupUtil popupUtil;
-    private final ErrorPopupPresenter errorPopupPresenter;
+    private final ErrorPopupPresenter errorPopup;
     private final MarshallingResponsePopup responsePopup;
     private final ClientTranslationService translationService;
     private final Event<NotificationEvent> notification;
@@ -78,14 +78,14 @@ public class IntegrationHandlerImpl implements IntegrationHandler {
     public IntegrationHandlerImpl(final Caller<IntegrationService> integrationService,
                                   final PlaceManager placeManger,
                                   final PopupUtil popupUtil,
-                                  final ErrorPopupPresenter errorPopupPresenter,
+                                  final ErrorPopupPresenter errorPopup,
                                   final MarshallingResponsePopup responsePopup,
                                   final ClientTranslationService translationService,
                                   final Event<NotificationEvent> notification) {
         this.integrationService = integrationService;
         this.placeManager = placeManger;
         this.popupUtil = popupUtil;
-        this.errorPopupPresenter = errorPopupPresenter;
+        this.errorPopup = errorPopup;
         this.responsePopup = responsePopup;
         this.translationService = translationService;
         this.notification = notification;
@@ -161,9 +161,9 @@ public class IntegrationHandlerImpl implements IntegrationHandler {
 
     private void migrateFinished(MigrateResult result, PlaceRequest place) {
         if (result.hasError()) {
-            errorPopupPresenter.showMessage(getErrorMessage(result));
+            errorPopup.showMessage(getErrorMessage(result));
         } else {
-            notification.fire(new NotificationEvent(translationService.getValue(IntegrationClientConstants.MigrateDiagramSuccessfullyMigratedMessage)));
+            notification.fire(new NotificationEvent(translationService.getValue(IntegrationClientConstants.MigrateDiagramSuccessfullyMigratedMessage), NotificationEvent.NotificationType.SUCCESS));
             placeManager.forceClosePlace(place);
             placeManager.goTo(createTargetPlace(result.getPath()));
         }
@@ -203,7 +203,7 @@ public class IntegrationHandlerImpl implements IntegrationHandler {
     private boolean onUnexpectedError(Throwable throwable) {
         String message = translationService.getValue(IntegrationClientConstants.MigrateActionUnexpectedErrorMessage);
         message += "\n" + throwable.getMessage();
-        errorPopupPresenter.showMessage(message);
+        errorPopup.showMessage(message);
         return false;
     }
 

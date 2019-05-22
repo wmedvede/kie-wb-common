@@ -17,10 +17,12 @@
 package org.kie.workbench.common.stunner.bpmn.integration.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.kie.workbench.common.stunner.bpmn.integration.service.IntegrationService.ServiceError;
+import org.kie.workbench.common.stunner.core.util.HashUtil;
 import org.uberfire.backend.vfs.Path;
 
 @Portable
@@ -66,5 +68,28 @@ public class MigrateResult {
 
     public boolean hasError() {
         return error != null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MigrateResult that = (MigrateResult) o;
+        return Objects.equals(path, that.path) &&
+                error == that.error &&
+                Objects.equals(messageKey, that.messageKey) &&
+                Objects.equals(messageArguments, that.messageArguments);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashUtil.combineHashCodes(Objects.hashCode(path),
+                                         Objects.hashCode(error),
+                                         Objects.hashCode(messageKey),
+                                         Objects.hashCode(messageArguments));
     }
 }
