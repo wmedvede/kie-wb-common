@@ -19,6 +19,7 @@ package org.kie.workbench.common.stunner.bpmn.integration.backend.service;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,6 +46,7 @@ import org.kie.workbench.common.stunner.core.graph.content.definition.Definition
 import org.kie.workbench.common.stunner.core.marshaller.MarshallingMessage;
 import org.kie.workbench.common.stunner.core.marshaller.MarshallingRequest;
 import org.kie.workbench.common.stunner.core.marshaller.MarshallingResponse;
+import org.kie.workbench.common.stunner.core.validation.Violation;
 import org.kie.workbench.common.stunner.project.diagram.ProjectDiagram;
 import org.kie.workbench.common.stunner.project.diagram.ProjectMetadata;
 import org.kie.workbench.common.stunner.project.diagram.impl.ProjectMetadataImpl;
@@ -152,7 +154,7 @@ public class IntegrationServiceImpl implements IntegrationService {
         //TODO, WM, remove this testing code.
         //Stat of code to be removed
         List<MarshallingMessage> messages = new ArrayList<>();
-        /*
+
         if (path.getFileName().contains("error")) {
             //Worst case, it's not possible to do the migration, the api can't resolve how to create the stunner process.
             for (int i = 0; i < 100; i++) {
@@ -172,7 +174,7 @@ public class IntegrationServiceImpl implements IntegrationService {
                 messages.add(new MarshallingMessage("uuid_" + i, i, Violation.Type.INFO, "The information message for error: " + key, "MarshallingMessage.messageKey" + key, Arrays.asList("param1", "param2")));
             }
         }
-        */
+
         //End of code to be removed.
 
         final String fileName = path.getFileName();
