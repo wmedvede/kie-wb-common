@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.workbench.common.stunner.client.widgets.event;
+package org.kie.workbench.common.stunner.core.client.session.event;
 
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
-import org.uberfire.workbench.events.UberFireEvent;
 
 /**
  * <p>Event when a diagram has been loaded and drawn into the session's canvas.</p>
  */
-public final class SessionDiagramOpenedEvent implements UberFireEvent {
+public final class SessionDiagramOpenedEvent extends BaseSessionEvent {
 
-    private final ClientSession session;
+    private final boolean readonly;
 
-    public SessionDiagramOpenedEvent(final ClientSession session) {
-        this.session = session;
+    public SessionDiagramOpenedEvent(final ClientSession session, final boolean readonly) {
+        super(session);
+        this.readonly = readonly;
     }
 
-    public ClientSession getSession() {
-        return session;
+    public boolean isReadonly() {
+        return readonly;
     }
 
     @Override
     public String toString() {
-        return "SessionDiagramOpenedEvent [session=" + session + "]";
+        return "SessionDiagramOpenedEvent [session=" + session + ", readonly=" + readonly + "]";
     }
 }
