@@ -25,16 +25,23 @@ public final class SessionDiagramOpenedEvent implements UberFireEvent {
 
     private final ClientSession session;
 
-    public SessionDiagramOpenedEvent(final ClientSession session) {
+    private final boolean readonly;
+
+    public SessionDiagramOpenedEvent(final ClientSession session, final boolean readonly) {
         this.session = session;
+        this.readonly = readonly;
     }
 
     public ClientSession getSession() {
         return session;
     }
 
+    public boolean isReadonly() {
+        return readonly;
+    }
+
     @Override
     public String toString() {
-        return "SessionDiagramOpenedEvent [session=" + session + "]";
+        return "SessionDiagramOpenedEvent [session=" + session + ", readonly=" + readonly + "]";
     }
 }

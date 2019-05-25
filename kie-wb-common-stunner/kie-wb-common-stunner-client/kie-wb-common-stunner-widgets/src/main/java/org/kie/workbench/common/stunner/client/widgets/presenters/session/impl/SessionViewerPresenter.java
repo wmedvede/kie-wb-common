@@ -110,7 +110,7 @@ public class SessionViewerPresenter<S extends ViewerSession>
     @Override
     protected void onSessionOpened(final S session) {
         super.onSessionOpened(session);
-        sessionDiagramOpenedEvent.fire(new SessionDiagramOpenedEvent(session));
+        sessionDiagramOpenedEvent.fire(new SessionDiagramOpenedEvent(session, true));
     }
 
     @Override

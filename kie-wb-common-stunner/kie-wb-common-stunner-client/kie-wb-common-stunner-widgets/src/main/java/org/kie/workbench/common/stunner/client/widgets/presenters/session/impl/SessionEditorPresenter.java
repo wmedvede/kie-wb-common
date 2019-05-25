@@ -105,7 +105,7 @@ public class SessionEditorPresenter<S extends EditorSession>
     @Override
     protected void onSessionOpened(final S session) {
         super.onSessionOpened(session);
-        sessionDiagramOpenedEvent.fire(new SessionDiagramOpenedEvent(session));
+        sessionDiagramOpenedEvent.fire(new SessionDiagramOpenedEvent(session, false));
     }
 
     void onScreenMaximizedEvent(@Observes ScreenMaximizedEvent event) {
