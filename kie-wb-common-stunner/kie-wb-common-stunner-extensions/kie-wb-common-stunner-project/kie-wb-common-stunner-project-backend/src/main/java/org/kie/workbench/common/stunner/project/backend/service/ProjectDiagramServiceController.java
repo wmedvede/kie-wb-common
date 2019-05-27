@@ -110,6 +110,16 @@ class ProjectDiagramServiceController extends AbstractVFSDiagramService<ProjectM
     }
 
     @Override
+    public ProjectDiagram getDiagramByPath(Path file) {
+        final ProjectDiagram projectDiagram = super.getDiagramByPath(file);
+        final org.uberfire.java.nio.file.Path svgPath = getDiagramSvgFilePath(projectDiagram);
+        if (getIoService().exists(svgPath)) {
+            projectDiagram.getMetadata().setDiagramSVGPath(Paths.convert(svgPath));
+        }
+        return projectDiagram;
+    }
+
+    @Override
     protected Metadata buildMetadataInstance(final Path path,
                                              final String defSetId,
                                              final String title) {

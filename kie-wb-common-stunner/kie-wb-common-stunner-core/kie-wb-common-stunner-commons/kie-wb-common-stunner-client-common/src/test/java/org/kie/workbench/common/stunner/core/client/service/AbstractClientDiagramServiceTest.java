@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.stunner.core.client.ShapeSet;
 import org.kie.workbench.common.stunner.core.client.api.ShapeManager;
-import org.kie.workbench.common.stunner.core.client.session.command.event.SaveDiagramSessionCommandExecutedEvent;
+import org.kie.workbench.common.stunner.core.client.session.event.SessionDiagramSavedEvent;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
 import org.kie.workbench.common.stunner.core.diagram.Metadata;
 import org.kie.workbench.common.stunner.core.graph.Graph;
@@ -65,7 +65,7 @@ public abstract class AbstractClientDiagramServiceTest<M extends Metadata, D ext
     protected CS tested;
 
     @Mock
-    protected EventSourceMock<SaveDiagramSessionCommandExecutedEvent> saveDiagramSessionCommandExecutedEventEvent;
+    protected EventSourceMock<SessionDiagramSavedEvent> saveDiagramSessionCommandExecutedEventEvent;
 
     @Before
     @SuppressWarnings("unchecked")

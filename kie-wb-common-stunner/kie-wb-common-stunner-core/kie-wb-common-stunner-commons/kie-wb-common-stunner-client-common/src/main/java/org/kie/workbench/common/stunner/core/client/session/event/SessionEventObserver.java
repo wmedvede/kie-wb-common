@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.client.widgets.event;
+package org.kie.workbench.common.stunner.core.client.session.event;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,14 +31,17 @@ import org.kie.workbench.common.stunner.core.diagram.Diagram;
 public class SessionEventObserver {
 
     private List<SessionDiagramOpenedHandler> sessionDiagramOpenedHandlers = new ArrayList<>();
+    private List<SessionDiagramSavedHandler> sessionDiagramSavedHandlers = new ArrayList<>();
 
     public SessionEventObserver() {
         //proxying constructor
     }
 
     @Inject
-    public SessionEventObserver(@Any final Instance<SessionDiagramOpenedHandler> sessionDiagramOpenedHandlersInstance) {
+    public SessionEventObserver(@Any final Instance<SessionDiagramOpenedHandler> sessionDiagramOpenedHandlersInstance,
+                                @Any final Instance<SessionDiagramSavedHandler> sessionDiagramSavedHandlersInstance) {
         sessionDiagramOpenedHandlersInstance.forEach(handler -> this.sessionDiagramOpenedHandlers.add(handler));
+        sessionDiagramSavedHandlersInstance.forEach(handler -> this.sessionDiagramSavedHandlers.add(handler));
     }
 
     void onSessionDiagramOpenedEvent(@Observes final SessionDiagramOpenedEvent event) {
@@ -46,5 +49,12 @@ public class SessionEventObserver {
         sessionDiagramOpenedHandlers.stream()
                 .filter(handler -> handler.accepts(currentDiagram))
                 .forEach(handler -> handler.onSessionDiagramOpened(event.getSession(), event.isReadonly()));
+    }
+
+    void onSessionDiagramSavedEvent(@Observes final SessionDiagramSavedEvent event) {
+        final Diagram currentDiagram = event.getSession().getCanvasHandler().getDiagram();
+        sessionDiagramSavedHandlers.stream()
+                .filter(handler -> handler.accepts(currentDiagram))
+                .forEach(handler -> handler.onSessionDiagramSaved(event.getSession()));
     }
 }

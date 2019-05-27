@@ -53,6 +53,7 @@ public class ClientDiagramServiceTest extends AbstractClientDiagramServiceTest<M
         final Caller<DiagramService> diagramServiceCaller = new CallerMock<>(diagramService);
         final Caller<DiagramLookupService> diagramLookupServiceCaller = new CallerMock<>(diagramLookupService);
         return new ClientDiagramServiceImpl(shapeManager,
+                                            null,  //TODO WM, check this test
                                             diagramServiceCaller,
                                             diagramLookupServiceCaller,
                                             saveDiagramSessionCommandExecutedEventEvent);

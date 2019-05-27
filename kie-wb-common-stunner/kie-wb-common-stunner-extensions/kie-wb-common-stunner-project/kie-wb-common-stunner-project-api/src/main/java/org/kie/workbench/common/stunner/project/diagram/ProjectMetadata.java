@@ -18,6 +18,7 @@ package org.kie.workbench.common.stunner.project.diagram;
 import org.guvnor.common.services.project.model.Package;
 import org.guvnor.common.services.shared.metadata.model.Overview;
 import org.kie.workbench.common.stunner.core.diagram.Metadata;
+import org.uberfire.backend.vfs.Path;
 
 public interface ProjectMetadata extends Metadata {
 
@@ -28,4 +29,8 @@ public interface ProjectMetadata extends Metadata {
     Overview getOverview();
 
     String getProjectType();
+
+    Path getDiagramSVGPath();
+
+    void setDiagramSVGPath(Path diagramSVGPath);
 }

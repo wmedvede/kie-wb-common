@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.client.widgets.event;
+package org.kie.workbench.common.stunner.core.client.session.event;
 
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
-import org.kie.workbench.common.stunner.core.diagram.Diagram;
 
-public interface SessionDiagramOpenedHandler {
+public final class SessionDiagramSavedEvent extends BaseSessionEvent {
 
-    boolean accepts(final Diagram diagram);
-
-    void onSessionDiagramOpened(final ClientSession clientSession, boolean readonly);
+    public SessionDiagramSavedEvent(final ClientSession session) {
+        super(session);
+    }
 }
