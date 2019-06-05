@@ -36,7 +36,8 @@ public class TimerSettingsFieldRendererTest {
 
     @Before
     public void setUp() {
-        renderer = new TimerSettingsFieldRenderer(widget);
+        //TODO, review this test
+        renderer = new TimerSettingsFieldRenderer(widget, null);
     }
 
     @Test

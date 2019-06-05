@@ -22,10 +22,8 @@ import java.util.StringJoiner;
 import org.jboss.errai.common.client.api.annotations.MapsTo;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
-import org.kie.workbench.common.stunner.bpmn.forms.validation.ValidTimerSettingsValue;
 import org.kie.workbench.common.stunner.core.util.HashUtil;
 
-@ValidTimerSettingsValue
 @Portable
 @Bindable
 public class TimerSettingsValue {

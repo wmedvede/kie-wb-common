@@ -38,17 +38,14 @@ public class TimerSettingsFieldEditorPresenter
     }
 
     protected enum TIME_CYCLE_LANGUAGE {
-        ISO("ISO",
-            "none"),
-        CRON("Cron",
-             "cron");
+        ISO("ISO", "none"),
+        CRON("Cron", "cron");
 
         private final String text;
 
         private final String value;
 
-        TIME_CYCLE_LANGUAGE(String text,
-                            String value) {
+        TIME_CYCLE_LANGUAGE(String text, String value) {
             this.text = text;
             this.value = value;
         }
@@ -103,8 +100,7 @@ public class TimerSettingsFieldEditorPresenter
 
         String getTimeCycle();
 
-        void setTimeCycleLanguageOptions(List<Pair<String, String>> options,
-                                         String selectedValue);
+        void setTimeCycleLanguageOptions(List<Pair<String, String>> options, String selectedValue);
 
         void setTimeCycleLanguage(String timeCycleLanguage);
 
@@ -112,11 +108,11 @@ public class TimerSettingsFieldEditorPresenter
 
         void clear();
 
-        Date parseFromISO(final String value) throws IllegalArgumentException;
+        Date parseFromISO(String value) throws IllegalArgumentException;
 
-        String formatToISO(final Date value);
+        String formatToISO(Date value);
 
-        void setReadOnly(final boolean readOnly);
+        void setReadOnly(boolean readOnly);
     }
 
     private final View view;
@@ -129,10 +125,8 @@ public class TimerSettingsFieldEditorPresenter
     @PostConstruct
     public void init() {
         view.init(this);
-        view.setTimeCycleLanguageOptions(timeCycleOptions,
-                                         TIME_CYCLE_LANGUAGE.ISO.value());
-        setDisplayMode(DISPLAY_MODE.DURATION_TIMER,
-                       true);
+        view.setTimeCycleLanguageOptions(timeCycleOptions, TIME_CYCLE_LANGUAGE.ISO.value());
+        setDisplayMode(DISPLAY_MODE.DURATION_TIMER, true);
         view.showTimeDateTimePicker(false);
     }
 
@@ -143,20 +137,16 @@ public class TimerSettingsFieldEditorPresenter
     public void setValue(TimerSettingsValue value) {
         super.setValue(value);
         view.clear();
-        setDisplayMode(DISPLAY_MODE.DURATION_TIMER,
-                       true);
+        setDisplayMode(DISPLAY_MODE.DURATION_TIMER, true);
         if (value != null) {
             if (value.getTimeDate() != null) {
-                setDisplayMode(DISPLAY_MODE.DATE_TIMER,
-                               true);
+                setDisplayMode(DISPLAY_MODE.DATE_TIMER, true);
                 view.setTimeDate(value.getTimeDate());
             } else if (value.getTimeDuration() != null) {
-                setDisplayMode(DISPLAY_MODE.DURATION_TIMER,
-                               true);
+                setDisplayMode(DISPLAY_MODE.DURATION_TIMER, true);
                 view.setTimeDuration(value.getTimeDuration());
             } else if (value.getTimeCycleLanguage() != null) {
-                setDisplayMode(DISPLAY_MODE.MULTIPLE_TIMER,
-                               true);
+                setDisplayMode(DISPLAY_MODE.MULTIPLE_TIMER, true);
                 view.setTimeCycleLanguage(value.getTimeCycleLanguage());
                 view.setTimeCycle(value.getTimeCycle());
             }
@@ -176,8 +166,7 @@ public class TimerSettingsFieldEditorPresenter
         value.setTimeCycle(null);
         value.setTimeCycleLanguage(null);
 
-        notifyChange(oldValue,
-                     value);
+        notifyChange(oldValue, value);
     }
 
     protected void onTimeCycleChange() {
@@ -197,8 +186,7 @@ public class TimerSettingsFieldEditorPresenter
         value.setTimeDuration(null);
         value.setTimeDate(null);
 
-        notifyChange(oldValue,
-                     value);
+        notifyChange(oldValue, value);
     }
 
     protected void onTimeDateChange() {
@@ -210,12 +198,10 @@ public class TimerSettingsFieldEditorPresenter
         value.setTimeCycle(null);
         value.setTimeCycleLanguage(null);
 
-        notifyChange(oldValue,
-                     value);
+        notifyChange(oldValue, value);
     }
 
-    private void setDisplayMode(DISPLAY_MODE mode,
-                                boolean setRadioChecked) {
+    private void setDisplayMode(DISPLAY_MODE mode, boolean setRadioChecked) {
         view.showDurationTimerParams(false);
         view.showMultipleTimerParams(false);
         view.showDateTimerParams(false);
@@ -243,20 +229,17 @@ public class TimerSettingsFieldEditorPresenter
     }
 
     protected void onMultipleTimerSelected() {
-        setDisplayMode(DISPLAY_MODE.MULTIPLE_TIMER,
-                       false);
+        setDisplayMode(DISPLAY_MODE.MULTIPLE_TIMER, false);
         onMultipleTimerValuesChange();
     }
 
     protected void onDurationTimerSelected() {
-        setDisplayMode(DISPLAY_MODE.DURATION_TIMER,
-                       false);
+        setDisplayMode(DISPLAY_MODE.DURATION_TIMER, false);
         onTimerDurationChange();
     }
 
     protected void onDateTimerSelected() {
-        setDisplayMode(DISPLAY_MODE.DATE_TIMER,
-                       false);
+        setDisplayMode(DISPLAY_MODE.DATE_TIMER, false);
         onTimeDateChange();
     }
 

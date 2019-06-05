@@ -71,6 +71,8 @@ public class TimerSettingsFieldEditorView
 
     private static final String MultipleTimer_Help_Line2 = "TimerSettingsFieldEditorView.MultipleTimer_Help_Line2";
 
+    private static final String MultipleTimer_Help_Line3 = "TimerSettingsFieldEditorView.MultipleTimer_Help_Line3";
+
     private static final String DateTimer_Help_Header = "TimerSettingsFieldEditorView.DateTimer_Help_Header";
 
     public static final String DateTimer_Help_Line1 = "TimerSettingsFieldEditorView.DateTimer_Help_Line1";
@@ -81,7 +83,7 @@ public class TimerSettingsFieldEditorView
 
     private static final String DATA_CONTENT_ATTR = "data-content";
 
-    private DateTimeFormat isoDateTimeFormat = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ssZZZ");
+    private final DateTimeFormat isoDateTimeFormat = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ssZZZ");
 
     @Inject
     @DataField("duration-timer")
@@ -163,23 +165,17 @@ public class TimerSettingsFieldEditorView
 
     @PostConstruct
     public void init() {
-        timeDuration.setAttribute(PLACEHOLDER_ATTR,
-                                  translationService.getValue(TimeDuration_Placeholder));
-        timeCycle.setAttribute(PLACEHOLDER_ATTR,
-                               translationService.getValue(TimeCycle_Placeholder));
-        timeDate.setAttribute(PLACEHOLDER_ATTR,
-                              translationService.getValue(TimeDate_Placeholder));
+        timeDuration.setAttribute(PLACEHOLDER_ATTR, translationService.getValue(TimeDuration_Placeholder));
+        timeCycle.setAttribute(PLACEHOLDER_ATTR, translationService.getValue(TimeCycle_Placeholder));
+        timeDate.setAttribute(PLACEHOLDER_ATTR, translationService.getValue(TimeDate_Placeholder));
 
-        durationTimerHelp.setAttribute(DATA_CONTENT_ATTR,
-                                       getDurationTimerHtmlHelpText());
+        durationTimerHelp.setAttribute(DATA_CONTENT_ATTR, getDurationTimerHtmlHelpText());
         durationTimerHelpPopover.wrap(durationTimerHelp).popover();
 
-        multipleTimerHelp.setAttribute(DATA_CONTENT_ATTR,
-                                       getMultipleTimerHtmlHelpText());
+        multipleTimerHelp.setAttribute(DATA_CONTENT_ATTR, getMultipleTimerHtmlHelpText());
         multipleTimerHelpPopover.wrap(multipleTimerHelp).popover();
 
-        dateTimerHelp.setAttribute(DATA_CONTENT_ATTR,
-                                   getDateTimerHtmlHelpText());
+        dateTimerHelp.setAttribute(DATA_CONTENT_ATTR, getDateTimerHtmlHelpText());
         dateTimerHelpPopover.wrap(dateTimerHelp).popover();
 
         timeDateTimePicker.setPlaceholder(translationService.getValue(TimeDateTimePicker_Placeholder));
@@ -239,11 +235,8 @@ public class TimerSettingsFieldEditorView
     }
 
     @Override
-    public void setTimeCycleLanguageOptions(List<Pair<String, String>> options,
-                                            String selectedValue) {
-        options.forEach(option ->
-                                timeCycleLanguage.add(newOption(option.getK1(),
-                                                                option.getK2())));
+    public void setTimeCycleLanguageOptions(List<Pair<String, String>> options, String selectedValue) {
+        options.forEach(option -> timeCycleLanguage.add(newOption(option.getK1(), option.getK2())));
         timeCycleLanguage.setValue(selectedValue);
     }
 
@@ -264,14 +257,12 @@ public class TimerSettingsFieldEditorView
 
     @Override
     public void showMultipleTimerParams(boolean show) {
-        showElement(multipleTimerParamsContainer,
-                    show);
+        showElement(multipleTimerParamsContainer, show);
     }
 
     @Override
     public void showDurationTimerParams(boolean show) {
-        showElement(durationTimerParamsContainer,
-                    show);
+        showElement(durationTimerParamsContainer, show);
     }
 
     @Override
@@ -282,8 +273,7 @@ public class TimerSettingsFieldEditorView
 
     @Override
     public void showTimeDate(boolean show) {
-        showElement(timeDate,
-                    show);
+        showElement(timeDate, show);
     }
 
     @Override
@@ -312,17 +302,17 @@ public class TimerSettingsFieldEditorView
     }
 
     @Override
-    public Date parseFromISO(final String value) throws IllegalArgumentException {
+    public Date parseFromISO(String value) throws IllegalArgumentException {
         return isoDateTimeFormat.parse(value);
     }
 
     @Override
-    public String formatToISO(final Date value) {
+    public String formatToISO(Date value) {
         return isoDateTimeFormat.format(value);
     }
 
     @Override
-    public void setReadOnly(final boolean readOnly) {
+    public void setReadOnly(boolean readOnly) {
         durationTimer.setDisabled(readOnly);
         timeDuration.setDisabled(readOnly);
         multipleTimer.setDisabled(readOnly);
@@ -343,6 +333,7 @@ public class TimerSettingsFieldEditorView
         return buildHtmlHelpText(translationService.getValue(MultipleTimer_Help_Header),
                                  translationService.getValue(MultipleTimer_Help_Line1),
                                  translationService.getValue(MultipleTimer_Help_Line2),
+                                 translationService.getValue(MultipleTimer_Help_Line3),
                                  translationService.getValue(Expression_Help_Line));
     }
 
@@ -362,8 +353,7 @@ public class TimerSettingsFieldEditorView
         }
     }
 
-    private Option newOption(final String text,
-                             final String value) {
+    private Option newOption(final String text, final String value) {
         final Option option = (Option) Window.getDocument().createElement("option");
         option.setTextContent(text);
         option.setValue(value);

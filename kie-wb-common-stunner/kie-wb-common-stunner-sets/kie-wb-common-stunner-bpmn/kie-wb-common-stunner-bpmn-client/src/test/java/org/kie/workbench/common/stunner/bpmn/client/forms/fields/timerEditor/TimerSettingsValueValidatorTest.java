@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.forms.validation;
+package org.kie.workbench.common.stunner.bpmn.client.forms.fields.timerEditor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.validation.ConstraintValidatorContext;
-
 import com.google.gwt.junit.client.GWTTestCase;
 import org.junit.Test;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.TimerSettingsValue;
+import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
 
-public class TimerSettingsValueValidatorTest
-        extends GWTTestCase {
+import static org.mockito.Mockito.mock;
+
+public class TimerSettingsValueValidatorTest extends GWTTestCase {
 
     private TimerSettingsValueValidator validator;
-
-    private ConstraintValidatorContext context;
 
     private TimerSettingsValue value;
 
     private List<String> errorMessages = new ArrayList<>();
 
     private List<TestElement> testElements = new ArrayList<>();
+
+    private ClientTranslationService translationService;
 
     private static final String[] VALID_TIME_DURATIONS = {
             "P6D",
@@ -171,39 +171,14 @@ public class TimerSettingsValueValidatorTest
     @Override
     protected void gwtSetUp() throws Exception {
         super.gwtSetUp();
-        validator = new TimerSettingsValueValidator();
+        translationService = mock(ClientTranslationService.class);
+        validator = new TimerSettingsValueValidator(translationService);
         value = new TimerSettingsValue();
-        context = new ConstraintValidatorContext() {
-            @Override
-            public void disableDefaultConstraintViolation() {
-            }
-
-            @Override
-            public String getDefaultConstraintMessageTemplate() {
-                return null;
-            }
-
-            @Override
-            public ConstraintViolationBuilder buildConstraintViolationWithTemplate(String message) {
-                errorMessages.add(message);
-                return new ConstraintViolationBuilder() {
-                    @Override
-                    public NodeBuilderDefinedContext addNode(String name) {
-                        return null;
-                    }
-
-                    @Override
-                    public ConstraintValidatorContext addConstraintViolation() {
-                        return context;
-                    }
-                };
-            }
-        };
     }
 
     @Override
     public String getModuleName() {
-        return "org.kie.workbench.common.stunner.bpmn.forms.validation.TimerSettingsValueValidatorTest";
+        return "org.kie.workbench.common.stunner.bpmn.client.forms.fields.timerEditor.TimerSettingsValueValidatorTest";
     }
 
     @Test
@@ -211,17 +186,12 @@ public class TimerSettingsValueValidatorTest
         clear();
         loadValidTestElements(VALID_TIME_DURATIONS);
         loadValidTestElements(VALID_EXPRESSIONS);
-        loadInvalidTestElements(TimerSettingsValueValidator.TimeDurationInvalid,
-                                INVALID_TIME_DURATIONS);
-        loadInvalidTestElements(TimerSettingsValueValidator.TimeDurationInvalid,
-                                INVALID_EXPRESSIONS);
-        testElements.add(new TestElement(null,
-                                         false,
-                                         TimerSettingsValueValidator.NoValueHasBeenProvided));
+        loadInvalidTestElements(TimerSettingsValueValidator.TimeDurationInvalid, INVALID_TIME_DURATIONS);
+        loadInvalidTestElements(TimerSettingsValueValidator.TimeDurationInvalid, INVALID_EXPRESSIONS);
+        testElements.add(new TestElement(null, false, TimerSettingsValueValidator.NoValueHasBeenProvided));
         testElements.forEach(testElement -> {
             value.setTimeDuration(testElement.getValue());
-            testElement.setResult(validator.isValid(value,
-                                                    context));
+            testElement.setResult(validator.validate(value).getStatus().isValid());
         });
         verifyTestResults();
     }
@@ -231,23 +201,17 @@ public class TimerSettingsValueValidatorTest
         clear();
         loadValidTestElements(VALID_ISO_TIME_CYCLE_DURATIONS);
         loadValidTestElements(VALID_EXPRESSIONS);
-        loadInvalidTestElements(TimerSettingsValueValidator.ISOTimeCycleInvalid,
-                                INVALID_ISO_TIME_CYCLE_DURATIONS);
-        loadInvalidTestElements(TimerSettingsValueValidator.ISOTimeCycleInvalid,
-                                INVALID_EXPRESSIONS);
+        loadInvalidTestElements(TimerSettingsValueValidator.ISOTimeCycleInvalid, INVALID_ISO_TIME_CYCLE_DURATIONS);
+        loadInvalidTestElements(TimerSettingsValueValidator.ISOTimeCycleInvalid, INVALID_EXPRESSIONS);
         testElements.forEach(testElement -> {
             value.setTimeCycleLanguage(TimerSettingsValueValidator.ISO);
             value.setTimeCycle(testElement.getValue());
-            testElement.setResult(validator.isValid(value,
-                                                    context));
+            testElement.setResult(validator.validate(value).getStatus().isValid());
         });
-        testElements.add(new TestElement(null,
-                                         false,
-                                         TimerSettingsValueValidator.NoValueHasBeenProvided));
+        testElements.add(new TestElement(null, false, TimerSettingsValueValidator.NoValueHasBeenProvided));
         value.setTimeCycleLanguage(null);
         value.setTimeCycle(null);
-        testElements.get(testElements.size() - 1).setResult(validator.isValid(value,
-                                                                              context));
+        testElements.get(testElements.size() - 1).setResult(validator.validate(value).getStatus().isValid());
         verifyTestResults();
     }
 
@@ -256,23 +220,17 @@ public class TimerSettingsValueValidatorTest
         clear();
         loadValidTestElements(VALID_CRON_TIME_CYCLE_DURATIONS);
         loadValidTestElements(VALID_EXPRESSIONS);
-        loadInvalidTestElements(TimerSettingsValueValidator.CronTimeCycleInvalid,
-                                INVALID_CRON_TIME_CYCLE_DURATIONS);
-        loadInvalidTestElements(TimerSettingsValueValidator.CronTimeCycleInvalid,
-                                INVALID_EXPRESSIONS);
+        loadInvalidTestElements(TimerSettingsValueValidator.CronTimeCycleInvalid, INVALID_CRON_TIME_CYCLE_DURATIONS);
+        loadInvalidTestElements(TimerSettingsValueValidator.CronTimeCycleInvalid, INVALID_EXPRESSIONS);
         testElements.forEach(testElement -> {
             value.setTimeCycleLanguage(TimerSettingsValueValidator.CRON);
             value.setTimeCycle(testElement.getValue());
-            testElement.setResult(validator.isValid(value,
-                                                    context));
+            testElement.setResult(validator.validate(value).getStatus().isValid());
         });
-        testElements.add(new TestElement(null,
-                                         false,
-                                         TimerSettingsValueValidator.NoValueHasBeenProvided));
+        testElements.add(new TestElement(null, false, TimerSettingsValueValidator.NoValueHasBeenProvided));
         value.setTimeCycleLanguage(null);
         value.setTimeCycle(null);
-        testElements.get(testElements.size() - 1).setResult(validator.isValid(value,
-                                                                              context));
+        testElements.get(testElements.size() - 1).setResult(validator.validate(value).getStatus().isValid());
         verifyTestResults();
     }
 
@@ -281,45 +239,33 @@ public class TimerSettingsValueValidatorTest
         clear();
         loadValidTestElements(VALID_TIME_DATES);
         loadValidTestElements(VALID_EXPRESSIONS);
-        loadInvalidTestElements(TimerSettingsValueValidator.TimeDateInvalid,
-                                INVALID_TIME_DATES);
-        loadInvalidTestElements(TimerSettingsValueValidator.TimeDateInvalid,
-                                INVALID_EXPRESSIONS);
-        testElements.add(new TestElement(null,
-                                         false,
-                                         TimerSettingsValueValidator.NoValueHasBeenProvided));
+        loadInvalidTestElements(TimerSettingsValueValidator.TimeDateInvalid, INVALID_TIME_DATES);
+        loadInvalidTestElements(TimerSettingsValueValidator.TimeDateInvalid, INVALID_EXPRESSIONS);
+        testElements.add(new TestElement(null, false, TimerSettingsValueValidator.NoValueHasBeenProvided));
         testElements.forEach(testElement -> {
             value.setTimeDate(testElement.getValue());
-            testElement.setResult(validator.isValid(value,
-                                                    context));
+            testElement.setResult(validator.validate(value).getStatus().isValid());
         });
         verifyTestResults();
     }
 
     private void loadValidTestElements(String... values) {
-        Arrays.stream(values).forEach(value -> testElements.add(new TestElement(value,
-                                                                                true)));
+        Arrays.stream(values).forEach(value -> testElements.add(new TestElement(value, true)));
     }
 
     private void loadInvalidTestElements(String errorMessage,
                                          String... values) {
-        Arrays.stream(values).forEach(value -> testElements.add(new TestElement(value,
-                                                                                false,
-                                                                                errorMessage)));
+        Arrays.stream(values).forEach(value -> testElements.add(new TestElement(value, false, errorMessage)));
     }
 
     private void verifyTestResults() {
         int error = 0;
         for (int i = 0; i < testElements.size(); i++) {
             TestElement testElement = testElements.get(i);
-            assertEquals("Invalid validation for item: " + testElement.toString(),
-                         testElement.getExpectedResult(),
-                         testElement.getResult());
+            assertEquals("Invalid validation for item: " + testElement.toString(), testElement.getExpectedResult(), testElement.getResult());
 
             if (!testElement.getExpectedResult()) {
-                assertEquals("Invalid validation: " + testElement.toString(),
-                             testElement.getExpectedError(),
-                             errorMessages.get(error));
+                assertEquals("Invalid validation: " + testElement.toString(), testElement.getExpectedError(), errorMessages.get(error));
                 error++;
             }
         }
@@ -332,7 +278,7 @@ public class TimerSettingsValueValidatorTest
 
     private class TestElement {
 
-        private String value = null;
+        private String value;
         private boolean expectedResult;
         private String expectedError = null;
         private boolean result;

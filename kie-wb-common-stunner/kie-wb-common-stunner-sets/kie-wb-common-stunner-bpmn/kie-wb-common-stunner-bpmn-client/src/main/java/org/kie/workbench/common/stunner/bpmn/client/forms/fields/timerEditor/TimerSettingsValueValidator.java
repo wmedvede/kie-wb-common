@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.forms.validation;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+package org.kie.workbench.common.stunner.bpmn.client.forms.fields.timerEditor;
 
 import com.google.gwt.regexp.shared.RegExp;
+import org.kie.workbench.common.forms.processing.engine.handling.CustomFieldValidator;
+import org.kie.workbench.common.forms.processing.engine.handling.ValidationResult;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.TimerSettingsValue;
+import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
 
 public class TimerSettingsValueValidator
-        implements ConstraintValidator<ValidTimerSettingsValue, TimerSettingsValue> {
+        implements CustomFieldValidator<TimerSettingsValue> {
 
-    public static final String TimeDurationInvalid = "The timer duration must be a valid ISO-8601 duration or an expression like #{expression}.";
+    public static final String TimeDurationInvalid = "TimerSettingsValueValidator.TimeDurationInvalid";
 
-    public static final String ISOTimeCycleInvalid = "The timer cycle must be a valid ISO-8601 repetable interval or an expression like #{expression}.";
+    public static final String ISOTimeCycleInvalid = "TimerSettingsValueValidator.ISOTimeCycleInvalid";
 
-    public static final String CronTimeCycleInvalid = "The time cycle must be a valid cron interval or an expression like #{expression}.";
+    public static final String CronTimeCycleInvalid = "TimerSettingsValueValidator.CronTimeCycleInvalid";
 
-    public static final String TimeDateInvalid = "The timer date must be a valid ISO-8601 date time or an expression like #{expression}.";
+    public static final String TimeDateInvalid = "TimerSettingsValueValidator.TimeDateInvalid";
 
-    public static final String NoValueHasBeenProvided = "At least one field must have a non empty value.";
+    public static final String NoValueHasBeenProvided = "TimerSettingsValueValidator.NoValueHasBeenProvided";
 
     public static final String ISO = "none";
 
@@ -68,12 +68,14 @@ public class TimerSettingsValueValidator
 
     private static final RegExp dateTimeExpr = RegExp.compile("^" + ISO_DATE_TIME + "$");
 
-    public void initialize(ValidTimerSettingsValue constraintAnnotation) {
+    private ClientTranslationService translationService;
+
+    public TimerSettingsValueValidator(final ClientTranslationService translationService) {
+        this.translationService = translationService;
     }
 
     @Override
-    public boolean isValid(TimerSettingsValue timerSettings,
-                           ConstraintValidatorContext constraintValidatorContext) {
+    public ValidationResult validate(final TimerSettingsValue timerSettings) {
         String value;
         String errorMessage = null;
 
@@ -81,64 +83,69 @@ public class TimerSettingsValueValidator
             value = timerSettings.getTimeDuration();
             if ((looksLikeExpression(value) && !isValidExpression(value)) ||
                     (!looksLikeExpression(value) && !isValidDuration(value))) {
-                errorMessage = TimeDurationInvalid;
+                errorMessage = translationService.getValue(TimeDurationInvalid);
             }
         } else if (ISO.equals(timerSettings.getTimeCycleLanguage())) {
             value = timerSettings.getTimeCycle();
             if ((looksLikeExpression(value) && !isValidExpression(value)) ||
                     (!looksLikeExpression(value) && !isValidRepetableInterval(value))) {
-                errorMessage = ISOTimeCycleInvalid;
+                errorMessage = translationService.getValue(ISOTimeCycleInvalid);
             }
         } else if (CRON.equals(timerSettings.getTimeCycleLanguage())) {
             value = timerSettings.getTimeCycle();
             if ((looksLikeExpression(value) && !isValidExpression(value)) ||
                     (!looksLikeExpression(value) && !isValidCronExpression(value))) {
-                errorMessage = CronTimeCycleInvalid;
+                errorMessage = translationService.getValue(CronTimeCycleInvalid);
             }
         } else if (timerSettings.getTimeDate() != null) {
             value = timerSettings.getTimeDate();
             if ((looksLikeExpression(value) && !isValidExpression(value)) ||
                     (!looksLikeExpression(value) && !isValidTimeDate(value))) {
-                errorMessage = TimeDateInvalid;
+                errorMessage = translationService.getValue(TimeDateInvalid);
             }
         } else {
-            errorMessage = NoValueHasBeenProvided;
+            errorMessage = translationService.getValue(NoValueHasBeenProvided);
         }
 
         if (errorMessage != null) {
-            constraintValidatorContext.disableDefaultConstraintViolation();
-            constraintValidatorContext.buildConstraintViolationWithTemplate(errorMessage)
-                    .addConstraintViolation();
-            return false;
+            return ValidationResult.error(errorMessage);
         }
-        return true;
+        return ValidationResult.valid();
     }
 
-    private boolean looksLikeExpression(final String value) {
+    private static boolean looksLikeExpression(final String value) {
         return hasSomething(value) && (value.startsWith("#{") || value.contains("{") || value.contains("}"));
     }
 
-    private boolean isValidExpression(final String value) {
+    private static boolean isValidExpression(final String value) {
         return hasSomething(value) && expressionExpr.test(value) && value.length() > 3;
     }
 
-    private boolean isValidDuration(final String value) {
+    private static boolean isValidDuration(final String value) {
         return hasSomething(value) && durationExpr.test(value);
     }
 
-    private boolean isValidRepetableInterval(final String value) {
+    private static boolean isValidRepetableInterval(final String value) {
         return hasSomething(value) && repetableIntervalExpr.test(value);
     }
 
-    private boolean isValidCronExpression(final String value) {
+    private static boolean isValidCronExpression(final String value) {
+        return isValidBPMNCronExpression(value) || isValidQuartzExpression(value);
+    }
+
+    private static boolean isValidBPMNCronExpression(final String value) {
         return hasSomething(value) && cronIntervalExpr.test(value) && !value.endsWith(" ");
     }
 
-    private boolean isValidTimeDate(final String value) {
+    private static boolean isValidQuartzExpression(final String value) {
+        return hasSomething(value) && CronExpression.isValidExpression(value);
+    }
+
+    private static boolean isValidTimeDate(final String value) {
         return hasSomething(value) && dateTimeExpr.test(value);
     }
 
-    private boolean hasSomething(final String value) {
+    private static boolean hasSomething(final String value) {
         return value != null && !value.trim().isEmpty();
     }
 }

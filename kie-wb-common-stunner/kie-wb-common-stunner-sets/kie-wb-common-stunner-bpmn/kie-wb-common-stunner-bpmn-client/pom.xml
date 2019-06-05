@@ -309,8 +309,34 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.mortbay.jasper</groupId>
+          <artifactId>apache-el</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
       <groupId>org.uberfire</groupId>
       <artifactId>uberfire-testing-utils</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kie.workbench.stunner</groupId>
+      <artifactId>kie-wb-common-stunner-core-common</artifactId>
+      <classifier>sources</classifier>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kie.workbench.stunner</groupId>
+      <artifactId>kie-wb-common-stunner-bpmn-api</artifactId>
+      <classifier>sources</classifier>
       <scope>test</scope>
     </dependency>
 
@@ -326,6 +352,13 @@
       <artifactId>kie-wb-common-stunner-client-common</artifactId>
       <scope>test</scope>
       <type>test-jar</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kie.workbench.stunner</groupId>
+      <artifactId>kie-wb-common-stunner-client-common</artifactId>
+      <classifier>sources</classifier>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -347,5 +380,34 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <additionalClasspathElements>
+            <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
+            <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
+            <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+          </additionalClasspathElements>
+
+          <useManifestOnlyJar>false</useManifestOnlyJar>
+          <forkMode>pertest</forkMode>
+
+          <argLine>-Xmx1500m -Derrai.devel.nocache=true -Derrai.codegen.permissive=false -Derrai.dynamic_validation.enabled=true</argLine>
+
+          <systemProperties>
+            <!-- Must disable long polling for automated tests to succeed -->
+            <property>
+              <name>errai.hosted_mode_testing</name>
+              <value>true</value>
+            </property>
+          </systemProperties>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 
 </project>

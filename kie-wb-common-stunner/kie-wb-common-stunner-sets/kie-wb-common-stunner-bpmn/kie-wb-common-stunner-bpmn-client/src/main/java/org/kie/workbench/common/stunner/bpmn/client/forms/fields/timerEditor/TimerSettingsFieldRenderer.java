@@ -19,19 +19,24 @@ package org.kie.workbench.common.stunner.bpmn.client.forms.fields.timerEditor;
 import javax.inject.Inject;
 
 import org.kie.workbench.common.forms.dynamic.client.rendering.FieldRenderer;
+import org.kie.workbench.common.forms.dynamic.client.rendering.FormFieldImpl;
 import org.kie.workbench.common.forms.dynamic.client.rendering.formGroups.FormGroup;
 import org.kie.workbench.common.forms.dynamic.client.rendering.formGroups.impl.def.DefaultFormGroup;
 import org.kie.workbench.common.forms.dynamic.service.shared.RenderMode;
 import org.kie.workbench.common.stunner.bpmn.forms.model.TimerSettingsFieldDefinition;
+import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
 
 public class TimerSettingsFieldRenderer
         extends FieldRenderer<TimerSettingsFieldDefinition, DefaultFormGroup> {
 
     private final TimerSettingsFieldEditorWidget widget;
 
+    private final ClientTranslationService translationService;
+
     @Inject
-    public TimerSettingsFieldRenderer(final TimerSettingsFieldEditorWidget widget) {
+    public TimerSettingsFieldRenderer(final TimerSettingsFieldEditorWidget widget, final ClientTranslationService translationService) {
         this.widget = widget;
+        this.translationService = translationService;
     }
 
     @Override
@@ -56,5 +61,11 @@ public class TimerSettingsFieldRenderer
     @Override
     public String getSupportedCode() {
         return TimerSettingsFieldDefinition.FIELD_TYPE.getTypeName();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected void registerCustomFieldValidators(FormFieldImpl field) {
+        field.getCustomValidators().add(new TimerSettingsValueValidator(translationService));
     }
 }
