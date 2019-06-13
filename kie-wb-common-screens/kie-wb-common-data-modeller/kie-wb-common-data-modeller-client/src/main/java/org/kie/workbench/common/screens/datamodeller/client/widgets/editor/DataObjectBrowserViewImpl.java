@@ -140,6 +140,8 @@ public class DataObjectBrowserViewImpl
         propertiesTable.setToolBarVisible(false);
         setTableHeight(tableHeight);
 
+        addMoveRowUpColumn();
+        addMoveRowDownColumn();
         addPropertyNameColumn();
         addPropertyLabelColumn();
         addPropertyTypeBrowseColumn();
@@ -378,6 +380,50 @@ public class DataObjectBrowserViewImpl
         propertiesTable.setColumnWidth(column,
                                        calculateButtonSize(Constants.INSTANCE.objectBrowser_action_delete()),
                                        Style.Unit.PX);
+    }
+
+    private void addMoveRowUpColumn() {
+        ButtonCell buttonCell = new ButtonCell(IconType.ARROW_UP,
+                                               ButtonType.LINK,
+                                               ButtonSize.SMALL);
+        Column<ObjectProperty, String> column = new Column<ObjectProperty, String>(buttonCell) {
+            @Override
+            public String getValue(ObjectProperty objectProperty) {
+                return "";
+            }
+        };
+
+        column.setFieldUpdater((index, objectProperty, value) -> {
+
+            if (!readonly) {
+                presenter.onMoveProperty(objectProperty, true);
+            }
+        });
+
+        propertiesTable.addColumn(column, "");
+        //propertiesTable.setColumnWidth(column, calculateButtonSize(Constants.INSTANCE.objectBrowser_action_delete()), Style.Unit.PX);
+    }
+
+    private void addMoveRowDownColumn() {
+        ButtonCell buttonCell = new ButtonCell(IconType.ARROW_DOWN,
+                                               ButtonType.LINK,
+                                               ButtonSize.SMALL);
+        Column<ObjectProperty, String> column = new Column<ObjectProperty, String>(buttonCell) {
+            @Override
+            public String getValue(ObjectProperty objectProperty) {
+                return "";
+            }
+        };
+
+        column.setFieldUpdater((index, objectProperty, value) -> {
+
+            if (!readonly) {
+                presenter.onMoveProperty(objectProperty, false);
+            }
+        });
+
+        propertiesTable.addColumn(column, "");
+        //propertiesTable.setColumnWidth(column, calculateButtonSize(Constants.INSTANCE.objectBrowser_action_delete()), Style.Unit.PX);
     }
 
     private void addSortHandler() {

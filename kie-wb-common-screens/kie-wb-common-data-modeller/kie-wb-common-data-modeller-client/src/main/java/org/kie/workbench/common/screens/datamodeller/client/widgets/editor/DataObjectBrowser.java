@@ -269,6 +269,7 @@ public class DataObjectBrowser
         List<ObjectProperty> dataObjectProperties = (dataObject != null) ?
                 DataModelerUtils.getManagedProperties(dataObject) : Collections.<ObjectProperty>emptyList();
 
+        /* TODO WM remove this, no more sort at load time if we must manage the fields order from UI
         ArrayList<ObjectProperty> sortBuffer = new ArrayList<ObjectProperty>();
         if (dataObject != null) {
             sortBuffer.addAll(dataObjectProperties);
@@ -277,10 +278,11 @@ public class DataObjectBrowser
         Collections.sort(sortBuffer,
                          new ObjectPropertyComparator("name",
                                                       true));
+                                                      */
 
-        adjustTableSize(sortBuffer.size());
+        adjustTableSize(dataObjectProperties.size());
         dataProvider.getList().clear();
-        dataProvider.getList().addAll(sortBuffer);
+        dataProvider.getList().addAll(dataObjectProperties);
         view.redrawTable();
     }
 
@@ -334,6 +336,31 @@ public class DataObjectBrowser
             }
         }).validateObjectPropertyDeletion(dataObject,
                                           objectProperty);
+    }
+
+    @Override
+    public void onMoveProperty(ObjectProperty objectProperty, boolean up) {
+        if (dataObject != null) {
+            if (moveProperty(dataProvider.getList(), objectProperty, up)) {
+                moveProperty(dataObject.getProperties(), objectProperty, up);
+                view.setSelectedRow(objectProperty, true);
+                dataModelerEvent.fire(new DataObjectChangeEvent(ChangeType.FIELD_ORDER_CHANGE, getContext().getContextId(), DataModelerEvent.DATA_OBJECT_BROWSER, dataObject, null, null, null));
+            }
+        }
+    }
+
+    private boolean moveProperty(List<ObjectProperty> properties, ObjectProperty objectProperty, boolean up) {
+        int index = properties.indexOf(objectProperty);
+        if (up && index > 0) {
+            ObjectProperty currentProperty = properties.set(index - 1, objectProperty);
+            properties.set(index, currentProperty);
+            return true;
+        } else if (!up && index > 0 && index < properties.size() - 1) {
+            ObjectProperty currentProperty = properties.set(index + 1, objectProperty);
+            properties.set(index, currentProperty);
+            return true;
+        }
+        return false;
     }
 
     private void deleteProperty(final ObjectProperty objectProperty,
@@ -455,18 +482,21 @@ public class DataObjectBrowser
     public void onSortByName(boolean ascending) {
         sortTable(new ObjectPropertyComparator("name",
                                                ascending));
+        dataModelerEvent.fire(new DataObjectChangeEvent(ChangeType.FIELD_ORDER_CHANGE, getContext().getContextId(), DataModelerEvent.DATA_OBJECT_BROWSER, dataObject, null, null, null));
     }
 
     @Override
     public void onSortByLabel(boolean ascending) {
         sortTable(new ObjectPropertyComparator("label",
                                                ascending));
+        dataModelerEvent.fire(new DataObjectChangeEvent(ChangeType.FIELD_ORDER_CHANGE, getContext().getContextId(), DataModelerEvent.DATA_OBJECT_BROWSER, dataObject, null, null, null));
     }
 
     @Override
     public void onSortByType(boolean ascending) {
         sortTable(new ObjectPropertyComparator("className",
                                                ascending));
+        dataModelerEvent.fire(new DataObjectChangeEvent(ChangeType.FIELD_ORDER_CHANGE, getContext().getContextId(), DataModelerEvent.DATA_OBJECT_BROWSER, dataObject, null, null, null));
     }
 
     private void sortTable(Comparator<ObjectProperty> comparator) {

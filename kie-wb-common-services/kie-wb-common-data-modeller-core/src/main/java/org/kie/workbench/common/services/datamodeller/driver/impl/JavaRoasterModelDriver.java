@@ -36,6 +36,7 @@ import org.jboss.forge.roaster.model.Method;
 import org.jboss.forge.roaster.model.Parameter;
 import org.jboss.forge.roaster.model.SyntaxError;
 import org.jboss.forge.roaster.model.Type;
+import org.jboss.forge.roaster.model.impl.AbstractJavaSourceMemberHolder;
 import org.jboss.forge.roaster.model.source.AnnotationSource;
 import org.jboss.forge.roaster.model.source.AnnotationTargetSource;
 import org.jboss.forge.roaster.model.source.FieldSource;
@@ -994,7 +995,7 @@ public class JavaRoasterModelDriver implements ModelDriver {
         List<MethodSource<JavaClassSource>> positionFieldsConstructorCandidates = findPositionFieldsConstructorCandidates(javaClassSource,
                                                                                                                           currentManagedProperties,
                                                                                                                           classTypeResolver);
-
+        List<String> expectedOrder = new ArrayList<>();
         //create new fields and update existing.
         for (ObjectProperty property : dataObject.getProperties()) {
 
@@ -1004,6 +1005,7 @@ public class JavaRoasterModelDriver implements ModelDriver {
                 continue;
             }
 
+            expectedOrder.add(property.getName());
             if (currentClassFields.containsKey(property.getName())) {
                 updateField(javaClassSource,
                             property.getName(),
@@ -1019,14 +1021,6 @@ public class JavaRoasterModelDriver implements ModelDriver {
                                 property.getName());
         }
 
-        //update constructors, equals and hashCode methods.
-        updateConstructors(javaClassSource,
-                           dataObject,
-                           allFieldsConstructorCandidates,
-                           keyFieldsConstructorCandidates,
-                           positionFieldsConstructorCandidates,
-                           classTypeResolver);
-
         //delete fields from .java file that not exists in the DataObject.
         List<String> removableFields = new ArrayList<String>();
         for (FieldSource<JavaClassSource> field : currentClassFields.values()) {
@@ -1041,6 +1035,20 @@ public class JavaRoasterModelDriver implements ModelDriver {
                         fieldName,
                         classTypeResolver);
         }
+
+        //update constructors, equals and hashCode methods.
+        updateConstructors(javaClassSource,
+                           dataObject,
+                           allFieldsConstructorCandidates,
+                           keyFieldsConstructorCandidates,
+                           positionFieldsConstructorCandidates,
+                           classTypeResolver);
+
+        AbstractJavaSourceMemberHolder memberHolder = (AbstractJavaSourceMemberHolder)javaClassSource;
+        for (int i = 1; i < expectedOrder.size(); i++) {
+            memberHolder.moveAfter(expectedOrder.get(i-1), expectedOrder.get(i));
+        }
+
         // update nested classes
         List<JavaSource<?>> nestedTypes = javaClassSource.getNestedTypes();
         if (nestedTypes != null) {

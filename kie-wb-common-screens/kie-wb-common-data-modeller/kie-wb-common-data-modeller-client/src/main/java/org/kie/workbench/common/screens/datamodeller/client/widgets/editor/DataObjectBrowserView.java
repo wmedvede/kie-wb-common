@@ -41,6 +41,8 @@ public interface DataObjectBrowserView
         void onDeleteProperty(final ObjectProperty objectProperty,
                               final int index);
 
+        void onMoveProperty(final ObjectProperty objectProperty, boolean up);
+
         void onSelectProperty(ObjectProperty selectedProperty);
 
         void onNewProperty();
