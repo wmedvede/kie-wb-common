@@ -61,13 +61,14 @@ public class BpmnFileIndexerTest extends BaseIndexingTest<BPMNDefinitionSetResou
     private final static List<String> PROCESS_IDS = Arrays.asList(new String[]{"hiring", "ParentProcess", "SubProcess", "multiple-rule-tasks", "org.jbpm.signal", "org.jbpm.broken"});
 
     private final static String[] BPMN_FILES = {
-            "callActivity.bpmn",
-            "callActivityByName.bpmn",
-            "callActivityCalledSubProcess.bpmn",
-            "hiring.bpmn",
-            "multipleRuleTasksWithDataInput.bpmn",
-            "signal.bpmn",
-            "brokenSignal.bpmn",
+//            "callActivity.bpmn",
+//            "callActivityByName.bpmn",
+//            "callActivityCalledSubProcess.bpmn",
+//            "hiring.bpmn",
+//            "multipleRuleTasksWithDataInput.bpmn",
+//            "signal.bpmn",
+//            "brokenSignal.bpmn",
+            "Legacy1.bpmn"
     };
 
     private static final String DEPLOYMENT_ID = "org.kjar:test:1.0";
