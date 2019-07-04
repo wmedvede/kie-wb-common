@@ -66,4 +66,8 @@ public interface VariableScope {
             return parentScopeId;
         }
     }
+
+    class MIVariable {
+
+    }
 }

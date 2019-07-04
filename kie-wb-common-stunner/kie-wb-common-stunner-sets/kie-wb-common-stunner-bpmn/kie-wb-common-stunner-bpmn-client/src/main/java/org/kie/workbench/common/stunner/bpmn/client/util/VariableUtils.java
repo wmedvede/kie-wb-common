@@ -32,14 +32,11 @@ import java.util.stream.StreamSupport;
 
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
-import org.kie.workbench.common.stunner.bpmn.definition.BaseAdHocSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
-import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EndErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndEscalationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndMessageEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndSignalEvent;
-import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateErrorEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateEscalationEventThrowing;
@@ -57,7 +54,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.UserTask;
 import org.kie.workbench.common.stunner.bpmn.definition.property.cm.CaseFileVariables;
 import org.kie.workbench.common.stunner.bpmn.definition.property.cm.CaseManagementSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
-import org.kie.workbench.common.stunner.bpmn.definition.property.variables.BaseProcessVariables;
+import org.kie.workbench.common.stunner.bpmn.definition.property.variables.HasProcessData;
 import org.kie.workbench.common.stunner.bpmn.workitem.ServiceTask;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
 import org.kie.workbench.common.stunner.core.graph.Edge;
@@ -70,6 +67,7 @@ import org.kie.workbench.common.stunner.core.util.StringUtils;
 import org.uberfire.commons.data.Pair;
 
 import static org.kie.workbench.common.stunner.core.util.StringUtils.isEmpty;
+import static org.kie.workbench.common.stunner.core.util.StringUtils.nonEmpty;
 
 public class VariableUtils {
 
@@ -229,49 +227,45 @@ public class VariableUtils {
                 Object oDefinition = ((View) element.getContent()).getDefinition();
                 if ((oDefinition instanceof BPMNDiagram)) {
                     BPMNDiagram bpmnDiagram = (BPMNDiagram) oDefinition;
-                    BaseProcessVariables processVariables = bpmnDiagram.getProcessData().getProcessVariables();
-                    if (processVariables != null) {
-                        if (variables.length() > 0) {
-                            variables.append(",");
-                        }
-                        variables.append(processVariables.getValue());
-                    }
+                    appendVariables(variables, bpmnDiagram);
                     CaseManagementSet caseManagementSet = bpmnDiagram.getCaseManagementSet();
                     if (caseManagementSet != null) {
                         CaseFileVariables caseFileVariables = caseManagementSet.getCaseFileVariables();
                         if (caseFileVariables != null) {
-                            if (variables.length() > 0) {
-                                variables.append(",");
-                            }
-                            variables.append(caseFileVariables.getRawValue());
+                            appendVariables(variables, caseFileVariables.getRawValue());
                         }
                     }
                 }
                 if ((Objects.nonNull(parent) && Objects.equals(parent, element)) || Objects.isNull(selectedElement)) {
-                    BaseProcessVariables subprocessVariables = null;
-                    if (oDefinition instanceof EventSubprocess) {
-                        EventSubprocess subprocess = (EventSubprocess) oDefinition;
-                        subprocessVariables = subprocess.getProcessData().getProcessVariables();
-                    } else if (oDefinition instanceof BaseAdHocSubprocess) {
-                        BaseAdHocSubprocess subprocess = (BaseAdHocSubprocess) oDefinition;
-                        subprocessVariables = subprocess.getProcessData().getProcessVariables();
-                    } else if (oDefinition instanceof MultipleInstanceSubprocess) {
-                        MultipleInstanceSubprocess subprocess = (MultipleInstanceSubprocess) oDefinition;
-                        subprocessVariables = subprocess.getProcessData().getProcessVariables();
-                    } else if (oDefinition instanceof EmbeddedSubprocess) {
-                        EmbeddedSubprocess subprocess = (EmbeddedSubprocess) oDefinition;
-                        subprocessVariables = subprocess.getProcessData().getProcessVariables();
-                    }
-                    if (subprocessVariables != null) {
-                        if (variables.length() > 0) {
-                            variables.append(",");
+                    if (oDefinition instanceof HasProcessData) {
+                        appendVariables(variables, (HasProcessData) oDefinition);
+                        if (oDefinition instanceof MultipleInstanceSubprocess) {
+                            MultipleInstanceSubprocess subprocess = (MultipleInstanceSubprocess) oDefinition;
+                            appendVariables(variables, subprocess.getExecutionSet().getMultipleInstanceDataInput().getValue());
+                            appendVariables(variables, subprocess.getExecutionSet().getMultipleInstanceDataOutput().getValue());
                         }
-                        variables.append(subprocessVariables.getValue());
                     }
                 }
             }
         }
         return variables.toString();
+    }
+
+    private static void appendVariables(StringBuffer encodedVariables, String variables) {
+        if (nonEmpty(variables)) {
+            if (encodedVariables.length() > 0) {
+                encodedVariables.append(",");
+            }
+            encodedVariables.append(variables);
+        }
+    }
+
+    private static void appendVariables(StringBuffer encodedVariables, HasProcessData hasProcessData) {
+        appendVariables(encodedVariables, processVariables(hasProcessData));
+    }
+
+    private static String processVariables(HasProcessData element) {
+        return element.getProcessData().getProcessVariables() != null ? element.getProcessData().getProcessVariables().getValue() : null;
     }
 
     private static Optional<BiFunction<String, Pair<BPMNDefinition, Node<View<BPMNDefinition>, Edge>>, Collection<VariableUsage>>> lookupFindFunction(BPMNDefinition definition) {

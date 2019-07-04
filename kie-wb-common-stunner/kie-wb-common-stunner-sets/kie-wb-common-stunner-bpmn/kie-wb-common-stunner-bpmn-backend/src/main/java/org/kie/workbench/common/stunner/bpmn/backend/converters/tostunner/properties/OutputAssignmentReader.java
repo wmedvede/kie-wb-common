@@ -29,6 +29,12 @@ public class OutputAssignmentReader {
         String sourceName = ((DataOutput) out.getSourceRef().get(0)).getName();
         if (out.getTargetRef() instanceof Property) {
             return new OutputAssignmentReader(sourceName, (Property) out.getTargetRef());
+        } else if (out.getTargetRef().getId() != null) {
+            //OJO, eso lo inventé para que funcionara bien el proceso de BPMN_LEGACY_MI generado en jBPM Designer
+            //que basicamente NO me leia el nombre de la variable de salida xq basicamente no existe la property
+            //PERO OJO, tengo q ver que no me joda otra cosa.......
+            //tengo que jugar un poco con los otros casos, UserTaskMI, ReusableSubprocess MI, etc.
+            return new OutputAssignmentReader(sourceName, out.getTargetRef().getId());
         }
         return null;
     }
@@ -40,6 +46,14 @@ public class OutputAssignmentReader {
                 AssociationDeclaration.Type.SourceTarget,
                 sourceName,
                 propertyName);
+    }
+
+    OutputAssignmentReader(String sourceName, String target) {
+        this.associationDeclaration = new AssociationDeclaration(
+                AssociationDeclaration.Direction.Output,
+                AssociationDeclaration.Type.SourceTarget,
+                sourceName,
+                target);
     }
 
     public AssociationDeclaration getAssociationDeclaration() {

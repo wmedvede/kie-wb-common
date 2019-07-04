@@ -246,6 +246,9 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_LOG_TASK_JBPM_DESIGNER = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/logtask.bpmn";
     private static final String BPMN_SERVICETASKS_JBPM_DESIGNER = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/serviceTasksJBPMDeginer.bpmn";
 
+    private static final String BPMN_LEGACY_MI = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/trasteos/LegacyMI.bpmn2";
+
+
     private static final String NEW_LINE = System.lineSeparator();
 
     @Mock
@@ -4019,4 +4022,14 @@ public class BPMNDirectDiagramMarshallerTest {
         }
         return null;
     }
+
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testUnmarshall_LEGACY_MI() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_LEGACY_MI);
+        int i = 0;
+
+    }
+
 }
