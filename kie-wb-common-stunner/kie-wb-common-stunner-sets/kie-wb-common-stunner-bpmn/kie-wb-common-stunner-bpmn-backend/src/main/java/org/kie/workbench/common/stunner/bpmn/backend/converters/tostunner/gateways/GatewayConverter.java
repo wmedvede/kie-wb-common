@@ -58,7 +58,7 @@ public class GatewayConverter extends AbstractConverter implements NodeConverter
                 .when(org.eclipse.bpmn2.ExclusiveGateway.class, this::exclusiveGateway)
                 .when(org.eclipse.bpmn2.InclusiveGateway.class, this::inclusiveGateway)
                 .ignore(EventBasedGateway.class)
-                .defaultValue(Result.ignored("Gateway not found"))
+                .defaultValue(Result.ignored("Gateway not found", getNotFoundMessage(gateway)))
                 .inputDecorator(BPMNElementDecorators.flowElementDecorator())
                 .outputDecorator(BPMNElementDecorators.resultBpmnDecorator())
                 .mode(getMode())
