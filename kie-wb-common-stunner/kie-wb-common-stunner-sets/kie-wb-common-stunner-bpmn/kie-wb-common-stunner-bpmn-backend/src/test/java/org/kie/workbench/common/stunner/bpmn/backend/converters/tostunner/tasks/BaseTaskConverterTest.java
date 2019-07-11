@@ -139,7 +139,7 @@ public abstract class BaseTaskConverterTest {
         when(serviceTask.getName()).thenReturn(CustomAttribute.serviceTaskName.name());
         when(businessRuleAttr.getValue()).thenReturn("BusinessRuleTask");
 
-        final BpmnNode converted = (BpmnNode) tested.convert(serviceTask).value().get();
+        final BpmnNode converted = (BpmnNode) tested.convert(serviceTask).value();
         assertNotEquals(converted.value(), noneTaskNode);
         assertEquals(converted.value(), serviceTaskNode);
     }

@@ -60,7 +60,8 @@ public class StartEventConverter {
                 .when(StartConditionalEvent.class, this::conditionalEvent)
                 .when(StartEscalationEvent.class, this::escalationEvent)
                 .when(StartCompensationEvent.class, this::compensationEvent)
-                .apply(node).value().get();
+                .apply(node)
+                .value();
     }
 
     private PropertyWriter messageEvent(Node<View<StartMessageEvent>, ?> n) {
