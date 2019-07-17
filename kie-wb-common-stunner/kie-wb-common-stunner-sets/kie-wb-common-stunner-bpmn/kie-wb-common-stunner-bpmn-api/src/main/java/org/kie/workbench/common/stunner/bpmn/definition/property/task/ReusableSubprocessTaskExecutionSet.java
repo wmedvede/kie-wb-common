@@ -69,6 +69,13 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
             afterElement = "independent"
     )
     @Valid
+    private AbortParent abortParent;
+
+    @Property
+    @FormField(
+            afterElement = "abortParent"
+    )
+    @Valid
     private WaitForCompletion waitForCompletion;
 
     @Property
@@ -163,6 +170,7 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
         this(new CalledElement(),
              new IsCase(),
              new Independent(),
+             new AbortParent(),
              new WaitForCompletion(),
              new IsAsync(),
              new AdHocAutostart(),
@@ -182,6 +190,7 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
     public ReusableSubprocessTaskExecutionSet(final @MapsTo("calledElement") CalledElement calledElement,
                                               final @MapsTo("isCase") IsCase isCase,
                                               final @MapsTo("independent") Independent independent,
+                                              final @MapsTo("abortParent") AbortParent abortParent,
                                               final @MapsTo("waitForCompletion") WaitForCompletion waitForCompletion,
                                               final @MapsTo("isAsync") IsAsync isAsync,
                                               final @MapsTo("adHocAutostart") AdHocAutostart adHocAutostart,
@@ -197,6 +206,7 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
         this.calledElement = calledElement;
         this.isCase = isCase;
         this.independent = independent;
+        this.abortParent = abortParent;
         this.waitForCompletion = waitForCompletion;
         this.isAsync = isAsync;
         this.adHocAutostart = adHocAutostart;
@@ -244,6 +254,16 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
     @Override
     public void setIndependent(final Independent independent) {
         this.independent = independent;
+    }
+
+    @Override
+    public AbortParent getAbortParent() {
+        return abortParent;
+    }
+
+    @Override
+    public void setAbortParent(final AbortParent abortParent) {
+        this.abortParent = abortParent;
     }
 
     @Override
@@ -366,6 +386,7 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
         return HashUtil.combineHashCodes(Objects.hashCode(calledElement),
                                          Objects.hashCode(isCase),
                                          Objects.hashCode(independent),
+                                         Objects.hashCode(abortParent),
                                          Objects.hashCode(waitForCompletion),
                                          Objects.hashCode(isAsync),
                                          Objects.hashCode(adHocAutostart),
@@ -390,6 +411,7 @@ public class ReusableSubprocessTaskExecutionSet implements BaseReusableSubproces
             return Objects.equals(calledElement, other.calledElement) &&
                     Objects.equals(isCase, other.isCase) &&
                     Objects.equals(independent, other.independent) &&
+                    Objects.equals(abortParent, other.abortParent) &&
                     Objects.equals(waitForCompletion, other.waitForCompletion) &&
                     Objects.equals(isAsync, other.isAsync) &&
                     Objects.equals(adHocAutostart, other.adHocAutostart) &&

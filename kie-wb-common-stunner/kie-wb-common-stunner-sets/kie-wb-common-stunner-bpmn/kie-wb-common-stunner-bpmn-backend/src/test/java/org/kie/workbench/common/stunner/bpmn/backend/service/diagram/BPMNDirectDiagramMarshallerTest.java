@@ -1768,6 +1768,8 @@ public class BPMNDirectDiagramMarshallerTest {
                      executionSet.getCalledElement().getValue());
         assertEquals(false,
                      executionSet.getIndependent().getValue());
+        assertEquals(false,
+                     executionSet.getAbortParent().getValue());
         assertEquals(true,
                      executionSet.getWaitForCompletion().getValue());
 
@@ -2842,6 +2844,7 @@ public class BPMNDirectDiagramMarshallerTest {
                                                            " ");
         assertTrue(flatResult.contains("<drools:metaData name=\"elementname\"> <drools:metaValue><![CDATA[my subprocess]]></drools:metaValue> </drools:metaData>"));
         assertTrue(flatResult.contains("<drools:metaData name=\"customAsync\"> <drools:metaValue><![CDATA[true]]></drools:metaValue>"));
+        assertTrue(flatResult.contains("<drools:metaData name=\"customAbortParent\"> <drools:metaValue><![CDATA[false]]></drools:metaValue> </drools:metaData>"));
     }
 
     @Test
